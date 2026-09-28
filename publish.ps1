@@ -337,8 +337,8 @@ try {
             $absExe = (Resolve-Path $exePath).Path
             $absZip = (Resolve-Path $zipPath).Path
 
-            & curl.exe -s -S -X POST "$giteaURL/api/v1/repos/$giteaOwner/$giteaRepo/releases/$gRelId/assets?name=PHGC.exe" -u "$($gUser):$($gPass)" -F "attachment=@$absExe" > $null
-            & curl.exe -s -S -X POST "$giteaURL/api/v1/repos/$giteaOwner/$giteaRepo/releases/$gRelId/assets?name=$zipName" -u "$($gUser):$($gPass)" -F "attachment=@$absZip" > $null
+            & curl.exe -s -S -X POST "$giteaURL/api/v1/repos/$giteaOwner/$giteaRepo/releases/$gRelId/assets?name=PHGC.exe" -H "Authorization: Basic $basicAuth" -F "attachment=@$absExe" > $null
+            & curl.exe -s -S -X POST "$giteaURL/api/v1/repos/$giteaOwner/$giteaRepo/releases/$gRelId/assets?name=$zipName" -H "Authorization: Basic $basicAuth" -F "attachment=@$absZip" > $null
             Write-Host ">>> Gitea 바이너리 및 압축 파일 에셋 (PHGC.exe, $zipName) 업로드 완료!" -ForegroundColor Green
         }
     }

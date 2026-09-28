@@ -7902,11 +7902,11 @@ function renderAgreementModal(onAcceptCallback) {
                 <div class="p-4 rounded-xl bg-rose-950/40 border border-rose-500/30 shadow-xs">
                     <div class="flex items-center gap-2 mb-2">
                         <span class="px-2.5 py-0.5 rounded-full text-xs font-black bg-rose-500/30 text-rose-300 border border-rose-400/40">제3조 (필독)</span>
-                        <h3 class="font-bold text-rose-200 text-sm sm:text-base">개인정보 관리 책임의 사용자 전액 귀속</h3>
+                        <h3 class="font-bold text-rose-200 text-sm sm:text-base">개인정보 관리 책임의 사용자 전적 귀속</h3>
                     </div>
                     <ul class="list-disc list-inside space-y-1.5 text-slate-300 leading-relaxed">
                         <li class="text-rose-200 font-semibold">
-                            ⚠️ <strong class="text-white">개인정보 관리 책임 전액 사용자 귀속:</strong> 본 프로그램은 네트워크 통신이 없는 로컬 오프라인 도구에 불과하며, 프로그램에 입력되는 나이스(NEIS) 엑셀 원본 파일, 학생 인적사항, 성적 및 산출 데이터의 <strong class="text-white underline underline-offset-2">취급·보관·관리·폐기 및 유출 방지에 대한 모든 법적·행정적 책임은 전적으로 사용자(이용 교원 및 소속 학교)에게 있습니다.</strong>
+                            ⚠️ <strong class="text-white">개인정보 관리 책임의 사용자 전적 귀속:</strong> 본 프로그램은 네트워크 통신이 없는 로컬 오프라인 도구에 불과하며, 프로그램에 입력되는 나이스(NEIS) 엑셀 원본 파일, 학생 인적사항, 성적 및 산출 데이터의 <strong class="text-white underline underline-offset-2">취급·보관·관리·폐기 및 유출 방지에 대한 모든 법적·행정적 책임은 전적으로 사용자(이용 교원 및 소속 학교)에게 있습니다.</strong>
                         </li>
                         <li>비밀번호 분실, 학교 공용 데이터 암호 유출, PC 보안 관리 소홀(분실, 도난, 악성코드 감염 등)로 인하여 발생하는 일체의 개인정보 사고 및 데이터 유실에 대해 개발자는 어떠한 민·형사상 책임도 지지 않습니다.</li>
                         <li>사용자는 상담 완료 후 교실·교무실 이석 시 반드시 화면 잠금(<span class="px-1.5 py-0.5 rounded bg-slate-800 text-slate-200 font-mono text-xs border border-slate-600">Win + L</span>) 및 프로그램 로그아웃을 실천해야 합니다.</li>
