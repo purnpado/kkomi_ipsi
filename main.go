@@ -51,7 +51,7 @@ func main() {
 
 	// Create application with options
 	err := wails.Run(&options.App{
-		Title:  "그래서? 넌 어디 갈래?",
+		Title:  "꼬미입시",
 		Width:  1024,
 		Height: 768,
 		AssetServer: &assetserver.Options{

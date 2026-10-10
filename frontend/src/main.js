@@ -50,8 +50,8 @@ function updateAppWindowTitle(role = '', detail = '') {
     }
 
     const title = roleLabel
-        ? `진학 상담 프로그램 ${roleLabel} - 그래서? 넌 어디갈래?`
-        : '진학 상담 프로그램 - 그래서? 넌 어디갈래?';
+        ? `꼬미입시 ${roleLabel} - 울산 고입 진학상담`
+        : '꼬미입시 - 울산 고입 진학상담';
 
     if (window.go?.main?.App?.SetWindowTitle) {
         window.go.main.App.SetWindowTitle(title).catch(() => { });
@@ -680,7 +680,7 @@ function renderFirstRunScreen() {
         <div class="glass-card p-8 w-full max-w-xl fade-in" style="margin: 2rem;">
             <div class="text-center mb-8">
                 <img src="${logoUniversal}" alt="로고" class="w-20 h-20 mx-auto mb-3 rounded-2xl shadow-xl border border-indigo-500/30 object-cover" style="animation: float 3s ease-in-out infinite;" />
-                <h1 class="text-2xl font-black text-white tracking-tight mb-2">그래서? 넌 어디 갈래?</h1>
+                <h1 class="text-2xl font-black text-white tracking-tight mb-2">꼬미입시</h1>
                 <div class="flex items-center justify-center gap-1.5 flex-wrap">
                     <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 text-[11px] font-bold">🔒 100% 오프라인</span>
                     <span class="px-2.5 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-400/30 text-[11px] font-bold">울산 고입 진학상담</span>
@@ -781,7 +781,7 @@ function renderSetupScreen(existingConfig = null) {
             <!-- 헤더 -->
             <div class="text-center mb-8">
                 <div class="text-5xl mb-4" style="animation: float 3s ease-in-out infinite;">🏫</div>
-                <h1 class="text-2xl font-bold text-white mb-2">그래서? 넌 어디갈래? 🏫 초기 설정</h1>
+                <h1 class="text-2xl font-bold text-white mb-2">꼬미입시 🏫 초기 설정</h1>
                 <p class="text-text-muted text-sm">관리자(학년부장)가 최초 1회 설정합니다</p>
             </div>
 
@@ -7860,7 +7860,7 @@ function renderAgreementModal(onAcceptCallback) {
             <div class="text-center pb-5 border-b border-slate-700/60">
                 <div class="flex items-center justify-center gap-2 mb-3 flex-wrap">
                     <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-500/20 border border-indigo-400/40 text-indigo-300 text-xs font-bold shadow-inner">
-                        <span>🏫</span> 그래서? 넌 어디 갈래?
+                        <span>🏫</span> 꼬미입시
                     </span>
                     <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 text-xs font-bold shadow-inner">
                         <span>🔒</span> 100% 오프라인 안전 모드
@@ -8046,7 +8046,7 @@ function renderGuideModal(role = 'homeroom') {
                     <span class="text-2xl sm:text-3xl">📖</span>
                     <div>
                         <h2 class="text-xl sm:text-2xl font-black text-white">
-                            『그래서? 넌 어디갈래?』 프로그램 사용 설명서
+                            『꼬미입시』 프로그램 사용 설명서
                         </h2>
                         <p class="text-xs text-text-muted mt-0.5">안전하고 효율적인 중3 고입 진학 지도를 위한 단계별 업무 매뉴얼</p>
                     </div>
@@ -8376,7 +8376,7 @@ async function renderLoginScreen(schoolName) {
             <div class="glass-card p-10 w-full max-w-md fade-in" style="margin: 2rem;">
                 <div class="text-center mb-6">
                     <img src="${logoUniversal}" alt="로고" class="w-20 h-20 mx-auto mb-3 rounded-2xl shadow-xl border border-indigo-500/30 object-cover" style="animation: float 3s ease-in-out infinite;" />
-                    <h1 class="text-2xl font-black text-white tracking-tight mb-1">그래서? 넌 어디 갈래?</h1>
+                    <h1 class="text-2xl font-black text-white tracking-tight mb-1">꼬미입시</h1>
                     <div class="flex items-center justify-center gap-1.5 mt-2 flex-wrap">
                         <span class="px-2.5 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-400/30 text-[11px] font-bold">🏫 ${schoolName}</span>
                         <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 text-[11px] font-bold">🔒 100% 오프라인</span>

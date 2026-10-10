@@ -1,6 +1,6 @@
 {
   "$schema": "https://wails.io/schemas/config.v2.json",
-  "name": "PHGC",
+  "name": "꼬미입시",
   "outputfilename": "PHGC",
   "frontend:install": "npm install",
   "frontend:build": "npm run build",

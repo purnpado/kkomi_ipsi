@@ -1,10 +1,10 @@
-# 빌드 및 패키징
+# 꼬미입시 빌드 및 패키징
 
-`build`는 PHGC Windows 실행 파일의 아이콘·메타데이터와 빌드 결과를 관리하는 폴더입니다.
+`build`는 **꼬미입시(PHGC)** Windows 실행 파일의 아이콘·메타데이터와 빌드 결과를 관리하는 폴더입니다. 실행 파일명 `PHGC.exe`는 기존 자동 업데이트·배포자료 호환성을 위해 유지합니다.
 
 ## 구성
 
-- `appicon.png`: 앱 기본 아이콘
+- `appicon.png`: 꼬미노트 고양이 아이덴티티를 이어받은 꼬미입시 앱 기본 아이콘
 - `windows/icon.ico`: Windows 실행 파일·작업표시줄 아이콘
 - `windows/info.json`: Windows 파일 정보 템플릿
 - `windows/wails.exe.manifest`: DPI 등 실행 매니페스트

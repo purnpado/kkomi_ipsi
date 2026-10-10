@@ -1,10 +1,10 @@
-# 프론트엔드 UI
+# 꼬미입시 프론트엔드 UI
 
-PHGC의 Wails v2 데스크톱 화면입니다. Vite와 Vanilla JavaScript, Tailwind CSS v4 기반으로 동작합니다.
+꼬미입시(PHGC)의 Wails v2 데스크톱 화면입니다. Vite와 Vanilla JavaScript, Tailwind CSS v4 기반으로 동작합니다.
 
 ## 구성
 
-- `src/main.js`: 로그인, 대시보드, 상담·지원현황·원서대장·사용 설명서 화면과 Wails 바인딩
+- `src/main.js`: 꼬미입시 로그인, 대시보드, 상담·지원현황·원서대장·사용 설명서 화면과 Wails 바인딩
 - `src/style.css`: 반응형 다크 테마와 A4 인쇄 스타일
 - `wailsjs/`: Go 백엔드 메서드 바인딩
 - `vite.config.js`: Vite 빌드 설정
