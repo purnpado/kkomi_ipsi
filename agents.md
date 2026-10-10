@@ -38,7 +38,7 @@ Set-Location frontend; npm run build; Set-Location ..
 - `server-data/highschools.json`: 고교·학과 마스터 목록
 - `server-data/version.json`, `sync.go`: 버전 확인과 릴리즈 안내
 - `docs/admission-score-audit-plan.md`: 학교별 공식 산출식 검증 기준
-- `docs/인수인계_현재상태.md`, `handover.md`: 현재 상태와 다음 작업
+- `docs/인수인계_현재상태.md`, `docs/handover.md`: 현재 상태와 다음 작업
 
 ## 내년도 입시 갱신 순서
 
@@ -52,7 +52,9 @@ Set-Location frontend; npm run build; Set-Location ..
 
 ## 명칭·실행 파일 변경 시
 
-현재 화면 명칭은 꼬미입시지만 실행 파일·릴리즈 에셋은 `PHGC.exe`로 유지합니다. 실제 파일명을 `꼬미입시.exe`로 바꾸려면 다음을 한 번에 검토해야 합니다.
+올해 배포본은 기존 호환성을 위해 실행 파일·릴리즈 에셋을 `PHGC.exe`로 유지합니다. 내년도 입시요강을 반영하는 정기 갱신 때 화면 공식 명칭과 실행 파일을 `꼬미입시`/`꼬미입시.exe`로 전환할지 최종 확정합니다. 전환 전까지는 현재 기술 식별자 `PHGC`를 함부로 바꾸지 않습니다.
+
+실제 파일명을 `꼬미입시.exe`로 바꾸기로 확정하면 다음을 한 번에 검토해야 합니다.
 
 - `wails.json`의 `outputfilename`
 - `publish.ps1`의 빌드·복사·GitHub/Gitea 에셋명
