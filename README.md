@@ -82,7 +82,7 @@
 
 ### 다른 컴퓨터에서 이어서 개발하기
 
-Gitea 원본 저장소를 복제하고 Go, Node.js/npm, Wails CLI, Microsoft Edge WebView2 Runtime을 설치합니다.
+Gitea 원본 저장소를 복제하고 Go, Node.js/npm, Wails CLI, Microsoft Edge WebView2 Runtime을 설치합니다. 현재 화면은 Vite 기반 일반 JavaScript이므로 React를 전역 설치할 필요는 없습니다.
 
 ```powershell
 git clone https://gitea.gguk.link/purnpadosori/PHGC-OFFLINE.git
@@ -95,6 +95,13 @@ Set-Location ..
 ```
 
 작업을 시작하기 전에 루트 `agents.md`와 `docs/handover.md`를 읽으십시오. 학생 개인정보, `data/`, 나이스 원본은 저장소에서 내려받거나 커밋하지 않습니다.
+
+React 화면으로 전환하는 작업을 시작할 때만 다음 의존성을 프로젝트에 추가합니다.
+
+```powershell
+Set-Location frontend
+npm install react react-dom
+```
 
 ```powershell
 # 개발 실행

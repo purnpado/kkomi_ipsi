@@ -26,11 +26,13 @@ Set-Location frontend; npm run build; Set-Location ..
 Gitea 원본을 복제한 뒤 다음 개발 도구를 설치해야 합니다.
 
 - Go
-- Node.js 및 npm
+- Node.js 및 npm (현재 프론트엔드는 Vite + 일반 JavaScript)
 - Wails CLI
 - Microsoft Edge WebView2 Runtime
 
 설치 후 프로젝트 루트에서 `go test ./...`를 실행하고, 프론트엔드 작업 시 `frontend` 폴더에서 `npm install`과 `npm run build`를 실행합니다. 실제 학생 자료와 `data/` 폴더는 원본 저장소에서 내려받지 않습니다.
+
+현재 React는 사용하지 않으므로 별도 전역 설치가 필요하지 않습니다. 향후 React로 화면을 전환하는 작업을 시작할 때만 `frontend`에서 `npm install react react-dom`을 실행하고, 해당 전환 계획과 의존성 변경을 먼저 커밋합니다.
 
 현재 작업 트리의 `proxmox/`는 별도 NAS·Proxmox 관제 저장소의 체크아웃이므로 꼬미입시 저장소에 추가하거나 수정하지 않습니다. 학생 DB, 나이스 원본, `data/`, 암호화 배포자료도 절대 커밋하지 않습니다.
 
