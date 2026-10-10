@@ -73,8 +73,8 @@
 - `server-data/highschools.json`: 고교·학과 기준 목록
 - `server-data/cutoffs/`: 개인정보 없는 연도별 커트라인 기준
 - `server-data/version.json`: 최신 버전 안내와 공식 다운로드 주소
-- 공식 배포 파일: [GitHub Releases](https://github.com/purnpado/PHGC/releases)
-- 소스 백업: [Gitea PHGC-OFFLINE](https://gitea.gguk.link/purnpadosori/PHGC-OFFLINE)
+- 원본 소스: [Gitea PHGC-OFFLINE](https://gitea.gguk.link/purnpadosori/PHGC-OFFLINE)
+- 백업 소스 및 릴리즈: [GitHub PHGC](https://github.com/purnpado/PHGC)
 
 `data/`, 나이스 원본, `*.db`, `*.phgcpkg`, `*.phgcpatch`, `*.phgcreset`은 학교 운영 자료이므로 저장소와 릴리즈에 올리지 않습니다.
 

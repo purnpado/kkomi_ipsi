@@ -6,7 +6,9 @@
 
 - 사용자에게 표시되는 명칭은 **꼬미입시**입니다.
 - `PHGC`는 저장소명, Go 패키지, 배포자료 형식, 자동 업데이트의 기술 식별자입니다. 기존 호환성을 확인하지 않고 제거하거나 바꾸지 않습니다.
-- 공식 저장소는 GitHub `purnpado/PHGC`, Gitea `purnpadosori/PHGC-OFFLINE`입니다.
+- 꼬미입시 원본 저장소는 Gitea `purnpadosori/PHGC-OFFLINE`입니다.
+- GitHub `purnpado/PHGC`는 원본을 보관하는 백업 미러입니다.
+- `proxmox`(`purnpadosori/proxmox`)는 NAS·Proxmox 관제용 별도 저장소이며 꼬미입시 소스가 아닙니다.
 - 현재 안정 릴리즈는 `v1.6.2`이며, 꼬미입시 브랜딩·도트 아이콘 변경은 `b39235d` 커밋에 반영되어 두 원격 저장소에 푸시되었습니다.
 
 ## 작업 전 필수 확인
@@ -19,7 +21,7 @@ go test ./...
 Set-Location frontend; npm run build; Set-Location ..
 ```
 
-현재 작업 트리에 있는 `proxmox/` 등 사용자가 만든 미추적 자료는 내용을 확인하지 않고 삭제·추가·초기화하지 않습니다. 학생 DB, 나이스 원본, `data/`, 암호화 배포자료도 절대 커밋하지 않습니다.
+현재 작업 트리의 `proxmox/`는 별도 NAS·Proxmox 관제 저장소의 체크아웃이므로 꼬미입시 저장소에 추가하거나 수정하지 않습니다. 학생 DB, 나이스 원본, `data/`, 암호화 배포자료도 절대 커밋하지 않습니다.
 
 ## 기능·보안 불변 원칙
 
@@ -66,11 +68,11 @@ Set-Location frontend; npm run build; Set-Location ..
 
 - 커밋 메시지는 한국어로 작성합니다.
 - 의도한 파일만 `git add`합니다. `git add -A`는 개인 미추적 자료가 없는지 확인한 뒤에만 사용합니다.
-- 일반 변경은 두 원격의 `main`에 푸시합니다.
+- 일반 변경은 먼저 원본인 Gitea `main`에 푸시하고, 성공을 확인한 뒤 GitHub 백업 `main`에 푸시합니다.
 
 ```powershell
-git push github main
 git push gitea main
+git push github main
 ```
 
 - 정식 릴리즈는 사용자 승인 후에만 `publish.ps1 -Version "x.y.z" -Notes "한국어 릴리즈 노트"`로 진행합니다. 이 스크립트는 버전 갱신, Wails 빌드, 커밋, 태그, 양쪽 원격 푸시, 릴리즈 에셋 업로드를 수행합니다.
