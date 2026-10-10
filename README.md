@@ -80,6 +80,22 @@
 
 ## 개발·빌드
 
+### 다른 컴퓨터에서 이어서 개발하기
+
+Gitea 원본 저장소를 복제하고 Go, Node.js/npm, Wails CLI, Microsoft Edge WebView2 Runtime을 설치합니다.
+
+```powershell
+git clone https://gitea.gguk.link/purnpadosori/PHGC-OFFLINE.git
+cd PHGC-OFFLINE
+go test ./...
+Set-Location frontend
+npm install
+npm run build
+Set-Location ..
+```
+
+작업을 시작하기 전에 루트 `agents.md`와 `docs/handover.md`를 읽으십시오. 학생 개인정보, `data/`, 나이스 원본은 저장소에서 내려받거나 커밋하지 않습니다.
+
 ```powershell
 # 개발 실행
 wails dev

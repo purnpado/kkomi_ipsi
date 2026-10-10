@@ -21,6 +21,17 @@ go test ./...
 Set-Location frontend; npm run build; Set-Location ..
 ```
 
+## 다른 컴퓨터에서 이어서 작업할 때
+
+Gitea 원본을 복제한 뒤 다음 개발 도구를 설치해야 합니다.
+
+- Go
+- Node.js 및 npm
+- Wails CLI
+- Microsoft Edge WebView2 Runtime
+
+설치 후 프로젝트 루트에서 `go test ./...`를 실행하고, 프론트엔드 작업 시 `frontend` 폴더에서 `npm install`과 `npm run build`를 실행합니다. 실제 학생 자료와 `data/` 폴더는 원본 저장소에서 내려받지 않습니다.
+
 현재 작업 트리의 `proxmox/`는 별도 NAS·Proxmox 관제 저장소의 체크아웃이므로 꼬미입시 저장소에 추가하거나 수정하지 않습니다. 학생 DB, 나이스 원본, `data/`, 암호화 배포자료도 절대 커밋하지 않습니다.
 
 ## 기능·보안 불변 원칙
