@@ -122,25 +122,44 @@ type CutoffInfo struct {
 	AvgValue   float64 `json:"avgValue"` // 평균점
 }
 
+// ApplicationScoreDetails 원서 접수 시점의 세부 산출 점수 스냅샷
+type ApplicationScoreDetails struct {
+	Percentile       float64 `json:"percentile"`       // 전교 석차 백분율 (%)
+	AllAverage       float64 `json:"allAverage"`       // 전과목 평균 성취도 (1~5)
+	AcademicScore    float64 `json:"academicScore"`    // 교과 점수 (1차-B: 직업계고는 전과목+가중과목, 일반고는 교과점수)
+	AcademicMax      float64 `json:"academicMax"`      // 교과 만점
+	NonAcademicScore float64 `json:"nonAcademicScore"` // 비교과 점수
+	NonAcademicMax   float64 `json:"nonAcademicMax"`   // 비교과 만점
+	AttendanceScore  float64 `json:"attendanceScore"`  // 출결 점수
+	AttendanceMax    float64 `json:"attendanceMax"`
+	VolunteerScore   float64 `json:"volunteerScore"`   // 봉사 점수
+	VolunteerMax     float64 `json:"volunteerMax"`
+	ExtraScore       float64 `json:"extraScore"`       // 가산점/리더십
+	TotalScore       float64 `json:"totalScore"`       // 2차 서류 총점
+	TotalMax         float64 `json:"totalMax"`         // 서류 총점 만점
+	FormulaVersion   string  `json:"formulaVersion"`   // 적용 산출식 버전
+}
+
 // ApplicationRecord is a local-only student admission application. Scores are
 // frozen at the time of application so later formula changes do not alter
 // historical results.
 type ApplicationRecord struct {
-	ID                 int      `json:"id"`
-	ClassNum           int      `json:"classNum"`
-	StudentNum         string   `json:"studentNum"`
-	StudentName        string   `json:"studentName"`
-	AdmissionYear      int      `json:"admissionYear"`
-	Category           string   `json:"category"` // meister, special, self_foreign, general, other
-	SchoolName         string   `json:"schoolName"`
-	Track              string   `json:"track"`
-	Status             string   `json:"status"`
-	Score              float64  `json:"score"`
-	ScoreBasis         string   `json:"scoreBasis"`
-	Preferences        []string `json:"preferences"`
-	AssignedDepartment string   `json:"assignedDepartment"`
-	AssignedSchool     string   `json:"assignedSchool"`
-	UpdatedAt          string   `json:"updatedAt"`
+	ID                 int                      `json:"id"`
+	ClassNum           int                      `json:"classNum"`
+	StudentNum         string                   `json:"studentNum"`
+	StudentName        string                   `json:"studentName"`
+	AdmissionYear      int                      `json:"admissionYear"`
+	Category           string                   `json:"category"` // meister, special, self_foreign, general, other
+	SchoolName         string                   `json:"schoolName"`
+	Track              string                   `json:"track"`
+	Status             string                   `json:"status"`
+	Score              float64                  `json:"score"`
+	ScoreBasis         string                   `json:"scoreBasis"`
+	Preferences        []string                 `json:"preferences"`
+	AssignedDepartment string                   `json:"assignedDepartment"`
+	AssignedSchool     string                   `json:"assignedSchool"`
+	ScoreDetails       *ApplicationScoreDetails `json:"scoreDetails,omitempty"`
+	UpdatedAt          string                   `json:"updatedAt"`
 }
 
 // ApplicationSummary is a school-internal aggregate. It intentionally has no
@@ -998,6 +1017,7 @@ func (dm *DBManager) InitClassDB(classNum int) error {
 			preferences_json TEXT DEFAULT '[]',
 			assigned_department TEXT DEFAULT '',
 			assigned_school TEXT DEFAULT '',
+			score_details_json TEXT DEFAULT '',
 			updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 			UNIQUE(student_num, student_name, admission_year, category, school_name, track)
 		);
@@ -1031,6 +1051,7 @@ func (dm *DBManager) InitClassDB(classNum int) error {
 	_, _ = db.Exec(`ALTER TABLE students ADD COLUMN volunteer_json TEXT DEFAULT ''`)
 	_, _ = db.Exec(`ALTER TABLE students ADD COLUMN extra_json TEXT DEFAULT ''`)
 	_, _ = db.Exec(`ALTER TABLE student_applications ADD COLUMN assigned_school TEXT DEFAULT ''`)
+	_, _ = db.Exec(`ALTER TABLE student_applications ADD COLUMN score_details_json TEXT DEFAULT ''`)
 
 	if err != nil {
 		return fmt.Errorf("학급 DB 초기화 실패: %w", err)
@@ -1345,15 +1366,161 @@ func (dm *DBManager) SaveApplication(record ApplicationRecord) error {
 	if err != nil {
 		return err
 	}
+	var scoreDetailsJSON string
+	if record.ScoreDetails != nil {
+		if bytes, err := json.Marshal(record.ScoreDetails); err == nil {
+			scoreDetailsJSON = string(bytes)
+		}
+	} else {
+		// 지원 당시 학생의 성적/출결/봉사 세부 점수 스냅샷 자동 생성
+		if details, err := dm.GenerateApplicationScoreDetails(record.ClassNum, record.StudentNum, record.StudentName, record.Category, record.SchoolName, record.Track); err == nil && details != nil {
+			record.ScoreDetails = details
+			if bytes, err := json.Marshal(details); err == nil {
+				scoreDetailsJSON = string(bytes)
+			}
+		}
+	}
+
 	db, err := dm.openDB(dm.getClassDBPath(record.ClassNum))
 	if err != nil {
 		return err
 	}
 	defer db.Close()
-	_, err = db.Exec(`INSERT INTO student_applications (student_num,student_name,admission_year,category,school_name,track,status,score,score_basis,preferences_json,assigned_department,assigned_school,updated_at)
-	VALUES (?,?,?,?,?,?,?,?,?,?,?,?,CURRENT_TIMESTAMP)
-	ON CONFLICT(student_num,student_name,admission_year,category,school_name,track) DO UPDATE SET status=excluded.status,score=excluded.score,score_basis=excluded.score_basis,preferences_json=excluded.preferences_json,assigned_department=excluded.assigned_department,assigned_school=excluded.assigned_school,updated_at=CURRENT_TIMESTAMP`, record.StudentNum, record.StudentName, record.AdmissionYear, record.Category, record.SchoolName, record.Track, record.Status, record.Score, record.ScoreBasis, string(prefs), record.AssignedDepartment, record.AssignedSchool)
+	_, err = db.Exec(`INSERT INTO student_applications (student_num,student_name,admission_year,category,school_name,track,status,score,score_basis,preferences_json,assigned_department,assigned_school,score_details_json,updated_at)
+	VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,CURRENT_TIMESTAMP)
+	ON CONFLICT(student_num,student_name,admission_year,category,school_name,track) DO UPDATE SET 
+		status=excluded.status,
+		score=excluded.score,
+		score_basis=excluded.score_basis,
+		preferences_json=excluded.preferences_json,
+		assigned_department=excluded.assigned_department,
+		assigned_school=excluded.assigned_school,
+		score_details_json=CASE WHEN excluded.score_details_json != '' THEN excluded.score_details_json ELSE student_applications.score_details_json END,
+		updated_at=CURRENT_TIMESTAMP`,
+		record.StudentNum, record.StudentName, record.AdmissionYear, record.Category, record.SchoolName, record.Track, record.Status, record.Score, record.ScoreBasis, string(prefs), record.AssignedDepartment, record.AssignedSchool, scoreDetailsJSON)
 	return err
+}
+
+// GenerateApplicationScoreDetails 원서 접수 시점의 학생 성적·출결·봉사 자료로부터 고교·전형별 세부 점수 스냅샷을 생성합니다.
+func (dm *DBManager) GenerateApplicationScoreDetails(classNum int, studentNum, studentName, category, schoolName, track string) (*ApplicationScoreDetails, error) {
+	student, err := dm.GetStudent(classNum, studentNum, studentName)
+	if err != nil {
+		return nil, err
+	}
+	full, err := parseStudentFullData(*student)
+	if err != nil {
+		return nil, err
+	}
+	snapshot, _ := dm.GetStudentRankSnapshot(classNum, studentNum, studentName)
+
+	details := &ApplicationScoreDetails{
+		AllAverage: full.AllAverage,
+	}
+	if snapshot != nil {
+		details.Percentile = snapshot.Percentile
+	}
+
+	switch category {
+	case "general":
+		details.TotalMax = 200
+		details.AcademicMax = 150
+		details.NonAcademicMax = 50
+		details.FormulaVersion = "2026-general-ulsan"
+		if snapshot != nil {
+			details.AcademicScore = snapshot.FinalScore
+			details.NonAcademicScore = snapshot.NonAcademicScore
+			details.TotalScore = snapshot.GeneralTotalScore
+		} else {
+			details.AcademicScore = full.GeneralHSAcademicScore
+			details.NonAcademicScore = full.GeneralHSNonAcademicScore
+			details.TotalScore = full.GeneralHSTotalScore
+		}
+	case "meister", "special":
+		for _, result := range full.SchoolResults {
+			if normalizeApplicationSchoolName(result.SchoolName) == normalizeApplicationSchoolName(schoolName) && result.TrackName == track {
+				details.AcademicScore = result.AllSubjectScore + result.WeightedScore
+				details.AcademicMax = result.AllSubjectMax + result.WeightedMax
+				details.AttendanceScore = result.AttendanceScore
+				details.AttendanceMax = result.AttendanceMax
+				details.VolunteerScore = result.VolunteerScore
+				details.VolunteerMax = result.VolunteerMax
+				details.ExtraScore = result.ExtraScore + result.LeadershipScore
+				details.NonAcademicScore = result.AttendanceScore + result.VolunteerScore + result.ExtraScore + result.LeadershipScore
+				details.NonAcademicMax = result.TotalMax - details.AcademicMax
+				details.TotalScore = result.TotalScore
+				details.TotalMax = result.TotalMax
+				details.FormulaVersion = fmt.Sprintf("%s-%s", result.SchoolName, result.TrackName)
+				break
+			}
+		}
+	default:
+		details.FormulaVersion = category
+	}
+	return details, nil
+}
+
+// BackfillAllApplicationsScoreDetails 과거 원서 레코드 중 score_details_json이 누락된 항목을 학생의 현재 성적/출결/봉사 데이터로 자동 역산하여 채워 넣습니다.
+func (dm *DBManager) BackfillAllApplicationsScoreDetails() (int, error) {
+	config, err := dm.GetSchoolConfig()
+	if err != nil {
+		return 0, err
+	}
+	totalUpdated := 0
+	for classNum := 1; classNum <= config.ClassCount; classNum++ {
+		count, err := dm.BackfillClassApplicationsScoreDetails(classNum)
+		if err == nil {
+			totalUpdated += count
+		}
+	}
+	return totalUpdated, nil
+}
+
+// BackfillClassApplicationsScoreDetails 특정 학급의 누락된 score_details_json을 자동 역산하여 채워 넣습니다.
+func (dm *DBManager) BackfillClassApplicationsScoreDetails(classNum int) (int, error) {
+	dbPath := dm.getClassDBPath(classNum)
+	if _, err := os.Stat(dbPath); os.IsNotExist(err) {
+		return 0, nil
+	}
+	db, err := dm.openDB(dbPath)
+	if err != nil {
+		return 0, err
+	}
+	defer db.Close()
+
+	rows, err := db.Query(`SELECT id, student_num, student_name, category, school_name, track FROM student_applications WHERE score_details_json IS NULL OR score_details_json = ''`)
+	if err != nil {
+		return 0, err
+	}
+	defer rows.Close()
+
+	type targetItem struct {
+		id          int
+		studentNum  string
+		studentName string
+		category    string
+		schoolName  string
+		track       string
+	}
+	var targets []targetItem
+	for rows.Next() {
+		var item targetItem
+		if err := rows.Scan(&item.id, &item.studentNum, &item.studentName, &item.category, &item.schoolName, &item.track); err == nil {
+			targets = append(targets, item)
+		}
+	}
+	rows.Close()
+
+	updated := 0
+	for _, item := range targets {
+		details, err := dm.GenerateApplicationScoreDetails(classNum, item.studentNum, item.studentName, item.category, item.schoolName, item.track)
+		if err == nil && details != nil && (details.TotalScore > 0 || details.Percentile > 0) {
+			if bytes, mErr := json.Marshal(details); mErr == nil {
+				_, _ = db.Exec(`UPDATE student_applications SET score_details_json = ? WHERE id = ?`, string(bytes), item.id)
+				updated++
+			}
+		}
+	}
+	return updated, nil
 }
 
 // UpdateAssignedSchool 후기 일반고 학생의 최종 배정 고등학교명을 업데이트합니다.
@@ -1538,7 +1705,7 @@ func (dm *DBManager) GetStudentApplications(classNum int, studentNum, name strin
 		return nil, err
 	}
 	defer db.Close()
-	rows, err := db.Query(`SELECT id,admission_year,category,school_name,track,status,score,score_basis,preferences_json,assigned_department,COALESCE(assigned_school, ''),updated_at FROM student_applications WHERE student_num=? AND student_name=? ORDER BY updated_at DESC`, studentNum, name)
+	rows, err := db.Query(`SELECT id,admission_year,category,school_name,track,status,score,score_basis,preferences_json,assigned_department,COALESCE(assigned_school, ''),COALESCE(score_details_json, ''),updated_at FROM student_applications WHERE student_num=? AND student_name=? ORDER BY updated_at DESC`, studentNum, name)
 	if err != nil {
 		return nil, err
 	}
@@ -1546,14 +1713,20 @@ func (dm *DBManager) GetStudentApplications(classNum int, studentNum, name strin
 	var out []ApplicationRecord
 	for rows.Next() {
 		var r ApplicationRecord
-		var prefs string
-		if err := rows.Scan(&r.ID, &r.AdmissionYear, &r.Category, &r.SchoolName, &r.Track, &r.Status, &r.Score, &r.ScoreBasis, &prefs, &r.AssignedDepartment, &r.AssignedSchool, &r.UpdatedAt); err != nil {
+		var prefs, detailsJSON string
+		if err := rows.Scan(&r.ID, &r.AdmissionYear, &r.Category, &r.SchoolName, &r.Track, &r.Status, &r.Score, &r.ScoreBasis, &prefs, &r.AssignedDepartment, &r.AssignedSchool, &detailsJSON, &r.UpdatedAt); err != nil {
 			return nil, err
 		}
 		r.ClassNum = classNum
 		r.StudentNum = studentNum
 		r.StudentName = name
 		_ = json.Unmarshal([]byte(prefs), &r.Preferences)
+		if strings.TrimSpace(detailsJSON) != "" {
+			var details ApplicationScoreDetails
+			if json.Unmarshal([]byte(detailsJSON), &details) == nil {
+				r.ScoreDetails = &details
+			}
+		}
 		out = append(out, r)
 	}
 	return out, rows.Err()
@@ -1573,17 +1746,23 @@ func (dm *DBManager) GetSchoolApplicationRecords() ([]ApplicationRecord, error) 
 			}
 			return nil, err
 		}
-		rows, err := db.Query(`SELECT student_num,student_name,admission_year,category,school_name,track,status,score,score_basis,preferences_json,assigned_department,COALESCE(assigned_school, ''),updated_at FROM student_applications ORDER BY student_num,updated_at`)
+		rows, err := db.Query(`SELECT student_num,student_name,admission_year,category,school_name,track,status,score,score_basis,preferences_json,assigned_department,COALESCE(assigned_school, ''),COALESCE(score_details_json, ''),updated_at FROM student_applications ORDER BY student_num,updated_at`)
 		if err != nil {
 			db.Close()
 			continue
 		}
 		for rows.Next() {
 			var r ApplicationRecord
-			var prefs string
-			if err := rows.Scan(&r.StudentNum, &r.StudentName, &r.AdmissionYear, &r.Category, &r.SchoolName, &r.Track, &r.Status, &r.Score, &r.ScoreBasis, &prefs, &r.AssignedDepartment, &r.AssignedSchool, &r.UpdatedAt); err == nil {
+			var prefs, detailsJSON string
+			if err := rows.Scan(&r.StudentNum, &r.StudentName, &r.AdmissionYear, &r.Category, &r.SchoolName, &r.Track, &r.Status, &r.Score, &r.ScoreBasis, &prefs, &r.AssignedDepartment, &r.AssignedSchool, &detailsJSON, &r.UpdatedAt); err == nil {
 				r.ClassNum = classNum
 				_ = json.Unmarshal([]byte(prefs), &r.Preferences)
+				if strings.TrimSpace(detailsJSON) != "" {
+					var details ApplicationScoreDetails
+					if json.Unmarshal([]byte(detailsJSON), &details) == nil {
+						r.ScoreDetails = &details
+					}
+				}
 				all = append(all, r)
 			}
 		}

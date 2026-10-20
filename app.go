@@ -825,6 +825,9 @@ func (a *App) ImportDistributionPackage(inputPath string) (string, error) {
 		}
 	}
 
+	// 4. 누락된 원서 점수 스냅샷 자동 역산 보완 (Self-healing)
+	_, _ = a.db.BackfillAllApplicationsScoreDetails()
+
 	return manifest.Username, nil
 }
 
@@ -1457,7 +1460,11 @@ func (a *App) UpdateSchoolRankSnapshots() error {
 	if err != nil {
 		return err
 	}
-	return a.db.SaveRankSnapshots(calcResults)
+	if err := a.db.SaveRankSnapshots(calcResults); err != nil {
+		return err
+	}
+	_, _ = a.db.BackfillAllApplicationsScoreDetails()
+	return nil
 }
 
 // GetClassGrades 특정 반의 내신 성적 가산출 결과 반환
