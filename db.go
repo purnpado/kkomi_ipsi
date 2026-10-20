@@ -1638,13 +1638,15 @@ func (dm *DBManager) GetClassApplicationSummaries(classNum int) ([]ApplicationSu
 func (dm *DBManager) getApplicationSummaries(classNums []int) ([]ApplicationSummary, error) {
 	type accumulator struct {
 		ApplicationSummary
-		acceptedSum    float64
-		expectedSum    float64
-		expectedCount  int
-		hasMin         bool
-		hasMax         bool
-		hasExpectedMin bool
-		hasExpectedMax bool
+		acceptedSum        float64
+		acceptedScoreCount int
+		expectedSum        float64
+		expectedCount      int
+		hasMin             bool
+		hasAcceptedMax     bool
+		hasRejectedMax     bool
+		hasExpectedMin     bool
+		hasExpectedMax     bool
 	}
 	groups := map[string]*accumulator{}
 	add := func(r ApplicationRecord, department string, rank int) {
@@ -1679,15 +1681,16 @@ func (dm *DBManager) getApplicationSummaries(classNums []int) ([]ApplicationSumm
 		}
 		if (r.Status == "합격" || r.Status == "최종 진학") && r.Score > 0 {
 			a.acceptedSum += r.Score
+			a.acceptedScoreCount++
 			if !a.hasMin || r.Score < a.MinAcceptedScore {
 				a.MinAcceptedScore, a.hasMin = r.Score, true
 			}
-			if !a.hasMax || r.Score > a.MaxAcceptedScore {
-				a.MaxAcceptedScore, a.hasMax = r.Score, true
+			if !a.hasAcceptedMax || r.Score > a.MaxAcceptedScore {
+				a.MaxAcceptedScore, a.hasAcceptedMax = r.Score, true
 			}
 		}
-		if r.Status == "불합격" && r.Score > 0 && (!a.hasMax || r.Score > a.MaxRejectedScore) {
-			a.MaxRejectedScore, a.hasMax = r.Score, true
+		if r.Status == "불합격" && r.Score > 0 && (!a.hasRejectedMax || r.Score > a.MaxRejectedScore) {
+			a.MaxRejectedScore, a.hasRejectedMax = r.Score, true
 		}
 	}
 	for _, classNum := range classNums {
@@ -1745,8 +1748,8 @@ func (dm *DBManager) getApplicationSummaries(classNums []int) ([]ApplicationSumm
 		if a.PlannedCount == 0 && a.SubmittedCount == 0 && a.AcceptedCount == 0 && a.RejectedCount == 0 && a.FinalCount == 0 {
 			continue
 		}
-		if a.AcceptedCount > 0 && a.acceptedSum > 0 {
-			a.AvgAcceptedScore = a.acceptedSum / float64(a.AcceptedCount)
+		if a.acceptedScoreCount > 0 {
+			a.AvgAcceptedScore = a.acceptedSum / float64(a.acceptedScoreCount)
 		}
 		if a.expectedCount > 0 {
 			a.AvgExpectedScore = a.expectedSum / float64(a.expectedCount)

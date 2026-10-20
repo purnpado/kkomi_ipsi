@@ -248,6 +248,50 @@ func TestApplicationSummaryCalculatesAcceptedAndRejectedScores(t *testing.T) {
 	}
 }
 
+func TestApplicationSummaryWithZeroScoreAcceptedStudent(t *testing.T) {
+	dir := t.TempDir()
+	dm := &DBManager{dataDir: dir}
+	dm.setDataKey(make([]byte, 32))
+	if err := dm.InitConfigDB(); err != nil {
+		t.Fatal(err)
+	}
+	if err := dm.SaveSchoolConfig("테스트중학교", 1, "", false, 2027); err != nil {
+		t.Fatal(err)
+	}
+	if err := dm.InitClassDB(1); err != nil {
+		t.Fatal(err)
+	}
+	// 합격생 1(80점), 합격생 2(90점), 점수 미입력 합격생 3(0점)
+	entries := []ApplicationRecord{
+		{ClassNum: 1, StudentNum: "1", StudentName: "합격자A", AdmissionYear: 2027, Category: "special", SchoolName: "울산공업고등학교", Track: "일반", Status: "합격", Score: 80, Preferences: []string{"스마트기계과"}},
+		{ClassNum: 1, StudentNum: "2", StudentName: "합격자B", AdmissionYear: 2027, Category: "special", SchoolName: "울산공업고등학교", Track: "일반", Status: "합격", Score: 90, Preferences: []string{"스마트기계과"}},
+		{ClassNum: 1, StudentNum: "3", StudentName: "합격자C_점수없음", AdmissionYear: 2027, Category: "special", SchoolName: "울산공업고등학교", Track: "일반", Status: "합격", Score: 0, Preferences: []string{"스마트기계과"}},
+	}
+	for _, entry := range entries {
+		if err := dm.SaveApplication(entry); err != nil {
+			t.Fatal(err)
+		}
+	}
+	summaries, err := dm.GetApplicationSummaries()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(summaries) != 1 {
+		t.Fatalf("expected one summary, got %#v", summaries)
+	}
+	s := summaries[0]
+	// 합격자 총원은 3명이지만, 유효 점수 평균은 (80+90)/2 = 85점이어야 함 (기존 버그 시 170/3=56.67점으로 왜곡됨)
+	if s.AcceptedCount != 3 {
+		t.Fatalf("expected AcceptedCount=3, got %d", s.AcceptedCount)
+	}
+	if s.AvgAcceptedScore != 85.0 {
+		t.Fatalf("expected AvgAcceptedScore=85.0, got %f", s.AvgAcceptedScore)
+	}
+	if s.MinAcceptedScore != 80.0 || s.MaxAcceptedScore != 90.0 {
+		t.Fatalf("unexpected min/max score: min=%f, max=%f", s.MinAcceptedScore, s.MaxAcceptedScore)
+	}
+}
+
 func TestSelectedTeacherPatchMergeAndExpectedSupportToken(t *testing.T) {
 	dir := t.TempDir()
 	dm := &DBManager{dataDir: dir}

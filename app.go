@@ -40,11 +40,6 @@ type ExpectedSupportItem struct {
 	AvgScore       float64 `json:"avgScore"`
 }
 
-type ExpectedSupportSubmission struct {
-	AdmissionYear          int                   `json:"admissionYear"`
-	SourceMiddleSchoolName string                `json:"sourceMiddleSchoolName"`
-	Items                  []ExpectedSupportItem `json:"items"`
-}
 
 // ExpectedSupportAggregate is the participant-facing Ulsan-wide result. It
 // excludes submitting-school names and all score information.
