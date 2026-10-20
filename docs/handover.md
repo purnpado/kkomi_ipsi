@@ -8,9 +8,8 @@
 - 기존 기술명: `PHGC`
 - 최신 안정 릴리즈: `v1.6.2`
 - 최신 소스 커밋: `b39235d 명칭 변경: 꼬미입시 브랜딩 및 도트 아이콘 적용`
-- 원본 Gitea: `https://gitea.gguk.link/purnpadosori/PHGC-OFFLINE.git`
+- 원본 Gitea: `.`
 - GitHub 백업: `https://github.com/purnpado/PHGC`
-- 별도 관제 저장소: `https://gitea.gguk.link/purnpadosori/proxmox.git` (꼬미입시 소스 아님)
 - 실행 파일: `build/bin/PHGC.exe` (현재는 호환성을 위해 이 이름을 유지)
 
 ## 최근 완료 사항
