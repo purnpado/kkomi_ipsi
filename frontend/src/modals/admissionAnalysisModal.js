@@ -34,9 +34,13 @@ export async function openAdmissionAnalysisModal() {
         console.warn('학과별 통계 로드 실패:', e);
     }
 
+    // 초기 학년도의 우리 학교 통계만으로 필터 목록을 구성한다. 이전·다음
+    // 학년도 기록이 현재 연도 분석에 섞이는 것을 막기 위함이다.
+    const statsForYear = (year) => ourDeptStats.filter(ds => Number(ds.admissionYear) === Number(year));
+
     // 고교 목록 및 학과 목록 추출
     const schoolMap = new Map();
-    ourDeptStats.forEach(ds => {
+    statsForYear(admissionYear).forEach(ds => {
         if (!schoolMap.has(ds.schoolName)) {
             schoolMap.set(ds.schoolName, {
                 category: ds.category,
@@ -166,15 +170,28 @@ export async function openAdmissionAnalysisModal() {
     modal.querySelector('#closeAnalysisFooterBtn')?.addEventListener('click', closeModal);
 
     // 학과 드롭다운 갱신 함수
+    const rebuildSchoolOptions = () => {
+        const year = parseInt(modal.querySelector('#analysisYearSelect')?.value || admissionYear, 10);
+        const schoolSelect = modal.querySelector('#analysisSchoolSelect');
+        if (!schoolSelect) return;
+        const schools = Array.from(new Set(statsForYear(year).map(ds => ds.schoolName)));
+        if (schools.length === 0) return;
+        const previous = schoolSelect.value;
+        schoolSelect.innerHTML = schools.map(s => `<option value="${escapeAttr(s)}">${escapeHtml(s)}</option>`).join('');
+        schoolSelect.value = schools.includes(previous) ? previous : schools[0];
+    };
+
     const updateDeptDropdown = () => {
         const sch = modal.querySelector('#analysisSchoolSelect')?.value || '';
         const deptSelect = modal.querySelector('#analysisDeptSelect');
         if (!deptSelect) return;
 
-        const info = schoolMap.get(sch);
+        const year = parseInt(modal.querySelector('#analysisYearSelect')?.value || admissionYear, 10);
+        const yearStats = statsForYear(year).filter(ds => ds.schoolName === sch);
         let optionsHTML = '<option value="" selected>전체 (학교 총괄)</option>';
-        if (info && info.departments.size > 0) {
-            info.departments.forEach(d => {
+        const departments = new Set(yearStats.map(ds => ds.department).filter(Boolean));
+        if (departments.size > 0) {
+            departments.forEach(d => {
                 optionsHTML += `<option value="${escapeAttr(d)}">${escapeHtml(d)}</option>`;
             });
         }
@@ -207,7 +224,7 @@ export async function openAdmissionAnalysisModal() {
                 stats = await window.go.main.App.GetConsolidatedAdmissionStats(year, school, dept, track, 1.0);
             } else {
                 // 우리 학교 학과별 통계에서 필터링
-                const found = ourDeptStats.find(x =>
+                const found = statsForYear(year).find(x =>
                     x.schoolName === school &&
                     (!dept || x.department === dept) &&
                     (x.track === track || !track)
@@ -295,7 +312,11 @@ export async function openAdmissionAnalysisModal() {
         updateDeptDropdown();
         loadAndRenderAnalysis();
     });
-    modal.querySelector('#analysisYearSelect')?.addEventListener('change', loadAndRenderAnalysis);
+    modal.querySelector('#analysisYearSelect')?.addEventListener('change', () => {
+        rebuildSchoolOptions();
+        updateDeptDropdown();
+        loadAndRenderAnalysis();
+    });
     modal.querySelector('#analysisDeptSelect')?.addEventListener('change', loadAndRenderAnalysis);
     modal.querySelector('#analysisTrackSelect')?.addEventListener('change', loadAndRenderAnalysis);
 

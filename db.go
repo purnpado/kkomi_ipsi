@@ -132,12 +132,14 @@ type ApplicationScoreDetails struct {
 	NonAcademicMax   float64 `json:"nonAcademicMax"`   // 비교과 만점
 	AttendanceScore  float64 `json:"attendanceScore"`  // 출결 점수
 	AttendanceMax    float64 `json:"attendanceMax"`
-	VolunteerScore   float64 `json:"volunteerScore"`   // 봉사 점수
+	VolunteerScore   float64 `json:"volunteerScore"` // 봉사 점수
 	VolunteerMax     float64 `json:"volunteerMax"`
-	ExtraScore       float64 `json:"extraScore"`       // 가산점/리더십
-	TotalScore       float64 `json:"totalScore"`       // 2차 서류 총점
-	TotalMax         float64 `json:"totalMax"`         // 서류 총점 만점
-	FormulaVersion   string  `json:"formulaVersion"`   // 적용 산출식 버전
+	ExtraScore       float64 `json:"extraScore"`     // 가산점/리더십
+	TotalScore       float64 `json:"totalScore"`     // 2차 서류 총점
+	TotalMax         float64 `json:"totalMax"`       // 서류 총점 만점
+	FormulaVersion   string  `json:"formulaVersion"` // 적용 산출식 버전
+	CapturedAt       string  `json:"capturedAt"`     // 스냅샷 생성 시각(UTC, RFC3339)
+	SnapshotSource   string  `json:"snapshotSource"` // application-save, legacy-backfill, legacy-unknown
 }
 
 // ApplicationRecord is a local-only student admission application. Scores are
@@ -177,22 +179,22 @@ type ApplicationSummary struct {
 	AcceptedCount    int     `json:"acceptedCount"`
 	RejectedCount    int     `json:"rejectedCount"`
 	FinalCount       int     `json:"finalCount"`
-	MinAcceptedScore    float64 `json:"minAcceptedScore"`
-	MaxAcceptedScore    float64 `json:"maxAcceptedScore"`
-	AvgAcceptedScore    float64 `json:"avgAcceptedScore"`
-	AcceptedMedian      float64 `json:"acceptedMedian"`
-	AcceptedQ1          float64 `json:"acceptedQ1"`
-	AcceptedQ3          float64 `json:"acceptedQ3"`
-	AcceptedStdDev      float64 `json:"acceptedStdDev"`
-	MinRejectedScore    float64 `json:"minRejectedScore"`
-	MaxRejectedScore    float64 `json:"maxRejectedScore"`
-	AvgRejectedScore    float64 `json:"avgRejectedScore"`
-	HasOverlap          bool    `json:"hasOverlap"`
-	OverlapMin          float64 `json:"overlapMin"`
-	OverlapMax          float64 `json:"overlapMax"`
-	MinExpectedScore    float64 `json:"minExpectedScore"`
-	MaxExpectedScore    float64 `json:"maxExpectedScore"`
-	AvgExpectedScore    float64 `json:"avgExpectedScore"`
+	MinAcceptedScore float64 `json:"minAcceptedScore"`
+	MaxAcceptedScore float64 `json:"maxAcceptedScore"`
+	AvgAcceptedScore float64 `json:"avgAcceptedScore"`
+	AcceptedMedian   float64 `json:"acceptedMedian"`
+	AcceptedQ1       float64 `json:"acceptedQ1"`
+	AcceptedQ3       float64 `json:"acceptedQ3"`
+	AcceptedStdDev   float64 `json:"acceptedStdDev"`
+	MinRejectedScore float64 `json:"minRejectedScore"`
+	MaxRejectedScore float64 `json:"maxRejectedScore"`
+	AvgRejectedScore float64 `json:"avgRejectedScore"`
+	HasOverlap       bool    `json:"hasOverlap"`
+	OverlapMin       float64 `json:"overlapMin"`
+	OverlapMax       float64 `json:"overlapMax"`
+	MinExpectedScore float64 `json:"minExpectedScore"`
+	MaxExpectedScore float64 `json:"maxExpectedScore"`
+	AvgExpectedScore float64 `json:"avgExpectedScore"`
 }
 
 // AdmissionClosure records that one admission year has been finalized by the
@@ -1338,7 +1340,7 @@ func (dm *DBManager) SaveApplication(record ApplicationRecord) error {
 	}
 	validCategories := map[string]bool{"meister": true, "special": true, "self_foreign": true, "general": true, "other": true, "none": true}
 	validStatuses := map[string]bool{
-		"미입력": true,
+		"미입력":  true,
 		"지원희망": true, "지원 희망": true,
 		"지원예정": true, "지원 예정": true,
 		"지원완료": true, "지원 완료": true,
@@ -1377,12 +1379,14 @@ func (dm *DBManager) SaveApplication(record ApplicationRecord) error {
 	}
 	var scoreDetailsJSON string
 	if record.ScoreDetails != nil {
+		stampApplicationScoreDetails(record.ScoreDetails, "application-save")
 		if bytes, err := json.Marshal(record.ScoreDetails); err == nil {
 			scoreDetailsJSON = string(bytes)
 		}
 	} else {
 		// 지원 당시 학생의 성적/출결/봉사 세부 점수 스냅샷 자동 생성
 		if details, err := dm.GenerateApplicationScoreDetails(record.ClassNum, record.StudentNum, record.StudentName, record.Category, record.SchoolName, record.Track); err == nil && details != nil {
+			stampApplicationScoreDetails(details, "application-save")
 			record.ScoreDetails = details
 			if bytes, err := json.Marshal(details); err == nil {
 				scoreDetailsJSON = string(bytes)
@@ -1408,6 +1412,19 @@ func (dm *DBManager) SaveApplication(record ApplicationRecord) error {
 		updated_at=CURRENT_TIMESTAMP`,
 		record.StudentNum, record.StudentName, record.AdmissionYear, record.Category, record.SchoolName, record.Track, record.Status, record.Score, record.ScoreBasis, string(prefs), record.AssignedDepartment, record.AssignedSchool, scoreDetailsJSON)
 	return err
+}
+
+// stampApplicationScoreDetails는 기존 출처가 있을 때 이를 유지해 과거 스냅샷의 표기를 바꾸지 않습니다.
+func stampApplicationScoreDetails(details *ApplicationScoreDetails, source string) {
+	if details == nil {
+		return
+	}
+	if details.CapturedAt == "" {
+		details.CapturedAt = time.Now().UTC().Format(time.RFC3339)
+	}
+	if details.SnapshotSource == "" {
+		details.SnapshotSource = source
+	}
 }
 
 // GenerateApplicationScoreDetails 원서 접수 시점의 학생 성적·출결·봉사 자료로부터 고교·전형별 세부 점수 스냅샷을 생성합니다.
@@ -1480,8 +1497,60 @@ func (dm *DBManager) BackfillAllApplicationsScoreDetails() (int, error) {
 		if err == nil {
 			totalUpdated += count
 		}
+		// 이전 버전이 만든 세부 점수는 원본 접수 시점 여부를 알 수 없으므로
+		// 현재 시각을 생성 시각으로 꾸며 쓰지 않고 출처만 명시합니다.
+		_ = dm.MarkLegacyClassApplicationScoreDetails(classNum)
 	}
 	return totalUpdated, nil
+}
+
+// MarkLegacyClassApplicationScoreDetails는 출처 메타데이터가 없는 기존 스냅샷을 legacy-unknown으로 표시합니다.
+func (dm *DBManager) MarkLegacyClassApplicationScoreDetails(classNum int) error {
+	dbPath := dm.getClassDBPath(classNum)
+	if _, err := os.Stat(dbPath); os.IsNotExist(err) {
+		return nil
+	}
+	db, err := dm.openDB(dbPath)
+	if err != nil {
+		return err
+	}
+	defer db.Close()
+
+	rows, err := db.Query(`SELECT id, score_details_json FROM student_applications WHERE score_details_json IS NOT NULL AND score_details_json != ''`)
+	if err != nil {
+		return err
+	}
+	defer rows.Close()
+	type legacyItem struct {
+		id      int
+		details ApplicationScoreDetails
+	}
+	var legacyItems []legacyItem
+	for rows.Next() {
+		var id int
+		var raw string
+		if err := rows.Scan(&id, &raw); err != nil {
+			return err
+		}
+		var details ApplicationScoreDetails
+		if json.Unmarshal([]byte(raw), &details) == nil && details.SnapshotSource == "" {
+			details.SnapshotSource = "legacy-unknown"
+			legacyItems = append(legacyItems, legacyItem{id: id, details: details})
+		}
+	}
+	if err := rows.Err(); err != nil {
+		return err
+	}
+	for _, item := range legacyItems {
+		bytes, err := json.Marshal(item.details)
+		if err != nil {
+			return err
+		}
+		if _, err := db.Exec(`UPDATE student_applications SET score_details_json=? WHERE id=?`, string(bytes), item.id); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 // BackfillClassApplicationsScoreDetails 특정 학급의 누락된 score_details_json을 자동 역산하여 채워 넣습니다.
@@ -1523,6 +1592,7 @@ func (dm *DBManager) BackfillClassApplicationsScoreDetails(classNum int) (int, e
 	for _, item := range targets {
 		details, err := dm.GenerateApplicationScoreDetails(classNum, item.studentNum, item.studentName, item.category, item.schoolName, item.track)
 		if err == nil && details != nil && (details.TotalScore > 0 || details.Percentile > 0) {
+			stampApplicationScoreDetails(details, "legacy-backfill")
 			if bytes, mErr := json.Marshal(details); mErr == nil {
 				_, _ = db.Exec(`UPDATE student_applications SET score_details_json = ? WHERE id = ?`, string(bytes), item.id)
 				updated++
@@ -2715,4 +2785,3 @@ func (dm *DBManager) GetStudentRankSnapshot(classNum int, studentNum, studentNam
 	}
 	return &s, nil
 }
-
