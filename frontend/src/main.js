@@ -22,6 +22,7 @@ import {
     openApplicationSummaryModal
 } from './modals/applicationSummaryModal.js';
 import { openSharedAdmissionModal } from './modals/sharedAdmissionModal.js';
+import { openAdmissionAnalysisModal } from './modals/admissionAnalysisModal.js';
 import {
     renderFirstRunScreen,
     renderSetupScreen,
@@ -103,6 +104,11 @@ eventBus.on(EVENTS.SHARED_ADMISSION, () => {
     openSharedAdmissionModal();
 });
 window.openSharedAdmissionModal = openSharedAdmissionModal;
+
+eventBus.on(EVENTS.ADMISSION_ANALYSIS, () => {
+    openAdmissionAnalysisModal();
+});
+window.openAdmissionAnalysisModal = openAdmissionAnalysisModal;
 
 eventBus.on(EVENTS.SCREEN_LOCK, () => {
     ScreenLockManager.lockScreen('이벤트');
@@ -430,6 +436,7 @@ async function renderAdminScreen(schoolName) {
     document.getElementById('openAdminMatrixBtn')?.addEventListener('click', () => openMatrixModal(null));
     document.getElementById('openAdminSchoolStatsBtn')?.addEventListener('click', openApplicationSummaryModal);
     document.getElementById('openAdminRegisterBtn')?.addEventListener('click', openApplicationRegisterModal);
+    document.getElementById('openAdminAnalysisBtn')?.addEventListener('click', openAdmissionAnalysisModal);
     document.getElementById('openSharedAdmissionBtn')?.addEventListener('click', openSharedAdmissionModal);
 
     document.getElementById('finalArchiveBtn')?.addEventListener('click', async () => {
@@ -2697,20 +2704,26 @@ function renderStudentModalContent(modalEl, classNum, studentNum, name, data, cu
         }
 
         // 합격 가능성 판단 헬퍼
+        // 4단계 판정 구간 (안정 / 적정 / 소신 / 도전)
         const getCutoffBadgeAndGauge = (cutoffVal) => {
             let badge = '';
             let color = 'bg-primary';
             let pct = (r.totalScore / r.totalMax) * 100;
             if (cutoffVal && cutoffVal > 0) {
-                if (r.totalScore >= cutoffVal + 5) {
-                    badge = '<span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-success/20 text-success border border-success/30">🟢 안정권</span>';
-                    color = 'bg-success';
+                const diff = r.totalScore - cutoffVal;
+                const diffStr = diff >= 0 ? `+${diff.toFixed(2)}` : diff.toFixed(2);
+                if (r.totalScore >= cutoffVal + 3) {
+                    badge = `<span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40" title="기준선: ${cutoffVal.toFixed(2)}점 (${diffStr}점) - 안정권">🟢 안정</span>`;
+                    color = 'bg-emerald-500';
                 } else if (r.totalScore >= cutoffVal) {
-                    badge = '<span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-warning/20 text-warning border border-warning/30">🟡 적정/경계</span>';
-                    color = 'bg-warning';
+                    badge = `<span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/40" title="기준선: ${cutoffVal.toFixed(2)}점 (${diffStr}점) - 적정권">🟡 적정</span>`;
+                    color = 'bg-indigo-500';
+                } else if (r.totalScore >= cutoffVal - 2) {
+                    badge = `<span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40" title="기준선: ${cutoffVal.toFixed(2)}점 (${diffStr}점) - 소신 지원">🟠 소신</span>`;
+                    color = 'bg-amber-500';
                 } else {
-                    badge = '<span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-danger/20 text-danger border border-danger/30">🔴 소신/주의</span>';
-                    color = 'bg-danger';
+                    badge = `<span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-500/20 text-rose-300 border border-rose-500/40" title="기준선: ${cutoffVal.toFixed(2)}점 (${diffStr}점) - 도전 지원">🔴 도전</span>`;
+                    color = 'bg-rose-500';
                 }
             } else {
                 badge = `<span class="text-xs text-text-muted">만점의 ${pct.toFixed(1)}%</span>`;

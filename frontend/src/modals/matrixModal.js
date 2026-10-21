@@ -259,12 +259,15 @@ export async function openMatrixModal(classNum = null) {
                         const tooltip = `기준선: ${cutoffVal.toFixed(2)}점 (${diffStr}점 차이)`;
 
                         // whitespace-nowrap, inline-flex, leading-none으로 절대 줄바꿈 없이 한 화면 쏙 표시
-                        if (score >= cutoffVal + 5) {
+                        // 4단계 판정 구간 (안정 / 적정 / 소신 / 도전)
+                        if (score >= cutoffVal + 3) {
                             return `<span class="inline-flex items-center justify-center gap-1 leading-none font-black text-emerald-300 bg-emerald-950/80 border border-emerald-400/60 px-2 py-0.5 rounded-full text-[11px] shadow-xs whitespace-nowrap" title="${tooltip} - 안정">🟢 ${scoreStr}</span>`;
                         } else if (score >= cutoffVal) {
-                            return `<span class="inline-flex items-center justify-center gap-1 leading-none font-black text-amber-200 bg-amber-950/80 border border-amber-400/60 px-2 py-0.5 rounded-full text-[11px] shadow-xs whitespace-nowrap" title="${tooltip} - 적정/경계">🟡 ${scoreStr}</span>`;
+                            return `<span class="inline-flex items-center justify-center gap-1 leading-none font-black text-indigo-300 bg-indigo-950/80 border border-indigo-400/60 px-2 py-0.5 rounded-full text-[11px] shadow-xs whitespace-nowrap" title="${tooltip} - 적정">🟡 ${scoreStr}</span>`;
+                        } else if (score >= cutoffVal - 2) {
+                            return `<span class="inline-flex items-center justify-center gap-1 leading-none font-black text-amber-300 bg-amber-950/80 border border-amber-400/60 px-2 py-0.5 rounded-full text-[11px] shadow-xs whitespace-nowrap" title="${tooltip} - 소신">🟠 ${scoreStr}</span>`;
                         } else {
-                            return `<span class="inline-flex items-center justify-center gap-1 leading-none font-bold text-rose-300 bg-rose-950/80 border border-rose-500/60 px-2 py-0.5 rounded-full text-[11px] shadow-xs whitespace-nowrap" title="${tooltip} - 소신/주의">🔴 ${scoreStr}</span>`;
+                            return `<span class="inline-flex items-center justify-center gap-1 leading-none font-bold text-rose-300 bg-rose-950/80 border border-rose-500/60 px-2 py-0.5 rounded-full text-[11px] shadow-xs whitespace-nowrap" title="${tooltip} - 도전">🔴 ${scoreStr}</span>`;
                         }
                     }
                     return `<span class="text-slate-300 font-mono font-medium text-[11px] whitespace-nowrap">${scoreStr}</span>`;
