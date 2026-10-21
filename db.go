@@ -177,13 +177,22 @@ type ApplicationSummary struct {
 	AcceptedCount    int     `json:"acceptedCount"`
 	RejectedCount    int     `json:"rejectedCount"`
 	FinalCount       int     `json:"finalCount"`
-	MinAcceptedScore float64 `json:"minAcceptedScore"`
-	MaxAcceptedScore float64 `json:"maxAcceptedScore"`
-	AvgAcceptedScore float64 `json:"avgAcceptedScore"`
-	MaxRejectedScore float64 `json:"maxRejectedScore"`
-	MinExpectedScore float64 `json:"minExpectedScore"`
-	MaxExpectedScore float64 `json:"maxExpectedScore"`
-	AvgExpectedScore float64 `json:"avgExpectedScore"`
+	MinAcceptedScore    float64 `json:"minAcceptedScore"`
+	MaxAcceptedScore    float64 `json:"maxAcceptedScore"`
+	AvgAcceptedScore    float64 `json:"avgAcceptedScore"`
+	AcceptedMedian      float64 `json:"acceptedMedian"`
+	AcceptedQ1          float64 `json:"acceptedQ1"`
+	AcceptedQ3          float64 `json:"acceptedQ3"`
+	AcceptedStdDev      float64 `json:"acceptedStdDev"`
+	MinRejectedScore    float64 `json:"minRejectedScore"`
+	MaxRejectedScore    float64 `json:"maxRejectedScore"`
+	AvgRejectedScore    float64 `json:"avgRejectedScore"`
+	HasOverlap          bool    `json:"hasOverlap"`
+	OverlapMin          float64 `json:"overlapMin"`
+	OverlapMax          float64 `json:"overlapMax"`
+	MinExpectedScore    float64 `json:"minExpectedScore"`
+	MaxExpectedScore    float64 `json:"maxExpectedScore"`
+	AvgExpectedScore    float64 `json:"avgExpectedScore"`
 }
 
 // AdmissionClosure records that one admission year has been finalized by the
@@ -1821,6 +1830,9 @@ func (dm *DBManager) getApplicationSummaries(classNums []int) ([]ApplicationSumm
 		acceptedScoreCount int
 		expectedSum        float64
 		expectedCount      int
+		rejectedSum        float64
+		acceptedScores     []float64
+		rejectedScores     []float64
 		hasMin             bool
 		hasAcceptedMax     bool
 		hasRejectedMax     bool
@@ -1861,6 +1873,7 @@ func (dm *DBManager) getApplicationSummaries(classNums []int) ([]ApplicationSumm
 		if (r.Status == "합격" || r.Status == "최종 진학") && r.Score > 0 {
 			a.acceptedSum += r.Score
 			a.acceptedScoreCount++
+			a.acceptedScores = append(a.acceptedScores, r.Score)
 			if !a.hasMin || r.Score < a.MinAcceptedScore {
 				a.MinAcceptedScore, a.hasMin = r.Score, true
 			}
@@ -1868,8 +1881,12 @@ func (dm *DBManager) getApplicationSummaries(classNums []int) ([]ApplicationSumm
 				a.MaxAcceptedScore, a.hasAcceptedMax = r.Score, true
 			}
 		}
-		if r.Status == "불합격" && r.Score > 0 && (!a.hasRejectedMax || r.Score > a.MaxRejectedScore) {
-			a.MaxRejectedScore, a.hasRejectedMax = r.Score, true
+		if r.Status == "불합격" && r.Score > 0 {
+			a.rejectedSum += r.Score
+			a.rejectedScores = append(a.rejectedScores, r.Score)
+			if !a.hasRejectedMax || r.Score > a.MaxRejectedScore {
+				a.MaxRejectedScore, a.hasRejectedMax = r.Score, true
+			}
 		}
 	}
 	for _, classNum := range classNums {
@@ -1891,9 +1908,6 @@ func (dm *DBManager) getApplicationSummaries(classNums []int) ([]ApplicationSumm
 			if err := rows.Scan(&r.StudentNum, &r.StudentName, &r.AdmissionYear, &r.Category, &r.SchoolName, &r.Track, &r.Status, &r.Score, &r.ScoreBasis, &prefs, &r.AssignedDepartment, &r.AssignedSchool, &r.UpdatedAt); err == nil {
 				_ = json.Unmarshal([]byte(prefs), &r.Preferences)
 				if r.Category == "meister" || r.Category == "special" {
-					// 예정·지원 단계에서만 여러 지망을 각각 집계한다. 합격·불합격
-					// 결과는 실제 배정 학과 한 곳(미입력 시 학교 전체)에만 반영해
-					// 한 학생이 여러 학과 합격자로 중복 집계되는 것을 막는다.
 					if r.Status == "지원희망" || r.Status == "지원 희망" || r.Status == "지원예정" || r.Status == "지원 예정" || r.Status == "지원완료" || r.Status == "지원 완료" {
 						for i, department := range r.Preferences {
 							if department != "" {
@@ -1928,10 +1942,22 @@ func (dm *DBManager) getApplicationSummaries(classNums []int) ([]ApplicationSumm
 			continue
 		}
 		if a.acceptedScoreCount > 0 {
-			a.AvgAcceptedScore = a.acceptedSum / float64(a.acceptedScoreCount)
+			a.AvgAcceptedScore = round2(a.acceptedSum / float64(a.acceptedScoreCount))
+			a.AcceptedQ1, a.AcceptedMedian, a.AcceptedQ3 = CalculateQuartiles(a.acceptedScores)
+			a.AcceptedStdDev = CalculateStdDev(a.acceptedScores, a.AvgAcceptedScore)
 		}
 		if a.expectedCount > 0 {
-			a.AvgExpectedScore = a.expectedSum / float64(a.expectedCount)
+			a.AvgExpectedScore = round2(a.expectedSum / float64(a.expectedCount))
+		}
+		if len(a.rejectedScores) > 0 {
+			a.AvgRejectedScore = round2(a.rejectedSum / float64(len(a.rejectedScores)))
+			sort.Float64s(a.rejectedScores)
+			a.MinRejectedScore = round2(a.rejectedScores[0])
+		}
+		if a.acceptedScoreCount > 0 && len(a.rejectedScores) > 0 && a.MaxRejectedScore >= a.MinAcceptedScore {
+			a.HasOverlap = true
+			a.OverlapMin = a.MinAcceptedScore
+			a.OverlapMax = a.MaxRejectedScore
 		}
 		out = append(out, a.ApplicationSummary)
 	}
@@ -1954,6 +1980,16 @@ func (dm *DBManager) getApplicationSummaries(classNums []int) ([]ApplicationSumm
 		return out[i].Track < out[j].Track
 	})
 	return out, nil
+}
+
+// GetDepartmentAdmissionStats calculates granular cutoffs, percentiles, overlap ranges,
+// and distribution histograms for all departments and tracks across classes.
+func (dm *DBManager) GetDepartmentAdmissionStats(bucketStep float64) ([]DepartmentAdmissionStats, error) {
+	records, err := dm.GetSchoolApplicationRecords()
+	if err != nil {
+		return nil, err
+	}
+	return ComputeDepartmentAdmissionStats(records, bucketStep), nil
 }
 
 // ApplyApplicationCutoffs writes only result-derived, school-internal cutoff

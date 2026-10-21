@@ -180,7 +180,16 @@ export namespace main {
 	    minAcceptedScore: number;
 	    maxAcceptedScore: number;
 	    avgAcceptedScore: number;
+	    acceptedMedian: number;
+	    acceptedQ1: number;
+	    acceptedQ3: number;
+	    acceptedStdDev: number;
+	    minRejectedScore: number;
 	    maxRejectedScore: number;
+	    avgRejectedScore: number;
+	    hasOverlap: boolean;
+	    overlapMin: number;
+	    overlapMax: number;
 	    minExpectedScore: number;
 	    maxExpectedScore: number;
 	    avgExpectedScore: number;
@@ -205,7 +214,16 @@ export namespace main {
 	        this.minAcceptedScore = source["minAcceptedScore"];
 	        this.maxAcceptedScore = source["maxAcceptedScore"];
 	        this.avgAcceptedScore = source["avgAcceptedScore"];
+	        this.acceptedMedian = source["acceptedMedian"];
+	        this.acceptedQ1 = source["acceptedQ1"];
+	        this.acceptedQ3 = source["acceptedQ3"];
+	        this.acceptedStdDev = source["acceptedStdDev"];
+	        this.minRejectedScore = source["minRejectedScore"];
 	        this.maxRejectedScore = source["maxRejectedScore"];
+	        this.avgRejectedScore = source["avgRejectedScore"];
+	        this.hasOverlap = source["hasOverlap"];
+	        this.overlapMin = source["overlapMin"];
+	        this.overlapMax = source["overlapMax"];
 	        this.minExpectedScore = source["minExpectedScore"];
 	        this.maxExpectedScore = source["maxExpectedScore"];
 	        this.avgExpectedScore = source["avgExpectedScore"];
@@ -236,6 +254,108 @@ export namespace main {
 	        this.minValue = source["minValue"];
 	        this.avgValue = source["avgValue"];
 	    }
+	}
+	export class ScoreDistributionBucket {
+	    rangeLabel: string;
+	    minScore: number;
+	    maxScore: number;
+	    acceptedCount: number;
+	    rejectedCount: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new ScoreDistributionBucket(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.rangeLabel = source["rangeLabel"];
+	        this.minScore = source["minScore"];
+	        this.maxScore = source["maxScore"];
+	        this.acceptedCount = source["acceptedCount"];
+	        this.rejectedCount = source["rejectedCount"];
+	    }
+	}
+	export class DepartmentAdmissionStats {
+	    admissionYear: number;
+	    category: string;
+	    schoolName: string;
+	    track: string;
+	    department: string;
+	    preferenceRank: number;
+	    totalApplicants: number;
+	    plannedCount: number;
+	    submittedCount: number;
+	    acceptedCount: number;
+	    rejectedCount: number;
+	    finalCount: number;
+	    acceptedMin: number;
+	    acceptedMax: number;
+	    acceptedAvg: number;
+	    acceptedMedian: number;
+	    acceptedQ1: number;
+	    acceptedQ3: number;
+	    acceptedStdDev: number;
+	    rejectedMin: number;
+	    rejectedMax: number;
+	    rejectedAvg: number;
+	    rejectedMedian: number;
+	    hasOverlap: boolean;
+	    overlapMin: number;
+	    overlapMax: number;
+	    distribution?: ScoreDistributionBucket[];
+	
+	    static createFrom(source: any = {}) {
+	        return new DepartmentAdmissionStats(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.admissionYear = source["admissionYear"];
+	        this.category = source["category"];
+	        this.schoolName = source["schoolName"];
+	        this.track = source["track"];
+	        this.department = source["department"];
+	        this.preferenceRank = source["preferenceRank"];
+	        this.totalApplicants = source["totalApplicants"];
+	        this.plannedCount = source["plannedCount"];
+	        this.submittedCount = source["submittedCount"];
+	        this.acceptedCount = source["acceptedCount"];
+	        this.rejectedCount = source["rejectedCount"];
+	        this.finalCount = source["finalCount"];
+	        this.acceptedMin = source["acceptedMin"];
+	        this.acceptedMax = source["acceptedMax"];
+	        this.acceptedAvg = source["acceptedAvg"];
+	        this.acceptedMedian = source["acceptedMedian"];
+	        this.acceptedQ1 = source["acceptedQ1"];
+	        this.acceptedQ3 = source["acceptedQ3"];
+	        this.acceptedStdDev = source["acceptedStdDev"];
+	        this.rejectedMin = source["rejectedMin"];
+	        this.rejectedMax = source["rejectedMax"];
+	        this.rejectedAvg = source["rejectedAvg"];
+	        this.rejectedMedian = source["rejectedMedian"];
+	        this.hasOverlap = source["hasOverlap"];
+	        this.overlapMin = source["overlapMin"];
+	        this.overlapMax = source["overlapMax"];
+	        this.distribution = this.convertValues(source["distribution"], ScoreDistributionBucket);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
 	}
 	export class HighSchool {
 	    name: string;
@@ -558,6 +678,7 @@ export namespace main {
 	        this.admissionYear = source["admissionYear"];
 	    }
 	}
+	
 	export class SetupRequest {
 	    schoolName: string;
 	    classCount: number;

@@ -58,6 +58,8 @@ export function GetCutoffs():Promise<Array<main.CutoffInfo>>;
 
 export function GetDataUpdateStatus():Promise<Record<string, any>>;
 
+export function GetDepartmentAdmissionStats(arg1:number):Promise<Array<main.DepartmentAdmissionStats>>;
+
 export function GetHighSchoolsData():Promise<main.HighSchoolData>;
 
 export function GetLoginIndex():Promise<main.LoginIndex>;

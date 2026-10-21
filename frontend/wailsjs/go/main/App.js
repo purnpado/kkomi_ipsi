@@ -114,6 +114,10 @@ export function GetDataUpdateStatus() {
   return window['go']['main']['App']['GetDataUpdateStatus']();
 }
 
+export function GetDepartmentAdmissionStats(arg1) {
+  return window['go']['main']['App']['GetDepartmentAdmissionStats'](arg1);
+}
+
 export function GetHighSchoolsData() {
   return window['go']['main']['App']['GetHighSchoolsData']();
 }

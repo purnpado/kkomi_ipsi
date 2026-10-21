@@ -36,10 +36,68 @@ import {
     renderLoginScreen,
     renderPasswordChangeScreen
 } from './views/auth/authViews.js';
+import { eventBus, EVENTS } from './core/eventBus.js';
 
 // 화면 잠금 및 전역 ESC 핸들러 초기화
 ScreenLockManager.init();
 initGlobalEscapeHandler();
+
+// 중앙 이벤트 버스 구독 연결 (이벤트 기반 아키텍처)
+eventBus.on(EVENTS.NAVIGATE, (detail) => {
+    if (!detail) return;
+    const schoolName = detail.schoolName || '';
+    switch (detail.screen) {
+        case 'teacher':
+            renderTeacherScreen(schoolName, detail.classNum ?? null);
+            break;
+        case 'admin':
+            renderAdminScreen(schoolName);
+            break;
+        case 'login':
+            renderLoginScreen(schoolName);
+            break;
+        case 'mode-select':
+            renderModeSelectScreen(schoolName);
+            break;
+        case 'setup':
+            renderSetupScreen(detail.config ?? null);
+            break;
+    }
+});
+
+eventBus.on(EVENTS.OPEN_MODAL, (detail) => {
+    if (!detail) return;
+    switch (detail.modal) {
+        case 'matrix':
+            openMatrixModal(detail.classNum ?? null);
+            break;
+        case 'transcript':
+            openStudentTranscriptModal(detail.classNum, detail.studentNum, detail.name);
+            break;
+        case 'application':
+            openStudentApplicationModal(detail.classNum, detail.studentNum, detail.name, detail.preset ?? null);
+            break;
+        case 'student':
+            openStudentModal(detail.classNum, detail.studentNum, detail.name);
+            break;
+        case 'guide':
+            renderGuideModal(detail.role || 'homeroom');
+            break;
+        case 'register':
+            openApplicationRegisterModal();
+            break;
+        case 'class-summary':
+            openClassApplicationSummaryModal(detail.classNum);
+            break;
+        case 'application-summary':
+            openApplicationSummaryModal();
+            break;
+    }
+});
+
+eventBus.on(EVENTS.SCREEN_LOCK, () => {
+    ScreenLockManager.lockScreen('이벤트');
+});
 
 const app = document.querySelector('#app');
 

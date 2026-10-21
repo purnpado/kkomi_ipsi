@@ -1756,6 +1756,15 @@ func (a *App) GetClassApplicationSummaries(classNum int) ([]ApplicationSummary, 
 	return a.db.GetClassApplicationSummaries(classNum)
 }
 
+// GetDepartmentAdmissionStats returns granular cutoffs, percentiles, overlap ranges,
+// and histograms across all departments and tracks for career guidance.
+func (a *App) GetDepartmentAdmissionStats(bucketStep float64) ([]DepartmentAdmissionStats, error) {
+	if a.user == nil {
+		return nil, fmt.Errorf("로그인이 필요합니다")
+	}
+	return a.db.GetDepartmentAdmissionStats(bucketStep)
+}
+
 func (a *App) GetSchoolApplicationRecords() ([]ApplicationRecord, error) {
 	if a.user == nil {
 		return nil, fmt.Errorf("로그인이 필요합니다")
