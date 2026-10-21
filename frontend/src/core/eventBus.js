@@ -8,6 +8,7 @@ export const EVENTS = {
     // 모달 제어
     OPEN_MODAL: 'modal:open',
     CLOSE_MODAL: 'modal:close',
+    SHARED_ADMISSION: 'modal:shared-admission',
 
     // 인증 및 세션
     SCREEN_LOCK: 'auth:screen-lock',

@@ -66,6 +66,10 @@ export function ExportPasswordResetPackage(arg1, arg2) {
   return window['go']['main']['App']['ExportPasswordResetPackage'](arg1, arg2);
 }
 
+export function ExportSharedAdmissionPackage(arg1, arg2, arg3) {
+  return window['go']['main']['App']['ExportSharedAdmissionPackage'](arg1, arg2, arg3);
+}
+
 export function ExportTeacherPatch(arg1, arg2, arg3, arg4, arg5) {
   return window['go']['main']['App']['ExportTeacherPatch'](arg1, arg2, arg3, arg4, arg5);
 }
@@ -106,6 +110,10 @@ export function GetClassStatus(arg1) {
   return window['go']['main']['App']['GetClassStatus'](arg1);
 }
 
+export function GetConsolidatedAdmissionStats(arg1, arg2, arg3, arg4, arg5) {
+  return window['go']['main']['App']['GetConsolidatedAdmissionStats'](arg1, arg2, arg3, arg4, arg5);
+}
+
 export function GetCutoffs() {
   return window['go']['main']['App']['GetCutoffs']();
 }
@@ -128,6 +136,10 @@ export function GetLoginIndex() {
 
 export function GetOfficialAdmissionData() {
   return window['go']['main']['App']['GetOfficialAdmissionData']();
+}
+
+export function GetParticipatingSchools(arg1) {
+  return window['go']['main']['App']['GetParticipatingSchools'](arg1);
 }
 
 export function GetSchoolApplicationRecords() {
@@ -186,12 +198,20 @@ export function ImportPasswordResetPackage(arg1) {
   return window['go']['main']['App']['ImportPasswordResetPackage'](arg1);
 }
 
+export function ImportSharedAdmissionPackage(arg1, arg2) {
+  return window['go']['main']['App']['ImportSharedAdmissionPackage'](arg1, arg2);
+}
+
 export function ImportTeacherPatch(arg1, arg2) {
   return window['go']['main']['App']['ImportTeacherPatch'](arg1, arg2);
 }
 
 export function ImportTeacherPatchSelected(arg1, arg2, arg3) {
   return window['go']['main']['App']['ImportTeacherPatchSelected'](arg1, arg2, arg3);
+}
+
+export function InspectSharedAdmissionPackage(arg1, arg2) {
+  return window['go']['main']['App']['InspectSharedAdmissionPackage'](arg1, arg2);
 }
 
 export function InspectTeacherPatch(arg1, arg2) {
@@ -232,6 +252,10 @@ export function OpenMultipleExcelFiles(arg1) {
 
 export function OpenPasswordResetPackage() {
   return window['go']['main']['App']['OpenPasswordResetPackage']();
+}
+
+export function OpenSharedAdmissionPackageDialog() {
+  return window['go']['main']['App']['OpenSharedAdmissionPackageDialog']();
 }
 
 export function OpenTeacherPatch(arg1) {
@@ -312,6 +336,10 @@ export function SaveOfficialAdmissionData(arg1) {
 
 export function SavePasswordResetPackage(arg1) {
   return window['go']['main']['App']['SavePasswordResetPackage'](arg1);
+}
+
+export function SaveSharedAdmissionPackageDialog(arg1, arg2) {
+  return window['go']['main']['App']['SaveSharedAdmissionPackageDialog'](arg1, arg2);
 }
 
 export function SaveStudentApplication(arg1) {

@@ -2716,3 +2716,81 @@ func (a *App) DeleteStudentCounselingRecord(classNum int, id int64) error {
 	}
 	return a.db.DeleteStudentCounselingRecord(classNum, id, a.user.Username)
 }
+
+// ExportSharedAdmissionPackage 우리 학교의 익명 학생 점수 및 학과별 통계가 포함된 관내 공유 파일(.phgc) 내보내기
+func (a *App) ExportSharedAdmissionPackage(admissionYear int, password, outputPath string) error {
+	if a.user == nil || a.user.Role != "master" {
+		return fmt.Errorf("관내 공유 자료 내보내기는 학년부장만 가능합니다")
+	}
+	return a.db.ExportSharedPackageV2(admissionYear, password, outputPath)
+}
+
+// SaveSharedAdmissionPackageDialog 파일 저장 대화상자를 열어 관내 공유 파일(.phgc) 저장
+func (a *App) SaveSharedAdmissionPackageDialog(admissionYear int, password string) (string, error) {
+	if a.user == nil || a.user.Role != "master" {
+		return "", fmt.Errorf("관내 공유 자료 생성은 학년부장만 가능합니다")
+	}
+	config, err := a.db.GetSchoolConfig()
+	if err != nil || config == nil {
+		return "", fmt.Errorf("학교 설정을 먼저 완료해주세요")
+	}
+	if admissionYear <= 0 {
+		admissionYear = config.AdmissionYear
+	}
+	defaultName := fmt.Sprintf("%s_%d학년도_고입결과_공유.phgc", config.SchoolName, admissionYear)
+	path, err := runtime.SaveFileDialog(a.ctx, runtime.SaveDialogOptions{
+		Title:           "관내 공유용 고입 결과 자료 내보내기 (V2)",
+		DefaultFilename: defaultName,
+		Filters: []runtime.FileFilter{
+			{DisplayName: "PHGC 관내 공유 파일 (*.phgc)", Pattern: "*.phgc"},
+		},
+	})
+	if err != nil || path == "" {
+		return "", err
+	}
+	if err := a.db.ExportSharedPackageV2(admissionYear, password, path); err != nil {
+		return "", err
+	}
+	return path, nil
+}
+
+// OpenSharedAdmissionPackageDialog 파일 열기 대화상자로 관내 공유 파일 선택
+func (a *App) OpenSharedAdmissionPackageDialog() (string, error) {
+	if a.user == nil || a.user.Role != "master" {
+		return "", fmt.Errorf("관내 공유 자료 취합은 학년부장만 가능합니다")
+	}
+	path, err := runtime.OpenFileDialog(a.ctx, runtime.OpenDialogOptions{
+		Title: "관내 공유 고입 결과 자료 선택 (V1/V2)",
+		Filters: []runtime.FileFilter{
+			{DisplayName: "PHGC 관내 공유 파일 (*.phgc;*.json)", Pattern: "*.phgc;*.json"},
+		},
+	})
+	if err != nil || path == "" {
+		return "", err
+	}
+	return path, nil
+}
+
+// InspectSharedAdmissionPackage 공유 파일의 표지(학교명, 학년도, 학생수 등) 미리보기
+func (a *App) InspectSharedAdmissionPackage(password, inputPath string) (*SharedPackageCover, error) {
+	return InspectSharedPackage(password, inputPath)
+}
+
+// ImportSharedAdmissionPackage 선택된 관내 공유 파일을 복호화하여 통합 DB에 취합
+func (a *App) ImportSharedAdmissionPackage(password, inputPath string) (*SharedPackageImportResult, error) {
+	if a.user == nil || a.user.Role != "master" {
+		return nil, fmt.Errorf("관내 공유 자료 취합은 학년부장만 가능합니다")
+	}
+	return a.db.ImportSharedPackageV2(password, inputPath)
+}
+
+// GetParticipatingSchools 취합된 참여 중학교 목록 반환
+func (a *App) GetParticipatingSchools(admissionYear int) ([]SharedParticipatingSchool, error) {
+	return a.db.GetParticipatingSchools(admissionYear)
+}
+
+// GetConsolidatedAdmissionStats 취합된 관내 통합 점수 자료로부터 학과별 정밀 통계 산출
+func (a *App) GetConsolidatedAdmissionStats(admissionYear int, highSchool, department, track string, bucketStep float64) (*ConsolidatedStatsResult, error) {
+	return a.db.GetConsolidatedAdmissionStats(admissionYear, highSchool, department, track, bucketStep)
+}
+

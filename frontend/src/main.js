@@ -21,6 +21,7 @@ import {
     openClassApplicationSummaryModal,
     openApplicationSummaryModal
 } from './modals/applicationSummaryModal.js';
+import { openSharedAdmissionModal } from './modals/sharedAdmissionModal.js';
 import {
     renderFirstRunScreen,
     renderSetupScreen,
@@ -92,8 +93,16 @@ eventBus.on(EVENTS.OPEN_MODAL, (detail) => {
         case 'application-summary':
             openApplicationSummaryModal();
             break;
+        case 'shared-admission':
+            openSharedAdmissionModal();
+            break;
     }
 });
+
+eventBus.on(EVENTS.SHARED_ADMISSION, () => {
+    openSharedAdmissionModal();
+});
+window.openSharedAdmissionModal = openSharedAdmissionModal;
 
 eventBus.on(EVENTS.SCREEN_LOCK, () => {
     ScreenLockManager.lockScreen('이벤트');
@@ -421,6 +430,7 @@ async function renderAdminScreen(schoolName) {
     document.getElementById('openAdminMatrixBtn')?.addEventListener('click', () => openMatrixModal(null));
     document.getElementById('openAdminSchoolStatsBtn')?.addEventListener('click', openApplicationSummaryModal);
     document.getElementById('openAdminRegisterBtn')?.addEventListener('click', openApplicationRegisterModal);
+    document.getElementById('openSharedAdmissionBtn')?.addEventListener('click', openSharedAdmissionModal);
 
     document.getElementById('finalArchiveBtn')?.addEventListener('click', async () => {
         const password = await showModalPrompt({

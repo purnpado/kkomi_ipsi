@@ -566,7 +566,7 @@ func normalizeCutoffSchool(name string) string {
 	if strings.HasPrefix(s, "울산에너지") {
 		return "울산에너지고"
 	}
-	if strings.HasPrefix(s, "현대공업") {
+	if strings.HasPrefix(s, "현대공업") || strings.HasPrefix(s, "현대공고") {
 		return "현대공업고"
 	}
 	if strings.HasPrefix(s, "울산공업") {

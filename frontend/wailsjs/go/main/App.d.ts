@@ -34,6 +34,8 @@ export function ExportJointShareData(arg1:number):Promise<string>;
 
 export function ExportPasswordResetPackage(arg1:string,arg2:string):Promise<void>;
 
+export function ExportSharedAdmissionPackage(arg1:number,arg2:string,arg3:string):Promise<void>;
+
 export function ExportTeacherPatch(arg1:string,arg2:string,arg3:number,arg4:Array<main.PatchChange>,arg5:string):Promise<void>;
 
 export function GetAdmissionClosure(arg1:number):Promise<main.AdmissionClosure>;
@@ -54,6 +56,8 @@ export function GetClassGrades(arg1:number):Promise<Array<main.StudentCalcResult
 
 export function GetClassStatus(arg1:number):Promise<Record<number, number>>;
 
+export function GetConsolidatedAdmissionStats(arg1:number,arg2:string,arg3:string,arg4:string,arg5:number):Promise<main.ConsolidatedStatsResult>;
+
 export function GetCutoffs():Promise<Array<main.CutoffInfo>>;
 
 export function GetDataUpdateStatus():Promise<Record<string, any>>;
@@ -65,6 +69,8 @@ export function GetHighSchoolsData():Promise<main.HighSchoolData>;
 export function GetLoginIndex():Promise<main.LoginIndex>;
 
 export function GetOfficialAdmissionData():Promise<main.OfficialAdmissionData>;
+
+export function GetParticipatingSchools(arg1:number):Promise<Array<main.SharedParticipatingSchool>>;
 
 export function GetSchoolApplicationRecords():Promise<Array<main.ApplicationRecord>>;
 
@@ -94,9 +100,13 @@ export function ImportJointShareData(arg1:number):Promise<Record<string, number>
 
 export function ImportPasswordResetPackage(arg1:string):Promise<string>;
 
+export function ImportSharedAdmissionPackage(arg1:string,arg2:string):Promise<main.SharedPackageImportResult>;
+
 export function ImportTeacherPatch(arg1:string,arg2:string):Promise<number>;
 
 export function ImportTeacherPatchSelected(arg1:string,arg2:string,arg3:Array<main.PatchMergeSelection>):Promise<number>;
+
+export function InspectSharedAdmissionPackage(arg1:string,arg2:string):Promise<main.SharedPackageCover>;
 
 export function InspectTeacherPatch(arg1:string,arg2:string):Promise<main.PatchPreview>;
 
@@ -117,6 +127,8 @@ export function OpenFinalArchive():Promise<string>;
 export function OpenMultipleExcelFiles(arg1:string):Promise<Array<string>>;
 
 export function OpenPasswordResetPackage():Promise<string>;
+
+export function OpenSharedAdmissionPackageDialog():Promise<string>;
 
 export function OpenTeacherPatch(arg1:string):Promise<Record<string, number>>;
 
@@ -157,6 +169,8 @@ export function SaveFinalArchive(arg1:string):Promise<string>;
 export function SaveOfficialAdmissionData(arg1:Array<Record<string, any>>):Promise<void>;
 
 export function SavePasswordResetPackage(arg1:string):Promise<string>;
+
+export function SaveSharedAdmissionPackageDialog(arg1:number,arg2:string):Promise<string>;
 
 export function SaveStudentApplication(arg1:main.ApplicationRecord):Promise<void>;
 

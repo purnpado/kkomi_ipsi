@@ -229,6 +229,134 @@ export namespace main {
 	        this.avgExpectedScore = source["avgExpectedScore"];
 	    }
 	}
+	export class SharedScoreHistogramBucket {
+	    minScore: number;
+	    maxScore: number;
+	    acceptedCount: number;
+	    rejectedCount: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new SharedScoreHistogramBucket(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.minScore = source["minScore"];
+	        this.maxScore = source["maxScore"];
+	        this.acceptedCount = source["acceptedCount"];
+	        this.rejectedCount = source["rejectedCount"];
+	    }
+	}
+	export class SharedDepartmentHistogram {
+	    highSchool: string;
+	    department: string;
+	    track: string;
+	    scoreType: string;
+	    step: number;
+	    buckets: SharedScoreHistogramBucket[];
+	
+	    static createFrom(source: any = {}) {
+	        return new SharedDepartmentHistogram(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.highSchool = source["highSchool"];
+	        this.department = source["department"];
+	        this.track = source["track"];
+	        this.scoreType = source["scoreType"];
+	        this.step = source["step"];
+	        this.buckets = this.convertValues(source["buckets"], SharedScoreHistogramBucket);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class ConsolidatedStatsResult {
+	    admissionYear: number;
+	    highSchool: string;
+	    department: string;
+	    track: string;
+	    totalParticipatingSchool: number;
+	    totalApplicants: number;
+	    acceptedCount: number;
+	    acceptedMin: number;
+	    acceptedMax: number;
+	    acceptedAvg: number;
+	    acceptedMedian: number;
+	    acceptedQ1: number;
+	    acceptedQ3: number;
+	    acceptedStdDev: number;
+	    rejectedCount: number;
+	    rejectedMax: number;
+	    rejectedAvg: number;
+	    hasOverlap: boolean;
+	    overlapMin: number;
+	    overlapMax: number;
+	    histogram: SharedDepartmentHistogram;
+	
+	    static createFrom(source: any = {}) {
+	        return new ConsolidatedStatsResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.admissionYear = source["admissionYear"];
+	        this.highSchool = source["highSchool"];
+	        this.department = source["department"];
+	        this.track = source["track"];
+	        this.totalParticipatingSchool = source["totalParticipatingSchool"];
+	        this.totalApplicants = source["totalApplicants"];
+	        this.acceptedCount = source["acceptedCount"];
+	        this.acceptedMin = source["acceptedMin"];
+	        this.acceptedMax = source["acceptedMax"];
+	        this.acceptedAvg = source["acceptedAvg"];
+	        this.acceptedMedian = source["acceptedMedian"];
+	        this.acceptedQ1 = source["acceptedQ1"];
+	        this.acceptedQ3 = source["acceptedQ3"];
+	        this.acceptedStdDev = source["acceptedStdDev"];
+	        this.rejectedCount = source["rejectedCount"];
+	        this.rejectedMax = source["rejectedMax"];
+	        this.rejectedAvg = source["rejectedAvg"];
+	        this.hasOverlap = source["hasOverlap"];
+	        this.overlapMin = source["overlapMin"];
+	        this.overlapMax = source["overlapMax"];
+	        this.histogram = this.convertValues(source["histogram"], SharedDepartmentHistogram);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
 	export class CutoffInfo {
 	    year: number;
 	    schoolName: string;
@@ -701,6 +829,114 @@ export namespace main {
 	        this.admissionYear = source["admissionYear"];
 	    }
 	}
+	
+	export class SharedPackageCover {
+	    schoolName: string;
+	    admissionYear: number;
+	    // Go type: time
+	    createdAt: any;
+	    appVersion: string;
+	    formatVersion: number;
+	    recordCount: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new SharedPackageCover(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.schoolName = source["schoolName"];
+	        this.admissionYear = source["admissionYear"];
+	        this.createdAt = this.convertValues(source["createdAt"], null);
+	        this.appVersion = source["appVersion"];
+	        this.formatVersion = source["formatVersion"];
+	        this.recordCount = source["recordCount"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class SharedPackageImportResult {
+	    schoolName: string;
+	    admissionYear: number;
+	    formatVersion: number;
+	    recordCount: number;
+	    isReplaced: boolean;
+	    totalParticipatingSchool: number;
+	    totalAnonymousRecords: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new SharedPackageImportResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.schoolName = source["schoolName"];
+	        this.admissionYear = source["admissionYear"];
+	        this.formatVersion = source["formatVersion"];
+	        this.recordCount = source["recordCount"];
+	        this.isReplaced = source["isReplaced"];
+	        this.totalParticipatingSchool = source["totalParticipatingSchool"];
+	        this.totalAnonymousRecords = source["totalAnonymousRecords"];
+	    }
+	}
+	export class SharedParticipatingSchool {
+	    id: number;
+	    schoolName: string;
+	    admissionYear: number;
+	    formatVersion: number;
+	    recordCount: number;
+	    // Go type: time
+	    importedAt: any;
+	
+	    static createFrom(source: any = {}) {
+	        return new SharedParticipatingSchool(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.schoolName = source["schoolName"];
+	        this.admissionYear = source["admissionYear"];
+	        this.formatVersion = source["formatVersion"];
+	        this.recordCount = source["recordCount"];
+	        this.importedAt = this.convertValues(source["importedAt"], null);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	
 	export class StudentCalcResult {
 	    ClassNum: number;
 	    StudentNum: string;
