@@ -107,7 +107,7 @@ wails build -trimpath -ldflags "-s -w"
 .\publish.ps1 -Version "1.6.0" -Notes "릴리즈 노트"
 ```
 
-빌드 결과는 `build/bin/꼬미입시.exe`입니다.
+현재 `wails.json`은 `build/bin/꼬미입시.exe`를 만들도록 설정되어 있습니다. 다만 공식 릴리즈·자동 업데이트·배포 안내는 기존 호환성을 위해 `PHGC.exe`를 기준으로 하므로, 정식 릴리즈 전에는 `wails.json`과 `publish.ps1`의 파일명 정책을 통일한 뒤 빌드 결과를 확인해야 합니다.
 
 ## 책임 고지
 

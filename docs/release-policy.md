@@ -9,6 +9,8 @@ GitHub와 Gitea의 동일 태그 릴리즈에는 다음 두 파일만 첨부합�
 
 자동 업데이트는 GitHub Releases의 `PHGC.exe`를 기준으로 안내합니다. `server-data/version.json`의 버전·다운로드 주소는 릴리즈 태그와 일치해야 합니다.
 
+> 릴리즈 전 확인: 현재 Wails 출력 설정은 `꼬미입시.exe`, 배포 스크립트·업데이트 URL은 `PHGC.exe`를 기준으로 한다. 승인된 파일명 정책으로 `wails.json`, `publish.ps1`, `sync.go`, `server-data/version.json`을 함께 맞추기 전에는 릴리즈하지 않는다.
+
 ## 절대 포함하지 않는 자료
 
 - `docs/`의 기획·개발 문서
