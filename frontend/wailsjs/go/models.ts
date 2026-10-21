@@ -46,6 +46,44 @@ export namespace main {
 	        this.finalCount = source["finalCount"];
 	    }
 	}
+	export class ApplicationScoreDetails {
+	    percentile: number;
+	    allAverage: number;
+	    academicScore: number;
+	    academicMax: number;
+	    nonAcademicScore: number;
+	    nonAcademicMax: number;
+	    attendanceScore: number;
+	    attendanceMax: number;
+	    volunteerScore: number;
+	    volunteerMax: number;
+	    extraScore: number;
+	    totalScore: number;
+	    totalMax: number;
+	    formulaVersion: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new ApplicationScoreDetails(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.percentile = source["percentile"];
+	        this.allAverage = source["allAverage"];
+	        this.academicScore = source["academicScore"];
+	        this.academicMax = source["academicMax"];
+	        this.nonAcademicScore = source["nonAcademicScore"];
+	        this.nonAcademicMax = source["nonAcademicMax"];
+	        this.attendanceScore = source["attendanceScore"];
+	        this.attendanceMax = source["attendanceMax"];
+	        this.volunteerScore = source["volunteerScore"];
+	        this.volunteerMax = source["volunteerMax"];
+	        this.extraScore = source["extraScore"];
+	        this.totalScore = source["totalScore"];
+	        this.totalMax = source["totalMax"];
+	        this.formulaVersion = source["formulaVersion"];
+	    }
+	}
 	export class ApplicationRecord {
 	    id: number;
 	    classNum: number;
@@ -61,6 +99,7 @@ export namespace main {
 	    preferences: string[];
 	    assignedDepartment: string;
 	    assignedSchool: string;
+	    scoreDetails?: ApplicationScoreDetails;
 	    updatedAt: string;
 	
 	    static createFrom(source: any = {}) {
@@ -83,9 +122,29 @@ export namespace main {
 	        this.preferences = source["preferences"];
 	        this.assignedDepartment = source["assignedDepartment"];
 	        this.assignedSchool = source["assignedSchool"];
+	        this.scoreDetails = this.convertValues(source["scoreDetails"], ApplicationScoreDetails);
 	        this.updatedAt = source["updatedAt"];
 	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
 	}
+	
 	export class ApplicationScoreSnapshot {
 	    score: number;
 	    totalMax: number;
