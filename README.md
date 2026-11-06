@@ -109,6 +109,10 @@ wails build -trimpath -ldflags "-s -w"
 
 현재 `wails.json`은 `build/bin/꼬미입시.exe`를 만들도록 설정되어 있습니다. 다만 공식 릴리즈·자동 업데이트·배포 안내는 기존 호환성을 위해 `PHGC.exe`를 기준으로 하므로, 정식 릴리즈 전에는 `wails.json`과 `publish.ps1`의 파일명 정책을 통일한 뒤 빌드 결과를 확인해야 합니다.
 
+### MacBook에서 개발 이어가기
+
+MacBook에서는 Xcode Command Line Tools, Go, Node.js/npm, Wails CLI를 설치한 뒤 위의 Gitea 복제·테스트 명령을 그대로 실행합니다. Windows 전용 WebView2는 필요하지 않습니다. `wails dev`와 `wails build` 결과는 macOS 개발 검증용이며, 학교 배포용 `PHGC.exe`를 만들거나 기존 Windows 자료를 전환하는 용도로 사용하지 않습니다.
+
 ## 책임 고지
 
 프로그램의 산출값·커트라인·합격 예측은 진학상담 보조용입니다. 실제 전형 결과는 경쟁률, 면접·실기, 당해 연도 요강 등에 따라 달라질 수 있으므로 최종 원서 업무는 공식 전형요강과 학교의 검증 절차에 따라 처리해야 합니다.

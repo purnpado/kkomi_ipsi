@@ -1,13 +1,13 @@
 # 꼬미입시(PHGC) 작업 인수인계
 
-최종 갱신 기준: 2026-10-21
+최종 갱신 기준: 2026-11-06
 
 ## 한눈에 보는 현재 상태
 
 - 서비스명: **꼬미입시**
 - 기존 기술명: `PHGC`
 - 최신 안정 릴리즈: `v1.6.2`
-- 최신 소스 커밋: `c2076bf feat(analysis): 고입 결과 정밀 분석 모달 및 4단계 판정 시각화 연동`
+- 최신 소스 커밋: `e72b8be 분석: 원서 스냅샷 출처와 학년도 분리 보강`
 - 원본 Gitea: `https://gitea.gguk.link/purnpadosori/PHGC-OFFLINE.git`
 - GitHub 백업: `https://github.com/purnpado/PHGC`
 - 실행 파일 정책: 현재 릴리즈·업데이트는 `PHGC.exe`를 기준으로 하나, `wails.json`은 `꼬미입시.exe`를 출력하도록 설정되어 있어 **릴리즈 전 반드시 통일해야 함**
@@ -18,7 +18,25 @@
 - Wails 창 제목, 로그인 화면, 사용 설명서, HTML 제목을 꼬미입시로 바꿨습니다.
 - README, 빌드 안내, 기준 데이터 안내, 릴리즈 정책, 설계 문서를 갱신했습니다.
 - 다른 에이전트가 이어서 작업할 수 있도록 루트 `agents.md`와 이 문서를 추가했습니다.
-- `go test ./...`와 `frontend` 프로덕션 빌드는 2026-10-21 기준 통과했습니다. Wails 빌드와 `publish.ps1`은 실행 파일명 충돌을 해소한 뒤 다시 검증합니다.
+- `go test ./...`와 `frontend` 프로덕션 빌드는 `e72b8be` 기준으로 통과했습니다. Wails 빌드와 `publish.ps1`은 실행 파일명 충돌을 해소한 뒤 다시 검증합니다.
+
+## macOS(MacBook) 작업 시작
+
+macOS에서는 소스·합성 테스트·프론트엔드 작업을 이어갈 수 있습니다. Xcode Command Line Tools, Go, Node.js/npm, Wails CLI를 준비한 뒤 아래 순서로 확인합니다. WebView2는 Windows 전용이므로 설치하지 않습니다.
+
+```bash
+git clone https://gitea.gguk.link/purnpadosori/PHGC-OFFLINE.git
+cd PHGC-OFFLINE
+git status -sb
+git log -5 --oneline
+go test ./...
+cd frontend && npm install && npm run build && cd ..
+wails dev
+```
+
+- macOS에서는 실제 학교 `data/`, 나이스 원본, 암호화 배포·취합 파일을 사용하지 않습니다.
+- macOS 빌드 결과는 개발 검증용이며, Windows 배포 파일 `PHGC.exe` 및 정식 릴리즈를 대체하지 않습니다.
+- 작업 완료 뒤 `go test ./...`, `npm run build`, `git status -sb`를 다시 확인하고 Gitea `main`에 먼저 푸시합니다.
 
 ## 사용자 운영 흐름
 
