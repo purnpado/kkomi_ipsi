@@ -1,0 +1,275 @@
+package exchange
+
+import (
+	"archive/zip"
+	"encoding/hex"
+	"encoding/json"
+	"fmt"
+	"os"
+	"path/filepath"
+	"strings"
+
+	"PHGC/internal/crypto"
+	"PHGC/internal/database"
+	"PHGC/internal/model"
+	"golang.org/x/crypto/bcrypt"
+)
+
+// DistributionPackageManifest identifies a teacher/viewer deployment package.
+// The ZIP contains only individually AES-GCM encrypted database files and an
+// encrypted shared-key envelope; it never contains a plaintext password.
+type DistributionPackageManifest struct {
+	Format   string   `json:"format"`
+	Username string   `json:"username"`
+	Role     string   `json:"role"`
+	ClassNum int      `json:"classNum"`
+	Files    []string `json:"files"`
+}
+
+// ExportDistributionPackage writes only the intended teacher's class DB (or
+// all class DBs for the read-only career viewer). Administrator envelopes and
+// other staff accounts are omitted.
+func ExportDistributionPackage(dm *database.DBManager, dataKey []byte, username, outputPath string) error {
+	if len(dataKey) != 32 {
+		return fmt.Errorf("학년부장으로 로그인한 뒤에만 배포 자료를 만들 수 있습니다")
+	}
+	users, err := dm.GetUsers()
+	if err != nil {
+		return err
+	}
+	var target *database.User
+	for i := range users {
+		if users[i].Username == username {
+			target = &users[i]
+			break
+		}
+	}
+	if target == nil || target.Role == "master" {
+		return fmt.Errorf("담임 또는 진로부장 계정을 선택해주세요")
+	}
+	config, err := dm.GetSchoolConfig()
+	if err != nil || config == nil {
+		if err != nil {
+			return err
+		}
+		return fmt.Errorf("학교 초기 설정을 먼저 완료해주세요")
+	}
+	// Older installations may predate the revision manifest. Create it before
+	// packaging so a recipient can later export a compatible teacher patch.
+	if _, err := os.Stat(crypto.ManifestPath(dm.DataDir)); os.IsNotExist(err) {
+		packageID, keyErr := crypto.NewDataKey()
+		if keyErr != nil {
+			return keyErr
+		}
+		manifestBytes, marshalErr := json.Marshal(model.DataManifest{
+			Format: "KKOMI-DATA-1", PackageID: hex.EncodeToString(packageID), AdmissionYear: config.AdmissionYear,
+		})
+		if marshalErr != nil {
+			return marshalErr
+		}
+		if writeErr := crypto.WritePrivateFileAtomically(crypto.ManifestPath(dm.DataDir), manifestBytes); writeErr != nil {
+			return writeErr
+		}
+	} else if err != nil {
+		return err
+	}
+	tmpDir, err := os.MkdirTemp("", "kkomi-package-*")
+	if err != nil {
+		return err
+	}
+	defer os.RemoveAll(tmpDir)
+	keyPassword := hex.EncodeToString(dataKey)
+	files := []string{"config.db.kkomi", "shared-key.json", "manifest.json", "login-index.json"}
+
+	// 배포 패키지 생성 직전 최신 전교생 석차 스냅샷을 갱신하여 config.db에 보관
+	_ = dm.UpdateSchoolRankSnapshots()
+
+	// Create a temporary config snapshot that contains only the target account.
+	configCopy := filepath.Join(tmpDir, "config.db")
+	if err := snapshotDatabase(dm, dm.GetConfigDBPath(), configCopy); err != nil {
+		return err
+	}
+	copyDB, err := dm.OpenDB(configCopy)
+	if err != nil {
+		return err
+	}
+	_, err = copyDB.Exec("DELETE FROM users WHERE username <> ?", target.Username)
+	if err == nil {
+		_, err = copyDB.Exec("UPDATE school_config SET admin_password = '' WHERE id = 1")
+	}
+	// 담임교사 배포 패키지인 경우: 타 학급의 학생 개인정보를 완벽히 보호하기 위해 해당 학급의 전교 석차 스냅샷만 남기고 삭제
+	if err == nil && target.Role == "homeroom" {
+		_, err = copyDB.Exec("DELETE FROM school_rank_snapshots WHERE class_num <> ?", target.ClassNum)
+	}
+	// 만약 target의 비밀번호가 설정되어 있지 않다면 기본 비밀번호(계정 아이디)를 설정하고, 이미 있어도 새 패키지에서는 must_change_password 활성화
+	if err == nil {
+		if target.PasswordHash == "" {
+			defaultHash, _ := bcrypt.GenerateFromPassword([]byte(target.Username), bcrypt.DefaultCost)
+			_, err = copyDB.Exec("UPDATE users SET password_hash = ?, must_change_password = 1 WHERE username = ?", string(defaultHash), target.Username)
+		} else {
+			_, err = copyDB.Exec("UPDATE users SET must_change_password = 1 WHERE username = ?", target.Username)
+		}
+	}
+	// WAL 변경사항을 본체 DB 파일로 완벽하게 체크포인트하고 저널 모드를 DELETE로 정리
+	if err == nil {
+		_, _ = copyDB.Exec("PRAGMA wal_checkpoint(TRUNCATE); PRAGMA journal_mode=DELETE")
+	}
+	copyDB.Close()
+	if err != nil {
+		return fmt.Errorf("배포용 계정 정보 준비 실패: %w", err)
+	}
+	if err := crypto.EncryptFileGCM(keyPassword, configCopy, filepath.Join(tmpDir, "config.db.kkomi")); err != nil {
+		return err
+	}
+
+	if err := copyPackageFile(crypto.SharedEnvelopePath(dm.DataDir), filepath.Join(tmpDir, "shared-key.json")); err != nil {
+		return err
+	}
+	if err := copyPackageFile(crypto.ManifestPath(dm.DataDir), filepath.Join(tmpDir, "manifest.json")); err != nil {
+		return err
+	}
+	if err := database.SaveLoginIndex(tmpDir, config.SchoolName, []database.User{*target}); err != nil {
+		return err
+	}
+
+	classNumbers := []int{}
+	if target.Role == "homeroom" {
+		classNumbers = append(classNumbers, target.ClassNum)
+	} else {
+		for classNum := 1; classNum <= config.ClassCount; classNum++ {
+			classNumbers = append(classNumbers, classNum)
+		}
+	}
+	for _, classNum := range classNumbers {
+		source := dm.GetClassDBPath(classNum)
+		if _, err := os.Stat(source); os.IsNotExist(err) {
+			continue
+		} else if err != nil {
+			return err
+		}
+		name := fmt.Sprintf("class_%d.db.kkomi", classNum)
+		if err := snapshotAndEncryptDatabase(dm, source, filepath.Join(tmpDir, name), keyPassword); err != nil {
+			return err
+		}
+		files = append(files, name)
+	}
+	// 고교·학과 목록은 개인정보가 아닌 공용 참고자료지만, 담임의 새
+	// 프로그램 폴더에서도 지원현황 입력을 바로 할 수 있도록 함께 전달한다.
+	highSchools := filepath.Join(dm.DataDir, "highschools.json")
+	if info, statErr := os.Stat(highSchools); statErr == nil && !info.IsDir() {
+		if err := copyPackageFile(highSchools, filepath.Join(tmpDir, "highschools.json")); err != nil {
+			return err
+		}
+		files = append(files, "highschools.json")
+	}
+	manifest := DistributionPackageManifest{Format: "KKOMI-DEPLOYMENT-1", Username: target.Username, Role: target.Role, ClassNum: target.ClassNum, Files: files}
+	manifestJSON, err := json.Marshal(manifest)
+	if err != nil {
+		return err
+	}
+	if err := os.WriteFile(filepath.Join(tmpDir, "package.json"), manifestJSON, 0600); err != nil {
+		return err
+	}
+	files = append([]string{"package.json"}, files...)
+	return writeDistributionZip(outputPath, tmpDir, files)
+}
+
+func ImportDistributionPackage(dm *database.DBManager, inputPath string) (string, error) {
+	reader, err := zip.OpenReader(inputPath)
+	if err != nil {
+		return "", fmt.Errorf("배포 자료를 열 수 없습니다: %w", err)
+	}
+	defer reader.Close()
+	entries := map[string]*zip.File{}
+	for _, file := range reader.File {
+		if filepath.Base(file.Name) != file.Name || strings.Contains(file.Name, "..") {
+			return "", fmt.Errorf("허용되지 않은 배포 파일 경로입니다")
+		}
+		entries[file.Name] = file
+	}
+	pkgFile := entries["package.json"]
+	if pkgFile == nil {
+		return "", fmt.Errorf("배포 자료 정보가 없습니다")
+	}
+	pkgBytes, err := readZipEntry(pkgFile)
+	if err != nil {
+		return "", err
+	}
+	var manifest DistributionPackageManifest
+	if err := json.Unmarshal(pkgBytes, &manifest); err != nil {
+		return "", fmt.Errorf("배포 자료 정보가 올바르지 않습니다")
+	}
+	if (manifest.Format != "KKOMI-DEPLOYMENT-1" && manifest.Format != "PHGC-DEPLOYMENT-1") || manifest.Username == "" || (manifest.Role != "homeroom" && manifest.Role != "viewer") {
+		return "", fmt.Errorf("지원하지 않는 배포 자료입니다")
+	}
+
+	// 안전장치: 현재 프로그램이 학년부장(master) 원본 관리자 데이터인 경우 실수로 덮어쓰는 것 방지
+	if dm.HasEncryptedConfigDB() || database.HasSchoolConfigTable(dm.GetConfigDBPath()) {
+		users, _ := dm.GetUsers()
+		for _, u := range users {
+			if u.Role == "master" {
+				return "", fmt.Errorf("현재 프로그램은 학년부장 원본 데이터가 보관된 폴더입니다. 학년부장 자료는 담임 배포 패키지로 덮어쓸 수 없습니다. 담임 교사용 폴더에서 실행해주세요")
+			}
+		}
+	}
+
+	// 1. 기존 학급 데이터(상담 일지, 진학 희망학교, 수기 출결/봉사 등) 사전 보존 및 백업
+	preservedDataMap := make(map[string]preservedClassData)
+	existingClassDBs, _ := filepath.Glob(filepath.Join(dm.DataDir, "class_*.db"))
+	for _, dbPath := range existingClassDBs {
+		baseName := filepath.Base(dbPath)
+		pData, pErr := extractPreservedClassData(dm, dbPath)
+		if pErr == nil && (len(pData.Apps) > 0 || len(pData.Counsels) > 0 || len(pData.Overrides) > 0) {
+			preservedDataMap[baseName] = pData
+		}
+	}
+
+	// 만약의 사태를 대비해 기존 data 폴더를 backup_before_pkg_import 폴더에 안전 복사
+	if len(existingClassDBs) > 0 {
+		backupDir := filepath.Join(dm.DataDir, "backup_before_pkg_import")
+		_ = os.MkdirAll(backupDir, 0700)
+		for _, f := range existingClassDBs {
+			_ = copyPackageFile(f, filepath.Join(backupDir, filepath.Base(f)))
+		}
+	}
+
+	// 기존 평문 DB 파일들 및 이전 캐시 정리 (새 배포 패키지로 갱신 준비)
+	cleanFiles, _ := filepath.Glob(filepath.Join(dm.DataDir, "*.db*"))
+	for _, f := range cleanFiles {
+		_ = os.Remove(f)
+	}
+	cleanEnvelopes, _ := filepath.Glob(filepath.Join(dm.DataDir, "*-key.json"))
+	for _, f := range cleanEnvelopes {
+		if filepath.Base(f) != "shared-key.json" {
+			_ = os.Remove(f)
+		}
+	}
+
+	// 2. 새 배포 패키지 파일 추출 및 저장
+	for _, name := range manifest.Files {
+		file := entries[name]
+		if file == nil {
+			return "", fmt.Errorf("배포 자료에 %s 파일이 없습니다", name)
+		}
+		data, err := readZipEntry(file)
+		if err != nil {
+			return "", err
+		}
+		if err := crypto.WritePrivateFileAtomically(filepath.Join(dm.DataDir, name), data); err != nil {
+			return "", err
+		}
+	}
+
+	// 3. 기존에 보존해 둔 담임의 상담 일지 및 진학 희망학교 데이터가 있다면 새 DB에 안전하게 자동 병합 복원
+	for baseName, pData := range preservedDataMap {
+		newDBPath := filepath.Join(dm.DataDir, baseName)
+		if _, err := os.Stat(newDBPath); err == nil {
+			_ = restorePreservedClassData(dm, newDBPath, pData)
+		}
+	}
+
+	// 4. 누락된 원서 점수 스냅샷 자동 역산 보완 (Self-healing)
+	_, _ = dm.BackfillAllApplicationsScoreDetails()
+
+	return manifest.Username, nil
+}

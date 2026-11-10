@@ -42,7 +42,7 @@ Write-Host ">>> 릴리즈 노트: $Notes" -ForegroundColor Yellow
 Write-Host ">>> 배포 대상: https://github.com/$ghOwner/$ghRepo/releases" -ForegroundColor Magenta
 Write-Host "==========================================" -ForegroundColor Cyan
 
-# ===== 1. version.json 및 sync.go 버전 업데이트 =====
+# ===== 1. version.json 및 internal/sync/manager.go 버전 업데이트 =====
 $versionFile = "server-data/version.json"
 if (Test-Path $versionFile) {
     $json = Get-Content $versionFile -Raw -Encoding UTF8 | ConvertFrom-Json
@@ -54,7 +54,7 @@ if (Test-Path $versionFile) {
     [System.IO.File]::WriteAllText((Resolve-Path $versionFile), $jsonString, $utf8NoBom)
 }
 
-$syncFile = "sync.go"
+$syncFile = "internal/sync/manager.go"
 if (Test-Path $syncFile) {
     $syncContent = Get-Content $syncFile -Raw -Encoding UTF8
     $syncContent = $syncContent -replace 'AppVersion = "[^"]+"', "AppVersion = `"$newVer`""

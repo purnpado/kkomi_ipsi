@@ -49,13 +49,13 @@ wails dev
 - 2026-10-21 운영 결정: 올해는 `꼬미입시.exe` 후보 빌드와 실제 데이터 **복제본** 검증을 먼저 완료하고, 확인된 참여 학교를 모두 꼬미입시로 전환한 뒤 정식 릴리즈합니다.
 - 전환 전에는 기존 `PHGC.exe`와 `data` 폴더를 삭제하지 않습니다. 같은 프로그램 폴더에 `꼬미입시.exe`를 추가해 검증하고, 정상 확인 뒤에도 기존 exe는 백업용으로만 보관합니다.
 - 모든 참여 학교가 전환을 확인하기 전에는 정식 릴리즈·자동 업데이트를 진행하지 않습니다.
-- 전환 완료 뒤 `wails.json`의 `outputfilename`, `publish.ps1`의 복사·업로드 대상, `sync.go` 및 `server-data/version.json`의 다운로드 URL을 꼬미입시 정책으로 한 번에 맞춥니다.
+- 전환 완료 뒤 `wails.json`의 `outputfilename`, `publish.ps1`의 복사·업로드 대상, `internal/sync/manager.go` 및 `server-data/version.json`의 다운로드 URL을 꼬미입시 정책으로 한 번에 맞춥니다.
 
 ### 2. 2027학년도 입시자료 점검
 
 - 교육청 및 각 고교의 새 전형요강을 수동 확보합니다.
 - 마이스터고·특성화고·일반고의 배점, 1차 점수, 반영 학기, 비교과 마감일을 `docs/admission-score-audit-plan.md`와 산출 코드에 대조합니다.
-- 학교·학과 목록은 `server-data/highschools.json`과 `sync.go` 내장 기본 목록을 함께 수정합니다.
+- 학교·학과 목록은 `server-data/highschools.json`과 `internal/sync/manager.go` 내장 기본 목록을 함께 수정합니다.
 - 공식 공개자료는 운영자 입력 전용으로 유지하고, 평균 커트라인은 확정 결과 데이터가 쌓일 때 자동 계산합니다.
 
 ### 3. 분석·스냅샷 보완
@@ -74,7 +74,7 @@ wails dev
 
 ### 4. 내년도 명칭·실행 파일 전환 시점
 
-올해 배포본은 `PHGC.exe`와 기존 기술 식별자를 유지합니다. 내년도 입시요강 갱신을 시작할 때 `꼬미입시` 공식 명칭과 `꼬미입시.exe` 전환 여부를 확정하고, 자동 업데이트·기존 배포자료 호환을 위해 한동안 `PHGC.exe`와 새 파일명을 함께 릴리즈하는 방안을 먼저 검토합니다. 관련 수정 대상은 `wails.json`, `publish.ps1`, `sync.go`, `server-data/version.json`, README류입니다.
+올해 배포본은 `PHGC.exe`와 기존 기술 식별자를 유지합니다. 내년도 입시요강 갱신을 시작할 때 `꼬미입시` 공식 명칭과 `꼬미입시.exe` 전환 여부를 확정하고, 자동 업데이트·기존 배포자료 호환을 위해 한동안 `PHGC.exe`와 새 파일명을 함께 릴리즈하는 방안을 먼저 검토합니다. 관련 수정 대상은 `wails.json`, `publish.ps1`, `internal/sync/manager.go`, `server-data/version.json`, README류입니다.
 
 ### 5. 실제 학교 데이터 검증
 

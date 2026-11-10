@@ -51,12 +51,15 @@ Gitea 원본을 복제한 뒤 다음 개발 도구를 설치해야 합니다.
 ## 주요 파일 위치
 
 - `입시결과_분석_설계서.md`: 고입 결과 분석 및 프로그램 현대화의 현재 구현 상태·실행 계획 기준
-- `calc.go`, `calc_school.go`, `calc_school_*.go`: 일반고·마이스터고·특성화고 전형 산출식
-- `db.go`, `crypto_store.go`, `db_encryption_*.go`: 로컬 DB와 AES-GCM 저장 계층
-- `app.go`: 파일 대화상자, 배포자료·취합자료·보관본·지원현황 API
+- `internal/calc/`: 일반고(`general.go`)·마이스터고(`meister.go`)·특성화고(`vocational.go`) 전형 산출식, 학생 전체 산출(`fulldata.go`, `school.go`), 학과별 통계(`stats.go`)
+- `internal/database/`, `internal/crypto/`: 로컬 DB 저장소 계층(`*_repo.go`, `manager.go`, `schema.go`)과 AES-GCM 저장 계층
+- `internal/exchange/`: 배포자료·취합자료·최종 보관본·비밀번호 재설정·관내 공유 파일 입출력
+- `internal/parser/`, `internal/model/`: 나이스 엑셀 파서와 공용 데이터 구조
+- `app.go`, `app_*.go`: Wails 바인딩 시그니처를 유지하는 얇은 위임 계층(권한 확인·파일 대화상자). 공개 메서드명과 JSON 필드는 바꾸지 않습니다.
+- 모든 `.go`·`.js`·`.css` 파일은 **500줄 이하**를 유지합니다. 줄바꿈 제거 같은 편법 없이 책임 단위로 파일을 나눕니다.
 - `frontend/src/main.js`, `frontend/src/app.css`: 화면·상담·지원현황·인쇄 UI
 - `server-data/highschools.json`: 고교·학과 마스터 목록
-- `server-data/version.json`, `sync.go`: 버전 확인과 릴리즈 안내
+- `server-data/version.json`, `internal/sync/manager.go`: 버전 확인과 릴리즈 안내
 - `docs/admission-score-audit-plan.md`: 학교별 공식 산출식 검증 기준
 - `docs/인수인계_현재상태.md`, `docs/handover.md`: 현재 상태와 다음 작업
 
@@ -65,7 +68,7 @@ Gitea 원본을 복제한 뒤 다음 개발 도구를 설치해야 합니다.
 1. 교육청·각 고교의 당해 연도 입학전형요강을 확보합니다. 자동 수집하지 않습니다.
 2. `docs/admission-score-audit-plan.md`에 학교별 배점·반영 학기·마감일·1차 비교 기준을 기록합니다.
 3. `calc_school.go`와 관련 산출 테스트에 변경을 반영하고 공식 엑셀/표본 학생과 대조합니다.
-4. `server-data/highschools.json`의 학교·학과 변경을 반영합니다. 내장 기본 목록(`sync.go`)도 함께 확인합니다.
+4. `server-data/highschools.json`의 학교·학과 변경을 반영합니다. 내장 기본 목록(`internal/sync/manager.go`)도 함께 확인합니다.
 5. 공개 커트라인은 공식·교육청 자료와 학교 자료를 구분해 갱신합니다. 평균은 실제 확정 결과가 쌓일 때 자동 계산합니다.
 6. `frontend/src/main.js`의 입학년도·마감일·전형 표시를 확인합니다. 3학년 1학기 예상값과 마감 후 확정값을 혼동하지 않습니다.
 7. `go test ./...`, `npm run build`, `wails build -s -trimpath -ldflags "-s -w"`를 실행합니다.
@@ -80,7 +83,7 @@ Gitea 원본을 복제한 뒤 다음 개발 도구를 설치해야 합니다.
 
 - `wails.json`의 `outputfilename`
 - `publish.ps1`의 빌드·복사·GitHub/Gitea 에셋명
-- `server-data/version.json`과 `sync.go` 자동 업데이트 주소
+- `server-data/version.json`과 `internal/sync/manager.go` 자동 업데이트 주소
 - README·인수인계 문서·학교 배포 안내
 - 기존 `PHGC.exe` 사용자에 대한 과도기 호환 에셋
 
