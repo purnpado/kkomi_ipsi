@@ -35,13 +35,24 @@ import { openAdmissionAnalysisModal } from './modals/analysis/admissionAnalysisM
 ScreenLockManager.init();
 initGlobalEscapeHandler();
 
+// 로그인 화면에는 계정 선택 목록(login-index)이 필요하다. 로그아웃 등에서 학교명 문자열만 넘어와도
+// 계정 목록이 비지 않도록 백엔드에서 목록을 다시 읽는다. 실패하면 학교명만으로 표시한다.
+async function resolveLoginIndex(value) {
+    if (value && typeof value === 'object') return value;
+    try {
+        const index = await window.go.main.App.GetLoginIndex();
+        if (index && Array.isArray(index.accounts) && index.accounts.length > 0) return index;
+    } catch (_) {}
+    return value || '';
+}
+
 // ----- 화면(메뉴) 라우팅 표: app:navigate 이벤트의 screen 값 → 렌더러 -----
 const SCREEN_ROUTES = {
     'first-run': () => renderFirstRunScreen(),
     'setup': (d) => renderSetupScreen(d.config ?? null),
     'sync': (d) => renderSyncScreen(d.schoolName || ''),
     'mode-select': (d) => renderModeSelectScreen(d.schoolName || ''),
-    'login': (d) => renderLoginScreen(d.schoolName || ''),
+    'login': async (d) => renderLoginScreen(await resolveLoginIndex(d.schoolName)),
     'admin': (d) => renderAdminScreen(d.schoolName || ''),
     'users': (d) => renderUserManagementScreen(d.schoolName || ''),
     'cutoff': (d) => renderCutoffScreen(d.schoolName || ''),
