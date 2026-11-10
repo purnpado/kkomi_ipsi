@@ -49,20 +49,28 @@ func (dm *DBManager) SealAllDatabases() error {
 // UnsealAllDatabases restores the encrypted package only after a user has
 // successfully opened their personal key envelope. Plain DB files exist only
 // while the application is running and are sealed again during shutdown.
+// Legacy *.db.phgc files are automatically converted to *.db.kkomi.
 func (dm *DBManager) UnsealAllDatabases() error {
 	if len(dm.dataKey) != 32 {
 		return fmt.Errorf("데이터 잠금 키가 준비되지 않았습니다")
 	}
-	files, err := filepath.Glob(filepath.Join(dm.dataDir, "*.db.phgc"))
+	kkomiFiles, err := filepath.Glob(filepath.Join(dm.dataDir, "*.db.kkomi"))
 	if err != nil {
 		return err
 	}
+	legacyFiles, err := filepath.Glob(filepath.Join(dm.dataDir, "*.db.phgc"))
+	if err != nil {
+		return err
+	}
+
 	password := hex.EncodeToString(dm.dataKey)
-	for _, encryptedPath := range files {
-		workingPath := strings.TrimSuffix(encryptedPath, ".phgc")
+
+	// 1. 표준 *.db.kkomi 파일 복원
+	for _, encryptedPath := range kkomiFiles {
+		workingPath := strings.TrimSuffix(encryptedPath, ".kkomi")
 		if encStat, statErr := os.Stat(encryptedPath); statErr == nil {
 			if workStat, workErr := os.Stat(workingPath); workErr == nil {
-				// 최신 배포 패키지(.phgc)가 기존 평문 DB보다 최신이면 새 배포본을 우선 복원
+				// 최신 배포 패키지(.kkomi)가 기존 평문 DB보다 최신이면 새 배포본을 우선 복원
 				if encStat.ModTime().After(workStat.ModTime()) {
 					removePlainDatabaseArtifacts(workingPath)
 				} else if filepath.Base(workingPath) == "config.db" && !hasSchoolConfigTable(workingPath) {
@@ -71,13 +79,48 @@ func (dm *DBManager) UnsealAllDatabases() error {
 					continue
 				}
 			}
-		} else if !os.IsNotExist(err) {
-			return err
+		} else if !os.IsNotExist(statErr) {
+			return statErr
 		}
 		if err := unsealDatabaseFile(password, encryptedPath, workingPath); err != nil {
 			return fmt.Errorf("암호화된 DB 열기 실패: %w", err)
 		}
 	}
+
+	// 2. 레거시 *.db.phgc 파일 감지 시 복호화 후 즉시 *.db.kkomi 포맷으로 자동 마이그레이션
+	for _, legacyPath := range legacyFiles {
+		workingPath := strings.TrimSuffix(legacyPath, ".phgc")
+		kkomiPath := workingPath + ".kkomi"
+
+		needUnseal := true
+		if legStat, statErr := os.Stat(legacyPath); statErr == nil {
+			if workStat, workErr := os.Stat(workingPath); workErr == nil {
+				if legStat.ModTime().After(workStat.ModTime()) {
+					removePlainDatabaseArtifacts(workingPath)
+				} else if filepath.Base(workingPath) == "config.db" && !hasSchoolConfigTable(workingPath) {
+					removePlainDatabaseArtifacts(workingPath)
+				} else {
+					needUnseal = false
+				}
+			}
+		} else if !os.IsNotExist(statErr) {
+			return statErr
+		}
+
+		if needUnseal {
+			if err := unsealDatabaseFile(password, legacyPath, workingPath); err != nil {
+				return fmt.Errorf("구버전 암호화 DB(.phgc) 변환 열기 실패: %w", err)
+			}
+		}
+
+		// 평문 workingPath가 준비되었으므로 새 .kkomi 암호화 본을 즉시 생성하고 구버전 .phgc 삭제
+		if _, statErr := os.Stat(workingPath); statErr == nil {
+			if err := encryptFileGCM(password, workingPath, kkomiPath); err == nil {
+				_ = os.Remove(legacyPath)
+			}
+		}
+	}
+
 	return nil
 }
 
@@ -270,6 +313,9 @@ func (dm *DBManager) getConfigDBPath() string {
 }
 
 func (dm *DBManager) hasEncryptedConfigDB() bool {
+	if _, err := os.Stat(dm.getConfigDBPath() + ".kkomi"); err == nil {
+		return true
+	}
 	_, err := os.Stat(dm.getConfigDBPath() + ".phgc")
 	return err == nil
 }
@@ -279,6 +325,9 @@ func (dm *DBManager) openDB(dbPath string) (*sql.DB, error) {
 	// Wails 바인딩은 화면 밖에서도 호출될 수 있다. 잠긴 암호화 패키지에
 	// 대해 SQLite가 빈 .db를 자동 생성하는 것을 막는다.
 	if len(dm.dataKey) != 32 {
+		if _, err := os.Stat(dbPath + ".kkomi"); err == nil {
+			return nil, fmt.Errorf("데이터 잠금을 먼저 해제해주세요")
+		}
 		if _, err := os.Stat(dbPath + ".phgc"); err == nil {
 			return nil, fmt.Errorf("데이터 잠금을 먼저 해제해주세요")
 		}

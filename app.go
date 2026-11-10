@@ -14,11 +14,10 @@ import (
 	"sort"
 	"strconv"
 	"strings"
-	"syscall"
 	"time"
 	"unicode/utf16"
 
-	"github.com/wailsapp/wails/v2/pkg/runtime"
+	"github.com/wailsapp/wails/v3/pkg/application"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -76,6 +75,7 @@ type FinalArchiveManifest struct {
 // App struct
 type App struct {
 	ctx     context.Context
+	window  *application.WebviewWindow
 	db      *DBManager
 	sync    *SyncManager
 	dataKey []byte
@@ -91,12 +91,78 @@ func NewApp() *App {
 	}
 }
 
-// startup is called when the app starts. The context is saved
-// so we can call the runtime methods
+func (a *App) setMainWindow(window *application.WebviewWindow) {
+	a.window = window
+}
+
+func (a *App) openFileDialog(title string, filterName string, pattern string) (string, error) {
+	appInst := application.Get()
+	if appInst == nil {
+		return "", fmt.Errorf("프로그램 실행 환경을 준비하지 못했습니다")
+	}
+	opts := &application.OpenFileDialogOptions{
+		Title:          title,
+		CanChooseFiles: true,
+	}
+	if filterName != "" && pattern != "" {
+		opts.Filters = []application.FileFilter{{
+			DisplayName: filterName,
+			Pattern:     pattern,
+		}}
+	}
+	if a.window != nil {
+		opts.Window = a.window
+	}
+	return appInst.Dialog.OpenFileWithOptions(opts).PromptForSingleSelection()
+}
+
+func (a *App) openMultipleFilesDialog(title string, filterName string, pattern string) ([]string, error) {
+	appInst := application.Get()
+	if appInst == nil {
+		return nil, fmt.Errorf("프로그램 실행 환경을 준비하지 못했습니다")
+	}
+	opts := &application.OpenFileDialogOptions{
+		Title:          title,
+		CanChooseFiles: true,
+	}
+	if filterName != "" && pattern != "" {
+		opts.Filters = []application.FileFilter{{
+			DisplayName: filterName,
+			Pattern:     pattern,
+		}}
+	}
+	if a.window != nil {
+		opts.Window = a.window
+	}
+	return appInst.Dialog.OpenFileWithOptions(opts).PromptForMultipleSelection()
+}
+
+func (a *App) saveFileDialog(title string, defaultFilename string, filterName string, pattern string) (string, error) {
+	appInst := application.Get()
+	if appInst == nil {
+		return "", fmt.Errorf("프로그램 실행 환경을 준비하지 못했습니다")
+	}
+	opts := &application.SaveFileDialogOptions{
+		Title:    title,
+		Filename: defaultFilename,
+	}
+	if filterName != "" && pattern != "" {
+		opts.Filters = []application.FileFilter{{
+			DisplayName: filterName,
+			Pattern:     pattern,
+		}}
+	}
+	if a.window != nil {
+		opts.Window = a.window
+	}
+	return appInst.Dialog.SaveFileWithOptions(opts).PromptForSingleSelection()
+}
+
+// startup is called when the app starts.
 func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
 
-	// 서약서에 동의했거나, 이미 배포된 config.db.phgc가 있는 경우에만 DB 초기화
+	// 서약서에 동의했거나, 이미 배포된 config.db.kkomi / config.db.phgc가 있는 경우에만 DB 초기화
 	// 서약 전에는 빈 data 폴더나 config.db를 만들지 않는다.
 	if a.IsAgreementAccepted() || a.db.hasEncryptedConfigDB() {
 		if !a.db.hasEncryptedConfigDB() {
@@ -455,7 +521,7 @@ func (a *App) ExportPasswordResetPackage(username, outputPath string) error {
 	}
 	db.Close()
 
-	tmp, err := os.CreateTemp(a.db.dataDir, ".password-reset-config-*.phgc")
+	tmp, err := os.CreateTemp(a.db.dataDir, ".password-reset-config-*.kkomi")
 	if err != nil {
 		return err
 	}
@@ -473,7 +539,7 @@ func (a *App) ExportPasswordResetPackage(username, outputPath string) error {
 		return err
 	}
 	payload, err := json.Marshal(PasswordResetPackage{
-		Format:         "PHGC-PASSWORD-RESET-1",
+		Format:         "KKOMI-PASSWORD-RESET-1",
 		Username:       username,
 		ConfigDatabase: encryptedConfig,
 	})
@@ -490,11 +556,12 @@ func (a *App) ExportPasswordResetPackage(username, outputPath string) error {
 // package.  It is called immediately after the administrator assigns a new
 // initial password.
 func (a *App) SavePasswordResetPackage(username string) (string, error) {
-	path, err := runtime.SaveFileDialog(a.ctx, runtime.SaveDialogOptions{
-		Title:           "담임 비밀번호 재설정 파일 저장",
-		DefaultFilename: fmt.Sprintf("PHGC-%s-비밀번호재설정.phgcreset", username),
-		Filters:         []runtime.FileFilter{{DisplayName: "PHGC 비밀번호 재설정 파일", Pattern: "*.phgcreset"}},
-	})
+	path, err := a.saveFileDialog(
+		"담임 비밀번호 재설정 파일 저장",
+		fmt.Sprintf("꼬미입시-%s-비밀번호재설정.kkomireset", username),
+		"꼬미입시 비밀번호 재설정 파일 (*.kkomireset)",
+		"*.kkomireset",
+	)
 	if err != nil || path == "" {
 		return "", err
 	}
@@ -520,7 +587,7 @@ func (a *App) ImportPasswordResetPackage(inputPath string) (string, error) {
 	if err := json.Unmarshal(payload, &reset); err != nil {
 		return "", fmt.Errorf("재설정 파일 형식이 올바르지 않습니다")
 	}
-	if reset.Format != "PHGC-PASSWORD-RESET-1" || reset.Username == "" || len(reset.ConfigDatabase) == 0 {
+	if (reset.Format != "KKOMI-PASSWORD-RESET-1" && reset.Format != "PHGC-PASSWORD-RESET-1") || reset.Username == "" || len(reset.ConfigDatabase) == 0 {
 		return "", fmt.Errorf("재설정 파일 정보가 올바르지 않습니다")
 	}
 	if reset.Username == "admin" {
@@ -532,9 +599,10 @@ func (a *App) ImportPasswordResetPackage(inputPath string) (string, error) {
 	} else if !os.IsNotExist(err) {
 		return "", err
 	}
-	if err := writePrivateFileAtomically(plainConfig+".phgc", reset.ConfigDatabase); err != nil {
+	if err := writePrivateFileAtomically(plainConfig+".kkomi", reset.ConfigDatabase); err != nil {
 		return "", fmt.Errorf("재설정 정보 적용 실패: %w", err)
 	}
+	_ = os.Remove(plainConfig + ".phgc")
 	if err := os.Remove(userEnvelopePath(a.db.dataDir, reset.Username)); err != nil && !os.IsNotExist(err) {
 		return "", fmt.Errorf("기존 개인 잠금 정보 초기화 실패: %w", err)
 	}
@@ -544,10 +612,11 @@ func (a *App) ImportPasswordResetPackage(inputPath string) (string, error) {
 // OpenPasswordResetPackage lets a teacher select the recovery file on the
 // login screen without exposing the data directory.
 func (a *App) OpenPasswordResetPackage() (string, error) {
-	path, err := runtime.OpenFileDialog(a.ctx, runtime.OpenDialogOptions{
-		Title:   "담임 비밀번호 재설정 파일 선택",
-		Filters: []runtime.FileFilter{{DisplayName: "PHGC 비밀번호 재설정 파일", Pattern: "*.phgcreset"}},
-	})
+	path, err := a.openFileDialog(
+		"담임 비밀번호 재설정 파일 선택",
+		"꼬미입시 비밀번호 재설정 파일 (*.kkomireset, *.phgcreset)",
+		"*.kkomireset;*.phgcreset",
+	)
 	if err != nil || path == "" {
 		return "", err
 	}
@@ -560,10 +629,12 @@ func (a *App) SaveDistributionPackage(username string) (string, error) {
 	if a.user == nil || a.user.Role != "master" {
 		return "", fmt.Errorf("교사용 배포 자료 생성은 학년부장 계정만 할 수 있습니다")
 	}
-	path, err := runtime.SaveFileDialog(a.ctx, runtime.SaveDialogOptions{
-		Title: "교사용 배포 자료 저장", DefaultFilename: fmt.Sprintf("PHGC-%s-배포자료.phgcpkg", username),
-		Filters: []runtime.FileFilter{{DisplayName: "PHGC 교사용 배포 자료", Pattern: "*.phgcpkg"}},
-	})
+	path, err := a.saveFileDialog(
+		"교사용 배포 자료 저장",
+		fmt.Sprintf("꼬미입시-%s-배포자료.kkomipkg", username),
+		"꼬미입시 교사용 배포 자료 (*.kkomipkg)",
+		"*.kkomipkg",
+	)
 	if err != nil || path == "" {
 		return "", err
 	}
@@ -609,7 +680,7 @@ func (a *App) ExportDistributionPackage(username, outputPath string) error {
 			return keyErr
 		}
 		manifestBytes, marshalErr := json.Marshal(DataManifest{
-			Format: "PHGC-DATA-1", PackageID: hex.EncodeToString(packageID), AdmissionYear: config.AdmissionYear,
+			Format: "KKOMI-DATA-1", PackageID: hex.EncodeToString(packageID), AdmissionYear: config.AdmissionYear,
 		})
 		if marshalErr != nil {
 			return marshalErr
@@ -620,13 +691,13 @@ func (a *App) ExportDistributionPackage(username, outputPath string) error {
 	} else if err != nil {
 		return err
 	}
-	tmpDir, err := os.MkdirTemp("", "phgc-package-*")
+	tmpDir, err := os.MkdirTemp("", "kkomi-package-*")
 	if err != nil {
 		return err
 	}
 	defer os.RemoveAll(tmpDir)
 	keyPassword := hex.EncodeToString(a.dataKey)
-	files := []string{"config.db.phgc", "shared-key.json", "manifest.json", "login-index.json"}
+	files := []string{"config.db.kkomi", "shared-key.json", "manifest.json", "login-index.json"}
 
 	// 배포 패키지 생성 직전 최신 전교생 석차 스냅샷을 갱신하여 config.db에 보관
 	_ = a.UpdateSchoolRankSnapshots()
@@ -665,7 +736,7 @@ func (a *App) ExportDistributionPackage(username, outputPath string) error {
 	if err != nil {
 		return fmt.Errorf("배포용 계정 정보 준비 실패: %w", err)
 	}
-	if err := encryptFileGCM(keyPassword, configCopy, filepath.Join(tmpDir, "config.db.phgc")); err != nil {
+	if err := encryptFileGCM(keyPassword, configCopy, filepath.Join(tmpDir, "config.db.kkomi")); err != nil {
 		return err
 	}
 
@@ -694,7 +765,7 @@ func (a *App) ExportDistributionPackage(username, outputPath string) error {
 		} else if err != nil {
 			return err
 		}
-		name := fmt.Sprintf("class_%d.db.phgc", classNum)
+		name := fmt.Sprintf("class_%d.db.kkomi", classNum)
 		if err := snapshotAndEncryptDatabase(a.db, source, filepath.Join(tmpDir, name), keyPassword); err != nil {
 			return err
 		}
@@ -709,7 +780,7 @@ func (a *App) ExportDistributionPackage(username, outputPath string) error {
 		}
 		files = append(files, "highschools.json")
 	}
-	manifest := DistributionPackageManifest{Format: "PHGC-DEPLOYMENT-1", Username: target.Username, Role: target.Role, ClassNum: target.ClassNum, Files: files}
+	manifest := DistributionPackageManifest{Format: "KKOMI-DEPLOYMENT-1", Username: target.Username, Role: target.Role, ClassNum: target.ClassNum, Files: files}
 	manifestJSON, err := json.Marshal(manifest)
 	if err != nil {
 		return err
@@ -724,7 +795,11 @@ func (a *App) ExportDistributionPackage(username, outputPath string) error {
 // OpenDistributionPackage imports a deployment package on a fresh copy of the
 // program. The recipient still supplies the shared password once on login.
 func (a *App) OpenDistributionPackage() (string, error) {
-	path, err := runtime.OpenFileDialog(a.ctx, runtime.OpenDialogOptions{Title: "교사용 배포 자료 선택", Filters: []runtime.FileFilter{{DisplayName: "PHGC 교사용 배포 자료", Pattern: "*.phgcpkg"}}})
+	path, err := a.openFileDialog(
+		"교사용 배포 자료 선택",
+		"꼬미입시 교사용 배포 자료 (*.kkomipkg, *.phgcpkg)",
+		"*.kkomipkg;*.phgcpkg",
+	)
 	if err != nil || path == "" {
 		return "", err
 	}
@@ -756,7 +831,7 @@ func (a *App) ImportDistributionPackage(inputPath string) (string, error) {
 	if err := json.Unmarshal(pkgBytes, &manifest); err != nil {
 		return "", fmt.Errorf("배포 자료 정보가 올바르지 않습니다")
 	}
-	if manifest.Format != "PHGC-DEPLOYMENT-1" || manifest.Username == "" || (manifest.Role != "homeroom" && manifest.Role != "viewer") {
+	if (manifest.Format != "KKOMI-DEPLOYMENT-1" && manifest.Format != "PHGC-DEPLOYMENT-1") || manifest.Username == "" || (manifest.Role != "homeroom" && manifest.Role != "viewer") {
 		return "", fmt.Errorf("지원하지 않는 배포 자료입니다")
 	}
 
@@ -1057,7 +1132,12 @@ func (a *App) SaveFinalArchive(archivePassword string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	path, err := runtime.SaveFileDialog(a.ctx, runtime.SaveDialogOptions{Title: "암호화 최종 보관본 저장", DefaultFilename: fmt.Sprintf("PHGC-%s-%d-최종보관본.phgcarchive", config.SchoolName, config.AdmissionYear), Filters: []runtime.FileFilter{{DisplayName: "PHGC 암호화 보관본", Pattern: "*.phgcarchive"}}})
+	path, err := a.saveFileDialog(
+		"암호화 최종 보관본 저장",
+		fmt.Sprintf("꼬미입시-%s-%d-최종보관본.kkomiarchive", config.SchoolName, config.AdmissionYear),
+		"꼬미입시 암호화 보관본 (*.kkomiarchive)",
+		"*.kkomiarchive",
+	)
 	if err != nil || path == "" {
 		return "", err
 	}
@@ -1075,14 +1155,14 @@ func (a *App) ExportFinalArchive(archivePassword, outputPath string) error {
 	if err != nil {
 		return err
 	}
-	tmpDir, err := os.MkdirTemp("", "phgc-archive-*")
+	tmpDir, err := os.MkdirTemp("", "kkomi-archive-*")
 	if err != nil {
 		return err
 	}
 	defer os.RemoveAll(tmpDir)
 	keyPassword := hex.EncodeToString(a.dataKey)
-	files := []string{"config.db.phgc", "shared-key.json", "login-index.json"}
-	if err := snapshotAndEncryptDatabase(a.db, a.db.getConfigDBPath(), filepath.Join(tmpDir, "config.db.phgc"), keyPassword); err != nil {
+	files := []string{"config.db.kkomi", "shared-key.json", "login-index.json"}
+	if err := snapshotAndEncryptDatabase(a.db, a.db.getConfigDBPath(), filepath.Join(tmpDir, "config.db.kkomi"), keyPassword); err != nil {
 		return err
 	}
 	for _, name := range []string{"shared-key.json", "login-index.json"} {
@@ -1103,7 +1183,7 @@ func (a *App) ExportFinalArchive(archivePassword, outputPath string) error {
 		} else if err != nil {
 			return err
 		}
-		name := fmt.Sprintf("class_%d.db.phgc", n)
+		name := fmt.Sprintf("class_%d.db.kkomi", n)
 		if err := snapshotAndEncryptDatabase(a.db, source, filepath.Join(tmpDir, name), keyPassword); err != nil {
 			return err
 		}
@@ -1123,7 +1203,7 @@ func (a *App) ExportFinalArchive(archivePassword, outputPath string) error {
 		}
 		files = append(files, name)
 	}
-	archive := FinalArchiveManifest{Format: "PHGC-FINAL-ARCHIVE-1", SchoolName: config.SchoolName, AdmissionYear: config.AdmissionYear, CreatedAt: time.Now().Format(time.RFC3339), Files: files}
+	archive := FinalArchiveManifest{Format: "KKOMI-FINAL-ARCHIVE-1", SchoolName: config.SchoolName, AdmissionYear: config.AdmissionYear, CreatedAt: time.Now().Format(time.RFC3339), Files: files}
 	b, err := json.Marshal(archive)
 	if err != nil {
 		return err
@@ -1139,7 +1219,11 @@ func (a *App) ExportFinalArchive(archivePassword, outputPath string) error {
 }
 
 func (a *App) OpenFinalArchive() (string, error) {
-	path, err := runtime.OpenFileDialog(a.ctx, runtime.OpenDialogOptions{Title: "암호화 최종 보관본 선택", Filters: []runtime.FileFilter{{DisplayName: "PHGC 암호화 보관본", Pattern: "*.phgcarchive"}}})
+	path, err := a.openFileDialog(
+		"암호화 최종 보관본 선택",
+		"꼬미입시 암호화 보관본 (*.kkomiarchive, *.phgcarchive)",
+		"*.kkomiarchive;*.phgcarchive",
+	)
 	if err != nil || path == "" {
 		return "", err
 	}
@@ -1162,7 +1246,7 @@ func (a *App) ImportFinalArchive(inputPath, archivePassword string) (string, err
 		}
 		removePlainDatabaseArtifacts(a.db.getConfigDBPath())
 	}
-	tmpDir, err := os.MkdirTemp("", "phgc-restore-*")
+	tmpDir, err := os.MkdirTemp("", "kkomi-restore-*")
 	if err != nil {
 		return "", err
 	}
@@ -1192,7 +1276,7 @@ func (a *App) ImportFinalArchive(inputPath, archivePassword string) (string, err
 		return "", err
 	}
 	var archive FinalArchiveManifest
-	if err := json.Unmarshal(raw, &archive); err != nil || archive.Format != "PHGC-FINAL-ARCHIVE-1" || archive.SchoolName == "" {
+	if err := json.Unmarshal(raw, &archive); err != nil || (archive.Format != "KKOMI-FINAL-ARCHIVE-1" && archive.Format != "PHGC-FINAL-ARCHIVE-1") || archive.SchoolName == "" {
 		return "", fmt.Errorf("지원하지 않는 보관본입니다")
 	}
 	for _, name := range archive.Files {
@@ -1200,7 +1284,9 @@ func (a *App) ImportFinalArchive(inputPath, archivePassword string) (string, err
 		if f == nil {
 			return "", fmt.Errorf("보관본에 %s 파일이 없습니다", name)
 		}
-		if !(name == "config.db.phgc" || name == "shared-key.json" || name == "login-index.json" || name == "manifest.json" || strings.HasPrefix(name, "class_") && strings.HasSuffix(name, ".db.phgc") || strings.HasPrefix(name, "keys/") && filepath.Ext(name) == ".json") {
+		allowedDB := name == "config.db.kkomi" || name == "config.db.phgc" ||
+			(strings.HasPrefix(name, "class_") && (strings.HasSuffix(name, ".db.kkomi") || strings.HasSuffix(name, ".db.phgc")))
+		if !(allowedDB || name == "shared-key.json" || name == "login-index.json" || name == "manifest.json" || (strings.HasPrefix(name, "keys/") && filepath.Ext(name) == ".json")) {
 			return "", fmt.Errorf("허용되지 않은 보관 파일입니다")
 		}
 		data, err := readZipEntry(f)
@@ -1264,16 +1350,7 @@ func (a *App) OpenMultipleExcelFiles(title string) ([]string, error) {
 	if title == "" {
 		title = "나이스 엑셀 파일 선택 (여러 반 파일을 Ctrl 또는 Shift 키로 동시 선택 가능)"
 	}
-	filePaths, err := runtime.OpenMultipleFilesDialog(a.ctx, runtime.OpenDialogOptions{
-		Title: title,
-		Filters: []runtime.FileFilter{
-			{
-				DisplayName: "Data Files (*.xlsx, *.xls, *.csv)",
-				Pattern:     "*.xlsx;*.xls;*.csv",
-			},
-		},
-	})
-	return filePaths, err
+	return a.openMultipleFilesDialog(title, "Data Files (*.xlsx, *.xls, *.csv)", "*.xlsx;*.xls;*.csv")
 }
 
 // ProcessExcel 엑셀 파일을 읽고 분할 저장 (단일 파일 호환)
@@ -1869,12 +1946,13 @@ func (a *App) SaveTeacherPatch(password, username string, classNum int, changes 
 	if classNum > 0 && !strings.Contains(username, fmt.Sprintf("%d", classNum)) {
 		classTag = fmt.Sprintf("3%02d_%s", classNum, username)
 	}
-	defaultFilename := fmt.Sprintf("취합자료_%s.phgcpatch", classTag)
-	path, err := runtime.SaveFileDialog(a.ctx, runtime.SaveDialogOptions{
-		Title:           "취합자료 제출(담임)",
-		DefaultFilename: defaultFilename,
-		Filters:         []runtime.FileFilter{{DisplayName: "PHGC 취합자료 (*.phgcpatch)", Pattern: "*.phgcpatch"}},
-	})
+	defaultFilename := fmt.Sprintf("취합자료_%s.kkomipatch", classTag)
+	path, err := a.saveFileDialog(
+		"취합자료 제출(담임)",
+		defaultFilename,
+		"꼬미입시 취합자료 (*.kkomipatch)",
+		"*.kkomipatch",
+	)
 	if err != nil || path == "" {
 		return "", err
 	}
@@ -2037,7 +2115,11 @@ func (a *App) OpenTeacherPatchPreview(password string) (PatchPreview, error) {
 	if _, err := openSharedKeyEnvelope(a.db.dataDir, password); err != nil {
 		return PatchPreview{}, fmt.Errorf("공용 데이터 비밀번호가 올바르지 않습니다")
 	}
-	path, err := runtime.OpenFileDialog(a.ctx, runtime.OpenDialogOptions{Title: "취합자료 미리보기(학년부장)", Filters: []runtime.FileFilter{{DisplayName: "PHGC 취합자료 (*.phgcpatch)", Pattern: "*.phgcpatch"}}})
+	path, err := a.openFileDialog(
+		"취합자료 미리보기(학년부장)",
+		"꼬미입시 취합자료 (*.kkomipatch, *.phgcpatch)",
+		"*.kkomipatch;*.phgcpatch",
+	)
 	if err != nil || path == "" {
 		return PatchPreview{}, err
 	}
@@ -2050,10 +2132,11 @@ func (a *App) OpenTeacherPatch(password string) (map[string]int, error) {
 	if _, err := openSharedKeyEnvelope(a.db.dataDir, password); err != nil {
 		return nil, fmt.Errorf("공용 데이터 비밀번호가 올바르지 않습니다")
 	}
-	paths, err := runtime.OpenMultipleFilesDialog(a.ctx, runtime.OpenDialogOptions{
-		Title:   "취합자료 일괄 병합(학년부장) - 여러 파일 동시 선택 가능 (Ctrl 또는 Shift 클릭)",
-		Filters: []runtime.FileFilter{{DisplayName: "PHGC 취합자료 (*.phgcpatch)", Pattern: "*.phgcpatch"}},
-	})
+	paths, err := a.openMultipleFilesDialog(
+		"취합자료 일괄 병합(학년부장) - 여러 파일 동시 선택 가능 (Ctrl 또는 Shift 클릭)",
+		"꼬미입시 취합자료 (*.kkomipatch, *.phgcpatch)",
+		"*.kkomipatch;*.phgcpatch",
+	)
 	if err != nil || len(paths) == 0 {
 		return nil, err
 	}
@@ -2066,7 +2149,7 @@ func (a *App) OpenTeacherPatch(password string) (map[string]int, error) {
 		}
 	}
 	if validFileCount == 0 {
-		return nil, fmt.Errorf("선택된 파일 중 올바른 PHGC 취합자료가 없거나 암호가 일치하지 않습니다")
+		return nil, fmt.Errorf("선택된 파일 중 올바른 취합자료가 없거나 암호가 일치하지 않습니다")
 	}
 	return map[string]int{
 		"files":    validFileCount,
@@ -2129,7 +2212,7 @@ func (a *App) ExportJointShareData(admissionYear int) (string, error) {
 	}
 
 	pkg := JointSharePackage{
-		Format:        "PHGC_JOINT_SHARE_V1",
+		Format:        "KKOMI_JOINT_SHARE_V1",
 		SchoolName:    config.SchoolName,
 		AdmissionYear: admissionYear,
 		ExportedAt:    time.Now().Format("2006-01-02 15:04:05"),
@@ -2153,12 +2236,13 @@ func (a *App) ExportJointShareData(admissionYear int) (string, error) {
 		}
 		return r
 	}, schoolName)
-	defaultFilename := fmt.Sprintf("PHGC_관내진학자료_%s_%d학년도.phgcdata", safeSchoolName, admissionYear)
-	path, err := runtime.SaveFileDialog(a.ctx, runtime.SaveDialogOptions{
-		Title:           "관내 진학자료 내보내기",
-		DefaultFilename: defaultFilename,
-		Filters:         []runtime.FileFilter{{DisplayName: "PHGC 관내 진학자료 (*.phgcdata)", Pattern: "*.phgcdata"}},
-	})
+	defaultFilename := fmt.Sprintf("꼬미입시_관내진학자료_%s_%d학년도.kkomidata", safeSchoolName, admissionYear)
+	path, err := a.saveFileDialog(
+		"관내 진학자료 내보내기",
+		defaultFilename,
+		"꼬미입시 관내 진학자료 (*.kkomidata)",
+		"*.kkomidata",
+	)
 	if err != nil || path == "" {
 		return "", err
 	}
@@ -2174,7 +2258,9 @@ func (a *App) OpenExternalURL(targetURL string) error {
 	if targetURL == "" {
 		targetURL = "https://github.com/purnpado/PHGC/releases"
 	}
-	runtime.BrowserOpenURL(a.ctx, targetURL)
+	if appInst := application.Get(); appInst != nil {
+		return appInst.Browser.OpenURL(targetURL)
+	}
 	return nil
 }
 
@@ -2183,10 +2269,11 @@ func (a *App) ImportJointShareData(admissionYear int) (map[string]int, error) {
 	if a.user == nil || a.user.Role != "master" {
 		return nil, fmt.Errorf("타교자료 병합은 학년부장 계정만 가능합니다")
 	}
-	paths, err := runtime.OpenMultipleFilesDialog(a.ctx, runtime.OpenDialogOptions{
-		Title:   "타교 진학자료 일괄 병합 - 여러 파일 동시 선택 가능",
-		Filters: []runtime.FileFilter{{DisplayName: "PHGC 관내 진학자료 (*.phgcdata)", Pattern: "*.phgcdata"}},
-	})
+	paths, err := a.openMultipleFilesDialog(
+		"타교 진학자료 일괄 병합 - 여러 파일 동시 선택 가능",
+		"꼬미입시 관내 진학자료 (*.kkomidata, *.phgcdata)",
+		"*.kkomidata;*.phgcdata",
+	)
 	if err != nil || len(paths) == 0 {
 		return nil, err
 	}
@@ -2203,7 +2290,7 @@ func (a *App) ImportJointShareData(admissionYear int) (map[string]int, error) {
 		}
 
 		var pkg JointSharePackage
-		if err := json.Unmarshal(data, &pkg); err != nil || pkg.Format != "PHGC_JOINT_SHARE_V1" {
+		if err := json.Unmarshal(data, &pkg); err != nil || (pkg.Format != "KKOMI_JOINT_SHARE_V1" && pkg.Format != "PHGC_JOINT_SHARE_V1") {
 			continue
 		}
 		validFileCount++
@@ -2440,8 +2527,8 @@ func (a *App) GetSchoolRuleList() []map[string]string {
 
 // QuitApp 프로그램 정상 안전 종료
 func (a *App) QuitApp() {
-	if a.ctx != nil {
-		runtime.Quit(a.ctx)
+	if appInst := application.Get(); appInst != nil {
+		appInst.Quit()
 	} else {
 		os.Exit(0)
 	}
@@ -2509,8 +2596,8 @@ func (a *App) DeleteUser(username string) error {
 
 // SetWindowTitle 창 제목을 동적으로 변경 (학년부장, 담임교사 구분용)
 func (a *App) SetWindowTitle(title string) {
-	if a.ctx != nil && title != "" {
-		runtime.WindowSetTitle(a.ctx, title)
+	if a.window != nil && title != "" {
+		a.window.SetTitle(title)
 	}
 }
 
@@ -2627,10 +2714,6 @@ for ($i = 0; $i -lt 15; $i++) {
 
 	encodedScript := encodePowerShell(psScript)
 	cmd := exec.Command("powershell.exe", "-NoProfile", "-NonInteractive", "-WindowStyle", "Hidden", "-EncodedCommand", encodedScript)
-	cmd.SysProcAttr = &syscall.SysProcAttr{
-		HideWindow:    true,
-		CreationFlags: 0x08000000, // CREATE_NO_WINDOW
-	}
 
 	if err := cmd.Start(); err != nil {
 		return fmt.Errorf("자가 삭제 스크립트 실행 실패: %w", err)
@@ -2725,7 +2808,7 @@ func (a *App) ExportSharedAdmissionPackage(admissionYear int, password, outputPa
 	return a.db.ExportSharedPackageV2(admissionYear, password, outputPath)
 }
 
-// SaveSharedAdmissionPackageDialog 파일 저장 대화상자를 열어 관내 공유 파일(.phgc) 저장
+// SaveSharedAdmissionPackageDialog 파일 저장 대화상자를 열어 관내 공유 파일(.kkomi) 저장
 func (a *App) SaveSharedAdmissionPackageDialog(admissionYear int, password string) (string, error) {
 	if a.user == nil || a.user.Role != "master" {
 		return "", fmt.Errorf("관내 공유 자료 생성은 학년부장만 가능합니다")
@@ -2737,14 +2820,13 @@ func (a *App) SaveSharedAdmissionPackageDialog(admissionYear int, password strin
 	if admissionYear <= 0 {
 		admissionYear = config.AdmissionYear
 	}
-	defaultName := fmt.Sprintf("%s_%d학년도_고입결과_공유.phgc", config.SchoolName, admissionYear)
-	path, err := runtime.SaveFileDialog(a.ctx, runtime.SaveDialogOptions{
-		Title:           "관내 공유용 고입 결과 자료 내보내기 (V2)",
-		DefaultFilename: defaultName,
-		Filters: []runtime.FileFilter{
-			{DisplayName: "PHGC 관내 공유 파일 (*.phgc)", Pattern: "*.phgc"},
-		},
-	})
+	defaultName := fmt.Sprintf("%s_%d학년도_고입결과_공유.kkomi", config.SchoolName, admissionYear)
+	path, err := a.saveFileDialog(
+		"관내 공유용 고입 결과 자료 내보내기 (V2)",
+		defaultName,
+		"꼬미입시 관내 공유 파일 (*.kkomi)",
+		"*.kkomi",
+	)
 	if err != nil || path == "" {
 		return "", err
 	}
@@ -2759,12 +2841,11 @@ func (a *App) OpenSharedAdmissionPackageDialog() (string, error) {
 	if a.user == nil || a.user.Role != "master" {
 		return "", fmt.Errorf("관내 공유 자료 취합은 학년부장만 가능합니다")
 	}
-	path, err := runtime.OpenFileDialog(a.ctx, runtime.OpenDialogOptions{
-		Title: "관내 공유 고입 결과 자료 선택 (V1/V2)",
-		Filters: []runtime.FileFilter{
-			{DisplayName: "PHGC 관내 공유 파일 (*.phgc;*.json)", Pattern: "*.phgc;*.json"},
-		},
-	})
+	path, err := a.openFileDialog(
+		"관내 공유 고입 결과 자료 선택 (V1/V2)",
+		"꼬미입시 관내 공유 파일 (*.kkomi;*.phgc;*.json)",
+		"*.kkomi;*.phgc;*.json",
+	)
 	if err != nil || path == "" {
 		return "", err
 	}

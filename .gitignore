@@ -1,5 +1,7 @@
 # 빌드 산출물
+bin/
 build/bin/
+*.syso
 
 # 프론트엔드
 node_modules/
@@ -12,6 +14,7 @@ frontend/dist/
 *.so
 *.dylib
 *.zip
+*.app
 
 # 임시 및 테스트 데이터 (보안/개인정보 유출 원천 차단)
 test-data/
@@ -19,6 +22,8 @@ test-data/
 *.xlsx
 *.db
 *.sqlite
+*.kkomi*
+*.phgc*
 data/
 classes/
 server-data/cutoffs/
@@ -56,4 +61,3 @@ sky_docs_stage/
 docs/bridge-*
 docs/*-structure-reference.png
 
-proxmox/

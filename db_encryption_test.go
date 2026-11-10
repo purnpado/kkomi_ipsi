@@ -29,7 +29,7 @@ func TestDatabaseSealAndUnsealLifecycle(t *testing.T) {
 	if _, err := os.Stat(filepath.Join(dir, "config.db")); !os.IsNotExist(err) {
 		t.Fatalf("plaintext config.db must not remain, err=%v", err)
 	}
-	if _, err := os.Stat(filepath.Join(dir, "config.db.phgc")); err != nil {
+	if _, err := os.Stat(filepath.Join(dir, "config.db.kkomi")); err != nil {
 		t.Fatalf("encrypted config DB missing: %v", err)
 	}
 
@@ -141,7 +141,7 @@ func TestTeacherPasswordResetPackageRestoresLoginWithoutClassDatabase(t *testing
 	// This represents the teacher's existing package.  It deliberately has no
 	// class DB copied in this test: the reset flow must only need config/key data.
 	teacherDir := t.TempDir()
-	copyTestFile(t, filepath.Join(adminDir, "config.db.phgc"), filepath.Join(teacherDir, "config.db.phgc"))
+	copyTestFile(t, filepath.Join(adminDir, "config.db.kkomi"), filepath.Join(teacherDir, "config.db.kkomi"))
 	copyTestFile(t, filepath.Join(adminDir, "shared-key.json"), filepath.Join(teacherDir, "shared-key.json"))
 
 	if err := admin.db.UnsealAllDatabases(); err != nil {
@@ -150,7 +150,7 @@ func TestTeacherPasswordResetPackageRestoresLoginWithoutClassDatabase(t *testing
 	if err := admin.SetUserPassword("301", "teacher-initial-password"); err != nil {
 		t.Fatalf("SetUserPassword(301): %v", err)
 	}
-	resetPath := filepath.Join(adminDir, "PHGC-301-reset.phgcreset")
+	resetPath := filepath.Join(adminDir, "KKOMI-301-reset.kkomireset")
 	if err := admin.ExportPasswordResetPackage("301", resetPath); err != nil {
 		t.Fatalf("ExportPasswordResetPackage: %v", err)
 	}
@@ -382,7 +382,7 @@ func TestTeacherDistributionPackageContainsOnlyTargetData(t *testing.T) {
 		}
 	}
 	archive.Close()
-	if !entryNames["config.db.phgc"] || !entryNames["class_1.db.phgc"] || entryNames["class_2.db.phgc"] || !entryNames["highschools.json"] {
+	if !entryNames["config.db.kkomi"] || !entryNames["class_1.db.kkomi"] || entryNames["class_2.db.kkomi"] || !entryNames["highschools.json"] {
 		t.Fatalf("unexpected homeroom package entries: %#v", entryNames)
 	}
 

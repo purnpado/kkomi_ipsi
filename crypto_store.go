@@ -16,7 +16,10 @@ import (
 	"golang.org/x/crypto/argon2"
 )
 
-const encryptedFileMagic = "PHGC-GCM-1"
+const (
+	encryptedFileMagic       = "KKOMI-GCM-1"
+	legacyEncryptedFileMagic = "PHGC-GCM-1"
+)
 
 type encryptedFileHeader struct {
 	Magic string `json:"magic"`
@@ -285,7 +288,7 @@ func decryptFileGCM(password, encryptedPath, destinationPath string) error {
 		return fmt.Errorf("암호화 파일 형식이 올바르지 않습니다")
 	}
 	head := payload[:separator]
-	if err := json.Unmarshal(head, &header); err != nil || header.Magic != encryptedFileMagic {
+	if err := json.Unmarshal(head, &header); err != nil || (header.Magic != encryptedFileMagic && header.Magic != legacyEncryptedFileMagic) {
 		return fmt.Errorf("암호화 파일 형식이 올바르지 않습니다")
 	}
 	block, err := aes.NewCipher(deriveDataKey(password, header.Salt))
@@ -336,13 +339,15 @@ func decryptPatchGCM(password, path string) (PatchFile, error) {
 // sealDatabaseFile replaces a plaintext SQLite file with an AES-256-GCM
 // package. The plaintext is removed only after the encrypted file is written.
 func sealDatabaseFile(password, dbPath string) (string, error) {
-	encryptedPath := dbPath + ".phgc"
+	encryptedPath := dbPath + ".kkomi"
 	if err := encryptFileGCM(password, dbPath, encryptedPath); err != nil {
 		return "", err
 	}
 	if err := os.Remove(dbPath); err != nil {
 		return "", err
 	}
+	// 구버전 .phgc 암호화 파일이 남아 있다면 .kkomi 생성 완료 후 자동 정리
+	_ = os.Remove(dbPath + ".phgc")
 	return encryptedPath, nil
 }
 
