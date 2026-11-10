@@ -1,0 +1,124 @@
+/* 꼬미입시 공통 컴포넌트: 카드·입력칸·버튼·오류 표시·스피너 */
+
+/* ===== 앱 공통 컴포넌트 스타일 ===== */
+
+/* 글래스모피즘 카드 */
+.glass-card {
+    background: rgba(30, 41, 59, 0.8);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(99, 102, 241, 0.2);
+    border-radius: 1.5rem;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5),
+                0 0 40px rgba(99, 102, 241, 0.1);
+}
+
+/* 인풋 필드 */
+.input-field {
+    width: 100%;
+    padding: 0.875rem 1.25rem;
+    background: rgba(15, 23, 42, 0.6);
+    border: 1.5px solid rgba(99, 102, 241, 0.3);
+    border-radius: 0.75rem;
+    color: white;
+    font-size: 1rem;
+    outline: none;
+    transition: all 0.3s ease;
+}
+
+.input-field:focus {
+    border-color: #6366f1;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+    background: rgba(15, 23, 42, 0.8);
+}
+
+.input-field::placeholder {
+    color: #64748b;
+}
+
+/* 숫자값은 직접 입력만 사용한다. WebView의 증감 화살표는 좁은 입력칸에서
+   값과 안내문을 가리므로 숨긴다. */
+input[type="number"] {
+    appearance: textfield;
+    -moz-appearance: textfield;
+}
+
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* 기본 버튼 */
+.btn-primary {
+    width: 100%;
+    padding: 0.875rem 2rem;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    color: white;
+    font-size: 1.05rem;
+    font-weight: 700;
+    border: none;
+    border-radius: 0.75rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #818cf8, #a78bfa);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(99, 102, 241, 0.5);
+}
+
+.btn-primary:active {
+    transform: translateY(0);
+}
+
+.btn-primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* 보조 동작도 텍스트 링크가 아닌 명확한 버튼으로 표시한다. */
+.btn-secondary {
+    background: rgba(30, 41, 59, 0.82);
+    color: #e2e8f0;
+    border: 1px solid rgba(100, 116, 139, 0.72);
+    border-radius: 0.6rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-secondary:hover {
+    background: rgba(51, 65, 85, 0.95);
+    border-color: rgba(129, 140, 248, 0.85);
+    color: #fff;
+    transform: translateY(-1px);
+}
+
+/* 에러 메시지 */
+.error-msg {
+    color: #ef4444;
+    font-size: 0.85rem;
+    margin-top: 0.5rem;
+    display: none;
+}
+
+.error-msg.show {
+    display: block;
+    animation: shake 0.4s ease;
+}
+
+/* 로딩 스피너 */
+.spinner {
+    width: 1.25rem;
+    height: 1.25rem;
+    border: 2.5px solid rgba(255,255,255,0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+    display: inline-block;
+    vertical-align: middle;
+    margin-right: 0.5rem;
+}

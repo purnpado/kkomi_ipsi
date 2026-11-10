@@ -1,5 +1,6 @@
 // ===== 시스템 다이얼로그 모달 모듈 (Alert, Confirm, Prompt & ESC 제어) =====
 import { escapeHtml, escapeAttr } from './utils.js';
+import { notifyClassUpdated } from './navigation.js';
 
 // ===== SweetAlert2 스타일 커스텀 모달 알림창 =====
 export function showModalAlert(optionsOrMessage, defaultTitle = '알림', defaultType = 'info', confirmText = '확인') {
@@ -347,9 +348,7 @@ export function initGlobalEscapeHandler() {
                 closeBtn.click();
             } else {
                 studentModal.remove();
-                if (typeof window.refreshCurrentClass === 'function') {
-                    window.refreshCurrentClass();
-                }
+                notifyClassUpdated();
             }
             return;
         }

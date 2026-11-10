@@ -1,0 +1,356 @@
+/* 꼬미입시 인쇄 공통 스타일: 용지·다크 테마 해제·신호등 매트릭스·상담표 배치·원서대장 */
+
+/* ===== 인쇄 전용 스타일 ===== */
+@media print {
+    @page {
+        size: A4 portrait;
+        margin: 10mm;
+    }
+
+    body, html {
+        background: white !important;
+        color: black !important;
+        width: auto !important;
+        height: auto !important;
+        overflow: visible !important;
+    }
+
+    /* 인쇄 시 스크롤 및 높이 제한 해제 */
+    body.printing .overflow-auto,
+    body.printing .overflow-y-auto,
+    body.printing .overflow-x-auto,
+    body.printing .max-h-\[70vh\],
+    body.printing .max-h-\[55vh\] {
+        overflow: visible !important;
+        max-height: none !important;
+    }
+    body.printing .glass-card {
+        border: none !important;
+        background: transparent !important;
+        padding: 0 !important;
+        box-shadow: none !important;
+    }
+    body.printing table {
+        font-size: 0.85rem !important;
+        color: black !important;
+        border-collapse: collapse !important;
+    }
+    body.printing th, body.printing td {
+        padding: 6px !important;
+        border: 1px solid #94a3b8 !important;
+        color: black !important;
+    }
+    body.printing th {
+        background-color: #f1f5f9 !important;
+    }
+
+    /* 인쇄 버튼이 고른 문서 외의 대시보드·배경·다른 모달은 출력하지 않는다. */
+    body.printing #app,
+    body.printing .bg-glow,
+    body.printing .watermark,
+    body.printing #globalFeedbackContainer,
+    body.printing #globalFeedbackFloatingBtn,
+    body.printing #studentDetailModal,
+    body.printing #studentTranscriptModal,
+    body.printing #matrixModal,
+    body.printing #classApplicationSummaryModal,
+    body.printing #applicationRegisterModal,
+    body.printing #programGuideModal,
+    body.printing #predictionDetailModal {
+        display: none !important;
+    }
+    body.printing[data-print-kind="report"] #studentDetailModal,
+    body.printing[data-print-kind="transcript"] #studentTranscriptModal,
+    body.printing[data-print-kind="matrix"] #matrixModal,
+    body.printing[data-print-kind="summary"] #classApplicationSummaryModal,
+    body.printing[data-print-kind="register"] #applicationRegisterModal,
+    body.printing[data-print-kind="guide"] #programGuideModal,
+    body.printing[data-print-kind="prediction"] #predictionDetailModal {
+        display: block !important;
+        position: static !important;
+        inset: auto !important;
+        width: auto !important;
+        height: auto !important;
+        min-height: 0 !important;
+        overflow: visible !important;
+        padding: 0 !important;
+        background: white !important;
+        backdrop-filter: none !important;
+    }
+
+    .watermark, .no-print, header, nav {
+        display: none !important;
+    }
+    .glass-card {
+        background: white !important;
+        color: black !important;
+        box-shadow: none !important;
+        border: 1px solid #ddd !important;
+    }
+    .print-document, .print-modal {
+        position: static !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        max-height: none !important;
+        min-height: 0 !important;
+        overflow: visible !important;
+        background: white !important;
+        color: black !important;
+        padding: 0 !important;
+        box-shadow: none !important;
+        border: 0 !important;
+    }
+    /* 본문은 문서 기본색을 상속한다. 모든 요소를 검정으로 덮어쓰면
+       신호등·배지의 글자가 배경과 섞여 보이지 않게 된다. */
+    .print-document *, .print-modal * {
+        color: inherit !important;
+        border-color: #ccc !important;
+    }
+    .print-document, .print-modal {
+        color: #111 !important;
+    }
+    /* 화면의 다크 테마(slate/indigo 계열)를 그대로 출력하면 글자 대비가
+       무너진다. 인쇄물은 흰 바탕과 옅은 구분선으로 재구성한다. */
+    .print-document [class*="bg-slate-"],
+    .print-modal [class*="bg-slate-"] {
+        background: #fff !important;
+    }
+    .print-document [class*="bg-indigo-"],
+    .print-modal [class*="bg-indigo-"] {
+        background: #f5f3ff !important;
+    }
+    .print-document [class*="bg-cyan-"],
+    .print-modal [class*="bg-cyan-"] {
+        background: #ecfeff !important;
+    }
+    .print-document [class*="bg-emerald-"],
+    .print-modal [class*="bg-emerald-"] {
+        background: #ecfdf5 !important;
+    }
+    .print-document [class*="bg-primary"],
+    .print-modal [class*="bg-primary"] {
+        background: #eef2ff !important;
+    }
+    .print-document input,
+    .print-modal input {
+        background: #fff !important;
+        color: #111 !important;
+        border-color: #94a3b8 !important;
+    }
+    .print-document table th,
+    .print-modal table th {
+        background: #e2e8f0 !important;
+        color: #111 !important;
+    }
+    .print-document table td,
+    .print-modal table td {
+        background: #fff !important;
+        color: #111 !important;
+    }
+    /* 상담 판단 색상은 프린터의 배경 그래픽 옵션 없이도 식별되도록
+       진한 글자 + 매우 옅은 배경으로 고정한다. */
+    .print-document .text-success, .print-modal .text-success {
+        color: #166534 !important;
+    }
+    .print-document .text-warning, .print-modal .text-warning {
+        color: #92400e !important;
+    }
+    .print-document .text-danger, .print-modal .text-danger {
+        color: #b91c1c !important;
+    }
+    .print-document .text-primary, .print-modal .text-primary {
+        color: #4338ca !important;
+    }
+    .print-document [class*="bg-success"], .print-modal [class*="bg-success"] {
+        background: #dcfce7 !important;
+        border-color: #86efac !important;
+    }
+    .print-document [class*="bg-warning"], .print-modal [class*="bg-warning"] {
+        background: #fef3c7 !important;
+        border-color: #fcd34d !important;
+    }
+    .print-document [class*="bg-danger"], .print-modal [class*="bg-danger"] {
+        background: #fee2e2 !important;
+        border-color: #fca5a5 !important;
+    }
+    .print-document .overflow-x-auto,
+    .print-document .overflow-y-auto,
+    .print-modal .overflow-x-auto,
+    .print-modal .overflow-y-auto {
+        overflow: visible !important;
+        max-height: none !important;
+    }
+    .print-document thead,
+    .print-modal thead {
+        display: table-header-group;
+    }
+    .print-document tr,
+    .print-document .print-keep-together,
+    .print-modal .print-keep-together {
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
+    /* 매트릭스 인쇄 전용 고품질 라이트 테마 스타일 (A4 가로 최적화) */
+    body.printing[data-print-kind="matrix"] #matrixModal {
+        background: white !important;
+        padding: 0 !important;
+    }
+    body.printing[data-print-kind="matrix"] .glass-card {
+        background: white !important;
+        border: none !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+        color: #0f172a !important;
+    }
+    body.printing[data-print-kind="matrix"] .print-document {
+        font-size: 7.5pt !important;
+        color: #0f172a !important;
+        background: white !important;
+    }
+    body.printing[data-print-kind="matrix"] .print-document h2 {
+        color: #0f172a !important;
+        font-size: 15pt !important;
+        font-weight: 900 !important;
+        margin-bottom: 2mm !important;
+    }
+    /* 인쇄 시 불필요한 컨트롤 숨김 */
+    body.printing[data-print-kind="matrix"] .no-print,
+    body.printing[data-print-kind="matrix"] .matrix-6tab,
+    body.printing[data-print-kind="matrix"] #matrixClassSelect,
+    body.printing[data-print-kind="matrix"] #matrixSearchInput,
+    body.printing[data-print-kind="matrix"] #matrixSortSelect,
+    body.printing[data-print-kind="matrix"] #clearMatrixSearchBtn {
+        display: none !important;
+    }
+    /* 인쇄 테이블 기본 설정 */
+    body.printing[data-print-kind="matrix"] .print-document table {
+        width: 100% !important;
+        table-layout: fixed !important;
+        border-collapse: collapse !important;
+        border: 1.5px solid #475569 !important;
+        margin-top: 2mm !important;
+    }
+    body.printing[data-print-kind="matrix"] .print-document th {
+        background: #f1f5f9 !important;
+        color: #0f172a !important;
+        border: 1px solid #94a3b8 !important;
+        font-size: 7.5pt !important;
+        font-weight: 800 !important;
+        padding: 1.5mm 0.5mm !important;
+        text-align: center !important;
+        word-break: keep-all !important;
+        line-height: 1.2 !important;
+    }
+    body.printing[data-print-kind="matrix"] .print-document td {
+        background: white !important;
+        color: #0f172a !important;
+        border: 1px solid #cbd5e1 !important;
+        padding: 1.2mm 0.5mm !important;
+        font-size: 7.5pt !important;
+        text-align: center !important;
+        vertical-align: middle !important;
+    }
+    /* 인쇄 시 신호등 뱃지: 순백색 종이에 맞춘 밝고 선명한 고대비 컬러 (칸 넘침 방지) */
+    body.printing[data-print-kind="matrix"] td span {
+        display: inline-block !important;
+        max-width: 100% !important;
+        padding: 0.5mm 1.5mm !important;
+        font-size: 7.5pt !important;
+        line-height: 1.15 !important;
+        border-radius: 9999px !important;
+        box-sizing: border-box !important;
+        white-space: nowrap !important;
+    }
+    /* 🟢 안정 뱃지 (인쇄용 밝은 민트 바탕 + 짙은 녹색 글씨) */
+    body.printing[data-print-kind="matrix"] span.bg-emerald-950\/80,
+    body.printing[data-print-kind="matrix"] span.bg-emerald-600 {
+        background: #ecfdf5 !important;
+        color: #065f46 !important;
+        border: 1px solid #10b981 !important;
+        font-weight: 800 !important;
+    }
+    /* 🟡 적정/경계 뱃지 (인쇄용 밝은 노랑 바탕 + 짙은 갈색 글씨) */
+    body.printing[data-print-kind="matrix"] span.bg-amber-950\/80,
+    body.printing[data-print-kind="matrix"] span.bg-amber-500 {
+        background: #fefce8 !important;
+        color: #854d0e !important;
+        border: 1px solid #f59e0b !important;
+        font-weight: 800 !important;
+    }
+    /* 🔴 소신/주의 뱃지 (인쇄용 밝은 핑크 바탕 + 짙은 빨강 글씨) */
+    body.printing[data-print-kind="matrix"] span.bg-rose-950\/80,
+    body.printing[data-print-kind="matrix"] span.bg-rose-600 {
+        background: #fef2f2 !important;
+        color: #991b1b !important;
+        border: 1px solid #ef4444 !important;
+        font-weight: 800 !important;
+    }
+    /* 일반 텍스트 점수 */
+    body.printing[data-print-kind="matrix"] span.text-slate-300 {
+        color: #334155 !important;
+        font-weight: 600 !important;
+    }
+    /* 학반 뱃지 */
+    body.printing[data-print-kind="matrix"] span.bg-indigo-950 {
+        background: #eef2ff !important;
+        color: #3730a3 !important;
+        border: 1px solid #818cf8 !important;
+        font-weight: 800 !important;
+    }
+    .print-document,
+    .print-document *,
+    .print-modal,
+    .print-modal * {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+    /* 상담표는 화면에서 5:7로 나뉘지만 A4에서는 한 영역씩 배치해야
+       후기 일반고 입력 표와 학교별 결과 카드가 충분한 폭을 확보한다. */
+    body.printing[data-print-kind="report"] .print-modal .grid.grid-cols-1.lg\:grid-cols-12 {
+        display: block !important;
+    }
+    body.printing[data-print-kind="report"] .print-modal .grid.grid-cols-1.lg\:grid-cols-12 > section {
+        width: 100% !important;
+        margin: 0 0 4mm 0 !important;
+    }
+    body.printing[data-print-kind="report"] .print-modal input.input-field {
+        min-width: 0 !important;
+        padding: 1.5mm 1mm !important;
+        font-size: 9pt !important;
+    }
+    .print-modal .school-counsel-card {
+        background: white !important;
+        border: 1px solid #bbb !important;
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
+    .print-modal .gauge-bg {
+        background: #eee !important;
+        border: 1px solid #bbb !important;
+    }
+    .print-modal .gauge-fill {
+        background: #4f46e5 !important;
+        min-width: 3mm;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+    /* 고입원서대장 인쇄 전용 스타일: 검은색 선명한 테두리 및 인라인 입력창 텍스트화 */
+    body.printing[data-print-kind="register"] .print-document table {
+        border: 2px solid black !important;
+        border-collapse: collapse !important;
+        width: 100% !important;
+    }
+    body.printing[data-print-kind="register"] .print-document th,
+    body.printing[data-print-kind="register"] .print-document td {
+        border: 1px solid black !important;
+        color: black !important;
+    }
+    body.printing[data-print-kind="register"] .register-assigned-school-input {
+        border: none !important;
+        background: transparent !important;
+        color: black !important;
+        padding: 0 !important;
+        text-align: left !important;
+    }
+}

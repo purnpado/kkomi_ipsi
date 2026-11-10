@@ -1,5 +1,7 @@
 // ===== 🔒 개인정보 보호 자동 화면 잠금(Auto Screen Lock) 시스템 =====
 import { escapeHtml } from './utils.js';
+import { state } from './store.js';
+import { notifyLogout } from './navigation.js';
 
 export const ScreenLockManager = {
     timer: null,
@@ -19,7 +21,7 @@ export const ScreenLockManager = {
 
     init() {
         const onActivity = () => {
-            if (!this.isLocked && window.currentUser) {
+            if (!this.isLocked && state.currentUser) {
                 this.resetTimer();
             }
         };
@@ -31,7 +33,7 @@ export const ScreenLockManager = {
         // 단축키: Ctrl + L (또는 Cmd + L) 즉시 잠금
         window.addEventListener('keydown', (e) => {
             if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'l') {
-                if (window.currentUser && !this.isLocked) {
+                if (state.currentUser && !this.isLocked) {
                     e.preventDefault();
                     this.lockScreen('단축키');
                 }
@@ -48,7 +50,7 @@ export const ScreenLockManager = {
 
     resetTimer() {
         this.clearTimer();
-        if (!window.currentUser || this.isLocked) return;
+        if (!state.currentUser || this.isLocked) return;
 
         const ms = this.getTimeoutMs();
         if (ms > 0) {
@@ -59,11 +61,11 @@ export const ScreenLockManager = {
     },
 
     lockScreen(reason = '') {
-        if (this.isLocked || !window.currentUser) return;
+        if (this.isLocked || !state.currentUser) return;
         this.isLocked = true;
         this.clearTimer();
 
-        const user = window.currentUser;
+        const user = state.currentUser;
         let userTitle = '교직원';
         if (user.Role === 'master') {
             userTitle = '학년부장 (관리자)';
@@ -198,12 +200,8 @@ export const ScreenLockManager = {
             overlay.remove();
             this.isLocked = false;
             this.clearTimer();
-            window.currentUser = null;
-            if (typeof renderMainScreen === 'function') {
-                renderMainScreen();
-            } else {
-                location.reload();
-            }
+            notifyLogout();
+            location.reload();
         });
     }
 };

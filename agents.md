@@ -57,7 +57,11 @@ Gitea 원본을 복제한 뒤 다음 개발 도구를 설치해야 합니다.
 - `internal/parser/`, `internal/model/`: 나이스 엑셀 파서와 공용 데이터 구조
 - `app.go`, `app_*.go`: Wails 바인딩 시그니처를 유지하는 얇은 위임 계층(권한 확인·파일 대화상자). 공개 메서드명과 JSON 필드는 바꾸지 않습니다.
 - 모든 `.go`·`.js`·`.css` 파일은 **500줄 이하**를 유지합니다. 줄바꿈 제거 같은 편법 없이 책임 단위로 파일을 나눕니다.
-- `frontend/src/main.js`, `frontend/src/app.css`: 화면·상담·지원현황·인쇄 UI
+- `frontend/src/main.js`: 앱 부트스트랩과 최상위 이벤트 라우팅(화면·모달 라우팅 표)만 담당
+- `frontend/src/core/`: `eventBus.js`(이벤트 버스), `navigation.js`(navigate·openModal·변경 알림 발행 함수), `store.js`(중앙 상태 저장소), `wailsBridge.js`(Wails v3에서 `window.go.main.App.*` 호환), `dialogs.js`, `screenLock.js`, `updater.js`
+- `frontend/src/views/auth/`, `views/admin/`(대시보드·계정·취합 병합·`cutoff/` 커트라인), `views/teacher/`(학급 명렬표·`studentList/`·`counsel/` 1:1 상담·`simulation/` 합격 예측): 메뉴별 화면
+- `frontend/src/modals/`(`summary/`, `application/`, `analysis/`, `matrix/`), `frontend/src/styles/`(`app.css`가 `@import`): 모달과 스타일
+- 화면·모달 모듈끼리는 서로 직접 import 하지 않고 `core/navigation.js`의 발행 함수로 요청합니다. 새 화면·모달은 `main.js`의 라우팅 표에 등록합니다.
 - `server-data/highschools.json`: 고교·학과 마스터 목록
 - `server-data/version.json`, `internal/sync/manager.go`: 버전 확인과 릴리즈 안내
 - `docs/admission-score-audit-plan.md`: 학교별 공식 산출식 검증 기준
@@ -67,10 +71,10 @@ Gitea 원본을 복제한 뒤 다음 개발 도구를 설치해야 합니다.
 
 1. 교육청·각 고교의 당해 연도 입학전형요강을 확보합니다. 자동 수집하지 않습니다.
 2. `docs/admission-score-audit-plan.md`에 학교별 배점·반영 학기·마감일·1차 비교 기준을 기록합니다.
-3. `calc_school.go`와 관련 산출 테스트에 변경을 반영하고 공식 엑셀/표본 학생과 대조합니다.
+3. `internal/calc/`(`meister.go`, `vocational.go`, `school.go`)와 관련 산출 테스트에 변경을 반영하고 공식 엑셀/표본 학생과 대조합니다.
 4. `server-data/highschools.json`의 학교·학과 변경을 반영합니다. 내장 기본 목록(`internal/sync/manager.go`)도 함께 확인합니다.
 5. 공개 커트라인은 공식·교육청 자료와 학교 자료를 구분해 갱신합니다. 평균은 실제 확정 결과가 쌓일 때 자동 계산합니다.
-6. `frontend/src/main.js`의 입학년도·마감일·전형 표시를 확인합니다. 3학년 1학기 예상값과 마감 후 확정값을 혼동하지 않습니다.
+6. `frontend/src/views/`·`frontend/src/modals/`의 입학년도·마감일·전형 표시를 확인합니다. 3학년 1학기 예상값과 마감 후 확정값을 혼동하지 않습니다.
 7. `go test ./...`, `npm run build`, `wails build -s -trimpath -ldflags "-s -w"`를 실행합니다.
 
 ## 명칭·실행 파일 변경 시

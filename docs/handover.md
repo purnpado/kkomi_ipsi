@@ -20,6 +20,14 @@
 - 다른 에이전트가 이어서 작업할 수 있도록 루트 `agents.md`와 이 문서를 추가했습니다.
 - `go test ./...`와 `frontend` 프로덕션 빌드는 `e72b8be` 기준으로 통과했습니다. Wails 빌드와 `publish.ps1`은 실행 파일명 충돌을 해소한 뒤 다시 검증합니다.
 
+## 코드 구조 (2026-11-11 모듈화)
+
+- 백엔드: 루트에는 `main.go`와 Wails 바인딩 위임 파일 `app*.go`만 두고, 도메인 로직은 `internal/{model,parser,calc,crypto,database,exchange,sync}`에 있습니다. `App` 공개 메서드명과 JSON 필드는 그대로입니다.
+- 프론트엔드: `frontend/src/main.js`는 부트스트랩·이벤트 라우팅 전용이며, 화면은 `views/`, 모달은 `modals/`, 공통 기반은 `core/`, 스타일은 `styles/`에 있습니다. 화면 간 연결은 `core/navigation.js`(이벤트 버스)로만 합니다.
+- Wails v3 연결: `core/wailsBridge.js`가 `@wailsio/runtime`(3.1.0 고정)의 `Call.ByName("main.App.메서드")`로 기존 `window.go.main.App.*` 호출을 연결합니다. Go 쪽 `App` 메서드를 추가하면 `frontend/wailsjs/go/main/App.js`에도 같은 이름을 추가해야 브릿지가 노출합니다.
+- 모든 `.go`·`.js`·`.css` 파일은 500줄 이하입니다. 새 코드도 이 기준을 지킵니다.
+- 화면 검증 방법(macOS): `go build -tags server -o <임시폴더>/kkomi .` 후 `WAILS_SERVER_PORT=<포트> ./kkomi`로 띄우면 브라우저에서 실제 백엔드와 함께 화면을 확인할 수 있습니다(파일 대화상자는 동작하지 않음, `data`는 실행 파일 옆에 생성).
+
 ## macOS(MacBook) 작업 시작
 
 macOS에서는 소스·합성 테스트·프론트엔드 작업을 이어갈 수 있습니다. Xcode Command Line Tools, Go, Node.js/npm, Wails CLI를 준비한 뒤 아래 순서로 확인합니다. WebView2는 Windows 전용이므로 설치하지 않습니다.

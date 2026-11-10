@@ -1,5 +1,6 @@
-import { escapeHtml, escapeAttr } from '../core/utils.js';
+import { escapeHtml } from '../core/utils.js';
 import { showModalAlert, showModalConfirm, showModalPrompt } from '../core/dialogs.js';
+import { state } from '../core/store.js';
 
 /**
  * 관내 고입 결과 공유 및 취합 관리 모달 (V2 규격)
@@ -27,7 +28,7 @@ export async function openSharedAdmissionModal() {
         console.warn('참여 학교 목록 조회 실패:', e);
     }
 
-    const isMaster = window.currentUser && window.currentUser.Role === 'master';
+    const isMaster = state.currentUser && state.currentUser.Role === 'master';
 
     const modal = document.createElement('div');
     modal.id = 'sharedAdmissionModal';

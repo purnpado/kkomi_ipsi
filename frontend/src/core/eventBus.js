@@ -16,6 +16,9 @@ export const EVENTS = {
     LOGIN_SUCCESS: 'auth:login-success',
     LOGOUT: 'auth:logout',
 
+    // 학생 선택
+    STUDENT_SELECTED: 'student:selected',
+
     // 데이터 변경 및 통계 갱신
     CLASS_UPDATED: 'data:class-updated',
     APPLICATIONS_CHANGED: 'data:applications-changed',
@@ -75,14 +78,17 @@ class EventBusImpl {
      * 이벤트 발행 (모든 구독자에게 디스패치)
      * @param {string} eventName 
      * @param {any} detail 페이로드 데이터
+     * @returns {any[]} 각 구독자의 반환값 (비동기 구독자는 Promise)
      */
     emit(eventName, detail = null) {
+        const results = [];
         // 1. 내부 메모리 버스 핸들러 호출
         const handlers = this.listeners.get(eventName);
         if (handlers) {
-            handlers.forEach(handler => {
+            // 처리 도중 구독이 바뀌어도 안전하도록 사본을 순회한다.
+            Array.from(handlers).forEach(handler => {
                 try {
-                    handler(detail);
+                    results.push(handler(detail));
                 } catch (err) {
                     console.error(`[EventBus] Error in handler for event "${eventName}":`, err);
                 }
@@ -95,6 +101,7 @@ class EventBusImpl {
                 window.dispatchEvent(new CustomEvent(eventName, { detail }));
             } catch (_) {}
         }
+        return results;
     }
 }
 

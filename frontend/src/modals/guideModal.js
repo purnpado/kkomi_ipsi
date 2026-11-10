@@ -1,10 +1,11 @@
 // ===== 프로그램 사용 설명서(가이드) 모달 및 A4 인쇄 =====
 import { printOnly } from '../print/printEngine.js';
+import { state } from '../core/store.js';
 
 export function renderGuideModal(role = 'homeroom') {
     document.getElementById('programGuideModal')?.remove();
 
-    const isMaster = (role === 'master' || window.currentUser?.Role === 'master');
+    const isMaster = (role === 'master' || state.currentUser?.Role === 'master');
 
     const modal = document.createElement('div');
     modal.id = 'programGuideModal';

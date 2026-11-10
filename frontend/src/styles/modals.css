@@ -1,0 +1,11 @@
+/* 꼬미입시 모달·오버레이 스타일: 화면 잠금 */
+
+/* ===== 개인정보 보호 화면 잠금(Screen Lock) 애니메이션 ===== */
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20%, 60% { transform: translateX(-7px); }
+    40%, 80% { transform: translateX(7px); }
+}
+.animate-shake {
+    animation: shake 0.4s ease-in-out;
+}
