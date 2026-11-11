@@ -343,7 +343,7 @@ export async function openApplicationSummaryModal() {
             if (review.pendingCount) return await showModalAlert(`진행 중인 기록이 ${review.pendingCount}건 있습니다. 모두 합격·불합격·포기·최종 진학으로 결과를 입력한 뒤 확정해주세요.`, '진행 중 기록 존재', 'warning');
             const confirmed = await showModalConfirm({
                 title: '입시 결과 확정',
-                message: `${admissionLabel(admissionYear)} 입시 결과를 확정할까요?\n\n확정하면 해당 연도 지원현황을 수정할 수 없고, 합격 결과의 최고·최저·평균이 우리 학교 커트라인에 자동 반영됩니다.`,
+                message: `${admissionLabel(admissionYear)} 입시 결과를 확정할까요?\n\n확정하면 해당 연도 지원현황을 수정할 수 없고, 합격 결과의 최고·최저·평균이 우리 학교 커트라인에 자동 반영됩니다. 원서 결과는 이름·학번 없이 따로 보관되어 인수인계 파일과 다음 학년도 분석에 쓰입니다.`,
                 confirmText: '확정하기',
                 type: 'warning'
             });
