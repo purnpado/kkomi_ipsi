@@ -38,6 +38,16 @@ func cleanupLegacyWebViewData() {
 	}
 }
 
+// legacyWebviewDataPath v1.6.2와 같은 WebView2 사용자 데이터 폴더(%APPDATA%\PHGC_WebviewData).
+// 윈도우가 아니거나 APPDATA가 없으면 빈 값(기본 위치)을 쓴다.
+func legacyWebviewDataPath() string {
+	appData := os.Getenv("APPDATA")
+	if appData == "" {
+		return ""
+	}
+	return filepath.Join(appData, "PHGC_WebviewData")
+}
+
 func main() {
 	// 1. 과거 버전 실행 잔여 임시 캐시 폴더 자동 청소
 	cleanupLegacyWebViewData()
@@ -55,6 +65,11 @@ func main() {
 		},
 		Mac: application.MacOptions{
 			ApplicationShouldTerminateAfterLastWindowClosed: true,
+		},
+		Windows: application.WindowsOptions{
+			// v1.6.2(PHGC)와 같은 화면 저장소를 써서, 상담 화면의 목표고교 목록·결재란·화면 잠금 시간 등
+			// 브라우저 저장소(localStorage)에 남아 있던 설정과 자료를 그대로 이어 쓴다.
+			WebviewUserDataPath: legacyWebviewDataPath(),
 		},
 		OnShutdown: func() {
 			appService.shutdown(context.Background())
