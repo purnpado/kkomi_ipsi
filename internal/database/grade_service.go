@@ -129,16 +129,18 @@ func (dm *DBManager) RefreshClassSchoolScoreCache(classNum int) error {
 	if err != nil {
 		return err
 	}
+	// 학급 전체를 한 번의 연결·트랜잭션으로 저장한다(학생마다 DB를 열고 스키마를 확인하면 올리기가 수십 초 걸린다).
+	results := make(map[string][]calc.SchoolCalcResult, len(students))
+	keys := make([][2]string, 0, len(students))
 	for _, student := range students {
 		full, err := calc.ParseStudentFullData(student)
 		if err != nil {
 			return fmt.Errorf("%s 학생: %w", student.Name, err)
 		}
-		if err := dm.ReplaceStudentSchoolScores(classNum, student.StudentNum, student.Name, full.SchoolResults); err != nil {
-			return err
-		}
+		results[student.StudentNum+"\x1f"+student.Name] = full.SchoolResults
+		keys = append(keys, [2]string{student.StudentNum, student.Name})
 	}
-	return nil
+	return dm.replaceClassSchoolScores(classNum, keys, results)
 }
 
 // GetStudentFullDetail 학생 1명의 10개 고교별 산출 결과 및 상세 내역 반환

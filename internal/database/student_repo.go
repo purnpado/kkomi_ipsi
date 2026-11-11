@@ -227,6 +227,47 @@ func (dm *DBManager) ReplaceStudentSchoolScores(classNum int, studentNum, name s
 	return tx.Commit()
 }
 
+// replaceClassSchoolScores 학급 학생 전체의 학교별 점수를 한 트랜잭션으로 교체한다.
+func (dm *DBManager) replaceClassSchoolScores(classNum int, keys [][2]string, results map[string][]calc.SchoolCalcResult) error {
+	if err := dm.InitClassDB(classNum); err != nil {
+		return err
+	}
+	db, err := dm.OpenDB(dm.GetClassDBPath(classNum))
+	if err != nil {
+		return err
+	}
+	defer db.Close()
+	tx, err := db.Begin()
+	if err != nil {
+		return err
+	}
+	del, err := tx.Prepare("DELETE FROM student_school_scores WHERE student_num = ? AND student_name = ?")
+	if err != nil {
+		_ = tx.Rollback()
+		return err
+	}
+	defer del.Close()
+	ins, err := tx.Prepare("INSERT INTO student_school_scores (student_num, student_name, school_name, track, total_score, total_max, updated_at) VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)")
+	if err != nil {
+		_ = tx.Rollback()
+		return err
+	}
+	defer ins.Close()
+	for _, k := range keys {
+		if _, err := del.Exec(k[0], k[1]); err != nil {
+			_ = tx.Rollback()
+			return err
+		}
+		for _, r := range results[k[0]+"\x1f"+k[1]] {
+			if _, err := ins.Exec(k[0], k[1], r.SchoolName, r.TrackName, r.TotalScore, r.TotalMax); err != nil {
+				_ = tx.Rollback()
+				return err
+			}
+		}
+	}
+	return tx.Commit()
+}
+
 func (dm *DBManager) GetStudentSchoolScore(classNum int, studentNum, name, schoolName, track string) (*calc.SchoolCalcResult, error) {
 	if err := dm.InitClassDB(classNum); err != nil {
 		return nil, err

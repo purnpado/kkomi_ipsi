@@ -17,10 +17,26 @@ func (dm *DBManager) ProcessMultipleExcel(filePaths []string) (map[int]int, erro
 	result := make(map[int]int)
 	var errors []string
 
+	// 반 번호 확인을 먼저 끝낸 뒤 저장한다(학교 설정보다 큰 반이 있으면 아무것도 저장하지 않는다).
+	parsed := map[string]map[int][]parser.StudentExcelData{}
+	var classNums []int
 	for _, filePath := range filePaths {
 		classData, err := parser.ParseExcel(filePath)
 		if err != nil {
 			errors = append(errors, fmt.Sprintf("[%s] 파싱 실패: %v", filepath.Base(filePath), err))
+			continue
+		}
+		parsed[filePath] = classData
+		for c := range classData {
+			classNums = append(classNums, c)
+		}
+	}
+	if err := dm.checkClassRange(classNums); err != nil {
+		return nil, err
+	}
+	for _, filePath := range filePaths {
+		classData, ok := parsed[filePath]
+		if !ok {
 			continue
 		}
 
@@ -56,10 +72,26 @@ func (dm *DBManager) ProcessMultipleAttendanceExcel(filePaths []string) (map[int
 	result := make(map[int]int)
 	var errors []string
 
+	// 반 번호 확인을 먼저 끝낸 뒤 저장한다(학교 설정보다 큰 반이 있으면 아무것도 저장하지 않는다).
+	parsed := map[string]map[int][]parser.StudentExcelData{}
+	var classNums []int
 	for _, filePath := range filePaths {
 		classData, err := parser.ParseAttendanceExcel(filePath)
 		if err != nil {
 			errors = append(errors, fmt.Sprintf("[%s] 파싱 실패: %v", filepath.Base(filePath), err))
+			continue
+		}
+		parsed[filePath] = classData
+		for c := range classData {
+			classNums = append(classNums, c)
+		}
+	}
+	if err := dm.checkClassRange(classNums); err != nil {
+		return nil, err
+	}
+	for _, filePath := range filePaths {
+		classData, ok := parsed[filePath]
+		if !ok {
 			continue
 		}
 
@@ -95,10 +127,26 @@ func (dm *DBManager) ProcessMultipleVolunteerExcel(filePaths []string) (map[int]
 	result := make(map[int]int)
 	var errors []string
 
+	// 반 번호 확인을 먼저 끝낸 뒤 저장한다(학교 설정보다 큰 반이 있으면 아무것도 저장하지 않는다).
+	parsed := map[string]map[int][]parser.StudentExcelData{}
+	var classNums []int
 	for _, filePath := range filePaths {
 		classData, err := parser.ParseVolunteerExcel(filePath)
 		if err != nil {
 			errors = append(errors, fmt.Sprintf("[%s] 파싱 실패: %v", filepath.Base(filePath), err))
+			continue
+		}
+		parsed[filePath] = classData
+		for c := range classData {
+			classNums = append(classNums, c)
+		}
+	}
+	if err := dm.checkClassRange(classNums); err != nil {
+		return nil, err
+	}
+	for _, filePath := range filePaths {
+		classData, ok := parsed[filePath]
+		if !ok {
 			continue
 		}
 

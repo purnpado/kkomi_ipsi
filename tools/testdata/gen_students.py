@@ -12,13 +12,14 @@
 사용법: python3 tools/testdata/gen_students.py [출력폴더]   (기본: test-data/가상학생)
 출력 폴더(test-data/)와 CSV는 .gitignore 대상이다.
 """
+import argparse
 import csv
 import os
 import random
-import sys
 
 SEED = 20271
-SCHOOL_YEAR = 2026  # 현 중3 학년도(2027 고입)
+SCHOOL_YEAR = 2026  # 현 중3 학년도(2027 고입). --school-year로 바꾼다.
+ABILITY_SHIFT = 0.0  # 학교 전체 학력 수준 조정(--shift). 시뮬레이터가 학교마다 다르게 준다.
 
 SUBJECTS = {
     "1_1": ["국어", "사회", "도덕", "수학", "과학", "기술·가정", "영어", "체육", "음악", "미술"],
@@ -64,10 +65,14 @@ def grade_letter(x, arts=False):
 
 
 def make_names(rng, n):
-    names = set()
+    # set의 순서는 실행마다 달라지므로(문자열 해시 무작위화) 만든 순서를 지켜 같은 씨앗이면 같은 자료가 나오게 한다.
+    names, seen = [], set()
     while len(names) < n:
-        names.add(rng.choice(SURNAMES) + rng.choice(SYL) + rng.choice(SYL))
-    return list(names)
+        name = rng.choice(SURNAMES) + rng.choice(SYL) + rng.choice(SYL)
+        if name not in seen:
+            seen.add(name)
+            names.append(name)
+    return names
 
 
 def effective_ability(st):
@@ -90,9 +95,11 @@ def build_students(rng, total):
     names = make_names(rng, total)
     students = []
     for i in range(total):
-        students.append({"name": names[i], "ability": rng.gauss(0.1, 0.9), "tags": [], "grades": {}, "att": {}, "vol": {}})
+        students.append({"name": names[i], "ability": rng.gauss(0.1 + ABILITY_SHIFT, 0.9), "tags": [], "grades": {}, "att": {}, "vol": {}})
+    scale = total / 255  # 유형 인원은 255명 기준이며 학교 규모에 맞춰 늘리거나 줄인다
     for name, group in PROFILE_GROUPS.items():
-        tags = [tag for tag, count in group for _ in range(count)]
+        tags = [tag for tag, count in group for _ in range(max(1, round(count * scale)))]
+        tags = tags[:len(students)]
         if name in ("출결", "봉사"):
             # 미인정 결석·지각과 낮은 봉사 시간은 중하위권에 많이 몰리게 한다(상위권에도 드물게 남긴다).
             # 학력이 낮을수록 뽑힐 가중치가 커진다: 하위 30% ≈ 상위 30%의 5배.
@@ -231,11 +238,11 @@ def build_volunteer(rng, s):
         s["vol"][g] = sorted(rows, key=lambda r: r[1])
 
 
-def assign_classes(rng, students):
+def assign_classes(rng, students, class_count=10):
     rng.shuffle(students)
-    sizes = [rng.randint(23, 28) for _ in range(10)]
+    sizes = [rng.randint(23, 28) for _ in range(class_count)]
     while sum(sizes) != len(students):
-        i = rng.randrange(10)
+        i = rng.randrange(class_count)
         if sum(sizes) > len(students) and sizes[i] > 23:
             sizes[i] -= 1
         elif sum(sizes) < len(students) and sizes[i] < 28:
@@ -326,11 +333,20 @@ def write_profile_list(path, classes):
 
 
 def main():
-    out = sys.argv[1] if len(sys.argv) > 1 else os.path.join("test-data", "가상학생")
-    rng = random.Random(SEED)
-    sizes_total = 255
-    students = build_students(rng, sizes_total)
-    classes = assign_classes(rng, students)
+    global SCHOOL_YEAR, ABILITY_SHIFT
+    ap = argparse.ArgumentParser(description="꼬미입시 가상 학생 자료 생성")
+    ap.add_argument("out", nargs="?", default=os.path.join("test-data", "가상학생"), help="출력 폴더")
+    ap.add_argument("--seed", type=int, default=SEED, help="난수 씨앗(같으면 같은 자료)")
+    ap.add_argument("--classes", type=int, default=10, help="반 수(반마다 23~28명)")
+    ap.add_argument("--shift", type=float, default=0.0, help="학교 학력 수준 조정(+는 높게)")
+    ap.add_argument("--school-year", type=int, default=SCHOOL_YEAR, help="현 중3 학년도(고입 학년도 - 1)")
+    args = ap.parse_args()
+    SCHOOL_YEAR, ABILITY_SHIFT = args.school_year, args.shift
+    rng = random.Random(args.seed)
+    total = sum(rng.randint(23, 28) for _ in range(args.classes)) if args.classes != 10 or args.seed != SEED else 255
+    students = build_students(rng, total)
+    classes = assign_classes(rng, students, args.classes)
+    out = args.out
     write_version(os.path.join(out, "v1_3학년1학기까지"), classes, with_final=False)
     write_version(os.path.join(out, "v2_3학년2학기포함"), classes, with_final=True)
     write_profile_list(os.path.join(out, "학생별_유형_목록.csv"), classes)

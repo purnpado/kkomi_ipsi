@@ -7,6 +7,7 @@ import { app } from '../../core/dom.js';
 import { navigate, notifyLogout, openModal, requestScreenLock } from '../../core/navigation.js';
 import { state } from '../../core/store.js';
 import { renderAdmissionYearNotice } from './admissionYearNotice.js';
+import { bindYearControls } from './yearControls.js';
 import { admissionLabel, admissionLongLabel, admissionYearHint, currentAdmissionYear } from '../../core/admissionYear.js';
 
 // ===== 화면 렌더링 함수들 =====
@@ -133,6 +134,7 @@ export async function renderAdminScreen(schoolName) {
                     <span class="text-slate-600 hidden sm:inline">|</span>
                     <!-- 연도 전환 및 초기화 -->
                     <button id="changeAdmissionYearBtn" class="text-sky-300/90 border border-sky-500/30 hover:bg-sky-500/10 transition-colors cursor-pointer text-xs px-2.5 py-1.5 rounded-lg font-bold inline-flex items-center gap-1" style="width: auto;" title="학생 자료는 그대로 두고 학교 설정의 고입 연도만 바꿉니다">📅 고입 연도 변경</button>
+                    <button id="changeClassCountBtn" class="text-sky-300/90 border border-sky-500/30 hover:bg-sky-500/10 transition-colors cursor-pointer text-xs px-2.5 py-1.5 rounded-lg font-bold inline-flex items-center gap-1" style="width: auto;" title="학급 수를 바꿉니다. 늘어난 반은 담임 계정을 새로 만들고 줄어든 반의 담임 계정은 정리합니다">🏫 학급 수 변경</button>
                     <button id="resetYearBtn" class="text-amber-400/90 border border-amber-500/30 hover:bg-amber-500/10 transition-colors cursor-pointer text-xs px-2.5 py-1.5 rounded-lg font-bold inline-flex items-center gap-1" style="width: auto;" title="커트라인은 보존하고 학생 성적·출결·봉사 자료를 비운 뒤 새 고입 연도로 시작합니다">
                         🔄 새 학년 시작
                     </button>
@@ -270,49 +272,8 @@ export async function renderAdminScreen(schoolName) {
         navigate('teacher', { schoolName, classNum: null });
     });
 
-    document.getElementById('resetYearBtn')?.addEventListener('click', async () => {
-        const nextYear = await showModalPrompt({
-            title: '새 학년 시작 (학생 자료 초기화)',
-            message: `학생 성적·출결·봉사 자료를 비우고 새로 시작할 고입 학년도를 입력하세요.\n${admissionYearHint(currentAdmissionYear())}\n\n※ 학생 자료를 지우지 않으려면 [고입 연도 변경]을 사용하세요.`,
-            defaultValue: String(currentAdmissionYear()),
-            placeholder: String(currentAdmissionYear())
-        });
-        if (!nextYear) return;
-
-        const confirmed = await showModalConfirm({
-            title: '새 학년 시작 확인',
-            message: `[${admissionLongLabel(parseInt(nextYear))}]로 전환하시겠습니까?\n\n※ 고교별 커트라인 데이터는 안전하게 보존되며, 학생들의 성적/출결/봉사 데이터만 깔끔하게 초기화됩니다.`,
-            confirmText: '전환하기',
-            type: 'warning'
-        });
-        if (confirmed) {
-            try {
-                await window.go.main.App.ResetAcademicYear(parseInt(nextYear));
-                await showModalAlert(`${admissionLabel(parseInt(nextYear))}으로 전환되었습니다!`, '전환 완료', 'success');
-                renderAdminScreen(schoolName);
-            } catch (err) {
-                await showModalAlert("새 학년 시작 실패: " + err, '오류', 'error');
-            }
-        }
-    });
-
-    document.getElementById('resetDataBtn')?.addEventListener('click', async () => {
-        const confirmed = await showModalConfirm({
-            title: '전체 데이터 초기화',
-            message: "정말 모든 데이터를 완전 초기화하시겠습니까?\n학교 설정과 업로드된 모든 성적 파일이 삭제되며 되돌릴 수 없습니다.",
-            confirmText: '완전 초기화',
-            type: 'error'
-        });
-        if (confirmed) {
-            try {
-                await window.go.main.App.ResetAllData();
-                await showModalAlert("모든 데이터가 초기화되었습니다. 프로그램이 재시작됩니다.", '초기화 완료', 'success');
-                window.location.reload();
-            } catch (err) {
-                await showModalAlert("데이터 초기화 실패: " + err, '오류', 'error');
-            }
-        }
-    });
+    // 학급 수 변경·새 학년 시작·전체 초기화(별도 모듈)
+    bindYearControls({ schoolName, classCount, rerender: () => renderAdminScreen(schoolName) });
 
     document.getElementById('refreshBtn').addEventListener('click', () => {
         renderAdminScreen(schoolName);

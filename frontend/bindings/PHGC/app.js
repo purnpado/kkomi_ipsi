@@ -782,7 +782,7 @@ export function ReopenAdmissionYear(admissionYear) {
 }
 
 /**
- * ResetAcademicYear 입시년도 전환 시 커트라인을 제외한 모든 학급 데이터 삭제
+ * ResetAcademicYear 입시년도 전환 시 커트라인을 제외한 모든 학급 데이터를 보관 폴더로 옮긴다(학년부장 전용).
  * @param {number} newYear
  * @returns {$CancellablePromise<void>}
  */
@@ -970,6 +970,17 @@ export function SetupApp(req) {
 }
 
 /**
+ * StartNewAcademicYear 새 학년 시작: 지난 학년도 학급 자료를 보관 폴더로 옮기고 새 고입 학년도·학급 수로 시작한다.
+ * 커트라인·결과 확정 기록·관내 공유 자료는 그대로 남는다.
+ * @param {number} newYear
+ * @param {number} classCount
+ * @returns {$CancellablePromise<void>}
+ */
+export function StartNewAcademicYear(newYear, classCount) {
+    return $Call.ByID(976817957, newYear, classCount);
+}
+
+/**
  * SyncWithServer Gitea 서버와 동기화 실행
  * @returns {$CancellablePromise<sync$0.SyncResult | null>}
  */
@@ -1022,6 +1033,15 @@ export function UpdateAdmissionYear(admissionYear) {
  */
 export function UpdateAssignedSchool(classNum, studentNum, studentName, assignedSchool) {
     return $Call.ByID(3467985720, classNum, studentNum, studentName, assignedSchool);
+}
+
+/**
+ * UpdateClassCount 학급 수 변경(학년부장 전용): 늘어난 반 담임 계정을 만들고 줄어든 반 계정을 지운다.
+ * @param {number} classCount
+ * @returns {$CancellablePromise<void>}
+ */
+export function UpdateClassCount(classCount) {
+    return $Call.ByID(1983937595, classCount);
 }
 
 /**

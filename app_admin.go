@@ -125,9 +125,41 @@ func (a *App) ResetAllData() error {
 	return nil
 }
 
-// ResetAcademicYear 입시년도 전환 시 커트라인을 제외한 모든 학급 데이터 삭제
+// ResetAcademicYear 입시년도 전환 시 커트라인을 제외한 모든 학급 데이터를 보관 폴더로 옮긴다(학년부장 전용).
 func (a *App) ResetAcademicYear(newYear int) error {
+	if a.user == nil || a.user.Role != "master" {
+		return fmt.Errorf("새 학년 시작은 학년부장 계정만 할 수 있습니다")
+	}
 	return a.db.ResetAcademicYear(newYear)
+}
+
+// StartNewAcademicYear 새 학년 시작: 지난 학년도 학급 자료를 보관 폴더로 옮기고 새 고입 학년도·학급 수로 시작한다.
+// 커트라인·결과 확정 기록·관내 공유 자료는 그대로 남는다.
+func (a *App) StartNewAcademicYear(newYear, classCount int) error {
+	if a.user == nil || a.user.Role != "master" {
+		return fmt.Errorf("새 학년 시작은 학년부장 계정만 할 수 있습니다")
+	}
+	if classCount < 1 || classCount > 30 {
+		return fmt.Errorf("학급 수는 1~30 사이여야 합니다")
+	}
+	if err := a.db.ResetAcademicYear(newYear); err != nil {
+		return err
+	}
+	if err := a.db.UpdateClassCount(classCount); err != nil {
+		return err
+	}
+	return a.refreshLoginIndex()
+}
+
+// UpdateClassCount 학급 수 변경(학년부장 전용): 늘어난 반 담임 계정을 만들고 줄어든 반 계정을 지운다.
+func (a *App) UpdateClassCount(classCount int) error {
+	if a.user == nil || a.user.Role != "master" {
+		return fmt.Errorf("학급 수 변경은 학년부장 계정만 할 수 있습니다")
+	}
+	if err := a.db.UpdateClassCount(classCount); err != nil {
+		return err
+	}
+	return a.refreshLoginIndex()
 }
 
 // GetDataUpdateStatus 교과, 출결, 봉사 데이터의 저장 상태 반환

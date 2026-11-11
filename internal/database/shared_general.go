@@ -40,6 +40,22 @@ type SharedGeneralDetail struct {
 // 점수는 원서 저장 당시 스냅샷이 아니라 지금 학생 자료로 다시 계산한 최신값(12월 확정치)을 쓴다.
 func (dm *DBManager) buildGeneralAnonymousRecords(records []model.ApplicationRecord, admissionYear int) []AnonymousApplicationRecord {
 	out := []AnonymousApplicationRecord{}
+	// 학급마다 한 번만 전교 석차를 계산한다(학생마다 다시 계산하면 공유 파일 만들기가 수 분 걸린다).
+	classCache := map[int]map[string]calc.StudentFullData{}
+	lookup := func(r model.ApplicationRecord) (calc.StudentFullData, bool) {
+		byStudent, ok := classCache[r.ClassNum]
+		if !ok {
+			byStudent = map[string]calc.StudentFullData{}
+			if list, err := dm.GetClassFullGrades(r.ClassNum, true); err == nil {
+				for _, f := range list {
+					byStudent[strings.TrimSpace(f.StudentNum)+"|"+strings.TrimSpace(f.Name)] = f
+				}
+			}
+			classCache[r.ClassNum] = byStudent
+		}
+		f, ok := byStudent[strings.TrimSpace(r.StudentNum)+"|"+strings.TrimSpace(r.StudentName)]
+		return f, ok
+	}
 	for _, r := range records {
 		if r.Category != "general" || (r.AdmissionYear > 0 && r.AdmissionYear != admissionYear) {
 			continue
@@ -47,8 +63,8 @@ func (dm *DBManager) buildGeneralAnonymousRecords(records []model.ApplicationRec
 		if r.Status != "합격" && r.Status != "불합격" && r.Status != "최종 진학" {
 			continue // 결과가 나온 기록만 합격선 자료가 된다
 		}
-		full, err := dm.GetStudentFullDetail(r.ClassNum, r.StudentNum, r.StudentName, true)
-		if err != nil || full == nil || full.GeneralHSAcademicScore <= 0 {
+		full, found := lookup(r)
+		if !found || full.GeneralHSAcademicScore <= 0 {
 			continue
 		}
 		detail := SharedGeneralDetail{

@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -202,11 +203,20 @@ func (dm *DBManager) GetFeedbackIssues() ([]FeedbackIssue, error) {
 
 // ResetAcademicYear 입시년도 전환 시 커트라인 데이터(highschool_cutoffs)를 제외한 모든 학급 데이터 삭제
 func (dm *DBManager) ResetAcademicYear(newYear int) error {
-	// 1. 모든 class_*.db 파일 삭제
-	files, err := filepath.Glob(filepath.Join(dm.DataDir, "class_*.db"))
-	if err == nil {
+	// 1. 지난 학년도 학급 DB를 data/backup_new_year/<시각>/ 으로 옮긴다.
+	// 작업용 평문(class_N.db, -wal, -shm)뿐 아니라 암호화 보관본(class_N.db.kkomi)도 함께 옮겨야
+	// 다음 로그인 때 옛 학급 자료가 되살아나지 않는다(새 자료를 올리지 않은 반이 있는 경우).
+	// 삭제하지 않고 옮겨 두어 실수로 눌렀을 때 되돌릴 수 있게 한다.
+	files, err := filepath.Glob(filepath.Join(dm.DataDir, "class_*.db*"))
+	if err == nil && len(files) > 0 {
+		backupDir := filepath.Join(dm.DataDir, "backup_new_year", time.Now().Format("20060102-150405"))
+		if err := os.MkdirAll(backupDir, 0o700); err != nil {
+			return fmt.Errorf("지난 학년도 자료 보관 폴더를 만들 수 없습니다: %w", err)
+		}
 		for _, f := range files {
-			_ = os.Remove(f)
+			if err := os.Rename(f, filepath.Join(backupDir, filepath.Base(f))); err != nil {
+				return fmt.Errorf("지난 학년도 학급 자료를 옮기지 못했습니다(%s): %w", filepath.Base(f), err)
+			}
 		}
 	}
 
