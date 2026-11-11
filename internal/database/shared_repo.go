@@ -51,11 +51,14 @@ func (dm *DBManager) InitSharedDatabaseTables() error {
 		stage1_school_score REAL DEFAULT 0,
 		score_details_json TEXT DEFAULT '',
 		formula_version TEXT DEFAULT '',
+		first_stage_result TEXT DEFAULT '',
 		FOREIGN KEY(school_pkg_id) REFERENCES shared_participating_schools(id) ON DELETE CASCADE
 	)`)
 	if err != nil {
 		return err
 	}
+
+	_, _ = db.Exec(`ALTER TABLE shared_anonymous_scores ADD COLUMN first_stage_result TEXT DEFAULT ''`)
 
 	// 3. 요약 통계 테이블 (다중 학교 모멘트 합산용)
 	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS shared_summary_stats (
@@ -130,6 +133,9 @@ func (dm *DBManager) BuildSharedPackageV2(admissionYear int) (*SharedPackageV2, 
 		if strings.TrimSpace(r.SchoolName) == "" {
 			continue
 		}
+		if !model.IsScoredCategory(r.Category) {
+			continue // 자사고·외고·예술고 등 별도 전형 학교는 점수 커트라인 자료가 아니다.
+		}
 
 		dept := strings.TrimSpace(r.AssignedDepartment)
 		rank := 1
@@ -151,15 +157,16 @@ func (dm *DBManager) BuildSharedPackageV2(admissionYear int) (*SharedPackageV2, 
 		}
 
 		anon := AnonymousApplicationRecord{
-			HighSchool:     normalizeCutoffSchool(r.SchoolName),
-			Department:     normalizeCutoffDept(dept),
-			Track:          normalizeCutoffTrack(r.Track),
-			PreferenceRank: rank,
-			Status:         r.Status,
-			Score:          r.Score,
-			ScoreBasis:     r.ScoreBasis,
-			ScoreDetails:   details,
-			FormulaVersion: details.FormulaVersion,
+			HighSchool:       normalizeCutoffSchool(r.SchoolName),
+			Department:       normalizeCutoffDept(dept),
+			Track:            normalizeCutoffTrack(r.Track),
+			PreferenceRank:   rank,
+			Status:           r.Status,
+			Score:            r.Score,
+			ScoreBasis:       r.ScoreBasis,
+			ScoreDetails:     details,
+			FormulaVersion:   details.FormulaVersion,
+			FirstStageResult: r.FirstStageResult,
 		}
 		anonymousRecords = append(anonymousRecords, anon)
 	}
@@ -191,7 +198,8 @@ func (dm *DBManager) BuildSharedPackageV2(admissionYear int) (*SharedPackageV2, 
 			accSumSq = calc.Round2((accCount-1.0)*variance + accCount*ds.AcceptedAvg*ds.AcceptedAvg)
 		}
 
-		rejCount := float64(ds.RejectedCount)
+		// 2차(면접 등) 탈락자는 불합격 점수 평균에 들어 있지 않으므로 합계 계산에서도 뺀다.
+		rejCount := float64(ds.RejectedCount - ds.Stage2FailCount)
 		rejSum := calc.Round2(ds.RejectedAvg * rejCount)
 
 		scoreType := "총점"
@@ -308,8 +316,8 @@ func (dm *DBManager) ImportV2Package(db *sql.DB, v2 *SharedPackageV2) (*SharedPa
 
 	// 익명 학생 점수 자료 배치 삽입
 	stmtScore, err := tx.Prepare(`INSERT INTO shared_anonymous_scores 
-		(school_pkg_id, admission_year, high_school, department, track, preference_rank, status, score, score_basis, stage1_common_score, stage1_school_score, score_details_json, formula_version) 
-		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
+		(school_pkg_id, admission_year, high_school, department, track, preference_rank, status, score, score_basis, stage1_common_score, stage1_school_score, score_details_json, formula_version, first_stage_result) 
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
 	if err != nil {
 		return nil, err
 	}
@@ -321,7 +329,7 @@ func (dm *DBManager) ImportV2Package(db *sql.DB, v2 *SharedPackageV2) (*SharedPa
 			pkgID, admissionYear, rec.HighSchool, rec.Department, rec.Track,
 			rec.PreferenceRank, rec.Status, rec.Score, rec.ScoreBasis,
 			rec.ScoreDetails.Percentile, rec.ScoreDetails.AcademicScore,
-			string(detailsJSON), rec.FormulaVersion,
+			string(detailsJSON), rec.FormulaVersion, rec.FirstStageResult,
 		)
 		if err != nil {
 			return nil, err

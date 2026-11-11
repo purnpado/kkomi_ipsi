@@ -47,6 +47,12 @@ func GetAllSchoolRuleNames() []map[string]string {
 			"trackName":  r.TrackName,
 			"totalMax":   fmt.Sprintf("%.0f", r.TotalMax),
 		})
+		if stage, ok := FindAdmissionStage(r.SchoolName, r.TrackName); ok {
+			last := names[len(names)-1]
+			last["firstStageMultiplier"] = fmt.Sprintf("%g", stage.Multiplier)
+			last["firstStageRounding"] = stage.Rounding
+			last["secondStageNote"] = stage.SecondStageNote
+		}
 	}
 	return names
 }

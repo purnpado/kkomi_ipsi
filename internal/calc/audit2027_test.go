@@ -149,3 +149,28 @@ func TestHyundaiTechSubstitutedSemesterArtPenalty(t *testing.T) {
 		t.Fatalf("현대공고 전과목(1-1 대체·감점 0.2) = %.2f, want 99.80", got)
 	}
 }
+
+// 1차·2차 단계 구분은 요강에서 배수를 확인한 학교·전형에만 적용한다.
+func TestAdmissionStagesFromGuidelines(t *testing.T) {
+	cases := []struct {
+		school, track string
+		two           bool
+		mult          float64
+	}{
+		{"울산마이스터고등학교", "특별", true, 1.3},
+		{"울산에너지고등학교", "일반전형", true, 1.3},
+		{"현대공업고등학교", "일반", true, 1.3},
+		{"울산상업고등학교", "취업희망자", true, 1.5},
+		{"울산공업고등학교", "취업자 특별전형", true, 1.5},
+		{"울산기술공업고등학교", "취업희망자", false, 0}, // 면접 점수 미반영
+		{"울산상업고등학교", "일반", false, 0},       // 특성화고 일반전형은 단일 전형
+	}
+	for _, c := range cases {
+		if got := HasSecondStage(c.school, c.track); got != c.two {
+			t.Errorf("%s/%s 2단계=%v, want %v", c.school, c.track, got, c.two)
+		}
+		if s, _ := FindAdmissionStage(c.school, c.track); s.Multiplier != c.mult {
+			t.Errorf("%s/%s 배수=%.1f, want %.1f", c.school, c.track, s.Multiplier, c.mult)
+		}
+	}
+}

@@ -6,6 +6,7 @@ import (
 	"os"
 	"strings"
 
+	"PHGC/internal/calc"
 	"PHGC/internal/model"
 	"PHGC/internal/parser"
 )
@@ -258,7 +259,8 @@ func normalizeFirstStageResult(record *model.ApplicationRecord) error {
 	default:
 		return fmt.Errorf("1차 전형 결과 값이 올바르지 않습니다")
 	}
-	if record.Category != "meister" && record.Category != "special" {
+	// 요강상 1차·2차로 나누어 뽑는 학교·전형만 단계 결과를 남긴다(학교별 배수는 calc/stages.go).
+	if (record.Category != "meister" && record.Category != "special") || !calc.HasSecondStage(record.SchoolName, record.Track) {
 		record.FirstStageResult = ""
 		return nil
 	}

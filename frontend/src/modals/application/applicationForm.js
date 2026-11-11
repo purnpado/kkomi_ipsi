@@ -127,7 +127,7 @@ export function defineApplicationRenderer(ctx) {
             <label class="text-sm font-bold">지원 학교<select id="appSchool" class="input-field mt-1 w-full" ${(!needsSchool && record.category !== 'other') || isNone || !ctx.canEdit || isLocked ? 'disabled' : ''}>${ctx.schoolOptions(record.category, record.schoolName)}</select></label>
             <label class="text-sm font-bold">전형 / 지원 유형<select id="appTrack" class="input-field mt-1 w-full" ${ctx.canEdit && !isOther && !isLocked ? '' : 'disabled'}>${ctx.trackOptions(record.category, record.schoolName, record.track)}</select></label>
             <label class="text-sm font-bold">지원 상태<select id="appStatus" class="input-field mt-1 w-full" ${ctx.canEdit && !isNone && !isLocked ? '' : 'disabled'}>${statusSelectHTML}</select></label>
-            <label id="appStageArea" class="text-sm font-bold ${needsDepartment ? '' : 'hidden'}">1차 전형 결과 <span class="text-[11px] font-normal text-slate-400">(1차 합격 후 면접 등에서 떨어지면 '1차 합격' + 지원 상태 '불합격')</span><select id="appStage" class="input-field mt-1 w-full" ${ctx.canEdit && !isLocked ? '' : 'disabled'}>${ctx.stageOptions(record.firstStageResult || '')}</select></label>
+            <label id="appStageArea" class="text-sm font-bold ${needsDepartment && ctx.stageInfo(record.schoolName, record.track) ? '' : 'hidden'}">1차 전형 결과 <span class="text-[11px] font-normal text-slate-400">(1차 합격 후 면접 등에서 떨어지면 '1차 합격' + 지원 상태 '불합격')</span><select id="appStage" class="input-field mt-1 w-full" ${ctx.canEdit && !isLocked ? '' : 'disabled'}>${ctx.stageOptions(record.firstStageResult || '')}</select><span id="appStageNote" class="block mt-1 text-[11px] font-normal text-indigo-300"></span></label>
             <label class="text-sm font-bold">점수 스냅샷 <span class="text-[11px] text-cyan-300">자동</span><input id="appScore" type="text" inputmode="decimal" value="${displayedScore || ''}" placeholder="${isUnscored && !isNone ? '별도 전형 학교 — 점수 미기록' : '학교·전형 선택 시 자동 산출'}" class="input-field mt-1 w-full" ${isUnscored ? 'disabled' : (autoScore || isLocked ? 'readonly' : (ctx.canEdit ? '' : 'disabled'))}></label>
             <label class="text-sm font-bold md:col-span-2">점수 기준 / 메모<input id="appBasis" value="${displayedBasis}" data-auto="${isAutoBasis}" placeholder="${isNone ? '예: 진학포기 사유, 기타 진로 등' : (isUnscored ? '예: 실기·면접 전형, 지원 학과, 메모 등' : '예: 3-1 누적 예상, 1차 서류점수 등')}" class="input-field mt-1 w-full" ${ctx.canEdit && !isLocked ? '' : 'disabled'}></label>
             <div id="appPreferenceArea" class="md:col-span-2 ${needsDepartment ? '' : 'hidden'}">${ctx.departmentControls(record.schoolName, record.preferences || [], record.assignedDepartment || '', ctx.preferenceLimit(record.category, record.track))}</div>
@@ -209,12 +209,25 @@ export function defineApplicationRenderer(ctx) {
             select.addEventListener('change', () => refreshDepartmentControls());
         });
         let scoreRequestID = 0;
+        // 요강상 1차·2차로 나누어 뽑는 학교·전형에서만 1차 결과 칸을 보인다(학교별 배수는 요강 기준).
+        const refreshStageArea = () => {
+            const category = document.getElementById('appCategory').value;
+            const info = ['meister', 'special'].includes(category)
+                ? ctx.stageInfo(document.getElementById('appSchool').value, document.getElementById('appTrack').value)
+                : null;
+            document.getElementById('appStageArea').classList.toggle('hidden', !info);
+            if (!info) document.getElementById('appStage').value = '';
+            document.getElementById('appStageNote').textContent = info
+                ? `요강: 1차 모집정원의 ${info.multiplier}배수 선발${info.rounding ? `(${info.rounding})` : ''} → 2차 ${info.note}`
+                : '';
+        };
         const refreshTrackAndScore = async () => {
             const category = document.getElementById('appCategory').value;
             const schoolName = document.getElementById('appSchool').value;
             const track = document.getElementById('appTrack');
             const previousTrack = track.value;
             track.innerHTML = ctx.trackOptions(category, schoolName, previousTrack);
+            refreshStageArea();
             const prefArea = document.getElementById('appPreferenceArea');
             if (prefArea && prefArea.dataset.limit !== String(ctx.preferenceLimit(category, track.value))) refreshDepartmentControls();
             if (category === 'other') {
@@ -289,8 +302,7 @@ export function defineApplicationRenderer(ctx) {
             trackSelect.disabled = other || !ctx.canEdit || isLocked;
 
             document.getElementById('appPreferenceArea').classList.toggle('hidden', !departmentRequired);
-            document.getElementById('appStageArea').classList.toggle('hidden', !departmentRequired);
-            if (!departmentRequired) document.getElementById('appStage').value = '';
+            refreshStageArea();
             document.getElementById('appGeneralAssignedArea')?.classList.toggle('hidden', !general);
             document.getElementById('generalApplicationGuide').classList.toggle('hidden', !general);
             document.getElementById('noneApplicationGuide')?.classList.toggle('hidden', !none);
@@ -363,7 +375,7 @@ export function defineApplicationRenderer(ctx) {
                 preferences: hasDepartment ? preferences : [],
                 assignedDepartment: hasDepartment ? document.getElementById('appAssigned').value.trim() : '',
                 assignedSchool: assignedSchoolVal,
-                firstStageResult: hasDepartment ? document.getElementById('appStage').value : ''
+                firstStageResult: hasDepartment && !document.getElementById('appStageArea').classList.contains('hidden') ? document.getElementById('appStage').value : ''
             };
             const sameYear = records.filter(r => r.admissionYear === payload.admissionYear && r.schoolName !== payload.schoolName);
             const active = r => ['지원예정', '지원완료', '지원 예정', '지원 완료', '합격', '최종 진학'].includes(r.status);

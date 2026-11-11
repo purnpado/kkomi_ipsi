@@ -53,6 +53,21 @@ async function prepareApplicationModal(ctx) {
     let studentDetail = null;
     ctx.refreshAutoScore = null;
     ctx.catalog = highSchoolData?.schools || [];
+    // 학교·전형별 1차 선발 배수와 2차 전형 구성(백엔드 calc/stages.go, 2027 요강 확인값)
+    const ruleList = await ctx.withFallback(() => window.go?.main?.App?.GetSchoolRuleList?.(), []);
+    const stageTrack = track => {
+        const t = String(track || '').replace(/\s/g, '');
+        if (t.includes('취업')) return '취업희망자';
+        if (t.includes('특별')) return '특별';
+        if (t.includes('일반')) return '일반';
+        return t;
+    };
+    ctx.stageInfo = (schoolName, track) => {
+        const school = String(schoolName || '').replace(/\s/g, '').replace(/등학교$/, '');
+        const rule = (ruleList || []).find(r => r.schoolName === school && r.trackName === stageTrack(track));
+        const multiplier = Number(rule?.firstStageMultiplier || 0);
+        return multiplier > 0 ? { multiplier, rounding: rule.firstStageRounding || '', note: rule.secondStageNote || '' } : null;
+    };
     ctx.normalizedSchoolName = value => String(value || '').replace(/등학교$/, '').replace(/\s/g, '');
     const trackLabel = track => ({
         '일반': '일반전형',

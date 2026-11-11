@@ -31,6 +31,7 @@ export function renderStatsDashboard(container, stats, sourceMode) {
                 <div class="text-[11px] text-slate-400 flex items-center gap-1.5 pt-1 border-t border-slate-700/40">
                     <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
                     <span>불합격 ${stats.rejectedCount}명${stats.stage2FailCount ? ` (1차 합격 후 ${stats.stage2FailCount}명)` : ''}</span>
+                    ${stats.stage1PassMin ? `<span class="text-slate-600">·</span><span class="text-amber-300" title="1차 합격자 최저점(관내 통합 시 전체 학교 기준)">1차 합격선 ${Number(stats.stage1PassMin).toFixed(2)}</span>` : ''}
                     <span class="text-slate-600">·</span>
                     <span class="text-indigo-300 font-medium">${sourceMode === 'consolidated' ? `관내 ${stats.totalParticipatingSchool}개교` : '우리 학교'}</span>
                 </div>

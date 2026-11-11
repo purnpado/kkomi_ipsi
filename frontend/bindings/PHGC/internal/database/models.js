@@ -98,6 +98,10 @@
  * @property {number} rejectedCount
  * @property {number} rejectedMax
  * @property {number} rejectedAvg
+ * @property {number} stage1PassCount - 1차 합격(최종 합격·2차 탈락 포함)
+ * @property {number} stage1PassMin - 관내 1차 합격선
+ * @property {number} stage2FailCount - 1차 합격 후 최종 불합격
+ * @property {number} stage2FailAvg
  * @property {boolean} hasOverlap
  * @property {number} overlapMin
  * @property {number} overlapMax

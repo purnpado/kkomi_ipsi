@@ -34,7 +34,7 @@ func (dm *DBManager) GetConsolidatedAdmissionStats(admissionYear int, highSchool
 	_ = db.QueryRow("SELECT COUNT(DISTINCT school_name) FROM shared_participating_schools WHERE admission_year = ?", admissionYear).Scan(&totalSchools)
 
 	// 통합 점수 레코드 로드
-	query := `SELECT status, score FROM shared_anonymous_scores 
+	query := `SELECT status, score, COALESCE(first_stage_result, '') FROM shared_anonymous_scores 
 		WHERE admission_year = ? AND high_school = ? AND department = ? AND track = ?`
 	rows, err := db.Query(query, admissionYear, highSchool, department, track)
 	if err != nil {
@@ -44,11 +44,25 @@ func (dm *DBManager) GetConsolidatedAdmissionStats(admissionYear int, highSchool
 
 	var acceptedScores []float64
 	var rejectedScores []float64
+	var stage1PassCount, stage2FailCount int
+	var stage1PassMin, stage2FailSum float64
 	for rows.Next() {
-		var status string
+		var status, firstStage string
 		var score float64
-		if err := rows.Scan(&status, &score); err == nil {
+		if err := rows.Scan(&status, &score, &firstStage); err == nil {
 			cleanStatus := strings.TrimSpace(status)
+			if firstStage == "합격" {
+				stage1PassCount++
+				if score > 0 && (stage1PassMin == 0 || score < stage1PassMin) {
+					stage1PassMin = score
+				}
+			}
+			if strings.Contains(cleanStatus, "불합격") && firstStage == "합격" {
+				// 1차 통과 후 2차(면접 등) 탈락은 점수 분포·겹침 구간에서 빼고 따로 센다.
+				stage2FailCount++
+				stage2FailSum += score
+				continue
+			}
 			if strings.Contains(cleanStatus, "불합격") {
 				rejectedScores = append(rejectedScores, score)
 			} else if strings.Contains(cleanStatus, "합격") || strings.Contains(cleanStatus, "진학") {
@@ -60,7 +74,7 @@ func (dm *DBManager) GetConsolidatedAdmissionStats(admissionYear int, highSchool
 	sort.Float64s(acceptedScores)
 	sort.Float64s(rejectedScores)
 
-	totalApplicants := len(acceptedScores) + len(rejectedScores)
+	totalApplicants := len(acceptedScores) + len(rejectedScores) + stage2FailCount
 	if totalApplicants == 0 {
 		// V2 레코드가 없다면 요약 테이블에서 조회
 		return dm.getConsolidatedFromSummaryStats(db, admissionYear, highSchool, department, track, totalSchools)
@@ -134,6 +148,10 @@ func (dm *DBManager) GetConsolidatedAdmissionStats(admissionYear int, highSchool
 		RejectedCount:            len(rejectedScores),
 		RejectedMax:              rejMax,
 		RejectedAvg:              rejAvg,
+		Stage1PassCount:          stage1PassCount,
+		Stage1PassMin:            calc.Round2(stage1PassMin),
+		Stage2FailCount:          stage2FailCount,
+		Stage2FailAvg:            stage2FailAvg(stage2FailSum, stage2FailCount),
 		HasOverlap:               hasOverlap,
 		OverlapMin:               overlapMin,
 		OverlapMax:               overlapMax,
@@ -219,4 +237,11 @@ func (dm *DBManager) getConsolidatedFromSummaryStats(db *sql.DB, admissionYear i
 		OverlapMin:               overlapMin,
 		OverlapMax:               overlapMax,
 	}, nil
+}
+
+func stage2FailAvg(sum float64, count int) float64 {
+	if count == 0 {
+		return 0
+	}
+	return calc.Round2(sum / float64(count))
 }
