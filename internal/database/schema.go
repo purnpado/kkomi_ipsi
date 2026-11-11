@@ -90,6 +90,14 @@ func (dm *DBManager) InitConfigDB() error {
 	// 기존 DB 마이그레이션 (avg_value 컬럼 추가)
 	_, _ = db.Exec("ALTER TABLE highschool_cutoffs ADD COLUMN avg_value REAL DEFAULT 0")
 	_, _ = db.Exec("ALTER TABLE school_config ADD COLUMN expected_support_token TEXT NOT NULL DEFAULT ''")
+	_, _ = db.Exec("ALTER TABLE school_config ADD COLUMN judgment_settings TEXT NOT NULL DEFAULT ''")
+	_, _ = db.Exec(`CREATE TABLE IF NOT EXISTS general_quota_records (
+		admission_year INTEGER PRIMARY KEY,
+		quota INTEGER NOT NULL DEFAULT 0,
+		applicants INTEGER NOT NULL DEFAULT 0,
+		note TEXT NOT NULL DEFAULT '',
+		updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+	)`)
 	_, _ = db.Exec(`CREATE TABLE IF NOT EXISTS school_rank_snapshots (
 		class_num INTEGER NOT NULL,
 		student_num TEXT NOT NULL,

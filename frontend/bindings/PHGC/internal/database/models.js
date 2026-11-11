@@ -98,6 +98,7 @@
  * @property {number} rejectedCount
  * @property {number} rejectedMax
  * @property {number} rejectedAvg
+ * @property {boolean} smallSample - 합격·불합격 표본이 3명 미만이면 참고용
  * @property {number} stage1PassCount - 1차 합격(최종 합격·2차 탈락 포함)
  * @property {number} stage1PassMin - 관내 1차 합격선
  * @property {number} stage2FailCount - 1차 합격 후 최종 불합격
@@ -119,6 +120,44 @@
  * @property {number} maxValue
  * @property {number} minValue
  * @property {number} avgValue - 평균점
+ */
+
+/**
+ * GeneralCutoffEstimate 한 잣대(기본 지표 또는 완전 총점)의 관내 합격선 추정.
+ * @typedef {Object} GeneralCutoffEstimate
+ * @property {string} basis - "base"(기본 지표) | "total"(완전 총점)
+ * @property {number} sampleCount - 사용한 표본(확정 자료) 수
+ * @property {number} acceptedCount - 배정(합격)
+ * @property {number} rejectedCount - 미배정(불합격)
+ * @property {number} acceptedMin - 합격 최저점
+ * @property {number} rejectedMax - 불합격 최고점
+ * @property {number} rangeLow - 실제 사례 기준 합격선 범위(불합격 최고점~합격 최저점)
+ * @property {number} rangeHigh
+ * @property {number} quotaCutoff - 정원 비율 기준 추정선(정원÷지원자 위치의 점수)
+ * @property {boolean} smallSample - 표본 부족(참고용)
+ */
+
+/**
+ * GeneralCutoffResult 후기 일반고 관내 합격선 추정 결과.
+ * @typedef {Object} GeneralCutoffResult
+ * @property {number} admissionYear
+ * @property {number} participatingSchool
+ * @property {number} totalRecords
+ * @property {number} confirmedRecords - 3-2 반영 확정 자료 수(합격선 계산에 사용)
+ * @property {number} quota
+ * @property {number} applicants
+ * @property {GeneralCutoffEstimate} base
+ * @property {GeneralCutoffEstimate} total
+ */
+
+/**
+ * GeneralQuotaRecord 후기 일반고 학년도별 선발 정원·지원자 수(교육청 발표값을 운영자가 직접 입력).
+ * 관내 공유 자료의 총점 분포에서 "정원 ÷ 지원자" 위치로 합격선을 추정할 때 쓴다.
+ * @typedef {Object} GeneralQuotaRecord
+ * @property {number} admissionYear
+ * @property {number} quota
+ * @property {number} applicants
+ * @property {string} note
  */
 
 /**

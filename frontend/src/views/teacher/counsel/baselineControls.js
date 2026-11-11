@@ -1,3 +1,4 @@
+import { judgeScore, judgmentBadge, describeDiff, describeMargin, judgmentModeToggleHTML, bindJudgmentModeToggle } from '../../../core/admissionJudgment.js';
 // 상담 모달: 커트라인 기준 탭·학과 선택 연결
 export function bindBaselineControls(ctx) {
     let currentBaselineMode = 'last';
@@ -51,24 +52,13 @@ export function bindBaselineControls(ctx) {
                 labelText = '최근 5년 평균';
             }
 
-            let badge = '';
-            let color = 'bg-primary';
-            let pct = (score / totalMax) * 100;
-
-            if (cutoffVal && cutoffVal > 0) {
-                if (score >= cutoffVal + 5) {
-                    badge = '<span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-success/20 text-success border border-success/30">🟢 안정권</span>';
-                    color = 'bg-success';
-                } else if (score >= cutoffVal) {
-                    badge = '<span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-warning/20 text-warning border border-warning/30">🟡 적정/경계</span>';
-                    color = 'bg-warning';
-                } else {
-                    badge = '<span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-danger/20 text-danger border border-danger/30">🔴 소신/주의</span>';
-                    color = 'bg-danger';
-                }
-            } else {
-                badge = `<span class="text-xs text-text-muted">만점의 ${pct.toFixed(1)}% (기준 부족)</span>`;
-            }
+            // 4단계 판정: core/admissionJudgment.js 단일 기준(학교 설정 여유폭)
+            const pct = (score / totalMax) * 100;
+            const result = judgeScore({ score, cutoff: cutoffVal, totalMax, schoolName: card.dataset.school, track: card.dataset.track, source: labelText });
+            const color = { safe: 'bg-emerald-500', proper: 'bg-indigo-500', hope: 'bg-amber-500', challenge: 'bg-rose-500' }[result.level] || 'bg-primary';
+            const badge = result.level === 'unknown'
+                ? `<span class="text-xs text-text-muted">만점의 ${pct.toFixed(1)}% (기준 부족)</span>`
+                : `${judgmentBadge(result)} <span class="text-[10px] text-slate-400">${describeDiff(result)} · ${describeMargin(result)}</span>`;
 
             const badgeEl = document.getElementById(`badge_${rIdx}`);
             if (badgeEl) badgeEl.innerHTML = badge;
@@ -85,7 +75,7 @@ export function bindBaselineControls(ctx) {
                     const diff = score - cutoffVal;
                     diffEl.innerHTML = `
                         <span>합격 기준선(${labelText}): <strong class="text-slate-200">${cutoffVal.toFixed(1)}점</strong> ${avgVal > 0 ? `<span class="text-amber-300 font-medium">(평균 ${avgVal.toFixed(1)}점)</span>` : ''}</span>
-                        <span>점수차: <strong class="${diff >= 0 ? 'text-success' : 'text-danger'}">${diff >= 0 ? '+' : ''}${diff.toFixed(2)}점</strong></span>
+                        <span>점수차: <strong class="${diff >= 0 ? 'text-success' : 'text-danger'}">${diff >= 0 ? '+' : ''}${diff.toFixed(2)}점</strong> <span class="text-slate-500">(만점의 ${(diff / totalMax * 100).toFixed(1)}%)</span></span>
                     `;
                 } else {
                     diffEl.innerHTML = `<span class="text-slate-500">※ 해당 기준(${labelText})의 누적 합격선 데이터가 부족합니다.</span>`;
@@ -93,6 +83,17 @@ export function bindBaselineControls(ctx) {
             }
         });
     };
+
+    // 판정 보기 방식(학교 설정/비율/점수) 전환: 현재 기준선 탭으로 다시 판정한다.
+    const bindToggle = () => {
+        const holder = ctx.modalEl.querySelector('#counselJudgmentToggle');
+        bindJudgmentModeToggle(holder, () => {
+            holder.innerHTML = judgmentModeToggleHTML();
+            bindToggle();
+            applyBaselineMode(currentBaselineMode);
+        });
+    };
+    bindToggle();
 
     ctx.modalEl.querySelectorAll('.cutoff-tab-btn').forEach(btn => {
         btn.addEventListener('click', () => {

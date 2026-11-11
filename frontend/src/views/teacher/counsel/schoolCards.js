@@ -1,4 +1,5 @@
 import { escapeAttr } from '../../../core/utils.js';
+import { judgeScore, judgmentBadge, describeDiff } from '../../../core/admissionJudgment.js';
 import { admissionLabel } from '../../../core/admissionYear.js';
 
 // 상담 모달: 고교별 산출 결과 카드 HTML 구성
@@ -75,31 +76,18 @@ export function buildSchoolResultCards(ctx) {
             }
         }
 
-        // 합격 가능성 판단 헬퍼
-        // 4단계 판정 구간 (안정 / 적정 / 소신 / 도전)
-        const getCutoffBadgeAndGauge = (cutoffVal) => {
-            let badge = '';
-            let color = 'bg-primary';
-            let pct = (r.totalScore / r.totalMax) * 100;
-            if (cutoffVal && cutoffVal > 0) {
-                const diff = r.totalScore - cutoffVal;
-                const diffStr = diff >= 0 ? `+${diff.toFixed(2)}` : diff.toFixed(2);
-                if (r.totalScore >= cutoffVal + 3) {
-                    badge = `<span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40" title="기준선: ${cutoffVal.toFixed(2)}점 (${diffStr}점) - 안정권">🟢 안정</span>`;
-                    color = 'bg-emerald-500';
-                } else if (r.totalScore >= cutoffVal) {
-                    badge = `<span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/40" title="기준선: ${cutoffVal.toFixed(2)}점 (${diffStr}점) - 적정권">🟡 적정</span>`;
-                    color = 'bg-indigo-500';
-                } else if (r.totalScore >= cutoffVal - 2) {
-                    badge = `<span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40" title="기준선: ${cutoffVal.toFixed(2)}점 (${diffStr}점) - 소신 지원">🟠 소신</span>`;
-                    color = 'bg-amber-500';
-                } else {
-                    badge = `<span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-500/20 text-rose-300 border border-rose-500/40" title="기준선: ${cutoffVal.toFixed(2)}점 (${diffStr}점) - 도전 지원">🔴 도전</span>`;
-                    color = 'bg-rose-500';
-                }
-            } else {
-                badge = `<span class="text-xs text-text-muted">만점의 ${pct.toFixed(1)}%</span>`;
+        // 합격 가능성 판정: core/admissionJudgment.js 단일 기준(학교 설정 여유폭)
+        const defaultSource = deptsForSchool.length > 0 ? '학교 입력 기준선(학과)'
+            : ((ctx.cutoffs || []).some(c => c.schoolName.includes(r.schoolName.substring(0, 4)) && c.track.includes(r.trackName) && c.minValue > 0) ? '학교 입력 기준선'
+                : (officialPrimary ? '고교 공식 발표' : ''));
+        const getCutoffBadgeAndGauge = (cutoffVal, source = defaultSource) => {
+            const pct = (r.totalScore / r.totalMax) * 100;
+            const result = judgeScore({ score: r.totalScore, cutoff: cutoffVal, totalMax: r.totalMax, schoolName: r.schoolName, track: r.trackName, source });
+            if (result.level === 'unknown') {
+                return { badge: `<span class="text-xs text-text-muted">만점의 ${pct.toFixed(1)}%</span>`, color: 'bg-primary', pct };
             }
+            const color = { safe: 'bg-emerald-500', proper: 'bg-indigo-500', hope: 'bg-amber-500', challenge: 'bg-rose-500' }[result.level];
+            const badge = `${judgmentBadge(result)} <span class="text-[10px] text-slate-400">${describeDiff(result)}${source ? ` · ${source}` : ''}</span>`;
             return { badge, color, pct };
         };
 

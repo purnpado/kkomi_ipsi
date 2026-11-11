@@ -31,22 +31,26 @@ type StudentCalcResult struct {
 	S21 float64
 	S22 float64
 
-	TotalSubjectScore   float64 // 5개 학기 합산
-	Rank                int     // 석차 (동석차 반영)
-	TotalStudents       int     // 전체 학생수
-	Percentile          float64 // 백분율
-	FinalScore          float64 // 160 - 0.96 * 백분율
-	AttendanceScore     float64 // 후기 일반고 비교과 출결(16)
-	VolunteerScore      float64 // 후기 일반고 비교과 봉사(8)
-	BehaviorScore       float64 // 후기 일반고 비교과 행발(8)
-	CreativeScore       float64 // 후기 일반고 비교과 창체(8)
-	NonAcademicScore    float64 // 비교과 합계(40)
-	GeneralTotalScore   float64 // 후기 일반고 내신 총점(200)
-	GeneralDataComplete bool    // 학년별 비교과 입력 완료 여부
-	GeneralProjected    bool    // 11/30 마감 전 누적자료 기준 예상치
-	ThirdYearFinalUsed  bool    // S22에 실제 3학년 2학기 성적을 반영했는지(false면 3-1 성적으로 대신한 예상치)
-	hasThirdYearFinal   bool
-	s22Projected        float64
+	TotalSubjectScore    float64 // 5개 학기 합산
+	Rank                 int     // 석차 (동석차 반영)
+	TotalStudents        int     // 전체 학생수
+	Percentile           float64 // 백분율
+	FinalScore           float64 // 160 - 0.96 * 백분율
+	AttendanceScore      float64 // 후기 일반고 비교과 출결(16)
+	VolunteerScore       float64 // 후기 일반고 비교과 봉사(8)
+	BehaviorScore        float64 // 후기 일반고 비교과 행발(8)
+	CreativeScore        float64 // 후기 일반고 비교과 창체(8)
+	NonAcademicScore     float64 // 비교과 합계(40)
+	GeneralBaseScore     float64 // 기본 지표: 교과 + 출결 + 봉사 + 창체·행발 기본 10점(가산점 제외, 관내 비교용)
+	GeneralTotalHigh     float64 // 아직 정해지지 않은 가산점을 모두 받는다고 볼 때의 상한 총점
+	GeneralBonusEntered  bool    // 담임이 창체·행발 가산점 입력을 마쳤는지(저장 이력)
+	GeneralPerGradeExact bool    // 출결·봉사를 학년별 실제 값으로 계산했는지(아니면 누적값 분배 예상)
+	GeneralTotalScore    float64 // 후기 일반고 내신 총점(200)
+	GeneralDataComplete  bool    // 학년별 비교과 입력 완료 여부
+	GeneralProjected     bool    // 11/30 마감 전 누적자료 기준 예상치
+	ThirdYearFinalUsed   bool    // S22에 실제 3학년 2학기 성적을 반영했는지(false면 3-1 성적으로 대신한 예상치)
+	hasThirdYearFinal    bool
+	s22Projected         float64
 }
 
 // CalculateGrades 전체 학생들의 내신 성적을 계산하여 석차 및 최종 점수를 반환
@@ -171,110 +175,13 @@ func CalculateGrades(allStudents map[int][]parser.StudentExcelData, isSmallSchoo
 		results[i].GeneralDataComplete = complete
 		results[i].GeneralProjected = !complete
 		results[i].GeneralTotalScore = roundToTwoDecimals(finalScore + nonAcademic.Total)
+		results[i].GeneralBaseScore = roundToTwoDecimals(finalScore + nonAcademic.AttendanceScore + nonAcademic.VolunteerScore + 10)
+		results[i].GeneralTotalHigh = roundToTwoDecimals(results[i].GeneralTotalScore + nonAcademic.PendingBonus)
+		results[i].GeneralBonusEntered = nonAcademic.BonusEntered
+		results[i].GeneralPerGradeExact = nonAcademic.PerGradeExact
 	}
 
 	return results, nil
-}
-
-type generalNonAcademic struct{ AttendanceScore, VolunteerScore, BehaviorScore, CreativeScore, Total float64 }
-
-func calculateGeneralNonAcademic(all map[int][]parser.StudentExcelData, target StudentCalcResult) (generalNonAcademic, bool) {
-	var s *parser.StudentExcelData
-	for _, students := range all {
-		for i := range students {
-			if students[i].ClassNum == target.ClassNum && students[i].StudentNum == target.StudentNum && students[i].Name == target.Name {
-				s = &students[i]
-				break
-			}
-		}
-		if s != nil {
-			break
-		}
-	}
-	if s == nil {
-		return generalNonAcademic{}, false
-	}
-	var extra map[string]interface{}
-	if s.ExtraData == "" {
-		extra = make(map[string]interface{})
-	} else if json.Unmarshal([]byte(s.ExtraData), &extra) != nil {
-		extra = make(map[string]interface{})
-	}
-	intValue := func(key string) (int, bool) { v, ok := extra[key].(float64); return int(v), ok }
-	boolValue := func(key string) bool { v, _ := extra[key].(bool); return v }
-	attendance, volunteer := 4.0, 2.0
-	complete := true
-	for grade := 1; grade <= 3; grade++ {
-		days, okDays := intValue(fmt.Sprintf("general_absence_%d", grade))
-		hours, okHours := intValue(fmt.Sprintf("general_volunteer_%d", grade))
-		if !okDays || !okHours {
-			complete = false
-			continue
-		}
-		attendance += generalAttendanceYearScore(days)
-		volunteer += generalVolunteerYearScore(hours)
-	}
-	if !complete {
-		// 마감 전 상담은 업로드된 3학년 1학기 누적 출결·봉사를 사용한 예상치다.
-		// 학년별 입력이 완료되면 아래의 공식 산출값으로 자동 대체된다.
-		var attendanceMap, volunteerMap map[string]int
-		_ = json.Unmarshal([]byte(s.AttendanceData), &attendanceMap)
-		_ = json.Unmarshal([]byte(s.VolunteerData), &volunteerMap)
-		days := attendanceMap["absence"] + (attendanceMap["late"]+attendanceMap["early"]+attendanceMap["result"])/3
-		attendanceScore := math.Max(4, 16-float64(days)*0.5)
-		hours := volunteerMap["total_time"]
-		volunteerScore := 2.0 + math.Min(6, float64(hours)*0.5)
-		behavior, creative := 5.0, 5.0
-		for grade := 1; grade <= 3; grade++ {
-			if boolValue(fmt.Sprintf("haengbal_%d", grade)) {
-				behavior++
-			}
-			if boolValue(fmt.Sprintf("changche_%d", grade)) {
-				creative++
-			}
-		}
-		r := generalNonAcademic{roundToTwoDecimals(attendanceScore), roundToTwoDecimals(volunteerScore), behavior, creative, 0}
-		r.Total = roundToTwoDecimals(r.AttendanceScore + r.VolunteerScore + r.BehaviorScore + r.CreativeScore)
-		return r, false
-	}
-	behavior, creative := 5.0, 5.0
-	for grade := 1; grade <= 3; grade++ {
-		if boolValue(fmt.Sprintf("haengbal_%d", grade)) && !boolValue(fmt.Sprintf("haengbal_disqualified_%d", grade)) {
-			behavior++
-		}
-		if boolValue(fmt.Sprintf("changche_%d", grade)) && !boolValue(fmt.Sprintf("changche_disqualified_%d", grade)) {
-			creative++
-		}
-	}
-	r := generalNonAcademic{roundToTwoDecimals(attendance), roundToTwoDecimals(volunteer), roundToTwoDecimals(behavior), roundToTwoDecimals(creative), 0}
-	r.Total = roundToTwoDecimals(r.AttendanceScore + r.VolunteerScore + r.BehaviorScore + r.CreativeScore)
-	return r, true
-}
-
-func generalAttendanceYearScore(days int) float64 {
-	if days <= 0 {
-		return 4
-	}
-	if days >= 8 {
-		return 0
-	}
-	return 4 - float64(days)*0.5
-}
-
-func generalVolunteerYearScore(hours int) float64 {
-	if hours >= 4 {
-		return 2
-	}
-	if hours == 3 {
-		return 1.7
-	}
-	if hours == 2 {
-		return 1.4
-	}
-	if hours == 1 {
-		return 1
-	}
-	return 0
 }
 
 // calcSingleStudent 학생 1명의 5개 학기 교과 점수 산출

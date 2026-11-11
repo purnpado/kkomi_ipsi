@@ -1,5 +1,6 @@
 import { normalizeSchoolName } from '../../core/utils.js';
 import { getGeneralGuideBadge } from '../../core/generalGuide.js';
+import { judgeScore, judgmentBadge } from '../../core/admissionJudgment.js';
 
 // 신호등 매트릭스: 필터 상태와 표 행 생성기
 export function defineMatrixRows(ctx, mx) {
@@ -148,21 +149,10 @@ export function defineMatrixRows(ctx, mx) {
                 const scoreStr = score.toFixed(2); // 소수 둘째자리 표기
 
                 if (cutoffVal && cutoffVal > 0) {
-                    const diff = score - cutoffVal;
-                    const diffStr = diff >= 0 ? `+${diff.toFixed(2)}` : `${diff.toFixed(2)}`;
-                    const tooltip = `기준선: ${cutoffVal.toFixed(2)}점 (${diffStr}점 차이)`;
-
-                    // whitespace-nowrap, inline-flex, leading-none으로 절대 줄바꿈 없이 한 화면 쏙 표시
-                    // 4단계 판정 구간 (안정 / 적정 / 소신 / 도전)
-                    if (score >= cutoffVal + 3) {
-                        return `<span class="inline-flex items-center justify-center gap-1 leading-none font-black text-emerald-300 bg-emerald-950/80 border border-emerald-400/60 px-2 py-0.5 rounded-full text-[11px] shadow-xs whitespace-nowrap" title="${tooltip} - 안정">🟢 ${scoreStr}</span>`;
-                    } else if (score >= cutoffVal) {
-                        return `<span class="inline-flex items-center justify-center gap-1 leading-none font-black text-indigo-300 bg-indigo-950/80 border border-indigo-400/60 px-2 py-0.5 rounded-full text-[11px] shadow-xs whitespace-nowrap" title="${tooltip} - 적정">🟡 ${scoreStr}</span>`;
-                    } else if (score >= cutoffVal - 2) {
-                        return `<span class="inline-flex items-center justify-center gap-1 leading-none font-black text-amber-300 bg-amber-950/80 border border-amber-400/60 px-2 py-0.5 rounded-full text-[11px] shadow-xs whitespace-nowrap" title="${tooltip} - 소신">🟠 ${scoreStr}</span>`;
-                    } else {
-                        return `<span class="inline-flex items-center justify-center gap-1 leading-none font-bold text-rose-300 bg-rose-950/80 border border-rose-500/60 px-2 py-0.5 rounded-full text-[11px] shadow-xs whitespace-nowrap" title="${tooltip} - 도전">🔴 ${scoreStr}</span>`;
-                    }
+                    // 4단계 판정은 core/admissionJudgment.js 단일 기준(학교 설정 여유폭)으로 한다.
+                    const source = { last: '직전 1개년', avg3: '최근 3년 평균', avg5: '최근 5년 평균' }[yearMode] || '기준선';
+                    const result = judgeScore({ score, cutoff: cutoffVal, totalMax: r.totalMax, schoolName: r.schoolName, track: r.trackName, source });
+                    return judgmentBadge(result, { text: `${result.emoji} ${scoreStr}`, compact: true });
                 }
                 return `<span class="text-slate-300 font-mono font-medium text-[11px] whitespace-nowrap">${scoreStr}</span>`;
             };

@@ -44,19 +44,28 @@ func (dm *DBManager) GenerateApplicationScoreDetails(classNum int, studentNum, s
 
 	switch category {
 	case "general":
+		// 2027 요강: 교과 160 + 비교과 40(출석 16·봉사 8·행발 8·창체 8)
 		details.TotalMax = 200
-		details.AcademicMax = 150
-		details.NonAcademicMax = 50
-		details.FormulaVersion = "2026-general-ulsan"
-		if snapshot != nil {
+		details.AcademicMax = 160
+		details.NonAcademicMax = 40
+		details.AttendanceMax = 16
+		details.VolunteerMax = 8
+		details.FormulaVersion = "2027-general-ulsan"
+		// 후기 일반고 점수는 전교 석차가 필요하므로 학급 석차 계산을 거친 상세 결과를 쓴다.
+		if detail, err := dm.GetStudentFullDetail(classNum, studentNum, studentName, false); err == nil && detail != nil {
+			full = detail
+		}
+		details.AcademicScore = full.GeneralHSAcademicScore
+		details.NonAcademicScore = full.GeneralHSNonAcademicScore
+		details.TotalScore = full.GeneralHSTotalScore
+		if snapshot != nil && full.GeneralHSAcademicScore == 0 {
 			details.AcademicScore = snapshot.FinalScore
 			details.NonAcademicScore = snapshot.NonAcademicScore
 			details.TotalScore = snapshot.GeneralTotalScore
-		} else {
-			details.AcademicScore = full.GeneralHSAcademicScore
-			details.NonAcademicScore = full.GeneralHSNonAcademicScore
-			details.TotalScore = full.GeneralHSTotalScore
 		}
+		details.AttendanceScore = full.GeneralHSAttendanceScore
+		details.VolunteerScore = full.GeneralHSVolunteerScore
+		details.ExtraScore = calc.Round2(full.GeneralHSBehaviorScore + full.GeneralHSCreativeScore)
 	case "meister", "special":
 		for _, result := range full.SchoolResults {
 			if normalizeApplicationSchoolName(result.SchoolName) == normalizeApplicationSchoolName(schoolName) && result.TrackName == track {

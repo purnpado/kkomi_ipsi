@@ -1,4 +1,5 @@
 import { escapeHtml } from '../core/utils.js';
+import { judgeGeneralPercentile } from '../core/admissionJudgment.js';
 import { printOnly } from '../print/printEngine.js';
 
 // ===== 학생 전학년 전과목 교과/비교과 종합 성적표 모달 =====
@@ -232,8 +233,8 @@ export async function openStudentTranscriptModal(classNum, studentNum, name) {
                     </div>
                     <div class="p-3.5 rounded-xl bg-slate-800/60 border border-slate-700/50 text-center">
                         <div class="text-xs text-text-muted mb-1">후기 일반고 판정</div>
-                        <div class="text-sm font-bold ${data.percentile <= 80 ? 'text-success' : (data.percentile <= 90 ? 'text-warning' : 'text-danger')}">
-                            ${data.percentile <= 80 ? '🟢 합격 안정' : (data.percentile <= 90 ? '🟡 경계선' : '🔴 지원 주의')}
+                        <div class="text-sm font-bold ${{ safe: 'text-success', proper: 'text-warning', challenge: 'text-danger' }[judgeGeneralPercentile(data.percentile).level] || 'text-slate-300'}">
+                            ${judgeGeneralPercentile(data.percentile).emoji} ${judgeGeneralPercentile(data.percentile).label} <span class="text-[10px] font-normal text-slate-400">(학교 내 석차 기준)</span>
                         </div>
                     </div>
                 </div>

@@ -1,5 +1,9 @@
 import { escapeHtml, escapeAttr } from '../../core/utils.js';
 import { renderStatsDashboard } from './statsDashboard.js';
+import { renderGeneralCutoffPanel } from './generalCutoffPanel.js';
+
+const GENERAL_OPTION = '후기 일반고';
+const generalOptionHTML = selected => `<option value="${GENERAL_OPTION}" ${selected ? 'selected' : ''}>🏫 후기 일반고 (관내 합격선)</option>`;
 import { admissionOptionLabel, currentAdmissionYear } from '../../core/admissionYear.js';
 
 /**
@@ -54,7 +58,7 @@ export async function openAdmissionAnalysisModal() {
         if (ds.track) sInfo.tracks.add(ds.track);
     });
 
-    const schoolNames = Array.from(schoolMap.keys());
+    const schoolNames = Array.from(schoolMap.keys()).filter(Boolean);
     const initialSchool = schoolNames.length > 0 ? schoolNames[0] : '울산마이스터고';
 
     const modal = document.createElement('div');
@@ -114,6 +118,7 @@ export async function openAdmissionAnalysisModal() {
                                     <option value="울산에너지고">울산에너지고</option>
                                     <option value="현대공업고">현대공업고</option>
                                 `}
+                                ${generalOptionHTML(false)}
                             </select>
                         </div>
 
@@ -175,11 +180,10 @@ export async function openAdmissionAnalysisModal() {
         const year = parseInt(modal.querySelector('#analysisYearSelect')?.value || admissionYear, 10);
         const schoolSelect = modal.querySelector('#analysisSchoolSelect');
         if (!schoolSelect) return;
-        const schools = Array.from(new Set(statsForYear(year).map(ds => ds.schoolName)));
-        if (schools.length === 0) return;
+        const schools = Array.from(new Set(statsForYear(year).map(ds => ds.schoolName))).filter(Boolean);
         const previous = schoolSelect.value;
-        schoolSelect.innerHTML = schools.map(s => `<option value="${escapeAttr(s)}">${escapeHtml(s)}</option>`).join('');
-        schoolSelect.value = schools.includes(previous) ? previous : schools[0];
+        schoolSelect.innerHTML = schools.map(s => `<option value="${escapeAttr(s)}">${escapeHtml(s)}</option>`).join('') + generalOptionHTML(false);
+        schoolSelect.value = [...schools, GENERAL_OPTION].includes(previous) ? previous : (schools[0] || GENERAL_OPTION);
     };
 
     const updateDeptDropdown = () => {
@@ -212,6 +216,14 @@ export async function openAdmissionAnalysisModal() {
         const school = modal.querySelector('#analysisSchoolSelect')?.value || '';
         const dept = modal.querySelector('#analysisDeptSelect')?.value || '';
         const track = modal.querySelector('#analysisTrackSelect')?.value || '일반전형';
+        // 후기 일반고는 학과·전형 구분 없이 관내 공유 자료로 합격선을 추정한다.
+        const isGeneral = school === GENERAL_OPTION;
+        ['#analysisDeptSelect', '#analysisTrackSelect'].forEach(id => { const el = modal.querySelector(id); if (el) el.disabled = isGeneral; });
+        if (isGeneral) {
+            container.innerHTML = '<div class="py-16 text-center text-slate-500"><span class="spinner"></span> 후기 일반고 관내 합격선을 계산하는 중...</div>';
+            await renderGeneralCutoffPanel(container, year);
+            return;
+        }
 
         container.innerHTML = `
             <div class="py-16 text-center text-slate-500">

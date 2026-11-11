@@ -1,5 +1,6 @@
 import { escapeHtml, escapeAttr, normalizeSchoolName, isSameTrack } from '../../../core/utils.js';
 import { currentAdmissionYear } from '../../../core/admissionYear.js';
+import { judgeScore, judgmentToneClass, judgmentTitle } from '../../../core/admissionJudgment.js';
 
 // ===== 마이스터고 및 특성화고 합격 가능 예측 뱃지 렌더러 =====
 // 마이스터고 및 특성화고 고교·학과별 정밀 합격 분석 목록 추출 헬퍼
@@ -45,18 +46,11 @@ export function getPredictionAnalysisList(results, cutoffs, schoolGroup) {
                 const diff = studentScore - minScore;
                 const isPass = studentScore >= minScore;
 
-                let status = '도전';
-                let statusColor = 'bg-rose-500/20 text-rose-300 border-rose-500/40';
-                if (diff >= 5) {
-                    status = '안정';
-                    statusColor = 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40';
-                } else if (diff >= 0) {
-                    status = '적정';
-                    statusColor = 'bg-yellow-500/20 text-yellow-300 border-yellow-500/40';
-                } else if (diff >= -5) {
-                    status = '소신';
-                    statusColor = 'bg-orange-500/20 text-orange-300 border-orange-500/40';
-                }
+                // 4단계 판정: core/admissionJudgment.js 단일 기준(학교 설정 여유폭)
+                const judged = judgeScore({ score: studentScore, cutoff: minScore, totalMax: r.totalMax, schoolName: r.schoolName, track: r.trackName, source: `${c.year || ''} 합격선` });
+                const status = judged.label;
+                const statusColor = judgmentToneClass(judged);
+                const emoji = judged.emoji;
 
                 list.push({
                     schoolName: r.schoolName,
@@ -70,6 +64,8 @@ export function getPredictionAnalysisList(results, cutoffs, schoolGroup) {
                     diff,
                     status,
                     statusColor,
+                    emoji,
+                    judgmentTitle: judgmentTitle(judged),
                     isPass
                 });
             }

@@ -92,6 +92,10 @@ import * as model$0 from "../model/models.js";
  * @property {number} BehaviorScore - 후기 일반고 비교과 행발(8)
  * @property {number} CreativeScore - 후기 일반고 비교과 창체(8)
  * @property {number} NonAcademicScore - 비교과 합계(40)
+ * @property {number} GeneralBaseScore - 기본 지표: 교과 + 출결 + 봉사 + 창체·행발 기본 10점(가산점 제외, 관내 비교용)
+ * @property {number} GeneralTotalHigh - 아직 정해지지 않은 가산점을 모두 받는다고 볼 때의 상한 총점
+ * @property {boolean} GeneralBonusEntered - 담임이 창체·행발 가산점 입력을 마쳤는지(저장 이력)
+ * @property {boolean} GeneralPerGradeExact - 출결·봉사를 학년별 실제 값으로 계산했는지(아니면 누적값 분배 예상)
  * @property {number} GeneralTotalScore - 후기 일반고 내신 총점(200)
  * @property {boolean} GeneralDataComplete - 학년별 비교과 입력 완료 여부
  * @property {boolean} GeneralProjected - 11/30 마감 전 누적자료 기준 예상치
@@ -132,6 +136,15 @@ import * as model$0 from "../model/models.js";
  * @property {number} generalHSTotalScore
  * @property {boolean} generalHSDataComplete
  * @property {boolean} generalHSProjected
+ * @property {number} generalHSAttendanceScore - 후기 일반고 비교과 항목별 점수와 범위(관내 비교·상담용) 출석(16)
+ * @property {number} generalHSVolunteerScore - 봉사(8)
+ * @property {number} generalHSBehaviorScore - 행발(8)
+ * @property {number} generalHSCreativeScore - 창체(8)
+ * @property {number} generalHSBaseScore - 기본 지표: 교과+출석+봉사+기본 10점
+ * @property {number} generalHSTotalHigh - 가산점 미정분까지 받을 때 상한
+ * @property {boolean} generalHSBonusEntered - 창체·행발 가산점 입력 완료
+ * @property {boolean} generalHSThirdYearFinal - 3-2 성적 반영(아니면 3-1 복사 예상)
+ * @property {boolean} generalHSPerGradeExact - 출결·봉사 학년별 실제 값 사용
  * @property {SchoolCalcResult[] | null} schoolResults - 학교별 산출 결과
  * @property {model$0.ApplicationRecord[] | null} applications - 학생 지원 희망 학교 목록 (1~5지망)
  */

@@ -4,7 +4,7 @@ import { updateAppWindowTitle } from '../../core/utils.js';
 import { ScreenLockManager } from '../../core/screenLock.js';
 import { showModalAlert, showModalPrompt } from '../../core/dialogs.js';
 import { app } from '../../core/dom.js';
-import { getGeneralGuideCutoff, setGeneralGuideCutoff } from '../../core/generalGuide.js';
+import { judgmentSummaryText } from '../../core/admissionJudgment.js';
 import { renderStudentList } from './studentList/studentListView.js';
 import { navigate, notifyLogout, openModal, requestScreenLock } from '../../core/navigation.js';
 import { state } from '../../core/store.js';
@@ -113,14 +113,11 @@ export async function renderTeacherScreen(schoolName, targetClassNum = null) {
                     </div>
                 </div>
                 <div class="flex items-center gap-3 flex-wrap">
-                    <!-- 일반고 지원가이드 판정 기준 커스텀 -->
-                    <div class="flex items-center gap-1.5 bg-slate-800/80 px-2.5 py-1.5 rounded-lg border border-slate-700/80 shadow-inner">
-                        <span class="text-xs text-slate-300 font-bold" title="기본값 80%. 각 학교 상황에 맞춰 일반고 합격 안정선 기준을 조정할 수 있습니다.">🎯 일반고 안정기준:</span>
-                        <input type="number" id="generalGuideCutoffInput" min="50" max="99" step="1" 
-                               class="w-14 text-center py-0.5 px-1 rounded bg-slate-900 border border-slate-600 text-indigo-300 text-xs font-bold outline-none" 
-                               value="${getGeneralGuideCutoff()}" />
-                        <span class="text-xs text-slate-400 font-bold">%</span>
-                        <button id="saveGuideCutoffBtn" class="text-[11px] bg-indigo-600 hover:bg-indigo-500 text-white px-2 py-0.5 rounded font-bold transition-colors cursor-pointer" title="클릭 시 전체 학생 판정이 즉시 갱신됩니다">적용</button>
+                    <!-- 4단계 판정·후기 일반고 안정선 (학교 설정, 학년부장만 변경) -->
+                    <div class="flex items-center gap-1.5 bg-slate-800/80 px-2.5 py-1.5 rounded-lg border border-slate-700/80 shadow-inner" title="학년부장이 정한 학교 판정 기준입니다. 배포자료로 모든 담임 PC에 같은 기준이 적용됩니다.">
+                        <span class="text-xs text-slate-300 font-bold">🎯 판정 기준:</span>
+                        <span class="text-xs text-indigo-300 font-bold">${judgmentSummaryText()}</span>
+                        ${state.currentUser?.Role === 'master' ? '<button id="openJudgmentSettingsBtn" class="text-[11px] bg-indigo-600 hover:bg-indigo-500 text-white px-2 py-0.5 rounded font-bold transition-colors cursor-pointer">설정</button>' : ''}
                     </div>
 
                     <button id="classGridHomeBtn" class="btn-secondary whitespace-nowrap text-xs px-3 py-2 flex items-center gap-1.5" style="display: none;">
@@ -158,19 +155,9 @@ export async function renderTeacherScreen(schoolName, targetClassNum = null) {
         </div>
     `;
 
-    // 일반고 기준 적용 버튼 이벤트
-    document.getElementById('saveGuideCutoffBtn')?.addEventListener('click', () => {
-        const inputVal = parseFloat(document.getElementById('generalGuideCutoffInput').value);
-        if (isNaN(inputVal) || inputVal < 10 || inputVal > 100) {
-            alert('유효한 백분율(10~100 사이)을 입력해 주세요.');
-            return;
-        }
-        setGeneralGuideCutoff(inputVal);
-        alert(`후기 일반고 합격 안정선 기준이 [${inputVal}%]로 설정되었습니다.\n(경계선: ${Math.min(100, inputVal + 10)}%까지)`);
-        const currentClass = activeClassNum;
-        if (currentClass) {
-            loadClass(currentClass);
-        }
+    // 판정 기준 설정(학년부장): 저장되면 현재 학급을 다시 그린다.
+    document.getElementById('openJudgmentSettingsBtn')?.addEventListener('click', () => {
+        openModal('judgment-settings', { onSaved: () => renderTeacherScreen(schoolName, activeClassNum) });
     });
 
     // 창 제목 역할 반영

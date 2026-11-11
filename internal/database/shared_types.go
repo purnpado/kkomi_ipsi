@@ -30,6 +30,8 @@ type AnonymousApplicationRecord struct {
 	// 1차 전형 결과(합격·불합격, 단계 구분 없는 전형·기존 자료는 빈값). 1차 합격 후 2차 탈락을
 	// 관내 전체 표본으로 따로 분석하기 위한 결과 항목이며 개인 식별 정보가 아니다.
 	FirstStageResult string `json:"firstStageResult,omitempty"`
+	// 후기 일반고 항목별 점수(교과·출석·봉사·가산점 입력 여부·확정 여부). 다른 전형은 비움.
+	GeneralDetail *SharedGeneralDetail `json:"generalDetail,omitempty"`
 }
 
 // SharedSummaryStat 다중 학교 자료 취합 시 평균과 표준편차를 정확하게 재계산하기 위한 모멘트(인원, 합, 제곱합) 포함 요약
@@ -126,6 +128,7 @@ type ConsolidatedStatsResult struct {
 	RejectedCount            int                       `json:"rejectedCount"`
 	RejectedMax              float64                   `json:"rejectedMax"`
 	RejectedAvg              float64                   `json:"rejectedAvg"`
+	SmallSample              bool                      `json:"smallSample"`     // 합격·불합격 표본이 3명 미만이면 참고용
 	Stage1PassCount          int                       `json:"stage1PassCount"` // 1차 합격(최종 합격·2차 탈락 포함)
 	Stage1PassMin            float64                   `json:"stage1PassMin"`   // 관내 1차 합격선
 	Stage2FailCount          int                       `json:"stage2FailCount"` // 1차 합격 후 최종 불합격

@@ -59,6 +59,7 @@ func (dm *DBManager) InitSharedDatabaseTables() error {
 	}
 
 	_, _ = db.Exec(`ALTER TABLE shared_anonymous_scores ADD COLUMN first_stage_result TEXT DEFAULT ''`)
+	_, _ = db.Exec(`ALTER TABLE shared_anonymous_scores ADD COLUMN general_detail_json TEXT DEFAULT ''`)
 
 	// 3. 요약 통계 테이블 (다중 학교 모멘트 합산용)
 	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS shared_summary_stats (
@@ -170,6 +171,9 @@ func (dm *DBManager) BuildSharedPackageV2(admissionYear int) (*SharedPackageV2, 
 		}
 		anonymousRecords = append(anonymousRecords, anon)
 	}
+
+	// 후기 일반고 결과(배정·미배정)는 학교명이 없으므로 따로 만든다(항목별 확정 총점).
+	anonymousRecords = append(anonymousRecords, dm.buildGeneralAnonymousRecords(records, admissionYear)...)
 
 	// 1. 개인 식별 방지: 순서 무작위 셔플 (Fisher-Yates)
 	if err := shuffleAnonymousRecords(anonymousRecords); err != nil {
@@ -316,8 +320,8 @@ func (dm *DBManager) ImportV2Package(db *sql.DB, v2 *SharedPackageV2) (*SharedPa
 
 	// 익명 학생 점수 자료 배치 삽입
 	stmtScore, err := tx.Prepare(`INSERT INTO shared_anonymous_scores 
-		(school_pkg_id, admission_year, high_school, department, track, preference_rank, status, score, score_basis, stage1_common_score, stage1_school_score, score_details_json, formula_version, first_stage_result) 
-		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
+		(school_pkg_id, admission_year, high_school, department, track, preference_rank, status, score, score_basis, stage1_common_score, stage1_school_score, score_details_json, formula_version, first_stage_result, general_detail_json) 
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
 	if err != nil {
 		return nil, err
 	}
@@ -329,7 +333,7 @@ func (dm *DBManager) ImportV2Package(db *sql.DB, v2 *SharedPackageV2) (*SharedPa
 			pkgID, admissionYear, rec.HighSchool, rec.Department, rec.Track,
 			rec.PreferenceRank, rec.Status, rec.Score, rec.ScoreBasis,
 			rec.ScoreDetails.Percentile, rec.ScoreDetails.AcademicScore,
-			string(detailsJSON), rec.FormulaVersion, rec.FirstStageResult,
+			string(detailsJSON), rec.FormulaVersion, rec.FirstStageResult, generalDetailJSON(rec.GeneralDetail),
 		)
 		if err != nil {
 			return nil, err
@@ -478,4 +482,15 @@ func (dm *DBManager) GetParticipatingSchools(admissionYear int) ([]SharedPartici
 		}
 	}
 	return list, nil
+}
+
+func generalDetailJSON(d *SharedGeneralDetail) string {
+	if d == nil {
+		return ""
+	}
+	b, err := json.Marshal(d)
+	if err != nil {
+		return ""
+	}
+	return string(b)
 }

@@ -148,6 +148,7 @@ func (dm *DBManager) GetConsolidatedAdmissionStats(admissionYear int, highSchool
 		RejectedCount:            len(rejectedScores),
 		RejectedMax:              rejMax,
 		RejectedAvg:              rejAvg,
+		SmallSample:              len(acceptedScores) < MinSharedSample || (len(rejectedScores) > 0 && len(rejectedScores) < MinSharedSample),
 		Stage1PassCount:          stage1PassCount,
 		Stage1PassMin:            calc.Round2(stage1PassMin),
 		Stage2FailCount:          stage2FailCount,

@@ -1,5 +1,6 @@
 import { escapeHtml } from '../../../core/utils.js';
 import { state } from '../../../core/store.js';
+import { judgmentModeToggleHTML, judgeGeneralPercentile } from '../../../core/admissionJudgment.js';
 
 // 상담 모달: 전체 레이아웃 렌더링
 export function renderStudentModalLayout(ctx) {
@@ -45,8 +46,19 @@ export function renderStudentModalLayout(ctx) {
                 </div>
                 <div class="p-3.5 rounded-xl bg-slate-800/50 border border-slate-700/50 text-center">
                     <div class="text-xs text-text-muted mb-1">후기 일반고 내신 / 석차백분율</div>
-                    <div class="text-xl font-bold ${ctx.data.generalHSPercentile <= (state.generalGuideCutoff || 80) ? 'text-success' : (ctx.data.generalHSPercentile <= (state.generalGuideCutoff || 80) + 10 ? 'text-warning' : 'text-danger')}">${ctx.data.generalHSTotalScore.toFixed(2)}점 <span class="text-[10px] font-normal text-amber-300">${ctx.data.generalHSProjected ? '예상' : '확정'}</span></div>
-                    <div class="text-[11px] text-slate-400">교과 ${ctx.data.generalHSAcademicScore.toFixed(2)} / 비교과 ${ctx.data.generalHSNonAcademicScore.toFixed(2)} · ${ctx.data.generalHSPercentile.toFixed(2)}%</div>
+                    ${(() => {
+                        // 후기 일반고: 학교 내 석차백분율 판정(학교 설정 안정·경계선) + 총점 범위(가산점 미정분)
+                        const d = ctx.data;
+                        const g = judgeGeneralPercentile(d.generalHSPercentile);
+                        const tone = { safe: 'text-success', proper: 'text-warning', challenge: 'text-danger' }[g.level] || 'text-slate-300';
+                        const high = Number(d.generalHSTotalHigh || 0);
+                        const range = high > d.generalHSTotalScore + 0.001 ? `~${high.toFixed(2)}` : '';
+                        const status = d.generalHSProjected ? '예상' : '확정';
+                        return `<div class="text-xl font-bold ${tone}">${d.generalHSTotalScore.toFixed(2)}${range}점 <span class="text-[10px] font-normal text-amber-300">${status}</span> <span class="text-[11px] font-normal">${g.emoji} ${g.label}</span></div>
+                    <div class="text-[11px] text-slate-400">교과 ${d.generalHSAcademicScore.toFixed(2)}${d.generalHSThirdYearFinal ? '' : '(3-1 복사 예상)'} · 출석 ${Number(d.generalHSAttendanceScore || 0).toFixed(1)} · 봉사 ${Number(d.generalHSVolunteerScore || 0).toFixed(1)} · 행발 ${Number(d.generalHSBehaviorScore || 0)} · 창체 ${Number(d.generalHSCreativeScore || 0)} · ${d.generalHSPercentile.toFixed(2)}%</div>
+                    <div class="text-[10px] text-slate-500">기본 지표(가산점 제외) ${Number(d.generalHSBaseScore || 0).toFixed(2)}점${range ? ' · 범위는 아직 정해지지 않은 가산점' : ''}${d.generalHSBonusEntered ? '' : ' · 가산점 미입력'}</div>
+                    <div id="generalCityCutoff" class="text-[10px] mt-1"></div>`;
+                    })()}
                 </div>
             </div>
 
@@ -128,7 +140,19 @@ export function renderStudentModalLayout(ctx) {
                                     </div>
                                 </div>
                             </div>
-                            <p class="text-[10px] text-slate-400 mt-1">※ 일반고 비교과(총 50점) 산출 시 각 해당 학년의 가산점으로 직결됩니다.</p>
+                            <div class="rounded-lg bg-slate-800/60 border border-slate-700 p-2.5 space-y-1.5">
+                                <span class="text-[11px] font-bold text-slate-300 block">학년별 출결·봉사 <span class="font-normal text-slate-400">(선택 · 비우면 나이스 자료로 자동 계산)</span></span>
+                                <div class="grid grid-cols-4 gap-1.5 text-[11px] text-slate-300 items-center">
+                                    <span></span>${[1, 2, 3].map(g => `<span class="text-center">${g}학년</span>`).join('')}
+                                    <span title="미인정 결석일 + 지각·조퇴·결과 3회당 1일">결석 환산(일)</span>
+                                    ${[1, 2, 3].map(g => `<input type="text" inputmode="numeric" id="genAbs${g}" class="input-field py-1 px-1.5 text-xs text-center" value="${ctx.rawExtra['general_absence_' + g] ?? ''}" placeholder="자동" ${isViewer ? 'disabled' : ''}/>`).join('')}
+                                    <span>봉사(시간)</span>
+                                    ${[1, 2, 3].map(g => `<input type="text" inputmode="numeric" id="genVol${g}" class="input-field py-1 px-1.5 text-xs text-center" value="${ctx.rawExtra['general_volunteer_' + g] ?? ''}" placeholder="자동" ${isViewer ? 'disabled' : ''}/>`).join('')}
+                                </div>
+                            </div>
+                            <p class="text-[10px] text-slate-400 mt-1">※ 후기 일반고 비교과 40점(출석 16·봉사 8·행발 8·창체 8). 출석·봉사는 학년별로 계산합니다.
+                                현재 출석 ${Number(ctx.data.generalHSAttendanceScore || 0).toFixed(1)} · 봉사 ${Number(ctx.data.generalHSVolunteerScore || 0).toFixed(1)} ·
+                                가산점 ${ctx.data.generalHSBonusEntered ? '<b class="text-emerald-300">입력 완료</b>' : '<b class="text-amber-300">미입력 — 저장하면 입력 완료로 기록됩니다</b>'}</p>
                         </section>
                     </div>
                 </div>
@@ -175,6 +199,7 @@ export function renderStudentModalLayout(ctx) {
                                 📈 최근 5년 평균
                             </button>
                         </div>
+                        <span id="counselJudgmentToggle">${judgmentModeToggleHTML()}</span>
                     </div>
                 </div>
 

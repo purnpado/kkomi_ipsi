@@ -3,6 +3,7 @@ import { buildSchoolResultCards } from './schoolCards.js';
 import { renderStudentModalLayout } from './modalLayout.js';
 import { bindBaselineControls } from './baselineControls.js';
 import { bindExtraSaveAndPrint } from './extraEditor.js';
+import { fillGeneralCityCutoff } from './generalCityCutoff.js';
 import { bindCounselRecords } from './counselLog.js';
 import { bindWishlistControls } from './wishlist.js';
 import { notifyClassUpdated, notifyStudentSelected } from '../../../core/navigation.js';
@@ -62,6 +63,7 @@ export function renderStudentModalContent(modalEl, classNum, studentNum, name, d
     bindStudentModalClose(ctx);
     bindBaselineControls(ctx);
     bindExtraSaveAndPrint(ctx);
+    fillGeneralCityCutoff(ctx);
     bindCounselRecords(ctx);
     bindWishlistControls(ctx);
 }
@@ -113,6 +115,8 @@ function prepareStudentModalState(ctx) {
 // 상담 모달: 목표고교 목록 HTML 렌더러
 function defineWishlistRenderer(ctx) {
     ctx.extra = ctx.data.extraData || {};
+    // 숫자 항목(학년별 결석·봉사 등)까지 담긴 원본 JSON. extraData는 참/거짓 항목만 담는다.
+    try { ctx.rawExtra = JSON.parse(ctx.data.extraJSON || '{}') || {}; } catch (_) { ctx.rawExtra = {}; }
 
     // 학생 관심학교(장바구니) HTML 생성 헬퍼
     ctx.renderWishlistHTML = (list) => {

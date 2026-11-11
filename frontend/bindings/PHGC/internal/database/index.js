@@ -40,6 +40,22 @@ import * as $models from "./models.js";
  */
 
 /**
+ * GeneralCutoffEstimate 한 잣대(기본 지표 또는 완전 총점)의 관내 합격선 추정.
+ * @typedef {$models.GeneralCutoffEstimate} GeneralCutoffEstimate
+ */
+
+/**
+ * GeneralCutoffResult 후기 일반고 관내 합격선 추정 결과.
+ * @typedef {$models.GeneralCutoffResult} GeneralCutoffResult
+ */
+
+/**
+ * GeneralQuotaRecord 후기 일반고 학년도별 선발 정원·지원자 수(교육청 발표값을 운영자가 직접 입력).
+ * 관내 공유 자료의 총점 분포에서 "정원 ÷ 지원자" 위치로 합격선을 추정할 때 쓴다.
+ * @typedef {$models.GeneralQuotaRecord} GeneralQuotaRecord
+ */
+
+/**
  * @typedef {$models.LoginAccount} LoginAccount
  */
 

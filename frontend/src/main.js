@@ -11,7 +11,8 @@ import { state, patchState } from './core/store.js';
 import { ScreenLockManager } from './core/screenLock.js';
 import { initGlobalEscapeHandler } from './core/dialogs.js';
 import { checkUpdateOnStartup, openExternalUrlSafe, FEEDBACK_BOARD_URL } from './core/updater.js';
-import { getGeneralGuideCutoff, setGeneralGuideCutoff, getGeneralGuideBadge } from './core/generalGuide.js';
+import { getGeneralGuideCutoff, getGeneralGuideBadge } from './core/generalGuide.js';
+import { loadJudgmentSettings } from './core/admissionJudgment.js';
 import { renderFirstRunScreen, renderSetupScreen, renderSyncScreen } from './views/auth/setupWizardView.js';
 import { renderModeSelectScreen, renderLoginScreen } from './views/auth/loginView.js';
 import { renderAgreementModal } from './views/auth/agreementView.js';
@@ -30,6 +31,7 @@ import { openApplicationRegisterModal } from './modals/summary/registerModal.js'
 import { openClassApplicationSummaryModal, openApplicationSummaryModal } from './modals/summary/applicationSummaryModal.js';
 import { openSharedAdmissionModal } from './modals/sharedAdmissionModal.js';
 import { openAdmissionAnalysisModal } from './modals/analysis/admissionAnalysisModal.js';
+import { openJudgmentSettingsModal } from './modals/judgmentSettingsModal.js';
 
 // 화면 잠금 및 전역 ESC 핸들러 초기화
 ScreenLockManager.init();
@@ -72,7 +74,8 @@ const MODAL_ROUTES = {
     'application-summary': () => openApplicationSummaryModal(),
     'shared-admission': () => openSharedAdmissionModal(),
     'admission-analysis': () => openAdmissionAnalysisModal(),
-    'patch-import': (d) => openPatchImportModal(d.schoolName || '')
+    'patch-import': (d) => openPatchImportModal(d.schoolName || ''),
+    'judgment-settings': (d) => openJudgmentSettingsModal({ onSaved: d.onSaved })
 };
 
 // ----- 중앙 이벤트 버스 구독 연결 (이벤트 기반 아키텍처) -----
@@ -87,6 +90,10 @@ eventBus.on(EVENTS.NAVIGATE, (detail) => {
         currentScreen: detail.screen,
         schoolName: typeof detail.schoolName === 'string' ? detail.schoolName : state.schoolName
     });
+    // 로그인 뒤 첫 화면은 학교 판정 기준을 읽은 다음 그린다(기본값으로 잠깐 판정되지 않도록).
+    if (state.currentUser && !state.judgmentSettings) {
+        return loadJudgmentSettings().then(() => route(detail));
+    }
     return route(detail);
 });
 
@@ -110,10 +117,12 @@ eventBus.on(EVENTS.ADMISSION_ANALYSIS, () => openAdmissionAnalysisModal());
 // 인증·세션: 로그인 사용자와 선택 상태는 중앙 저장소에서만 바꾼다.
 eventBus.on(EVENTS.LOGIN_SUCCESS, (detail) => {
     state.currentUser = detail?.user ?? null;
+    // 4단계 판정 기준(학교 설정)을 로그인마다 다시 읽는다.
+    loadJudgmentSettings();
 });
 
 eventBus.on(EVENTS.LOGOUT, () => {
-    patchState({ currentUser: null, activeClassNum: null, selectedStudent: null });
+    patchState({ currentUser: null, activeClassNum: null, selectedStudent: null, judgmentSettings: null, judgmentViewMode: null });
 });
 
 eventBus.on(EVENTS.SCREEN_LOCK, (detail) => {
@@ -138,7 +147,6 @@ Object.assign(window, {
     openSharedAdmissionModal,
     openAdmissionAnalysisModal,
     getGeneralGuideCutoff,
-    setGeneralGuideCutoff,
     getGeneralGuideBadge
 });
 

@@ -9,6 +9,16 @@ import (
 
 // SaveStudentExtra 학생의 수기 가산점 및 추가 봉사시간 저장
 func (a *App) SaveStudentExtra(classNum int, studentNum, name, extraJSON string) error {
+	// 진로부장은 조회 전용, 담임은 본인 학급만 수정할 수 있다.
+	if a.user == nil {
+		return fmt.Errorf("로그인이 필요합니다")
+	}
+	if a.user.Role == "viewer" {
+		return fmt.Errorf("조회 전용 계정은 가산점·출결을 수정할 수 없습니다")
+	}
+	if a.user.Role == "homeroom" && a.user.ClassNum != classNum {
+		return fmt.Errorf("담당 학급(%d반) 학생만 수정할 수 있습니다", a.user.ClassNum)
+	}
 	if err := a.db.UpdateStudentExtra(classNum, studentNum, name, extraJSON); err != nil {
 		return err
 	}

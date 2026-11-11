@@ -71,7 +71,10 @@ func (dm *DBManager) GetClassGrades(classNum int, isMaster bool) ([]calc.Student
 					res.Rank = snap.Rank
 					res.Percentile = snap.Percentile
 					res.FinalScore = snap.FinalScore
+					pending := res.GeneralTotalHigh - res.GeneralTotalScore
 					res.GeneralTotalScore = res.FinalScore + res.NonAcademicScore
+					res.GeneralBaseScore = calc.Round2(res.FinalScore + res.AttendanceScore + res.VolunteerScore + 10)
+					res.GeneralTotalHigh = calc.Round2(res.GeneralTotalScore + pending)
 				}
 			}
 			classResults = append(classResults, res)
@@ -160,6 +163,7 @@ func (dm *DBManager) GetStudentFullDetail(classNum int, studentNum, name string,
 			full.GeneralHSTotalScore = cg.GeneralTotalScore
 			full.GeneralHSDataComplete = cg.GeneralDataComplete
 			full.GeneralHSProjected = cg.GeneralProjected
+			applyGeneralBreakdown(full, cg)
 			if cg.Percentile <= 80 {
 				full.GeneralHSLevel = "상"
 			} else if cg.Percentile <= 90 {
@@ -330,6 +334,7 @@ func (dm *DBManager) GetClassFullGrades(classNum int, isMaster bool) ([]calc.Stu
 					full.GeneralHSTotalScore = cg.GeneralTotalScore
 					full.GeneralHSDataComplete = cg.GeneralDataComplete
 					full.GeneralHSProjected = cg.GeneralProjected
+					applyGeneralBreakdown(full, cg)
 					break
 				}
 			}
@@ -348,4 +353,17 @@ func (dm *DBManager) GetClassFullGrades(classNum int, isMaster bool) ([]calc.Stu
 	})
 
 	return results, nil
+}
+
+// applyGeneralBreakdown은 후기 일반고 비교과 항목별 점수·기본 지표·범위를 학생 상세에 옮긴다.
+func applyGeneralBreakdown(full *calc.StudentFullData, cg calc.StudentCalcResult) {
+	full.GeneralHSAttendanceScore = cg.AttendanceScore
+	full.GeneralHSVolunteerScore = cg.VolunteerScore
+	full.GeneralHSBehaviorScore = cg.BehaviorScore
+	full.GeneralHSCreativeScore = cg.CreativeScore
+	full.GeneralHSBaseScore = cg.GeneralBaseScore
+	full.GeneralHSTotalHigh = cg.GeneralTotalHigh
+	full.GeneralHSBonusEntered = cg.GeneralBonusEntered
+	full.GeneralHSThirdYearFinal = cg.ThirdYearFinalUsed
+	full.GeneralHSPerGradeExact = cg.GeneralPerGradeExact
 }

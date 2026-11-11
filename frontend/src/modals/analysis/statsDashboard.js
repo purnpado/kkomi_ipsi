@@ -1,3 +1,6 @@
+import { judgmentZones, totalMaxFor } from '../../core/admissionJudgment.js';
+
+const describeMarginText = m => (m.mode === 'ratio' ? `만점의 ${m.value}%(${m.points.toFixed(2)}점)` : `${m.value}점`);
 /**
  * 정밀 통계 지표 및 히스토그램 대시보드 렌더링
  */
@@ -10,9 +13,14 @@ export function renderStatsDashboard(container, stats, sourceMode) {
     // 적정: 합격자 하위 25%(Q1) 이상 ~ 불합격 최고점 이하
     // 소신: 합격 최저점 이상 ~ 합격자 하위 25%(Q1) 미만
     // 도전: 합격 최저점 미만
-    const safeCutoff = stats.rejectedCount > 0 ? stats.rejectedMax : (stats.acceptedQ3 || stats.acceptedAvg);
-    const properCutoff = stats.acceptedQ1 || stats.acceptedMin;
-    const challengeCutoff = stats.acceptedMin;
+    // 4단계 구간: core/admissionJudgment.js 단일 기준(기준선 = 합격 최저점, 학교 설정 여유폭)
+    const zones = judgmentZones({
+        cutoff: stats.acceptedMin, totalMax: totalMaxFor(stats.highSchool, stats.track),
+        schoolName: stats.highSchool, track: stats.track, maxRejected: stats.rejectedCount > 0 ? stats.rejectedMax : 0
+    });
+    const safeCutoff = zones ? zones.safeFrom : 0;
+    const properCutoff = zones ? zones.properFrom : 0;
+    const challengeCutoff = zones ? zones.hopeFrom : 0;
 
     const stdDevEmphasis = stats.acceptedCount >= 10
         ? `<span class="text-emerald-300 font-bold">${stats.acceptedStdDev.toFixed(2)}</span>`
@@ -34,6 +42,7 @@ export function renderStatsDashboard(container, stats, sourceMode) {
                     ${stats.stage1PassMin ? `<span class="text-slate-600">·</span><span class="text-amber-300" title="1차 합격자 최저점(관내 통합 시 전체 학교 기준)">1차 합격선 ${Number(stats.stage1PassMin).toFixed(2)}</span>` : ''}
                     <span class="text-slate-600">·</span>
                     <span class="text-indigo-300 font-medium">${sourceMode === 'consolidated' ? `관내 ${stats.totalParticipatingSchool}개교` : '우리 학교'}</span>
+                    ${stats.smallSample ? '<span class="text-amber-300" title="합격 또는 불합격 표본이 3명 미만입니다">· 표본 부족(참고)</span>' : ''}
                 </div>
             </div>
 
@@ -101,9 +110,9 @@ export function renderStatsDashboard(container, stats, sourceMode) {
                 <div class="p-3 rounded-lg bg-emerald-950/40 border border-emerald-500/30 space-y-1">
                     <div class="flex items-center justify-between font-bold text-emerald-300">
                         <span>🟢 안정권</span>
-                        <span class="font-mono">${safeCutoff > 0 ? `>${safeCutoff.toFixed(2)}점` : '-'}</span>
+                        <span class="font-mono">${safeCutoff > 0 ? `${safeCutoff.toFixed(2)}점 ~` : '-'}</span>
                     </div>
-                    <p class="text-[11px] text-slate-300">불합격 최고점 초과 구간</p>
+                    <p class="text-[11px] text-slate-300">합격 최저점 + ${zones ? describeMarginText(zones.margin) : '여유폭'} 이상 또는 불합격 최고점 초과</p>
                 </div>
 
                 <!-- 적정 -->
@@ -112,16 +121,16 @@ export function renderStatsDashboard(container, stats, sourceMode) {
                         <span>🟡 적정권</span>
                         <span class="font-mono">${properCutoff > 0 ? `${properCutoff.toFixed(2)}점 ~` : '-'}</span>
                     </div>
-                    <p class="text-[11px] text-slate-300">합격자 하위 25%(Q1) 이상</p>
+                    <p class="text-[11px] text-slate-300">합격 최저점 이상(동점 포함)</p>
                 </div>
 
                 <!-- 소신 -->
                 <div class="p-3 rounded-lg bg-amber-950/40 border border-amber-500/30 space-y-1">
                     <div class="flex items-center justify-between font-bold text-amber-300">
-                        <span>🟠 소신/주의</span>
+                        <span>🟠 소신권</span>
                         <span class="font-mono">${challengeCutoff > 0 ? `${challengeCutoff.toFixed(2)}점 ~` : '-'}</span>
                     </div>
-                    <p class="text-[11px] text-slate-300">합격 최저 ~ Q1 미만 경합</p>
+                    <p class="text-[11px] text-slate-300">합격 최저점 − 여유폭 ~ 합격 최저점 미만</p>
                 </div>
 
                 <!-- 도전 -->
@@ -130,7 +139,7 @@ export function renderStatsDashboard(container, stats, sourceMode) {
                         <span>🔴 도전권</span>
                         <span class="font-mono">${challengeCutoff > 0 ? `<${challengeCutoff.toFixed(2)}점` : '-'}</span>
                     </div>
-                    <p class="text-[11px] text-slate-300">합격 최저점 미달 구간</p>
+                    <p class="text-[11px] text-slate-300">소신 구간 미만</p>
                 </div>
             </div>
         </div>

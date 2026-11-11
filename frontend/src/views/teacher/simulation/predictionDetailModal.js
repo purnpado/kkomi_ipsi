@@ -1,4 +1,5 @@
 import { escapeHtml, normalizeSchoolName, normalizeTrack } from '../../../core/utils.js';
+import { judgmentSummaryText } from '../../../core/admissionJudgment.js';
 import { printOnly } from '../../../print/printEngine.js';
 import { getPredictionAnalysisList } from './prediction.js';
 import { showSchoolScoreDetailModal } from './schoolScoreDetail.js';
@@ -169,8 +170,7 @@ export async function openPredictionDetailModal(classNum, studentNum, studentNam
                 let badgeHTML = '';
                 if (relatedPred) {
                     const diffStr = relatedPred.diff >= 0 ? `+${relatedPred.diff.toFixed(1)}` : relatedPred.diff.toFixed(1);
-                    const bColor = relatedPred.isPass ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40' : 'bg-rose-500/20 text-rose-300 border-rose-500/40';
-                    badgeHTML = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold border ${bColor}">${relatedPred.isPass ? '🟢' : '🔴'} ${relatedPred.status} (${diffStr})</span>`;
+                    badgeHTML = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold border ${relatedPred.statusColor}" title="${escapeHtml(relatedPred.judgmentTitle || '')}">${relatedPred.emoji || ''} ${relatedPred.status} (${diffStr})</span>`;
                 }
 
                 return `
@@ -206,9 +206,7 @@ export async function openPredictionDetailModal(classNum, studentNum, studentNam
             tableRowsHTML = displayList.map((item, idx) => {
                 const diffStr = item.diff >= 0 ? `+${item.diff.toFixed(2)}` : item.diff.toFixed(2);
                 const diffColor = item.diff >= 0 ? 'text-emerald-400 font-black' : 'text-rose-400 font-bold';
-                const statusBadge = item.isPass
-                    ? `<span class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 inline-flex items-center gap-1 shadow-xs">🟢 ${item.status}</span>`
-                    : `<span class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-rose-500/20 text-rose-300 border border-rose-500/40 inline-flex items-center gap-1 shadow-xs">🔴 ${item.status}</span>`;
+                const statusBadge = `<span class="px-2.5 py-1 rounded-full text-[11px] font-bold border inline-flex items-center gap-1 shadow-xs ${item.statusColor}" title="${escapeHtml(item.judgmentTitle || '')}">${item.emoji || ''} ${item.status}</span>`;
 
                 return `
                     <tr class="border-b border-slate-700/40 hover:bg-slate-800/50 transition-colors text-center text-xs">
@@ -327,10 +325,8 @@ export async function openPredictionDetailModal(classNum, studentNum, studentNam
                         </button>
                     </div>
                     <div class="text-xs text-text-muted flex items-center gap-3">
-                        <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-400"></span> 안정(+5점 이상)</span>
-                        <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-yellow-400"></span> 적정(0~+5점)</span>
-                        <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-orange-400"></span> 소신(-5~0점)</span>
-                        <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-rose-400"></span> 도전(-5점 미만)</span>
+                        <span>🟢 안정 · 🟡 적정 · 🟠 소신 · 🔴 도전</span>
+                        <span class="text-slate-500">${judgmentSummaryText()}</span>
                     </div>
                 </div>
 

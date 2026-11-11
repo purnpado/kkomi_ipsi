@@ -11,7 +11,10 @@ export function bindExtraSaveAndPrint(ctx) {
             saveBtn.textContent = '저장 중...';
 
             const leadershipTerms = Math.min(4, Math.max(0, parseInt(document.getElementById('inputLeadershipTerms')?.value) || 0));
+            // 이미 저장된 다른 항목(징계 제외 표시 등)은 지우지 않고 합친다.
             const newExtra = {
+                ...ctx.rawExtra,
+                general_bonus_entered: true, // 가산점 입력 완료(체크가 없어도 '가산점 없음'으로 확정)
                 leadership_terms: leadershipTerms,
                 changche_1: Boolean(document.getElementById('checkChangche1')?.checked),
                 changche_2: Boolean(document.getElementById('checkChangche2')?.checked),
@@ -20,6 +23,15 @@ export function bindExtraSaveAndPrint(ctx) {
                 haengbal_2: Boolean(document.getElementById('checkHaengbal2')?.checked),
                 haengbal_3: Boolean(document.getElementById('checkHaengbal3')?.checked),
             };
+
+            for (const g of [1, 2, 3]) {
+                for (const [id, key] of [[`genAbs${g}`, `general_absence_${g}`], [`genVol${g}`, `general_volunteer_${g}`]]) {
+                    const raw = document.getElementById(id)?.value.trim() ?? '';
+                    const value = parseInt(raw, 10);
+                    if (raw === '' || !Number.isFinite(value) || value < 0) delete newExtra[key];
+                    else newExtra[key] = value;
+                }
+            }
 
             try {
                 await window.go.main.App.SaveStudentExtra(ctx.classNum, ctx.studentNum, ctx.name, JSON.stringify(newExtra));

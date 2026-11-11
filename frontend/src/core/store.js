@@ -13,6 +13,9 @@ const data = {
     selectedStudent: null,
     // 후기 일반고 안정권 기준 석차백분율(%)
     generalGuideCutoff: null,
+    // 4단계 판정 기준(학교 설정)과 상담 화면 보기 방식(null=학교 설정, 'ratio', 'points')
+    judgmentSettings: null,
+    judgmentViewMode: null,
     // 고교별 산출 규칙 목록 캐시
     allSchoolRules: null
 };

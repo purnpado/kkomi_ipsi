@@ -163,7 +163,7 @@ func TestAdmissionStagesFromGuidelines(t *testing.T) {
 		{"울산상업고등학교", "취업희망자", true, 1.5},
 		{"울산공업고등학교", "취업자 특별전형", true, 1.5},
 		{"울산기술공업고등학교", "취업희망자", false, 0}, // 면접 점수 미반영
-		{"울산상업고등학교", "일반", false, 0},       // 특성화고 일반전형은 단일 전형
+		{"울산상업고등학교", "일반", false, 0},      // 특성화고 일반전형은 단일 전형
 	}
 	for _, c := range cases {
 		if got := HasSecondStage(c.school, c.track); got != c.two {

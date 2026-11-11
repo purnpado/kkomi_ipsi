@@ -311,6 +311,15 @@ export function GetConsolidatedAdmissionStats(admissionYear, highSchool, departm
 }
 
 /**
+ * GetConsolidatedGeneralCutoff 관내 공유 자료로 추정한 후기 일반고 합격선(기본 지표·완전 총점).
+ * @param {number} admissionYear
+ * @returns {$CancellablePromise<database$0.GeneralCutoffResult | null>}
+ */
+export function GetConsolidatedGeneralCutoff(admissionYear) {
+    return $Call.ByID(2666984461, admissionYear);
+}
+
+/**
  * @returns {$CancellablePromise<database$0.CutoffInfo[] | null>}
  */
 export function GetCutoffs() {
@@ -336,11 +345,27 @@ export function GetDepartmentAdmissionStats(bucketStep) {
 }
 
 /**
+ * GetGeneralQuotaRecords 후기 일반고 학년도별 정원·지원자 수 목록.
+ * @returns {$CancellablePromise<database$0.GeneralQuotaRecord[] | null>}
+ */
+export function GetGeneralQuotaRecords() {
+    return $Call.ByID(3244642107);
+}
+
+/**
  * GetHighSchoolsData 고교 목록 데이터 반환 (후기 일반고 포함)
  * @returns {$CancellablePromise<sync$0.HighSchoolData | null>}
  */
 export function GetHighSchoolsData() {
     return $Call.ByID(842643540);
+}
+
+/**
+ * GetJudgmentSettings 4단계 판정 여유폭 설정(JSON). 모든 계정이 같은 기준으로 판정하도록 조회는 누구나 가능하다.
+ * @returns {$CancellablePromise<string>}
+ */
+export function GetJudgmentSettings() {
+    return $Call.ByID(311359202);
 }
 
 /**
@@ -817,6 +842,24 @@ export function SaveDistributionPackage(username) {
  */
 export function SaveFinalArchive(archivePassword) {
     return $Call.ByID(2813526518, archivePassword);
+}
+
+/**
+ * SaveGeneralQuotaRecord 후기 일반고 정원·지원자 수 저장(교육청 발표값 수동 입력, 학년부장 전용).
+ * @param {database$0.GeneralQuotaRecord} record
+ * @returns {$CancellablePromise<void>}
+ */
+export function SaveGeneralQuotaRecord(record) {
+    return $Call.ByID(1880010149, record);
+}
+
+/**
+ * SaveJudgmentSettings 판정 설정 저장. 학교 전체 기준이므로 학년부장만 바꿀 수 있다.
+ * @param {string} settingsJSON
+ * @returns {$CancellablePromise<void>}
+ */
+export function SaveJudgmentSettings(settingsJSON) {
+    return $Call.ByID(4287905601, settingsJSON);
 }
 
 /**

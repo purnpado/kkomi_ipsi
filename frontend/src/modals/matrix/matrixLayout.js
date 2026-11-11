@@ -1,5 +1,6 @@
 import { printOnly } from '../../print/printEngine.js';
 import { openModal } from '../../core/navigation.js';
+import { judgmentModeToggleHTML, bindJudgmentModeToggle, judgmentSummaryText } from '../../core/admissionJudgment.js';
 
 // 신호등 매트릭스: 화면 골격 렌더링
 export function renderMatrixLayout(ctx, mx) {
@@ -134,9 +135,9 @@ export function renderMatrixLayout(ctx, mx) {
                 <div class="flex justify-between items-center text-xs text-text-muted flex-wrap gap-3 pt-1">
                     <div class="flex items-center gap-3 flex-wrap">
                         <span><strong>신호등 범례:</strong></span>
-                        <span class="inline-flex items-center gap-1 text-emerald-300 font-black bg-emerald-950/80 px-2.5 py-0.5 rounded-full border border-emerald-400/50">🟢 안정 (기준선 +5점 이상)</span>
-                        <span class="inline-flex items-center gap-1 text-amber-300 font-black bg-amber-950/80 px-2.5 py-0.5 rounded-full border border-amber-400/50">🟡 적정/경계 (기준선 이상)</span>
-                        <span class="inline-flex items-center gap-1 text-rose-300 font-black bg-rose-950/80 px-2.5 py-0.5 rounded-full border border-rose-400/50">🔴 소신/주의 (기준선 미만)</span>
+                        <span class="text-emerald-300 font-bold">🟢 안정</span><span class="text-indigo-300 font-bold">🟡 적정</span><span class="text-amber-300 font-bold">🟠 소신</span><span class="text-rose-300 font-bold">🔴 도전</span>
+                        <span class="text-slate-400">(${judgmentSummaryText()} · 점수에 마우스를 올리면 기준선·차이가 보입니다)</span>
+                        <span class="no-print" id="matrixJudgmentToggle">${judgmentModeToggleHTML()}</span>
                         <span class="text-slate-400 font-medium">※ 학생 이름을 클릭하면 해당 학생의 1:1 세부 상담 화면으로 즉시 이동합니다.</span>
                     </div>
                     <button id="matrixPrintBtn" class="no-print btn-secondary text-xs px-3.5 py-2 font-bold inline-flex items-center gap-1.5 rounded-xl cursor-pointer">
@@ -181,6 +182,17 @@ export function bindMatrixControls(ctx, mx) {
     };
 
     updateTabStyles();
+
+    // 판정 보기 방식(학교 설정/비율/점수) 전환: 표만 다시 그린다.
+    const bindToggle = () => {
+        const holder = ctx.modalEl.querySelector('#matrixJudgmentToggle');
+        bindJudgmentModeToggle(holder, () => {
+            holder.innerHTML = judgmentModeToggleHTML();
+            bindToggle();
+            renderTableOnly();
+        });
+    };
+    bindToggle();
 
     // 6개 탭 클릭 이벤트 바인딩
     ctx.modalEl.querySelectorAll('.matrix-6tab').forEach(btn => {
