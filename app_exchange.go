@@ -96,46 +96,6 @@ func (a *App) OpenDistributionPackageWithPassword(password string) (*exchange.Di
 	return a.ImportDistributionPackageWithPassword(path, password)
 }
 
-// SaveFinalArchive creates a portable AES-256-GCM encrypted archive of every
-// encrypted school data file. It contains no plaintext SQLite database.
-func (a *App) SaveFinalArchive(archivePassword string) (string, error) {
-	if a.user == nil || a.user.Role != "master" || len(a.dataKey) != 32 {
-		return "", fmt.Errorf("최종 보관본 생성은 학년부장 로그인 후에만 할 수 있습니다")
-	}
-	if strings.TrimSpace(archivePassword) == "" {
-		return "", fmt.Errorf("보관본 암호를 입력해주세요")
-	}
-	config, err := a.db.GetSchoolConfig()
-	if err != nil {
-		return "", err
-	}
-	path, err := a.saveFileDialog(
-		"암호화 최종 보관본 저장",
-		fmt.Sprintf("꼬미입시-%s-%d-최종보관본.kkomiarchive", config.SchoolName, config.AdmissionYear),
-		"꼬미입시 암호화 보관본 (*.kkomiarchive)",
-		"*.kkomiarchive",
-	)
-	if err != nil || path == "" {
-		return "", err
-	}
-	if err := a.ExportFinalArchive(archivePassword, path); err != nil {
-		return "", err
-	}
-	return path, nil
-}
-
-func (a *App) OpenFinalArchive() (string, error) {
-	path, err := a.openFileDialog(
-		"암호화 최종 보관본 선택",
-		"꼬미입시 암호화 보관본 (*.kkomiarchive · 이전 버전 파일 포함)",
-		"*.kkomiarchive;*.phgcarchive",
-	)
-	if err != nil || path == "" {
-		return "", err
-	}
-	return path, nil
-}
-
 // SaveTeacherPatch opens a native save dialog and writes an encrypted patch.
 func (a *App) SaveTeacherPatch(password, username string, classNum int, changes []model.PatchChange) (string, error) {
 	classTag := username

@@ -8,3 +8,8 @@ import * as $models from "./models.js";
  * DistributionImportResult 배포자료 가져오기 결과와 옮긴 기존 자료 건수
  * @typedef {$models.DistributionImportResult} DistributionImportResult
  */
+
+/**
+ * HandoverImportResult 받아 들인 자료 요약(화면 안내용)
+ * @typedef {$models.HandoverImportResult} HandoverImportResult
+ */

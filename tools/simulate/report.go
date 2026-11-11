@@ -247,19 +247,37 @@ func (sm *sim) report() string {
 			}
 		}
 	}
-	w("\n## 연도 변경·자료 보존 점검 (%s)\n", view.name)
+	w("\n## 인수인계로 이어진 자료 점검 (마지막 학년도 %s 프로그램 기준)\n", view.name)
+	w("해마다 새 폴더에 새로 설치하고 지난 학년도 인수인계 파일 하나만 받았다. 마지막 해 프로그램 안에 모든 학년도 자료가 남아 있어야 한다.\n")
+	w("| 학년도 | 학급 수(%s) | 우리 학교 커트라인 | 결과 확정 | 지난 입시 결과(익명) | 실제 원서 수(%s) | 관내 공유 참여 |", view.name, view.name)
+	w("|---|---:|---:|---|---:|---:|---:|")
 	years := map[int]int{}
 	for _, c := range cuts {
 		years[c.Year]++
 	}
-	for _, yr := range sm.years {
+	history, _ := view.dm.GetAdmissionHistory()
+	histCount := map[int]int{}
+	for _, h := range history {
+		histCount[h.AdmissionYear]++
+	}
+	for i, yr := range sm.years {
 		closure, _ := view.dm.GetAdmissionClosure(yr.year)
-		status := "미확정"
+		status := "없음"
 		if closure != nil && closure.Status != "" {
 			status = closure.Status
 		}
 		schools, _ := view.dm.GetParticipatingSchools(yr.year)
-		w("- %d 고입: 우리 학교 커트라인 %d건 · 결과 확정 %s · 관내 공유 참여 %d개교", yr.year, years[yr.year], status, len(schools))
+		actual := 0
+		for _, a := range yr.apps {
+			if a.stu.school == view {
+				actual++
+			}
+		}
+		classes := 0
+		if i < len(view.classHistory) {
+			classes = view.classHistory[i]
+		}
+		w("| %d | %d | %d | %s | %d | %d | %d개교 |", yr.year, classes, years[yr.year], status, histCount[yr.year], actual, len(schools))
 	}
 	return b.String()
 }

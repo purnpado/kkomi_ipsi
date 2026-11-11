@@ -63,7 +63,7 @@ func (dm *DBManager) GetApplicationSummaries() ([]ApplicationSummary, error) {
 	for classNum := 1; classNum <= config.ClassCount; classNum++ {
 		classNums = append(classNums, classNum)
 	}
-	return dm.getApplicationSummaries(classNums)
+	return dm.getApplicationSummaries(classNums, true)
 }
 
 // GetClassApplicationSummaries is the homeroom-safe view: it aggregates only
@@ -75,7 +75,7 @@ func (dm *DBManager) GetClassApplicationSummaries(classNum int) ([]ApplicationSu
 	return dm.getApplicationSummaries([]int{classNum})
 }
 
-func (dm *DBManager) getApplicationSummaries(classNums []int) ([]ApplicationSummary, error) {
+func (dm *DBManager) getApplicationSummaries(classNums []int, includeHistory ...bool) ([]ApplicationSummary, error) {
 	type accumulator struct {
 		ApplicationSummary
 		acceptedSum        float64
@@ -170,6 +170,34 @@ func (dm *DBManager) getApplicationSummaries(classNums []int) ([]ApplicationSumm
 			}
 		}
 	}
+	// 기록 한 건을 학과·지망별 묶음에 더한다. 진행 중 원서는 지망 학과마다, 결과가 나온 원서는 배정 학과로 센다.
+	presentYears := map[int]bool{}
+	dispatch := func(r model.ApplicationRecord) {
+		if r.Category != "meister" && r.Category != "special" {
+			add(r, "", 0)
+			return
+		}
+		if r.Status == "지원희망" || r.Status == "지원 희망" || r.Status == "지원예정" || r.Status == "지원 예정" || r.Status == "지원완료" || r.Status == "지원 완료" {
+			for i, department := range r.Preferences {
+				if department != "" {
+					add(r, department, i+1)
+				}
+			}
+			return
+		}
+		department := r.AssignedDepartment
+		if department == "" {
+			department = "전체"
+		}
+		rank := 0
+		for i, preferred := range r.Preferences {
+			if preferred == department {
+				rank = i + 1
+				break
+			}
+		}
+		add(r, department, rank)
+	}
 	for _, classNum := range classNums {
 		db, err := dm.OpenDB(dm.GetClassDBPath(classNum))
 		if err != nil {
@@ -188,34 +216,18 @@ func (dm *DBManager) getApplicationSummaries(classNums []int) ([]ApplicationSumm
 			var prefs string
 			if err := rows.Scan(&r.StudentNum, &r.StudentName, &r.AdmissionYear, &r.Category, &r.SchoolName, &r.Track, &r.Status, &r.Score, &r.ScoreBasis, &prefs, &r.AssignedDepartment, &r.AssignedSchool, &r.FirstStageResult, &r.UpdatedAt); err == nil {
 				_ = json.Unmarshal([]byte(prefs), &r.Preferences)
-				if r.Category == "meister" || r.Category == "special" {
-					if r.Status == "지원희망" || r.Status == "지원 희망" || r.Status == "지원예정" || r.Status == "지원 예정" || r.Status == "지원완료" || r.Status == "지원 완료" {
-						for i, department := range r.Preferences {
-							if department != "" {
-								add(r, department, i+1)
-							}
-						}
-					} else {
-						department := r.AssignedDepartment
-						if department == "" {
-							department = "전체"
-						}
-						rank := 0
-						for i, preferred := range r.Preferences {
-							if preferred == department {
-								rank = i + 1
-								break
-							}
-						}
-						add(r, department, rank)
-					}
-				} else {
-					add(r, "", 0)
-				}
+				presentYears[r.AdmissionYear] = true
+				dispatch(r)
 			}
 		}
 		rows.Close()
 		db.Close()
+	}
+	// 학교 전체 집계는 지금 학급 DB에 없는 학년도의 익명 보관 기록도 더한다(새 프로그램으로 이어 받은 지난 입시).
+	if len(includeHistory) > 0 && includeHistory[0] {
+		for _, r := range dm.historyAsRecords(presentYears) {
+			dispatch(r)
+		}
 	}
 	out := make([]ApplicationSummary, 0, len(groups))
 	for _, a := range groups {
@@ -269,7 +281,8 @@ func (dm *DBManager) getApplicationSummaries(classNums []int) ([]ApplicationSumm
 // GetDepartmentAdmissionStats calculates granular cutoffs, percentiles, overlap ranges,
 // and distribution histograms for all departments and tracks across classes.
 func (dm *DBManager) GetDepartmentAdmissionStats(bucketStep float64) ([]calc.DepartmentAdmissionStats, error) {
-	records, err := dm.GetSchoolApplicationRecords()
+	// 지금 학급 DB 기록 + 지난 학년도 익명 보관 기록(새 프로그램으로 이어 받은 입시 결과 포함)
+	records, err := dm.schoolRecordsWithHistory()
 	if err != nil {
 		return nil, err
 	}

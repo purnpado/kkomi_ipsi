@@ -21,6 +21,20 @@ func ExportSharedPackageV2(dm *database.DBManager, admissionYear int, password, 
 	if err != nil {
 		return err
 	}
+	// 우리 학교의 다른 학년도 결과도 함께 담는다(나중에 참여한 학교도 한 번에 지난 자료를 받도록).
+	years, err := ownResultYears(dm)
+	if err != nil {
+		return err
+	}
+	for _, y := range years {
+		if y == pkg.Cover.AdmissionYear {
+			continue
+		}
+		extra, err := dm.BuildSharedPackageV2(y)
+		if err == nil && extra != nil && len(extra.AnonymousRecords) > 0 {
+			pkg.AdditionalYears = append(pkg.AdditionalYears, *extra)
+		}
+	}
 
 	jsonData, err := json.Marshal(pkg)
 	if err != nil {
@@ -104,7 +118,22 @@ func ImportSharedPackageV2(dm *database.DBManager, password, inputPath string) (
 	// V2 형식 시도
 	var v2 database.SharedPackageV2
 	if err := json.Unmarshal(data, &v2); err == nil && v2.Cover.FormatVersion == 2 {
-		return dm.ImportV2Package(db, &v2)
+		extra := v2.AdditionalYears
+		v2.AdditionalYears = nil
+		res, err := dm.ImportV2Package(db, &v2)
+		if err != nil {
+			return nil, err
+		}
+		for i := range extra {
+			if extra[i].Cover.SchoolName == "" {
+				extra[i].Cover.SchoolName = v2.Cover.SchoolName
+			}
+			if _, err := dm.ImportV2Package(db, &extra[i]); err != nil {
+				return nil, err
+			}
+			res.AdditionalYears = append(res.AdditionalYears, extra[i].Cover.AdmissionYear)
+		}
+		return res, nil
 	}
 
 	// V1 형식(요약 배열) 시도
@@ -114,4 +143,31 @@ func ImportSharedPackageV2(dm *database.DBManager, password, inputPath string) (
 	}
 
 	return nil, fmt.Errorf("공유 파일의 형식을 인식할 수 없습니다")
+}
+
+// ownResultYears 우리 학교 결과가 있는 학년도(결과 확정 기록 + 익명 보관 기록)
+func ownResultYears(dm *database.DBManager) ([]int, error) {
+	set := map[int]bool{}
+	closures, err := dm.GetAdmissionClosures()
+	if err != nil {
+		return nil, err
+	}
+	for _, c := range closures {
+		set[c.AdmissionYear] = true
+	}
+	history, err := dm.GetAdmissionHistory()
+	if err != nil {
+		return nil, err
+	}
+	for _, h := range history {
+		if h.Source == "local" || h.Source == "handover" {
+			set[h.AdmissionYear] = true
+		}
+	}
+	out := make([]int, 0, len(set))
+	for y := range set {
+		out = append(out, y)
+	}
+	sortInts(out)
+	return out, nil
 }

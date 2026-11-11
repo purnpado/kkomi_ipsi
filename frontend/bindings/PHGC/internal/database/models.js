@@ -227,6 +227,7 @@
  * @property {boolean} isReplaced
  * @property {number} totalParticipatingSchool
  * @property {number} totalAnonymousRecords
+ * @property {number[] | null} [additionalYears] - 함께 받은 다른 학년도
  */
 
 /**

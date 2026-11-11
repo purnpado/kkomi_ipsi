@@ -165,13 +165,13 @@ export function ExportDistributionPackage(username, outputPath) {
 }
 
 /**
- * ExportFinalArchive 암호화 최종 보관본 생성
- * @param {string} archivePassword
+ * ExportHandoverPackageTo 인수인계 파일을 정한 경로에 저장(대화상자 없이, 학년부장 전용).
+ * @param {string} password
  * @param {string} outputPath
  * @returns {$CancellablePromise<void>}
  */
-export function ExportFinalArchive(archivePassword, outputPath) {
-    return $Call.ByID(891918409, archivePassword, outputPath);
+export function ExportHandoverPackageTo(password, outputPath) {
+    return $Call.ByID(1352327065, password, outputPath);
 }
 
 /**
@@ -510,16 +510,6 @@ export function ImportDistributionPackageWithPassword(inputPath, password) {
 }
 
 /**
- * ImportFinalArchive 비어 있는 프로그램 폴더에만 최종 보관본 복원
- * @param {string} inputPath
- * @param {string} archivePassword
- * @returns {$CancellablePromise<string>}
- */
-export function ImportFinalArchive(inputPath, archivePassword) {
-    return $Call.ByID(3872470394, inputPath, archivePassword);
-}
-
-/**
  * ImportJointShareData 타 학교의 진학자료 파일(단일 또는 다중 선택)을 열어 우리 학교 커트라인과 공식자료에 일괄 병합
  * @param {number} admissionYear
  * @returns {$CancellablePromise<{ [_ in string]?: number } | null>}
@@ -535,6 +525,19 @@ export function ImportJointShareData(admissionYear) {
  */
 export function ImportPasswordResetPackage(inputPath) {
     return $Call.ByID(3242498776, inputPath);
+}
+
+/**
+ * ImportPreviousYearData 지난 학년도 입시 자료 가져오기(학년부장 전용). 학생 개인정보·계정은 가져오지 않는다.
+ * previousSharedPassword는 이전 버전 최종 보관본을 받을 때만 쓴다(보관본을 만든 해의 공용 데이터 암호).
+ * @param {string} path
+ * @param {string} password
+ * @param {string} previousSharedPassword
+ * @param {boolean} includeJudgment
+ * @returns {$CancellablePromise<exchange$0.HandoverImportResult | null>}
+ */
+export function ImportPreviousYearData(path, password, previousSharedPassword, includeJudgment) {
+    return $Call.ByID(3776697592, path, password, previousSharedPassword, includeJudgment);
 }
 
 /**
@@ -597,6 +600,15 @@ export function IsAgreementAccepted() {
 }
 
 /**
+ * IsLegacyArchivePath 이전 버전 최종 보관본이면 그해 공용 데이터 암호도 물어야 한다.
+ * @param {string} path
+ * @returns {$CancellablePromise<boolean>}
+ */
+export function IsLegacyArchivePath(path) {
+    return $Call.ByID(786983075, path);
+}
+
+/**
  * Logout clears the in-memory role. Encrypted files are sealed only at
  * application shutdown so the active UI can still complete its transition.
  * @returns {$CancellablePromise<void>}
@@ -652,13 +664,6 @@ export function OpenExternalURL(targetURL) {
 }
 
 /**
- * @returns {$CancellablePromise<string>}
- */
-export function OpenFinalArchive() {
-    return $Call.ByID(131169723);
-}
-
-/**
  * OpenMultipleExcelFiles 복수 학급 엑셀 파일 동시 선택 다이얼로그 열기
  * @param {string} title
  * @returns {$CancellablePromise<string[] | null>}
@@ -674,6 +679,14 @@ export function OpenMultipleExcelFiles(title) {
  */
 export function OpenPasswordResetPackage() {
     return $Call.ByID(3473021209);
+}
+
+/**
+ * OpenPreviousYearFile 지난 학년도 인수인계 파일(또는 이전 버전 최종 보관본) 선택
+ * @returns {$CancellablePromise<string>}
+ */
+export function OpenPreviousYearFile() {
+    return $Call.ByID(3212298371);
 }
 
 /**
@@ -835,22 +848,21 @@ export function SaveDistributionPackage(username) {
 }
 
 /**
- * SaveFinalArchive creates a portable AES-256-GCM encrypted archive of every
- * encrypted school data file. It contains no plaintext SQLite database.
- * @param {string} archivePassword
- * @returns {$CancellablePromise<string>}
- */
-export function SaveFinalArchive(archivePassword) {
-    return $Call.ByID(2813526518, archivePassword);
-}
-
-/**
  * SaveGeneralQuotaRecord 후기 일반고 정원·지원자 수 저장(교육청 발표값 수동 입력, 학년부장 전용).
  * @param {database$0.GeneralQuotaRecord} record
  * @returns {$CancellablePromise<void>}
  */
 export function SaveGeneralQuotaRecord(record) {
     return $Call.ByID(1880010149, record);
+}
+
+/**
+ * SaveHandoverPackage 인수인계 파일 저장(학년부장 전용). 저장한 경로와 함께 그해 결과 확정 여부를 돌려준다.
+ * @param {string} password
+ * @returns {$CancellablePromise<{ [_ in string]?: any } | null>}
+ */
+export function SaveHandoverPackage(password) {
+    return $Call.ByID(2606553057, password);
 }
 
 /**

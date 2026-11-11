@@ -11,6 +11,7 @@ import (
 
 	"PHGC/internal/calc"
 	"PHGC/internal/database"
+	"PHGC/internal/exchange"
 )
 
 // 가상 지역: 관내 참여 중학교(프로그램 사용) + 비참여 중학교(경쟁자로만 존재).
@@ -24,6 +25,9 @@ type middleSchool struct {
 	bonusInput    bool    // 창체·행발 가산점까지 입력하는 학교
 	dir           string
 	dm            *database.DBManager
+	baseClasses   int
+	handover      string // 지난 학년도에 만든 인수인계 파일
+	classHistory  []int  // 학년도별 학급 수
 }
 
 type student struct {
@@ -62,25 +66,43 @@ func newSchools(root string) []*middleSchool {
 	for i := range defs {
 		d := defs[i]
 		d.dir = filepath.Join(root, "schools", fmt.Sprintf("%d", i+1))
+		d.baseClasses = d.classes
 		out = append(out, &d)
 	}
 	return out
 }
 
-// openSchool 첫 해: 학교 설정·학급 DB를 만든다. 다음 해부터는 "새 학년 시작"으로 넘어간다.
-func (m *middleSchool) openSchool(year int) error {
-	if m.dm != nil {
-		return m.dm.ResetAcademicYear(year)
+// openSchool 해마다 새 폴더에 새로 설치하고 초기 설정(그해 학급 수·새 열쇠)을 한 뒤,
+// 지난 학년도 인수인계 파일이 있으면 입시 자료를 받아 들인다(실제 학교의 학년 전환 방식).
+func (m *middleSchool) openSchool(year int, rng *rand.Rand) error {
+	m.classes = m.baseClasses + rng.Intn(5) - 2 // 학급 수가 해마다 ±2 바뀐다
+	if m.classes < 4 {
+		m.classes = 4
 	}
-	if err := os.MkdirAll(m.dir, 0o700); err != nil {
+	m.classHistory = append(m.classHistory, m.classes)
+	dir := filepath.Join(m.dir, fmt.Sprint(year))
+	if err := os.MkdirAll(dir, 0o700); err != nil {
 		return err
 	}
-	m.dm = &database.DBManager{DataDir: m.dir}
-	m.dm.SetDataKey(make([]byte, 32))
+	m.dm = &database.DBManager{DataDir: dir}
+	key := make([]byte, 32)
+	rng.Read(key)
+	m.dm.SetDataKey(key)
 	if err := m.dm.InitConfigDB(); err != nil {
 		return err
 	}
-	return m.dm.SaveSchoolConfig(m.name, m.classes, "", false, year)
+	if err := m.dm.SaveSchoolConfig(m.name, m.classes, "", false, year); err != nil {
+		return err
+	}
+	if err := m.dm.UpdateClassCount(m.classes); err != nil {
+		return err
+	}
+	if m.participating && m.handover != "" {
+		if _, err := exchange.ImportHandoverFile(m.dm, m.handover, "sim-handover-pw", true); err != nil {
+			return fmt.Errorf("인수인계 파일 받기: %w", err)
+		}
+	}
+	return nil
 }
 
 // generateCohort tools/testdata/gen_students.py로 그 해 학생 자료(v1·v2 CSV)를 만든다.

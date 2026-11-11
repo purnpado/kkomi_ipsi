@@ -53,7 +53,7 @@ Gitea 원본을 복제한 뒤 다음 개발 도구를 설치해야 합니다.
 - `입시결과_분석_설계서.md`: 고입 결과 분석 및 프로그램 현대화의 현재 구현 상태·실행 계획 기준
 - `internal/calc/`: 일반고(`general.go`)·마이스터고(`meister.go`)·특성화고(`vocational.go`) 전형 산출식, 학생 전체 산출(`fulldata.go`, `school.go`), 학과별 통계(`stats.go`)
 - `internal/database/`, `internal/crypto/`: 로컬 DB 저장소 계층(`*_repo.go`, `manager.go`, `schema.go`)과 AES-GCM 저장 계층
-- `internal/exchange/`: 배포자료·취합자료·최종 보관본·비밀번호 재설정·관내 공유 파일 입출력
+- `internal/exchange/`: 배포자료·취합자료·인수인계 파일(`handover.go`, 개인정보 없는 입시 자료 누적·이전 버전 최종 보관본에서 입시 자료만 꺼내기)·비밀번호 재설정·관내 공유 파일(여러 학년도) 입출력
 - `internal/parser/`, `internal/model/`: 나이스 엑셀 파서와 공용 데이터 구조
 - Wails v3 빌드: `Taskfile.yml`, `build/Taskfile.yml`, `build/{windows,darwin}/Taskfile.yml`, 제품 정보 `build/config.yml`. 프론트 바인딩은 `wails3 generate bindings`가 만드는 `frontend/bindings/`(커밋 대상, `wails3 build` 때 자동 갱신)이며 `core/wailsBridge.js`가 이를 `window.go.main.App.*`로 연결합니다.
 - `app.go`, `app_*.go`: Wails 바인딩 시그니처를 유지하는 얇은 위임 계층(권한 확인·파일 대화상자). 공개 메서드명과 JSON 필드는 바꾸지 않습니다.
@@ -68,6 +68,14 @@ Gitea 원본을 복제한 뒤 다음 개발 도구를 설치해야 합니다.
 - `server-data/version.json`, `internal/sync/manager.go`: 버전 확인과 릴리즈 안내
 - `docs/admission-score-audit-plan.md`: 학교별 공식 산출식 검증 기준
 - `docs/인수인계_현재상태.md`, `docs/handover.md`: 현재 상태와 다음 작업
+
+## 학년도 전환(학교 운영)
+
+1. 학년 말: 입시 결과 확정 → [📦 인수인계 파일] 만들기(학생 개인정보 없음, 지난 해들 누적) → 관내 공유 파일 교환(우리 학교 전 학년도).
+2. 새 학년도: 새 폴더에 새 버전 설치 → 초기 설정(학급 수·새 학년부장·새 공용 암호) → [📥 지난 학년도 입시 자료 가져오기].
+3. 최종 보관본(학생 개인정보 포함 전체 백업)은 개인정보 보관 문제로 없앴다. 이전 버전 보관본은 가져오기에서 입시 자료만 익명으로 꺼낸다.
+4. 지난 입시 결과(익명)는 config.db `admission_history`에 쌓이고, 결과 확정 때 그해 기록이 보관된다(확정 해제 시 삭제).
+5. 점검: `go run ./tools/simulate` (여러 학교·여러 해 가상 입시 시뮬레이션, 보고서 `test-data/시뮬레이션/보고서.md`).
 
 ## 내년도 입시 갱신 순서
 

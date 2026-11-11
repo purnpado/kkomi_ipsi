@@ -44,19 +44,6 @@ func (a *App) ImportDistributionPackageWithPassword(inputPath, password string) 
 	return exchange.ImportDistributionPackageWithPassword(a.db, inputPath, password)
 }
 
-// ExportFinalArchive 암호화 최종 보관본 생성
-func (a *App) ExportFinalArchive(archivePassword, outputPath string) error {
-	if !a.isMaster() {
-		return fmt.Errorf("학년부장 로그인 후에만 보관본을 만들 수 있습니다")
-	}
-	return exchange.ExportFinalArchive(a.db, a.dataKey, archivePassword, outputPath)
-}
-
-// ImportFinalArchive 비어 있는 프로그램 폴더에만 최종 보관본 복원
-func (a *App) ImportFinalArchive(inputPath, archivePassword string) (string, error) {
-	return exchange.ImportFinalArchive(a.db, inputPath, archivePassword)
-}
-
 // ExportTeacherPatch 학급 단위 암호화 취합자료 작성
 func (a *App) ExportTeacherPatch(password, username string, classNum int, changes []model.PatchChange, outputPath string) error {
 	return exchange.ExportTeacherPatch(a.db, password, username, classNum, changes, outputPath)

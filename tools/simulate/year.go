@@ -101,7 +101,7 @@ func (sm *sim) loadAll(year int, version string, byKey map[string]*student) ([]*
 	var all []*student
 	for i, m := range sm.schools {
 		if version == "v1" {
-			if err := m.openSchool(year); err != nil {
+			if err := m.openSchool(year, sm.rng); err != nil {
 				return nil, fmt.Errorf("%s 학년도 준비: %w", m.name, err)
 			}
 			dir, err := m.generateCohort(sm.root, year, year*100+i)
@@ -388,6 +388,17 @@ func (sm *sim) recordGeneralAndClose(yr *yearResult, students []*student) error 
 		if err := m.dm.SaveGeneralQuotaRecord(database.GeneralQuotaRecord{AdmissionYear: yr.year, Quota: yr.generalQuota, Applicants: yr.generalPool, Note: "시뮬레이터"}); err != nil {
 			return err
 		}
+	}
+	// 학년 말: 다음 학년도 학년부장에게 넘길 인수인계 파일
+	for i, m := range sm.schools {
+		if !m.participating {
+			continue
+		}
+		path := filepath.Join(sm.root, "handover", fmt.Sprintf("%d_%d.kkomihandover", yr.year, i))
+		if _, err := exchange.ExportHandoverPackage(m.dm, "sim-handover-pw", path); err != nil {
+			return fmt.Errorf("%s 인수인계 파일: %w", m.name, err)
+		}
+		m.handover = path
 	}
 	return nil
 }

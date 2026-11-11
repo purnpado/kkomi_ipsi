@@ -38,12 +38,9 @@ export function renderFirstRunScreen() {
                     <div class="font-bold text-white text-base">🔑 비밀번호 재설정 파일 가져오기</div>
                     <p class="text-xs text-slate-300 mt-2">학년부장에게 받은 <strong>.kkomireset</strong> 파일을 적용합니다. 기존 학급 작업 데이터는 그대로 보존됩니다.</p>
                 </button>
-                <button id="firstRunArchiveImportBtn" type="button" class="rounded-xl border border-amber-500/50 bg-amber-500/10 p-5 text-left hover:bg-amber-500/20 transition-colors cursor-pointer">
-                    <div class="font-bold text-white text-base">🗄️ 암호화 최종 보관본 복원</div>
-                    <p class="text-xs text-slate-300 mt-2">학년부장이 보관한 <strong>.kkomiarchive</strong>를 새 프로그램 폴더에 복원합니다.</p>
-                </button>
             </div>
             <p class="text-[11px] text-slate-400 mt-6 text-center">기존 data 폴더가 있는 경우에는 이 화면이 아닌 로그인 화면으로 자동 이동합니다.</p>
+            <p class="text-[11px] text-amber-300/90 mt-2 text-center">새 학년도 학년부장은 초기 설정을 마친 뒤 학년부장 화면의 <strong>[지난 학년도 입시 자료 가져오기]</strong>에서 작년 인수인계 파일을 받으세요.</p>
         </div>
     `;
 
@@ -79,30 +76,6 @@ export function renderFirstRunScreen() {
         } finally {
             button.disabled = false;
             button.innerHTML = '<div class="font-bold text-white text-base">🔑 비밀번호 재설정 파일 가져오기</div><p class="text-xs text-slate-300 mt-2">학년부장에게 받은 <strong>.kkomireset</strong> 파일을 적용합니다. 기존 학급 작업 데이터는 그대로 보존됩니다.</p>';
-        }
-    });
-    document.getElementById('firstRunArchiveImportBtn').addEventListener('click', async () => {
-        const password = await showModalPrompt({
-            title: '최종 보관본 복원',
-            message: '최종 보관본 암호를 입력하세요.',
-            placeholder: '보관본 암호',
-            isPassword: true
-        });
-        if (!password) return;
-        const button = document.getElementById('firstRunArchiveImportBtn');
-        try {
-            button.disabled = true;
-            button.textContent = '최종 보관본 복원 중...';
-            const path = await window.go.main.App.OpenFinalArchive();
-            if (!path) return;
-            const school = await window.go.main.App.ImportFinalArchive(path, password);
-            await showModalAlert(`${school} 최종 보관본을 복원했습니다.\n학년부장 개인 비밀번호로 로그인하세요.`, '복원 완료', 'success');
-            window.location.reload();
-        } catch (err) {
-            await showModalAlert('최종 보관본 복원 실패: ' + err, '오류', 'error');
-        } finally {
-            button.disabled = false;
-            button.innerHTML = '<div class="font-bold text-white text-base">🗄️ 암호화 최종 보관본 복원</div><p class="text-xs text-slate-300 mt-2">학년부장이 보관한 <strong>.kkomiarchive</strong>를 새 프로그램 폴더에 복원합니다.</p>';
         }
     });
 }

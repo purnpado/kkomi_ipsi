@@ -125,6 +125,29 @@ func (dm *DBManager) BuildSharedPackageV2(admissionYear int) (*SharedPackageV2, 
 	if err != nil {
 		return nil, err
 	}
+	// 지금 학급 DB에 그 학년도 기록이 없으면(지난 학년도) 익명 보관 기록으로 만든다.
+	fromHistory := true
+	for _, r := range records {
+		if r.AdmissionYear == admissionYear {
+			fromHistory = false
+			break
+		}
+	}
+	var historyGeneral []AnonymousApplicationRecord
+	if fromHistory {
+		records = nil
+		rows, _ := dm.GetAdmissionHistory()
+		for _, h := range rows {
+			if h.AdmissionYear != admissionYear {
+				continue
+			}
+			if a, ok := generalAnonFromHistory(h); ok {
+				historyGeneral = append(historyGeneral, a)
+				continue
+			}
+			records = append(records, historyToRecord(h))
+		}
+	}
 
 	var anonymousRecords []AnonymousApplicationRecord
 	for _, r := range records {
@@ -173,7 +196,11 @@ func (dm *DBManager) BuildSharedPackageV2(admissionYear int) (*SharedPackageV2, 
 	}
 
 	// 후기 일반고 결과(배정·미배정)는 학교명이 없으므로 따로 만든다(항목별 확정 총점).
-	anonymousRecords = append(anonymousRecords, dm.buildGeneralAnonymousRecords(records, admissionYear)...)
+	if fromHistory {
+		anonymousRecords = append(anonymousRecords, historyGeneral...)
+	} else {
+		anonymousRecords = append(anonymousRecords, dm.buildGeneralAnonymousRecords(records, admissionYear)...)
+	}
 
 	// 1. 개인 식별 방지: 순서 무작위 셔플 (Fisher-Yates)
 	if err := shuffleAnonymousRecords(anonymousRecords); err != nil {

@@ -215,11 +215,6 @@ export async function renderLoginScreen(schoolName) {
                             <span class="text-base group-hover:scale-110 transition-transform">🔑</span>
                             <span class="font-bold text-sky-300 text-xs tracking-wide">비밀번호 재설정 파일 가져오기 (.kkomireset)</span>
                         </button>
-                        <button type="button" id="finalArchiveImportBtn" 
-                                class="group w-full py-2.5 px-4 rounded-xl border border-amber-500/30 bg-amber-950/15 hover:bg-amber-900/30 hover:border-amber-400/60 transition-all duration-200 flex items-center justify-center gap-2 shadow-sm cursor-pointer active:scale-[0.99]">
-                            <span class="text-base group-hover:scale-110 transition-transform">🗄️</span>
-                            <span class="font-bold text-amber-300/90 group-hover:text-amber-200 text-xs tracking-wide">암호화 최종 보관본 복원하기</span>
-                        </button>
                     </div>
                 </form>
 
@@ -281,30 +276,6 @@ export async function renderLoginScreen(schoolName) {
             } finally {
                 button.disabled = false;
                 button.innerHTML = '<span class="text-base group-hover:scale-110 transition-transform">🔑</span><span class="font-bold text-sky-300 text-xs tracking-wide">비밀번호 재설정 파일 가져오기 (.kkomireset)</span>';
-            }
-        });
-
-        document.getElementById('finalArchiveImportBtn').addEventListener('click', async () => {
-            const button = document.getElementById('finalArchiveImportBtn');
-            const password = await showModalPrompt({
-                title: '최종 보관본 복원',
-                message: '최종 보관본 암호를 입력하세요. 복원은 새 프로그램 폴더에서만 가능합니다.',
-                isPassword: true
-            });
-            if (!password) return;
-            try {
-                button.disabled = true;
-                button.innerHTML = '<span class="spinner" style="width:12px;height:12px;border-width:1.5px;"></span> <span class="text-xs font-bold text-amber-200">최종 보관본 복원 중...</span>';
-                const path = await window.go.main.App.OpenFinalArchive();
-                if (!path) return;
-                const school = await window.go.main.App.ImportFinalArchive(path, password);
-                await showModalAlert(`${school} 최종 보관본을 복원했습니다.\n학년부장 개인 비밀번호로 로그인하세요.`, '복원 완료', 'success');
-                window.location.reload();
-            } catch (err) {
-                await showModalAlert('최종 보관본 복원 실패: ' + err, '오류', 'error');
-            } finally {
-                button.disabled = false;
-                button.innerHTML = '<span class="text-base group-hover:scale-110 transition-transform">🗄️</span><span class="font-bold text-amber-300/90 group-hover:text-amber-200 text-xs tracking-wide">암호화 최종 보관본 복원하기</span>';
             }
         });
 

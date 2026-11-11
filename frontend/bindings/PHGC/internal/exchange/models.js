@@ -15,6 +15,21 @@
  * @property {boolean} mergedWithLocalData
  */
 
+/**
+ * HandoverImportResult 받아 들인 자료 요약(화면 안내용)
+ * @typedef {Object} HandoverImportResult
+ * @property {string} schoolName
+ * @property {number[] | null} years
+ * @property {number} cutoffs
+ * @property {number} closures
+ * @property {number} historyRecords
+ * @property {number} sharedPackages
+ * @property {number} sharedSkipped
+ * @property {number} quotas
+ * @property {boolean} judgmentImported
+ * @property {boolean} currentYearOpen - 내보낸 쪽의 그해 결과가 아직 확정 전이었음
+ */
+
 // In interface mode, this file is likely to contain just comments.
 // We add a dummy export statement to ensure it is recognised as an ES module.
 export {};

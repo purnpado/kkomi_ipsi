@@ -141,6 +141,10 @@ func (dm *DBManager) CloseAdmissionYear(admissionYear int, closedBy, note string
 	if err != nil {
 		return AdmissionClosure{}, err
 	}
+	// 그해 원서 기록을 이름·학번 없이 보관한다(새 학년·새 프로그램으로 넘어가도 분석·관내 공유가 이어지도록).
+	if _, err := dm.snapshotAdmissionHistory(admissionYear); err != nil {
+		return AdmissionClosure{}, fmt.Errorf("입시 결과 보관 실패: %w", err)
+	}
 	db, err := dm.OpenDB(dm.GetConfigDBPath())
 	if err != nil {
 		return AdmissionClosure{}, err
@@ -178,5 +182,6 @@ func (dm *DBManager) ReopenAdmissionYear(admissionYear int) error {
 	if affected, _ := result.RowsAffected(); affected == 0 {
 		return fmt.Errorf("%d 고입 확정 기록이 없습니다", admissionYear)
 	}
-	return nil
+	// 확정을 해제하면 그해 우리 학교 보관 기록도 지운다(다시 확정할 때 새로 보관).
+	return dm.deleteLocalHistory(admissionYear)
 }

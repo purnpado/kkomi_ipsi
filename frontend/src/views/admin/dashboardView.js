@@ -8,6 +8,7 @@ import { navigate, notifyLogout, openModal, requestScreenLock } from '../../core
 import { state } from '../../core/store.js';
 import { renderAdmissionYearNotice } from './admissionYearNotice.js';
 import { bindYearControls } from './yearControls.js';
+import { bindHandoverControls } from './handoverControls.js';
 import { admissionLabel, admissionLongLabel, admissionYearHint, currentAdmissionYear } from '../../core/admissionYear.js';
 
 // ===== 화면 렌더링 함수들 =====
@@ -128,8 +129,11 @@ export async function renderAdminScreen(schoolName) {
                     <button id="importPatchBtn" class="btn-secondary text-xs px-3 py-1.5 rounded-lg font-bold inline-flex items-center gap-1.5 hover:border-emerald-400/50 text-emerald-300" style="width: auto;" title="담임교사가 제출한 취합자료(.kkomipatch) 병합">
                         📥 취합자료병합
                     </button>
-                    <button id="finalArchiveBtn" class="btn-secondary text-xs px-3 py-1.5 rounded-lg font-bold inline-flex items-center gap-1.5 hover:border-amber-400/50 text-amber-300" style="width: auto;" title="입시 종료 후 암호화 보관본 생성">
-                        🗄️ 최종 보관본
+                    <button id="handoverExportBtn" class="btn-secondary text-xs px-3 py-1.5 rounded-lg font-bold inline-flex items-center gap-1.5 hover:border-amber-400/50 text-amber-300" style="width: auto;" title="다음 학년도 학년부장에게 넘길 입시 자료(학생 개인정보 없음)">
+                        📦 인수인계 파일
+                    </button>
+                    <button id="handoverImportBtn" class="btn-secondary text-xs px-3 py-1.5 rounded-lg font-bold inline-flex items-center gap-1.5 hover:border-emerald-400/50 text-emerald-300" style="width: auto;" title="작년 인수인계 파일(또는 이전 버전 최종 보관본)에서 입시 자료만 가져옵니다">
+                        📥 지난 학년도 입시 자료 가져오기
                     </button>
                     <span class="text-slate-600 hidden sm:inline">|</span>
                     <!-- 연도 전환 및 초기화 -->
@@ -285,30 +289,8 @@ export async function renderAdminScreen(schoolName) {
     document.getElementById('openAdminAnalysisBtn')?.addEventListener('click', () => openModal('admission-analysis'));
     document.getElementById('openSharedAdmissionBtn')?.addEventListener('click', () => openModal('shared-admission'));
 
-    document.getElementById('finalArchiveBtn')?.addEventListener('click', async () => {
-        const password = await showModalPrompt({
-            title: '최종 보관본 생성',
-            message: '최종 보관본을 보호할 새 암호를 입력하세요.\n이 암호는 복원할 때 반드시 필요하며 공용 데이터 암호와 별도로 안전하게 보관하세요.',
-            isPassword: true
-        });
-        if (!password) return;
-        const confirmPassword = await showModalPrompt({
-            title: '암호 재확인',
-            message: '보관본 암호를 한 번 더 입력하세요.',
-            isPassword: true
-        });
-        if (password !== confirmPassword) {
-            return await showModalAlert('보관본 암호가 일치하지 않습니다.', '입력 불일치', 'warning');
-        }
-        try {
-            const path = await window.go.main.App.SaveFinalArchive(password);
-            if (path) {
-                await showModalAlert(`암호화된 최종 보관본을 만들었습니다.\n${path}\n\n새 프로그램 폴더의 로그인 화면에서 복원할 수 있습니다.`, '보관본 생성 완료', 'success');
-            }
-        } catch (err) {
-            await showModalAlert('최종 보관본 생성 실패: ' + err, '오류', 'error');
-        }
-    });
+    // 인수인계 파일 내보내기·지난 학년도 입시 자료 가져오기(별도 모듈)
+    bindHandoverControls({ rerender: () => renderAdminScreen(schoolName) });
 
     document.getElementById('uploadExcelBtn').addEventListener('click', async () => {
         const btn = document.getElementById('uploadExcelBtn');

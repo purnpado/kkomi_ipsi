@@ -39,7 +39,19 @@ type SharedGeneralDetail struct {
 // buildGeneralAnonymousRecords 우리 학교 후기 일반고 결과(배정·미배정)를 익명 자료로 만든다.
 // 점수는 원서 저장 당시 스냅샷이 아니라 지금 학생 자료로 다시 계산한 최신값(12월 확정치)을 쓴다.
 func (dm *DBManager) buildGeneralAnonymousRecords(records []model.ApplicationRecord, admissionYear int) []AnonymousApplicationRecord {
-	out := []AnonymousApplicationRecord{}
+	keyed := dm.buildGeneralAnonymousRecordsKeyed(records, admissionYear)
+	out := make([]AnonymousApplicationRecord, 0, len(keyed))
+	for _, r := range records {
+		if a, ok := keyed[recordStudentKey(r)]; ok && r.Category == "general" {
+			out = append(out, a)
+		}
+	}
+	return out
+}
+
+// buildGeneralAnonymousRecordsKeyed 학생 열쇠(반|번호|이름) → 익명 기록. 결과 확정 때 보관 기록에도 쓴다.
+func (dm *DBManager) buildGeneralAnonymousRecordsKeyed(records []model.ApplicationRecord, admissionYear int) map[string]AnonymousApplicationRecord {
+	out := map[string]AnonymousApplicationRecord{}
 	// 학급마다 한 번만 전교 석차를 계산한다(학생마다 다시 계산하면 공유 파일 만들기가 수 분 걸린다).
 	classCache := map[int]map[string]calc.StudentFullData{}
 	lookup := func(r model.ApplicationRecord) (calc.StudentFullData, bool) {
@@ -80,11 +92,11 @@ func (dm *DBManager) buildGeneralAnonymousRecords(records []model.ApplicationRec
 			b, c := full.GeneralHSBehaviorScore, full.GeneralHSCreativeScore
 			detail.BehaviorScore, detail.CreativeScore = &b, &c
 		}
-		out = append(out, AnonymousApplicationRecord{
+		out[recordStudentKey(r)] = AnonymousApplicationRecord{
 			HighSchool: GeneralHighSchoolKey, Department: "", Track: GeneralTrackKey, PreferenceRank: 0,
 			Status: r.Status, Score: full.GeneralHSTotalScore, ScoreBasis: "후기 일반고 내신 총점(200)",
 			FormulaVersion: "2027-general-ulsan", GeneralDetail: &detail,
-		})
+		}
 	}
 	return out
 }
@@ -202,4 +214,20 @@ func (dm *DBManager) GetConsolidatedGeneralCutoff(admissionYear int) (*GeneralCu
 	res.Base = estimateGeneralCutoff("base", base, res.Quota, res.Applicants)
 	res.Total = estimateGeneralCutoff("total", total, res.Quota, res.Applicants)
 	return res, rows.Err()
+}
+
+// generalAnonFromHistory 보관 기록(후기 일반고)을 관내 공유용 익명 기록으로 바꾼다.
+func generalAnonFromHistory(h HistoryRecord) (AnonymousApplicationRecord, bool) {
+	if h.Category != "general" || strings.TrimSpace(h.GeneralDetailJSON) == "" {
+		return AnonymousApplicationRecord{}, false
+	}
+	if h.Status != "합격" && h.Status != "불합격" && h.Status != "최종 진학" {
+		return AnonymousApplicationRecord{}, false
+	}
+	var d SharedGeneralDetail
+	if json.Unmarshal([]byte(h.GeneralDetailJSON), &d) != nil {
+		return AnonymousApplicationRecord{}, false
+	}
+	return AnonymousApplicationRecord{HighSchool: GeneralHighSchoolKey, Track: GeneralTrackKey, Status: h.Status, Score: h.Score,
+		ScoreBasis: "후기 일반고 내신 총점(200)", FormulaVersion: "2027-general-ulsan", GeneralDetail: &d}, true
 }

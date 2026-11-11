@@ -86,6 +86,8 @@ type SharedPackageV2 struct {
 	Histograms       []SharedDepartmentHistogram  `json:"histograms"`
 	SummaryStats     []SharedSummaryStat          `json:"summaryStats"`
 	FormulaVersions  map[string]string            `json:"formulaVersions"`
+	// AdditionalYears 같은 학교의 다른 학년도 결과(여러 해를 한 파일로 공유). 이전 버전은 이 칸을 무시하고 표지 학년도만 받는다.
+	AdditionalYears []SharedPackageV2 `json:"additionalYears,omitempty"`
 }
 
 // SharedParticipatingSchool 참여 학교 정보
@@ -107,6 +109,7 @@ type SharedPackageImportResult struct {
 	IsReplaced               bool   `json:"isReplaced"`
 	TotalParticipatingSchool int    `json:"totalParticipatingSchool"`
 	TotalAnonymousRecords    int    `json:"totalAnonymousRecords"`
+	AdditionalYears          []int  `json:"additionalYears,omitempty"` // 함께 받은 다른 학년도
 }
 
 // ConsolidatedStatsResult 관내 통합 통계 산출 결과
