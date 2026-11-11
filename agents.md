@@ -7,7 +7,7 @@
 - 사용자에게 표시되는 명칭은 **꼬미입시**입니다.
 - `PHGC`는 저장소명, Go 패키지, 배포자료 형식, 자동 업데이트의 기술 식별자입니다. 기존 호환성을 확인하지 않고 제거하거나 바꾸지 않습니다.
 - 꼬미입시 원본 저장소는 Gitea `purnpadosori/PHGC-OFFLINE`입니다.
-- GitHub `purnpado/PHGC`는 원본을 보관하는 백업 미러입니다.
+- GitHub `purnpado/kkomi_ipsi`(옛 이름 `purnpado/PHGC`, 옛 주소는 자동 연결됨)는 원본을 보관하는 백업 미러이자 공개 릴리즈 저장소입니다. GitHub에 `PHGC`라는 새 저장소를 만들면 옛 주소 연결이 끊기므로 만들지 않습니다.
 - `proxmox`(`purnpadosori/proxmox`)는 NAS·Proxmox 관제용 별도 저장소이며 꼬미입시 소스가 아닙니다.
 - 현재 안정 릴리즈는 `v1.6.2`이며, 현재 소스 기준 커밋은 `e72b8be`(원서 스냅샷 출처와 학년도 분리 보강)입니다. 꼬미입시 브랜딩·도트 아이콘 변경은 `b39235d`에 반영되어 있습니다.
 
@@ -77,21 +77,17 @@ Gitea 원본을 복제한 뒤 다음 개발 도구를 설치해야 합니다.
 4. `server-data/highschools.json`의 학교·학과 변경을 반영합니다. 내장 기본 목록(`internal/sync/manager.go`)도 함께 확인합니다.
 5. 공개 커트라인은 공식·교육청 자료와 학교 자료를 구분해 갱신합니다. 평균은 실제 확정 결과가 쌓일 때 자동 계산합니다.
 6. `frontend/src/views/`·`frontend/src/modals/`의 입학년도·마감일·전형 표시를 확인합니다. 3학년 1학기 예상값과 마감 후 확정값을 혼동하지 않습니다.
-7. `go test ./...`, `npm run build`, `wails3 build`(윈도우: `bin/PHGC.exe`)를 실행합니다.
+7. `go test ./...`, `npm run build`, `wails3 build`(윈도우: `bin/꼬미입시.exe`)를 실행합니다.
 
 ## 명칭·실행 파일 변경 시
 
-올해 배포본은 기존 호환성을 위해 실행 파일·릴리즈 에셋을 `PHGC.exe`로 유지합니다. 내년도 입시요강을 반영하는 정기 갱신 때 화면 공식 명칭과 실행 파일을 `꼬미입시`/`꼬미입시.exe`로 전환할지 최종 확정합니다. 전환 전까지는 현재 기술 식별자 `PHGC`를 함부로 바꾸지 않습니다.
+v1.6.4부터 실행 파일은 **`꼬미입시.exe`**입니다(참여 학교가 자동 업데이트가 없는 초기 버전으로 시험 중이어서 이름 전환에 따른 업데이트 호환 문제가 없음을 확인하고 결정). 저장소명·Go 모듈·교환 파일 형식 식별자(`PHGC`)는 그대로 둡니다.
 
-> Wails v3 표준 구조로 전환하면서 실행 파일 이름은 `Taskfile.yml`의 `APP_NAME: "PHGC"`로 통일했습니다(`wails3 build` → `bin/PHGC.exe`, `publish.ps1`도 같은 경로 사용). 제품명 "꼬미입시"는 `build/config.yml`의 `info.productName`으로 exe 속성·맥 Info.plist에 들어갑니다. `wails.json`은 v2 설정이라 제거했습니다.
-
-실제 파일명을 `꼬미입시.exe`로 바꾸기로 확정하면 다음을 한 번에 검토해야 합니다.
-
-- `Taskfile.yml`의 `APP_NAME`(그리고 `wails3 task common:update:build-assets`로 빌드 자산 재생성)
-- `publish.ps1`의 빌드·복사·GitHub/Gitea 에셋명
-- `server-data/version.json`과 `internal/sync/manager.go` 자동 업데이트 주소
-- README·인수인계 문서·학교 배포 안내
-- 기존 `PHGC.exe` 사용자에 대한 과도기 호환 에셋
+- 이름 두 가지: `Taskfile.yml`의 `PRODUCT_FILENAME`("꼬미입시")은 사용자에게 보이는 이름(`bin/꼬미입시.exe`, `bin/꼬미입시.app`), `APP_NAME`("kkomi-ipsi")은 기술용 영문 이름(맥 앱 내부 실행 파일, GitHub 릴리즈 파일 이름)입니다. 맥 `codesign`은 앱 내부 실행 파일 이름이 한글이면 비정상 종료하고, GitHub는 릴리즈 파일 이름의 한글을 바꿔 버리기 때문입니다.
+- 릴리즈 파일: zip `kkomi-ipsi_v<버전>.zip`(안에 `꼬미입시.exe`), 단독 실행 파일은 GitHub `kkomi-ipsi.exe`, Gitea `꼬미입시.exe`.
+- 자동 업데이트(`internal/sync/manager.go`의 `PickDownloadAsset`)는 `꼬미입시.exe` → `kkomi-ipsi.exe` → 예전 `PHGC.exe` 순으로 고릅니다. `server-data/version.json`의 다운로드 주소는 GitHub `kkomi-ipsi.exe`입니다.
+- 이름을 다시 바꿀 때는 `Taskfile.yml`, `publish.ps1`, `internal/sync/manager.go`, `server-data/version.json`, 문서를 함께 바꾸고 `wails3 task common:update:build-assets`로 빌드 자산을 다시 생성합니다.
+- 제품명 "꼬미입시"는 `build/config.yml`의 `info.productName`으로 exe 속성·맥 Info.plist에 들어갑니다.
 
 ## 커밋·푸시·릴리즈
 

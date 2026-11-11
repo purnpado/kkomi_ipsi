@@ -16,6 +16,7 @@ import (
 var assets embed.FS
 
 // cleanupLegacyWebViewData AppData\Roaming 내의 과거 버전(PHGC_v*.exe 등) 임시 캐시 폴더 자동 청소
+// (PHGC_WebviewData 는 현재 꼬미입시.exe 도 쓰는 화면 저장소이므로 보존한다)
 func cleanupLegacyWebViewData() {
 	appData := os.Getenv("APPDATA")
 	if appData == "" {

@@ -1,12 +1,16 @@
 # 꼬미입시(PHGC) Wails v3 빌드 작업 정의
-# - 실행 파일 이름은 올해 배포 정책에 따라 PHGC(.exe)로 유지한다(AGENTS.md "명칭·실행 파일 변경 시" 참고).
+# - APP_NAME(kkomi-ipsi)은 기술용 영문 이름: 맥 앱 내부 실행 파일, GitHub 릴리즈 파일 이름에 쓴다
+#   (맥 codesign 은 앱 내부 실행 파일 이름이 한글이면 비정상 종료한다).
+# - PRODUCT_FILENAME(꼬미입시)은 사용자에게 보이는 이름: bin/꼬미입시.exe, bin/꼬미입시.app
 # - 화면·파일 정보의 제품명은 build/config.yml 의 info.productName(꼬미입시)을 따른다.
 # - 사용 예: wails3 build (현재 OS), wails3 build GOOS=windows (맥에서 윈도우용 교차 빌드),
 #            wails3 task darwin:package:universal (맥 유니버설 .app)
 version: '3'
 
 vars:
-  APP_NAME: "PHGC"
+  APP_NAME: "kkomi-ipsi"
+  # 사용자에게 보이는 실행 파일·앱 이름(윈도우 꼬미입시.exe, 맥 꼬미입시.app)
+  PRODUCT_FILENAME: "꼬미입시"
   BIN_DIR: "bin"
   PACKAGE_MANAGER: '{{.PACKAGE_MANAGER | default "npm"}}'
   VITE_PORT: '{{.WAILS_VITE_PORT | default 9245}}'

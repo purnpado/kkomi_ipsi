@@ -88,14 +88,43 @@ func (sm *SyncManager) saveToFile(filename string, data []byte) error {
 	return os.WriteFile(filePath, data, 0644)
 }
 
+// GitHubReleasesAPI 공식 릴리즈 최신판 조회 주소(GitHub 저장소 이름: purnpado/kkomi_ipsi, 옛 이름 PHGC)
+const GitHubReleasesAPI = "https://api.github.com/repos/purnpado/kkomi_ipsi/releases/latest"
+
+// ReleaseAsset 릴리즈에 첨부된 파일 이름과 내려받기 주소
+type ReleaseAsset struct {
+	Name string
+	URL  string
+}
+
+// PickDownloadAsset 릴리즈 첨부 파일 가운데 내려받을 실행 파일을 고른다.
+// v1.6.4부터 실행 파일은 꼬미입시.exe 이며, GitHub에는 한글 이름이 깨지지 않도록 kkomi-ipsi.exe 로 올린다.
+// 이전 릴리즈 호환을 위해 PHGC.exe 도 받아들이고, 마지막으로 그 밖의 .exe 를 고른다.
+func PickDownloadAsset(assets []ReleaseAsset) string {
+	preferred := []string{"꼬미입시.exe", "kkomi-ipsi.exe", "phgc.exe"}
+	for _, want := range preferred {
+		for _, a := range assets {
+			if strings.EqualFold(strings.TrimSpace(a.Name), want) {
+				return a.URL
+			}
+		}
+	}
+	for _, a := range assets {
+		if strings.HasSuffix(strings.ToLower(a.Name), ".exe") {
+			return a.URL
+		}
+	}
+	return ""
+}
+
 // CheckVersion 원격 릴리즈(GitHub -> Gitea)에서 최신 버전 확인 (오프라인 시 안전하게 로컬 반환)
 func (sm *SyncManager) CheckVersion() (*VersionInfo, error) {
 	client := &http.Client{Timeout: 3 * time.Second}
 
 	// 1차 시도: GitHub 공식 Releases API
-	req, err := http.NewRequest("GET", "https://api.github.com/repos/purnpado/PHGC/releases/latest", nil)
+	req, err := http.NewRequest("GET", GitHubReleasesAPI, nil)
 	if err == nil {
-		req.Header.Set("User-Agent", "PHGC-Offline-Updater")
+		req.Header.Set("User-Agent", "kkomi-ipsi-offline-updater")
 		req.Header.Set("Accept", "application/vnd.github+json")
 
 		resp, err := client.Do(req)
@@ -112,23 +141,11 @@ func (sm *SyncManager) CheckVersion() (*VersionInfo, error) {
 			}
 			if err := json.NewDecoder(resp.Body).Decode(&ghRelease); err == nil && ghRelease.TagName != "" {
 				latestVer := strings.TrimPrefix(strings.TrimSpace(ghRelease.TagName), "v")
-				downloadURL := ""
-				// 1순위: 버전 명시 파일 (예: PHGC_v1.2.2.exe)
+				assets := make([]ReleaseAsset, 0, len(ghRelease.Assets))
 				for _, a := range ghRelease.Assets {
-					if strings.Contains(strings.ToLower(a.Name), "v") && strings.HasSuffix(strings.ToLower(a.Name), ".exe") {
-						downloadURL = a.BrowserDownloadURL
-						break
-					}
+					assets = append(assets, ReleaseAsset{Name: a.Name, URL: a.BrowserDownloadURL})
 				}
-				// 2순위: 기본 PHGC.exe
-				if downloadURL == "" {
-					for _, a := range ghRelease.Assets {
-						if strings.HasSuffix(strings.ToLower(a.Name), ".exe") {
-							downloadURL = a.BrowserDownloadURL
-							break
-						}
-					}
-				}
+				downloadURL := PickDownloadAsset(assets)
 				return &VersionInfo{
 					LatestVersion: latestVer,
 					MinVersion:    "1.0.0",
@@ -156,13 +173,11 @@ func (sm *SyncManager) CheckVersion() (*VersionInfo, error) {
 		}
 		if err := json.NewDecoder(giteaResp.Body).Decode(&gitRelease); err == nil && gitRelease.TagName != "" {
 			latestVer := strings.TrimPrefix(strings.TrimSpace(gitRelease.TagName), "v")
-			downloadURL := ""
+			assets := make([]ReleaseAsset, 0, len(gitRelease.Assets))
 			for _, a := range gitRelease.Assets {
-				if strings.HasSuffix(strings.ToLower(a.Name), ".exe") {
-					downloadURL = a.BrowserDownloadURL
-					break
-				}
+				assets = append(assets, ReleaseAsset{Name: a.Name, URL: a.BrowserDownloadURL})
 			}
+			downloadURL := PickDownloadAsset(assets)
 			return &VersionInfo{
 				LatestVersion: latestVer,
 				MinVersion:    "1.0.0",

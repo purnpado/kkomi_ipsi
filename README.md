@@ -23,7 +23,7 @@
 
 ### 1. 학년부장 최초 준비
 
-1. 새 폴더에 `PHGC.exe`를 놓고 실행합니다.
+1. 새 폴더에 `꼬미입시.exe`를 놓고 실행합니다(릴리즈의 `kkomi-ipsi_v버전.zip` 압축을 풀면 나옵니다).
 2. 학교명, 학급 수, 고교 입학년도, 학년부장 비밀번호와 공용 데이터 암호를 설정합니다. 실행 위치에 `data` 폴더가 생성됩니다.
 3. 나이스 교과성적·출결·봉사 엑셀을 불러오고, 표본 학생으로 공식 산출값과 대조합니다.
 4. 고교별 공식 공개자료와 학교 원서대장 기반 커트라인을 입력합니다.
@@ -33,11 +33,11 @@
 
 학년부장은 각 계정의 **배포 자료 만들기**로 `.phgcpkg` 파일을 생성해 다음 세 가지를 함께 전달합니다.
 
-- `PHGC.exe`
+- `꼬미입시.exe`
 - 해당 담임용 `.phgcpkg` 배포 자료
 - 공용 데이터 암호와 초기 비밀번호(별도 안전한 방법으로 전달)
 
-담임은 **새 프로그램 폴더**에서 `PHGC.exe`를 실행하고, 로그인 화면의 **학년부장 배포 자료 가져오기**를 선택합니다. 배포 자료 적용 뒤 공용 데이터 암호와 초기 비밀번호로 로그인한 다음, 본인 비밀번호로 변경합니다.
+담임은 **새 프로그램 폴더**에서 `꼬미입시.exe`를 실행하고, 로그인 화면의 **학년부장 배포 자료 가져오기**를 선택합니다. 배포 자료 적용 뒤 공용 데이터 암호와 초기 비밀번호로 로그인한 다음, 본인 비밀번호로 변경합니다.
 
 > 기존 `data` 폴더가 이미 있는 경우에는 같은 폴더에 새 배포 자료를 덮어쓰지 마십시오. 새 폴더에서 적용하거나 기존 자료를 먼저 백업하십시오.
 
@@ -74,7 +74,7 @@
 - `server-data/cutoffs/`: 개인정보 없는 연도별 커트라인 기준
 - `server-data/version.json`: 최신 버전 안내와 공식 다운로드 주소
 - 원본 소스: [Gitea PHGC-OFFLINE](https://gitea.gguk.link/purnpadosori/PHGC-OFFLINE)
-- 백업 소스 및 릴리즈: [GitHub PHGC](https://github.com/purnpado/PHGC)
+- 백업 소스 및 릴리즈: [GitHub kkomi_ipsi](https://github.com/purnpado/kkomi_ipsi) (옛 이름 PHGC)
 
 `data/`, 나이스 원본, `*.db`, `*.phgcpkg`, `*.phgcpatch`, `*.phgcreset`은 학교 운영 자료이므로 저장소와 릴리즈에 올리지 않습니다.
 
@@ -100,10 +100,10 @@ Set-Location ..
 # 개발 실행
 wails3 dev
 
-# 배포용 실행 파일 빌드 (현재 OS 기준, 윈도우: bin/PHGC.exe)
+# 배포용 실행 파일 빌드 (현재 OS 기준, 윈도우: bin/꼬미입시.exe)
 wails3 build
 
-# 맥에서 윈도우용 교차 빌드 / 맥 유니버설 앱(bin/PHGC.app)
+# 맥에서 윈도우용 교차 빌드 / 맥 유니버설 앱(bin/꼬미입시.app)
 wails3 build GOOS=windows
 wails3 task darwin:package:universal
 
@@ -111,11 +111,11 @@ wails3 task darwin:package:universal
 .\publish.ps1 -Version "1.6.0" -Notes "릴리즈 노트"
 ```
 
-빌드는 Wails v3 표준 구조(`Taskfile.yml`, `build/config.yml`)를 따릅니다. 실행 파일 이름은 공식 릴리즈·자동 업데이트 호환을 위해 `PHGC`(`bin/PHGC.exe`)로 통일했고, 화면·파일 정보의 제품명은 "꼬미입시"입니다.
+빌드는 Wails v3 표준 구조(`Taskfile.yml`, `build/config.yml`)를 따릅니다. v1.6.4부터 실행 파일은 `꼬미입시.exe`이고, GitHub 릴리즈 파일은 한글이 깨지지 않도록 `kkomi-ipsi.exe`·`kkomi-ipsi_v버전.zip`으로 올립니다.
 
 ### MacBook에서 개발 이어가기
 
-MacBook에서는 Xcode Command Line Tools, Go, Node.js/npm, Wails v3 CLI(`go install github.com/wailsapp/wails/v3/cmd/wails3@v3.1.0`)를 설치한 뒤 위의 Gitea 복제·테스트 명령을 그대로 실행합니다. Windows 전용 WebView2는 필요하지 않습니다. `wails3 dev`와 `wails3 build` 결과(`bin/PHGC`, `bin/PHGC.app`)는 macOS 개발 검증용이며, 학교 배포용 `PHGC.exe`를 만들거나 기존 Windows 자료를 전환하는 용도로 사용하지 않습니다.
+MacBook에서는 Xcode Command Line Tools, Go, Node.js/npm, Wails v3 CLI(`go install github.com/wailsapp/wails/v3/cmd/wails3@v3.1.0`)를 설치한 뒤 위의 Gitea 복제·테스트 명령을 그대로 실행합니다. Windows 전용 WebView2는 필요하지 않습니다. `wails3 dev`와 `wails3 build` 결과(`bin/kkomi-ipsi`, `bin/꼬미입시.app`)는 macOS 개발 검증용이며, 학교 배포용 `꼬미입시.exe`를 만들거나 기존 Windows 자료를 전환하는 용도로 사용하지 않습니다.
 
 ## 책임 고지
 

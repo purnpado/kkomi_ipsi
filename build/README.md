@@ -1,6 +1,6 @@
 # 꼬미입시 빌드 및 패키징 (Wails v3)
 
-`build`는 **꼬미입시(PHGC)**의 Wails v3 빌드 작업과 아이콘·제품 정보를 관리하는 폴더입니다. 실행 파일명 `PHGC.exe`는 기존 자동 업데이트·배포자료 호환성을 위해 유지합니다(`Taskfile.yml`의 `APP_NAME`).
+`build`는 **꼬미입시(PHGC)**의 Wails v3 빌드 작업과 아이콘·제품 정보를 관리하는 폴더입니다. 실행 파일 이름은 `꼬미입시.exe`(`Taskfile.yml`의 `PRODUCT_FILENAME`)이고, 기술용 영문 이름 `kkomi-ipsi`(`APP_NAME`)는 맥 앱 내부 실행 파일과 GitHub 릴리즈 파일 이름에 씁니다.
 
 ## 구성
 
@@ -17,13 +17,13 @@
 프로젝트 루트에서 실행합니다. 결과물은 루트의 `bin/`에 생깁니다(저장소 추적 제외).
 
 ```bash
-wails3 build                          # 현재 OS (윈도우: bin/PHGC.exe, 맥: bin/PHGC)
-wails3 build GOOS=windows             # 맥에서 윈도우용 교차 빌드 → bin/PHGC.exe
-wails3 task darwin:package:universal  # 맥 유니버설(인텔+애플 실리콘) 앱 → bin/PHGC.app
+wails3 build                          # 현재 OS (윈도우: bin/꼬미입시.exe, 맥: bin/kkomi-ipsi)
+wails3 build GOOS=windows             # 맥에서 윈도우용 교차 빌드 → bin/꼬미입시.exe
+wails3 task darwin:package:universal  # 맥 유니버설(인텔+애플 실리콘) 앱 → bin/꼬미입시.app
 wails3 dev                            # 개발 실행(프론트엔드 핫 리로드)
 ```
 
-실행 중인 PHGC가 있으면 종료한 뒤 빌드해야 파일 교체가 안전합니다.
+실행 중인 꼬미입시가 있으면 종료한 뒤 빌드해야 파일 교체가 안전합니다.
 
 ## 공식 릴리즈
 
@@ -34,8 +34,8 @@ wails3 dev                            # 개발 실행(프론트엔드 핫 리로
 파이프라인은 다음을 수행합니다.
 
 1. `server-data/version.json`, 앱 버전, `build/config.yml` 버전을 지정 버전으로 갱신하고 빌드 자산 재생성
-2. `wails3 build`로 `bin/PHGC.exe` 빌드 및 버전별 ZIP 생성
+2. `wails3 build`로 `bin/꼬미입시.exe` 빌드 및 `kkomi-ipsi_v버전.zip` 생성
 3. GitHub와 Gitea에 커밋·태그·푸시
-4. 두 릴리즈에 `PHGC.exe`, `phgc_v버전.zip` 업로드
+4. GitHub 릴리즈에 `kkomi-ipsi.exe`·zip, Gitea 릴리즈에 `꼬미입시.exe`·zip 업로드
 
 학교별 `data` 폴더, 나이스 엑셀, DB, 암호화 배포·취합 파일은 릴리즈 산출물에 포함하지 않습니다.

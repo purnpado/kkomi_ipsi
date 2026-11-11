@@ -2,14 +2,14 @@
 
 ## 공식 배포물
 
-GitHub와 Gitea의 동일 태그 릴리즈에는 다음 두 파일만 첨부합니다.
+GitHub와 Gitea의 동일 태그 릴리즈에는 다음 두 파일만 첨부합니다(v1.6.4부터).
 
-- `PHGC.exe`
-- `phgc_v<버전>.zip`
+- 실행 파일: GitHub `kkomi-ipsi.exe`, Gitea `꼬미입시.exe` (GitHub는 릴리즈 파일 이름의 한글을 바꾸므로 영문 이름 사용)
+- `kkomi-ipsi_v<버전>.zip` (압축을 풀면 `꼬미입시.exe`)
 
-자동 업데이트는 GitHub Releases의 `PHGC.exe`를 기준으로 안내합니다. `server-data/version.json`의 버전·다운로드 주소는 릴리즈 태그와 일치해야 합니다.
+자동 업데이트는 GitHub Releases(`purnpado/kkomi_ipsi`)의 `kkomi-ipsi.exe`를 기준으로 안내합니다. `server-data/version.json`의 버전·다운로드 주소는 릴리즈 태그와 일치해야 합니다.
 
-> 릴리즈 전 확인: Wails v3 전환으로 빌드 산출물(`Taskfile.yml`의 `APP_NAME`), `publish.ps1`, 업데이트 URL이 모두 `PHGC.exe`를 기준으로 통일되었다. 파일명을 `꼬미입시.exe`로 바꿀 때는 `Taskfile.yml`, `publish.ps1`, `internal/sync/manager.go`, `server-data/version.json`을 함께 바꾼다.
+> 릴리즈 전 확인: 빌드 산출물(`Taskfile.yml`의 `PRODUCT_FILENAME`), `publish.ps1`, 업데이트 코드(`internal/sync/manager.go`), `server-data/version.json`이 같은 파일 이름 정책을 따르는지 확인한다.
 
 ## 절대 포함하지 않는 자료
 

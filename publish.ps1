@@ -1,5 +1,8 @@
-# PHGC 자동 빌드 & 릴리즈 & 푸시 스크립트
-# - GitHub (github.com): 메인 배포 및 릴리즈 저장소 (v$Version 릴리즈 생성 및 PHGC.exe 바이너리 자동 업로드)
+﻿# 꼬미입시(PHGC) 자동 빌드 & 릴리즈 & 푸시 스크립트
+# - GitHub (github.com/purnpado/kkomi_ipsi, 옛 이름 PHGC): 공개 배포 저장소 (kkomi-ipsi.exe·zip 자동 업로드)
+#   GitHub는 릴리즈 파일 이름의 한글을 바꿔 버리므로 영문 이름(kkomi-ipsi)으로 올린다.
+# - 실행 파일은 v1.6.4부터 꼬미입시.exe (zip 안에도 꼬미입시.exe), Gitea 릴리즈에는 꼬미입시.exe 이름 그대로 올린다.
+# - 이 파일은 윈도우 PowerShell 5.1이 한글 경로를 바르게 읽도록 BOM 있는 UTF-8로 저장한다.
 # - Gitea (gitea.gguk.link): 내부 소스 백업 및 옵션별 릴리즈 업로드
 param (
     [string]$Notes = @"
@@ -28,7 +31,7 @@ git config i18n.logOutputEncoding utf-8
 
 # ===== 저장소 설정 =====
 $ghOwner = "purnpado"
-$ghRepo = "PHGC"
+$ghRepo = "kkomi_ipsi"
 
 $giteaURL = "https://gitea.gguk.link"
 $giteaOwner = "purnpadosori"
@@ -37,7 +40,7 @@ $giteaRepo = "PHGC-OFFLINE"
 $newVer = $Version.TrimStart('v').Trim()
 
 Write-Host "==========================================" -ForegroundColor Cyan
-Write-Host ">>> PHGC 릴리즈 배포 파이프라인 시작 (v$newVer)" -ForegroundColor Green
+Write-Host ">>> 꼬미입시 릴리즈 배포 파이프라인 시작 (v$newVer)" -ForegroundColor Green
 Write-Host ">>> 릴리즈 노트: $Notes" -ForegroundColor Yellow
 Write-Host ">>> 배포 대상: https://github.com/$ghOwner/$ghRepo/releases" -ForegroundColor Magenta
 Write-Host "==========================================" -ForegroundColor Cyan
@@ -48,7 +51,7 @@ if (Test-Path $versionFile) {
     $json = Get-Content $versionFile -Raw -Encoding UTF8 | ConvertFrom-Json
     $json.latestVersion = $newVer
     $json.releaseNotes = "v$newVer - $Notes"
-    $json.downloadUrl = "https://github.com/$ghOwner/$ghRepo/releases/latest/download/PHGC.exe"
+    $json.downloadUrl = "https://github.com/$ghOwner/$ghRepo/releases/latest/download/kkomi-ipsi.exe"
     $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
     $jsonString = $json | ConvertTo-Json -Depth 4
     [System.IO.File]::WriteAllText((Resolve-Path $versionFile), $jsonString, $utf8NoBom)
@@ -70,7 +73,7 @@ if (Test-Path $buildConfig) {
 }
 
 # ===== 2. 실행 중인 PHGC 프로세스 종료 (버전명 실행파일 포함) =====
-Get-Process | Where-Object { $_.ProcessName -like "PHGC*" } | Stop-Process -Force -ErrorAction SilentlyContinue
+Get-Process | Where-Object { $_.ProcessName -like "꼬미입시*" -or $_.ProcessName -like "kkomi-ipsi*" -or $_.ProcessName -like "PHGC*" } | Stop-Process -Force -ErrorAction SilentlyContinue
 Start-Sleep -Milliseconds 500
 
 # ===== 3. Wails v3 빌드 =====
@@ -104,21 +107,21 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
-$exePath = "bin\PHGC.exe"
+$exePath = "bin\꼬미입시.exe"
 if (-not (Test-Path $exePath)) {
     Write-Host ">>> 생성된 exe 파일을 찾을 수 없습니다: $exePath" -ForegroundColor Red
     exit 1
 }
 Write-Host ">>> 빌드 성공: $exePath" -ForegroundColor Green
 
-# 버전 명시 바이너리 파일명 생성 (예: PHGC_v1.2.2.exe)
-$versionedExeName = "PHGC_v$newVer.exe"
+# 버전 명시 바이너리 파일명 생성 (예: kkomi-ipsi_v1.6.4.exe, 로컬 보관용)
+$versionedExeName = "kkomi-ipsi_v$newVer.exe"
 $versionedExePath = "bin\$versionedExeName"
 Copy-Item $exePath $versionedExePath -Force
 Write-Host ">>> 실행 파일 확인: $exePath" -ForegroundColor Green
 
-# 압축 배포 파일 생성 (phgc_v$newVer.zip)
-$zipName = "phgc_v$newVer.zip"
+# 압축 배포 파일 생성 (kkomi-ipsi_v$newVer.zip, 안에는 꼬미입시.exe)
+$zipName = "kkomi-ipsi_v$newVer.zip"
 $zipPath = "bin\$zipName"
 
 if (Test-Path $zipPath) { Remove-Item $zipPath -Force }
@@ -127,17 +130,17 @@ Compress-Archive -Path $exePath -DestinationPath $zipPath -Force
 Write-Host ">>> 압축 배포 파일 생성 완료 ($zipName)" -ForegroundColor Green
 
 # server-data 및 배포 폴더 복사
-Copy-Item $exePath "server-data\PHGC.exe" -Force
+Copy-Item $exePath "server-data\꼬미입시.exe" -Force
 Copy-Item $zipPath "server-data\$zipName" -Force
 
 $desktopPath = [System.Environment]::GetFolderPath([System.Environment+SpecialFolder]::Desktop)
 $schoolDir = Join-Path $desktopPath "푸른파도소리중학교"
 $testDir = Join-Path $desktopPath "test"
 if (Test-Path -LiteralPath $schoolDir) {
-    Copy-Item -LiteralPath $exePath -Destination (Join-Path $schoolDir "PHGC.exe") -Force -ErrorAction SilentlyContinue
+    Copy-Item -LiteralPath $exePath -Destination (Join-Path $schoolDir "꼬미입시.exe") -Force -ErrorAction SilentlyContinue
 }
 if (Test-Path -LiteralPath $testDir) {
-    Copy-Item -LiteralPath $exePath -Destination (Join-Path $testDir "PHGC.exe") -Force -ErrorAction SilentlyContinue
+    Copy-Item -LiteralPath $exePath -Destination (Join-Path $testDir "꼬미입시.exe") -Force -ErrorAction SilentlyContinue
 }
 Write-Host ">>> server-data 및 로컬 배포 폴더 복사 완료" -ForegroundColor Green
 
@@ -153,8 +156,8 @@ $commonReleaseBody = @"
 $Notes
 
 ### 📥 다운로드 안내
-- **단독 실행 파일**: 아래 Assets 항목의 **PHGC.exe**를 다운로드하여 바로 실행하시면 됩니다.
-- **압축 배포 파일**: 압축 해제 후 사용하실 경우 아래 Assets 항목의 **$zipName**을 다운로드하시면 됩니다.
+- **압축 배포 파일(권장)**: 아래 Assets 항목의 **$zipName**을 내려받아 압축을 풀면 **꼬미입시.exe**가 나옵니다.
+- **단독 실행 파일**: GitHub에서는 **kkomi-ipsi.exe**, Gitea에서는 **꼬미입시.exe**입니다. 내려받은 뒤 이름을 꼬미입시.exe로 바꿔 쓰셔도 됩니다.
 - 본 프로그램은 학생 개인정보 보호 및 학교 정보보안 지침을 철저히 준수하는 100% 로컬 독립형 소프트웨어입니다.
 "@
 
@@ -199,7 +202,7 @@ try {
     Write-Host ">>> Gitea 푸시 예외: $_" -ForegroundColor Yellow
 }
 
-# ===== 5. GitHub 릴리즈 생성 및 PHGC.exe 에셋 업로드 =====
+# ===== 5. GitHub 릴리즈 생성 및 kkomi-ipsi.exe·zip 에셋 업로드 =====
 if (-not $SkipGitHubRelease) {
     Write-Host ">>> GitHub Releases (v$newVer) 등록 및 바이너리 업로드 시작..." -ForegroundColor Cyan
     try {
@@ -249,7 +252,7 @@ if (-not $SkipGitHubRelease) {
             $newRel = Invoke-RestMethod -Uri "https://api.github.com/repos/$ghOwner/$ghRepo/releases" -Headers $headers -Method Post -Body ([System.Text.Encoding]::UTF8.GetBytes($payload)) -ContentType "application/json; charset=utf-8"
             $relId = $newRel.id
 
-            # 기존 에셋 삭제 (깔끔한 2종 에셋 유지: PHGC.exe & phgc_v1.3.0.zip)
+            # 기존 에셋 삭제 (2종 에셋 유지: kkomi-ipsi.exe & kkomi-ipsi_v버전.zip)
             try {
                 $ghAssets = Invoke-RestMethod -Uri "https://api.github.com/repos/$ghOwner/$ghRepo/releases/$relId/assets" -Headers $headers -Method Get -ErrorAction SilentlyContinue
                 foreach ($asset in $ghAssets) {
@@ -257,17 +260,17 @@ if (-not $SkipGitHubRelease) {
                 }
             } catch {}
 
-            # 1. 표준 PHGC.exe 파일 업로드
-            $uploadUrl = "https://uploads.github.com/repos/$ghOwner/$ghRepo/releases/$relId/assets?name=PHGC.exe"
+            # 1. 실행 파일 업로드 (GitHub는 한글 파일 이름을 바꾸므로 영문 이름 사용)
+            $uploadUrl = "https://uploads.github.com/repos/$ghOwner/$ghRepo/releases/$relId/assets?name=kkomi-ipsi.exe"
             $absExe = (Resolve-Path $exePath).Path
             & curl.exe -s -S -X POST "$uploadUrl" `
                 -H "Authorization: Bearer $ghToken" `
                 -H "Accept: application/vnd.github+json" `
                 -H "Content-Type: application/octet-stream" `
                 --data-binary "@$absExe" > $null
-            Write-Host ">>> GitHub Releases (PHGC.exe) 업로드 완료!" -ForegroundColor Green
+            Write-Host ">>> GitHub Releases (kkomi-ipsi.exe) 업로드 완료!" -ForegroundColor Green
 
-            # 2. 압축 배포 파일 업로드 (phgc_v1.3.0.zip)
+            # 2. 압축 배포 파일 업로드 (kkomi-ipsi_v버전.zip)
             $uploadUrlZip = "https://uploads.github.com/repos/$ghOwner/$ghRepo/releases/$relId/assets?name=$zipName"
             $absZip = (Resolve-Path $zipPath).Path
             & curl.exe -s -S -X POST "$uploadUrlZip" `
@@ -343,7 +346,7 @@ try {
         }
 
         if ($gRelId) {
-            # 기존 동일 에셋 삭제 후 신규 업로드 (PHGC.exe & phgc_v1.3.0.zip 2종)
+            # 기존 동일 에셋 삭제 후 신규 업로드 (꼬미입시.exe & kkomi-ipsi_v버전.zip 2종)
             try {
                 $existingAssets = Invoke-RestMethod -Uri "$giteaURL/api/v1/repos/$giteaOwner/$giteaRepo/releases/$gRelId/assets" -Headers $gHeaders -Method Get -ErrorAction SilentlyContinue
                 foreach ($asset in $existingAssets) {
@@ -354,9 +357,10 @@ try {
             $absExe = (Resolve-Path $exePath).Path
             $absZip = (Resolve-Path $zipPath).Path
 
-            & curl.exe -s -S -X POST "$giteaURL/api/v1/repos/$giteaOwner/$giteaRepo/releases/$gRelId/assets?name=PHGC.exe" -H "Authorization: Basic $basicAuth" -F "attachment=@$absExe" > $null
+            $giteaExeName = [uri]::EscapeDataString("꼬미입시.exe")
+            & curl.exe -s -S -X POST "$giteaURL/api/v1/repos/$giteaOwner/$giteaRepo/releases/$gRelId/assets?name=$giteaExeName" -H "Authorization: Basic $basicAuth" -F "attachment=@$absExe" > $null
             & curl.exe -s -S -X POST "$giteaURL/api/v1/repos/$giteaOwner/$giteaRepo/releases/$gRelId/assets?name=$zipName" -H "Authorization: Basic $basicAuth" -F "attachment=@$absZip" > $null
-            Write-Host ">>> Gitea 바이너리 및 압축 파일 에셋 (PHGC.exe, $zipName) 업로드 완료!" -ForegroundColor Green
+            Write-Host ">>> Gitea 바이너리 및 압축 파일 에셋 (꼬미입시.exe, $zipName) 업로드 완료!" -ForegroundColor Green
         }
     }
 } catch {
@@ -364,5 +368,5 @@ try {
 }
 
 Write-Host "==========================================" -ForegroundColor Green
-Write-Host ">>> PHGC v$newVer GitHub & Gitea 릴리즈 및 배포 파이프라인 완료!" -ForegroundColor Green
+Write-Host ">>> 꼬미입시 v$newVer GitHub & Gitea 릴리즈 및 배포 파이프라인 완료!" -ForegroundColor Green
 Write-Host "==========================================" -ForegroundColor Green

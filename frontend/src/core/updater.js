@@ -1,7 +1,7 @@
 import { showModalAlert } from './dialogs.js';
 
 export const FEEDBACK_BOARD_URL = "https://gguk.link/boards/phgc";
-export const GITHUB_RELEASE_URL = "https://github.com/purnpado/PHGC/releases/latest";
+export const GITHUB_RELEASE_URL = "https://github.com/purnpado/kkomi_ipsi/releases/latest";
 
 export function delay(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));

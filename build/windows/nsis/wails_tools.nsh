@@ -5,7 +5,7 @@
 !include "FileFunc.nsh"
 
 !ifndef INFO_PROJECTNAME
-    !define INFO_PROJECTNAME "PHGC"
+    !define INFO_PROJECTNAME "꼬미입시"
 !endif
 !ifndef INFO_COMPANYNAME
     !define INFO_COMPANYNAME "푸른파도소리"
@@ -14,7 +14,7 @@
     !define INFO_PRODUCTNAME "꼬미입시"
 !endif
 !ifndef INFO_PRODUCTVERSION
-    !define INFO_PRODUCTVERSION "1.6.3"
+    !define INFO_PRODUCTVERSION "1.6.4"
 !endif
 !ifndef INFO_COPYRIGHT
     !define INFO_COPYRIGHT "(c) 2026, 푸른파도소리"

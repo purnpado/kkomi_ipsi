@@ -17,7 +17,7 @@ import (
 // OpenExternalURL 기본 웹브라우저로 외부 웹페이지(공식 GitHub 릴리즈 페이지 등)를 엽니다.
 func (a *App) OpenExternalURL(targetURL string) error {
 	if targetURL == "" {
-		targetURL = "https://github.com/purnpado/PHGC/releases"
+		targetURL = "https://github.com/purnpado/kkomi_ipsi/releases"
 	}
 	if appInst := application.Get(); appInst != nil {
 		return appInst.Browser.OpenURL(targetURL)
