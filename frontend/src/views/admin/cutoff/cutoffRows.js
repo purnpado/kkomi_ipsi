@@ -1,4 +1,5 @@
 import { normalizeSchoolName } from '../../../core/utils.js';
+import { admissionLabel } from '../../../core/admissionYear.js';
 
 // 커트라인 관리: 저장값 대조표와 학교·학과별 입력 행 HTML 구성
 export function buildCutoffRowsHTML(ctx, view) {
@@ -193,7 +194,7 @@ export function buildCutoffRowsHTML(ctx, view) {
                     <tr>
                         <td colspan="11" class="p-10 text-center text-text-muted">
                             <p class="text-3xl mb-2">📭</p>
-                            <p class="font-bold text-slate-300 text-sm">${ctx.currentAdmissionYear}학년도 공식 공개 데이터가 없습니다.</p>
+                            <p class="font-bold text-slate-300 text-sm">${admissionLabel(ctx.currentAdmissionYear)} 공식 공개 데이터가 없습니다.</p>
                             <p class="text-xs mt-1 text-slate-400">'전체 연도 모아보기'를 누르거나 우측 상단 '➕ 공개자료 추가'를 통해 등록할 수 있습니다.</p>
                         </td>
                     </tr>
@@ -227,7 +228,7 @@ export function buildCutoffRowsHTML(ctx, view) {
                                     <td class="p-3 align-middle bg-slate-900/60 border-r border-slate-700/50 text-center" rowspan="${rowSpan}">
                                         <div class="flex flex-col items-center justify-center gap-1">
                                             <span class="px-2.5 py-1 rounded-lg bg-indigo-950/90 border border-indigo-500/50 text-indigo-300 font-black text-xs shadow-inner">
-                                                ${group.year}학년도
+                                                ${admissionLabel(group.year)}
                                             </span>
                                             <span class="text-[10px] text-slate-400">입학 기준</span>
                                             <input type="hidden" class="public-year" data-index="${p.originalIndex}" value="${group.year}" />
@@ -294,7 +295,7 @@ export function buildCutoffRowsHTML(ctx, view) {
                                 <td class="p-2.5 text-center">
                                     <div class="flex items-center justify-center gap-1.5">
                                         <button class="px-2.5 py-1.5 rounded-lg ${isApplied ? 'bg-slate-700/60 hover:bg-slate-700 border border-slate-600 text-slate-200' : 'bg-emerald-600/30 hover:bg-emerald-600/50 border border-emerald-500/40 text-emerald-300'} text-xs font-bold transition-all flex items-center gap-1 btn-apply-public-item" 
-                                                data-index="${p.originalIndex}" title="${group.year}학년도 커트라인으로 ${isApplied ? '다시 적용' : '즉시 적용'}">
+                                                data-index="${p.originalIndex}" title="${admissionLabel(group.year)} 커트라인으로 ${isApplied ? '다시 적용' : '즉시 적용'}">
                                             <span>${isApplied ? '🔄' : '📥'}</span> ${isApplied ? '재반영' : '반영'}
                                         </button>
                                         <button class="text-slate-400 hover:text-danger hover:bg-danger/10 p-1.5 rounded-lg transition-colors btn-delete-public-item" 
@@ -323,7 +324,7 @@ export function buildCutoffRowsHTML(ctx, view) {
                             <!-- 연도 필터 토글 -->
                             <div class="inline-flex rounded-xl bg-slate-900/80 p-1 border border-slate-700/60 shadow-inner text-xs h-8.5 items-center">
                                 <button id="btnFilterPublicCurrentYear" class="px-3 py-1 rounded-lg font-bold transition-all ${ctx.publicYearFilterMode === 'current' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-400 hover:text-white'}">
-                                    📅 ${ctx.currentAdmissionYear}학년도만 보기
+                                    📅 ${admissionLabel(ctx.currentAdmissionYear)}만 보기
                                 </button>
                                 <button id="btnFilterPublicAllYears" class="px-3 py-1 rounded-lg font-bold transition-all ${ctx.publicYearFilterMode === 'all' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-400 hover:text-white'}">
                                     전체 연도 모아보기
@@ -360,7 +361,7 @@ export function buildCutoffRowsHTML(ctx, view) {
                                     <th class="p-3 w-10 border-r border-slate-700/50 text-center">
                                         <input type="checkbox" id="checkAllPublicItems" class="cursor-pointer w-4 h-4 rounded accent-indigo-500" title="전체 선택/해제" />
                                     </th>
-                                    <th class="p-3 w-28 border-r border-slate-700/50">입학년도</th>
+                                    <th class="p-3 w-28 border-r border-slate-700/50">고입</th>
                                     <th class="p-3 text-left pl-4 w-44 border-r border-slate-700/50">고교명</th>
                                     <th class="p-3 w-28">학과</th>
                                     <th class="p-3 w-24">전형</th>

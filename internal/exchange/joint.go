@@ -89,7 +89,7 @@ func BuildJointShareData(dm *database.DBManager, sm *sync.SyncManager, admission
 		}
 		return r
 	}, schoolName)
-	defaultFilename = fmt.Sprintf("꼬미입시_관내진학자료_%s_%d학년도.kkomidata", safeSchoolName, admissionYear)
+	defaultFilename = fmt.Sprintf("꼬미입시_관내진학자료_%s_%d고입.kkomidata", safeSchoolName, admissionYear)
 	return data, defaultFilename, nil
 }
 

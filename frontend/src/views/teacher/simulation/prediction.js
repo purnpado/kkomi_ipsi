@@ -1,4 +1,5 @@
 import { escapeHtml, escapeAttr, normalizeSchoolName, isSameTrack } from '../../../core/utils.js';
+import { currentAdmissionYear } from '../../../core/admissionYear.js';
 
 // ===== 마이스터고 및 특성화고 합격 가능 예측 뱃지 렌더러 =====
 // 마이스터고 및 특성화고 고교·학과별 정밀 합격 분석 목록 추출 헬퍼
@@ -61,7 +62,7 @@ export function getPredictionAnalysisList(results, cutoffs, schoolGroup) {
                     schoolName: r.schoolName,
                     dept: deptLabel || '학교 전체(공통)',
                     track: r.trackName,
-                    year: c.year || 2026,
+                    year: c.year || currentAdmissionYear() - 1, // 연도 없는 커트라인은 직전 고입 결과로 본다
                     studentScore,
                     minScore,
                     avgScore,

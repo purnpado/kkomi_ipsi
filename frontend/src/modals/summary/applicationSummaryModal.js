@@ -4,6 +4,7 @@ import { showModalAlert, showModalConfirm } from '../../core/dialogs.js';
 import { openApplicantDetailModal, buildSmartApplicationGroups } from './smartGroups.js';
 import { openApplicationRegisterModal } from './registerModal.js';
 import { state } from '../../core/store.js';
+import { admissionLabel, admissionLongLabel, resolveAdmissionYear } from '../../core/admissionYear.js';
 
 // 1. 우리 반 지원희망 모달 (스마트 지망 가로 뱃지 + 학생 명단 팝업 지원)
 export async function openClassApplicationSummaryModal(classNum) {
@@ -37,7 +38,7 @@ export async function openClassApplicationSummaryModal(classNum) {
 
             rowsHTML = groupedWithRowSpan.map(g => {
                 const schoolCells = g.isFirstGroup ? `
-                    <td class="p-3 border-r border-slate-700/50 text-center font-bold text-slate-300" rowspan="${g.rowSpanSchool}">${g.admissionYear}학년도</td>
+                    <td class="p-3 border-r border-slate-700/50 text-center font-bold text-slate-300" rowspan="${g.rowSpanSchool}">${admissionLabel(g.admissionYear)}</td>
                     <td class="p-3 border-r border-slate-700/50 text-center font-semibold text-slate-300" rowspan="${g.rowSpanSchool}">${g.categoryLabel}</td>
                     <td class="p-3 border-r border-slate-700/50 font-bold text-white" rowspan="${g.rowSpanSchool}">${g.schoolName}</td>
                 ` : '';
@@ -90,7 +91,7 @@ export async function openClassApplicationSummaryModal(classNum) {
                     <table class="w-full text-sm">
                         <thead class="sticky top-0 bg-slate-800 border-b border-slate-700">
                             <tr class="text-xs text-slate-400 font-bold">
-                                <th class="p-3 border-r border-slate-700/50 w-24">입학년도</th>
+                                <th class="p-3 border-r border-slate-700/50 w-24">고입</th>
                                 <th class="p-3 border-r border-slate-700/50 w-24">구분</th>
                                 <th class="p-3 border-r border-slate-700/50 w-40 text-left pl-3">학교</th>
                                 <th class="p-3 w-28 text-left pl-3">전형</th>
@@ -167,7 +168,7 @@ export async function openApplicationSummaryModal() {
         const recordsResp = await window.go.main.App.GetSchoolApplicationRecords().catch(() => []);
         const allRecords = Array.isArray(recordsResp) ? recordsResp : [];
 
-        const admissionYear = config?.admissionYear || 2026;
+        const admissionYear = resolveAdmissionYear(config);
         const [closure, review] = await Promise.all([
             window.go.main.App.GetAdmissionClosure(admissionYear).catch(() => null),
             window.go.main.App.GetAdmissionClosureReview(admissionYear).catch(() => null),
@@ -201,7 +202,7 @@ export async function openApplicationSummaryModal() {
 
             rowsHTML = groupedWithRowSpan.map(g => {
                 const schoolCells = g.isFirstGroup ? `
-                    <td class="p-3 border-r border-slate-700/50 text-center font-bold text-slate-300" rowspan="${g.rowSpanSchool}">${g.admissionYear}학년도</td>
+                    <td class="p-3 border-r border-slate-700/50 text-center font-bold text-slate-300" rowspan="${g.rowSpanSchool}">${admissionLabel(g.admissionYear)}</td>
                     <td class="p-3 border-r border-slate-700/50 text-center font-semibold text-slate-300" rowspan="${g.rowSpanSchool}">${g.categoryLabel}</td>
                     <td class="p-3 border-r border-slate-700/50 font-bold text-white" rowspan="${g.rowSpanSchool}">${g.schoolName}</td>
                 ` : '';
@@ -247,8 +248,8 @@ export async function openApplicationSummaryModal() {
 
         const canApplyCutoffs = state.currentUser?.Role === 'master';
         const closeInfo = closure
-            ? `<div class="rounded-xl border border-emerald-400/40 bg-emerald-500/10 p-4"><p class="font-bold text-emerald-200">🔒 ${admissionYear}학년도 입시 결과 확정됨</p><p class="text-xs text-slate-300 mt-1">확정자: ${closure.closedBy || '학년부장'} · 결과 커트라인 ${closure.cutoffsApplied || 0}건 반영됨${closure.note ? ` · 메모: ${closure.note}` : ''}</p></div>`
-            : `<div class="rounded-xl border ${review.pendingCount ? 'border-amber-400/40 bg-amber-500/10' : 'border-sky-400/40 bg-sky-500/10'} p-4"><p class="font-bold ${review.pendingCount ? 'text-amber-200' : 'text-sky-200'}">${admissionYear}학년도 결과 확정 전</p><p class="text-xs text-slate-300 mt-1">기록 ${review.totalRecorded}건 · 진행 중 ${review.pendingCount}건 · 합격 ${review.acceptedCount}건 · 불합격 ${review.rejectedCount}건 · 포기 ${review.withdrawnCount}건 · 최종 진학 ${review.finalCount}건</p><p class="text-xs text-slate-400 mt-1">진행 중 기록을 모두 결과 상태로 바꾼 뒤 확정하면 수정이 잠기고, 합격 결과가 우리 학교 커트라인에 자동 반영됩니다.</p></div>`;
+            ? `<div class="rounded-xl border border-emerald-400/40 bg-emerald-500/10 p-4"><p class="font-bold text-emerald-200">🔒 ${admissionLongLabel(admissionYear)} 입시 결과 확정됨</p><p class="text-xs text-slate-300 mt-1">확정자: ${closure.closedBy || '학년부장'} · 결과 커트라인 ${closure.cutoffsApplied || 0}건 반영됨${closure.note ? ` · 메모: ${closure.note}` : ''}</p></div>`
+            : `<div class="rounded-xl border ${review.pendingCount ? 'border-amber-400/40 bg-amber-500/10' : 'border-sky-400/40 bg-sky-500/10'} p-4"><p class="font-bold ${review.pendingCount ? 'text-amber-200' : 'text-sky-200'}">${admissionLabel(admissionYear)} 결과 확정 전</p><p class="text-xs text-slate-300 mt-1">기록 ${review.totalRecorded}건 · 진행 중 ${review.pendingCount}건 · 합격 ${review.acceptedCount}건 · 불합격 ${review.rejectedCount}건 · 포기 ${review.withdrawnCount}건 · 최종 진학 ${review.finalCount}건</p><p class="text-xs text-slate-400 mt-1">진행 중 기록을 모두 결과 상태로 바꾼 뒤 확정하면 수정이 잠기고, 합격 결과가 우리 학교 커트라인에 자동 반영됩니다.</p></div>`;
         const closeControls = canApplyCutoffs
             ? (closure
                 ? '<button id="reopenAdmissionYear" class="btn-secondary w-auto px-4 py-2 text-sm font-medium cursor-pointer">🔓 결과 확정 해제</button>'
@@ -271,7 +272,7 @@ export async function openApplicationSummaryModal() {
                     <table class="w-full text-sm">
                         <thead class="sticky top-0 bg-slate-800 z-10 border-b border-slate-700">
                             <tr class="text-xs text-slate-400 font-bold">
-                                <th class="p-3 border-r border-slate-700/50 w-24 text-center">입학년도</th>
+                                <th class="p-3 border-r border-slate-700/50 w-24 text-center">고입</th>
                                 <th class="p-3 border-r border-slate-700/50 w-24 text-center">구분</th>
                                 <th class="p-3 border-r border-slate-700/50 w-44 text-left pl-3">학교</th>
                                 <th class="p-3 w-28 text-left pl-3">전형</th>
@@ -342,7 +343,7 @@ export async function openApplicationSummaryModal() {
             if (review.pendingCount) return await showModalAlert(`진행 중인 기록이 ${review.pendingCount}건 있습니다. 모두 합격·불합격·포기·최종 진학으로 결과를 입력한 뒤 확정해주세요.`, '진행 중 기록 존재', 'warning');
             const confirmed = await showModalConfirm({
                 title: '입시 결과 확정',
-                message: `${admissionYear}학년도 입시 결과를 확정할까요?\n\n확정하면 해당 연도 지원현황을 수정할 수 없고, 합격 결과의 최고·최저·평균이 우리 학교 커트라인에 자동 반영됩니다.`,
+                message: `${admissionLabel(admissionYear)} 입시 결과를 확정할까요?\n\n확정하면 해당 연도 지원현황을 수정할 수 없고, 합격 결과의 최고·최저·평균이 우리 학교 커트라인에 자동 반영됩니다.`,
                 confirmText: '확정하기',
                 type: 'warning'
             });
@@ -350,7 +351,7 @@ export async function openApplicationSummaryModal() {
             try {
                 const note = document.getElementById('admissionClosureNote')?.value?.trim() || '';
                 const result = await window.go.main.App.CloseAdmissionYear(admissionYear, note);
-                await showModalAlert(`${admissionYear}학년도 입시 결과를 확정했습니다.\n커트라인 ${result.cutoffsApplied || 0}건이 반영되었습니다.`, '확정 완료', 'success');
+                await showModalAlert(`${admissionLabel(admissionYear)} 입시 결과를 확정했습니다.\n커트라인 ${result.cutoffsApplied || 0}건이 반영되었습니다.`, '확정 완료', 'success');
                 closeModal();
                 openApplicationSummaryModal();
             } catch (err) { await showModalAlert('입시 결과 확정 실패: ' + err, '오류', 'error'); }
@@ -358,7 +359,7 @@ export async function openApplicationSummaryModal() {
         document.getElementById('reopenAdmissionYear')?.addEventListener('click', async () => {
             const confirmed = await showModalConfirm({
                 title: '입시 결과 확정 해제',
-                message: `${admissionYear}학년도 입시 결과 확정을 해제할까요?\n\n지원현황을 다시 수정할 수 있습니다. 이미 반영된 커트라인은 자동으로 지워지지 않으므로 필요하면 커트라인 관리에서 검토해주세요.`,
+                message: `${admissionLabel(admissionYear)} 입시 결과 확정을 해제할까요?\n\n지원현황을 다시 수정할 수 있습니다. 이미 반영된 커트라인은 자동으로 지워지지 않으므로 필요하면 커트라인 관리에서 검토해주세요.`,
                 confirmText: '확정 해제',
                 type: 'warning'
             });

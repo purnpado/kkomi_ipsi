@@ -6,6 +6,8 @@ import { showModalAlert, showModalConfirm, showModalPrompt } from '../../core/di
 import { app } from '../../core/dom.js';
 import { navigate, notifyLogout, openModal, requestScreenLock } from '../../core/navigation.js';
 import { state } from '../../core/store.js';
+import { renderAdmissionYearNotice } from './admissionYearNotice.js';
+import { admissionLabel, admissionLongLabel, admissionYearHint, currentAdmissionYear } from '../../core/admissionYear.js';
 
 // ===== 화면 렌더링 함수들 =====
 
@@ -15,9 +17,11 @@ import { state } from '../../core/store.js';
 export async function renderAdminScreen(schoolName) {
     // 1. 학교 설정(학급수) 가져오기
     let classCount = 8; // 기본값
+    let configuredYear = 0;
     try {
         const config = await GetSchoolConfig();
         classCount = config.classCount;
+        configuredYear = config.admissionYear;
     } catch (e) {
         console.error("설정 불러오기 실패:", e);
     }
@@ -129,7 +133,7 @@ export async function renderAdminScreen(schoolName) {
                     <span class="text-slate-600 hidden sm:inline">|</span>
                     <!-- 연도 전환 및 초기화 -->
                     <button id="resetYearBtn" class="text-amber-400/90 border border-amber-500/30 hover:bg-amber-500/10 transition-colors cursor-pointer text-xs px-2.5 py-1.5 rounded-lg font-bold inline-flex items-center gap-1" style="width: auto;" title="커트라인은 유지하고 학생 데이터만 삭제">
-                        📅 입시년도 전환
+                        📅 고입 연도 전환
                     </button>
                     <button id="resetDataBtn" class="text-rose-400/90 border border-rose-500/30 hover:bg-rose-500/10 transition-colors cursor-pointer text-xs px-2.5 py-1.5 rounded-lg font-bold inline-flex items-center gap-1" style="width: auto;">
                         전체 초기화
@@ -243,6 +247,7 @@ export async function renderAdminScreen(schoolName) {
 
     // 이벤트 바인딩
     ScreenLockManager.resetTimer();
+    renderAdmissionYearNotice(app.querySelector('.glass-card'), configuredYear);
 
     document.getElementById('lockScreenAdminBtn')?.addEventListener('click', () => {
         requestScreenLock('수동 잠금');
@@ -266,26 +271,26 @@ export async function renderAdminScreen(schoolName) {
 
     document.getElementById('resetYearBtn')?.addEventListener('click', async () => {
         const nextYear = await showModalPrompt({
-            title: '새 입시학년도 전환',
-            message: '전환할 새 입시학년도를 입력하세요 (예: 2028):',
-            defaultValue: String(new Date().getFullYear() + 1),
-            placeholder: '2028'
+            title: '새 고입 연도로 전환',
+            message: `전환할 고입 학년도를 입력하세요.\n${admissionYearHint(currentAdmissionYear())}`,
+            defaultValue: String(currentAdmissionYear()),
+            placeholder: String(currentAdmissionYear())
         });
         if (!nextYear) return;
 
         const confirmed = await showModalConfirm({
-            title: '입시학년도 전환 확인',
-            message: `입시년도를 [${nextYear}학년도]로 전환하시겠습니까?\n\n※ 고교별 커트라인 데이터는 안전하게 보존되며, 학생들의 성적/출결/봉사 데이터만 깔끔하게 초기화됩니다.`,
+            title: '고입 연도 전환 확인',
+            message: `[${admissionLongLabel(parseInt(nextYear))}]로 전환하시겠습니까?\n\n※ 고교별 커트라인 데이터는 안전하게 보존되며, 학생들의 성적/출결/봉사 데이터만 깔끔하게 초기화됩니다.`,
             confirmText: '전환하기',
             type: 'warning'
         });
         if (confirmed) {
             try {
                 await window.go.main.App.ResetAcademicYear(parseInt(nextYear));
-                await showModalAlert(`${nextYear}학년도로 성공적으로 전환되었습니다!`, '전환 완료', 'success');
+                await showModalAlert(`${admissionLabel(parseInt(nextYear))}으로 전환되었습니다!`, '전환 완료', 'success');
                 renderAdminScreen(schoolName);
             } catch (err) {
-                await showModalAlert("입시년도 전환 실패: " + err, '오류', 'error');
+                await showModalAlert("고입 연도 전환 실패: " + err, '오류', 'error');
             }
         }
     });

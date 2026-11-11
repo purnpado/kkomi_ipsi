@@ -135,7 +135,7 @@ func (dm *DBManager) CloseAdmissionYear(admissionYear int, closedBy, note string
 	if alreadyClosed, err := dm.IsAdmissionYearClosed(admissionYear); err != nil {
 		return AdmissionClosure{}, err
 	} else if alreadyClosed {
-		return AdmissionClosure{}, fmt.Errorf("%d학년도 입시는 이미 확정되었습니다", admissionYear)
+		return AdmissionClosure{}, fmt.Errorf("%d 고입 결과는 이미 확정되었습니다", admissionYear)
 	}
 	cutoffsApplied, err := dm.ApplyApplicationCutoffsForYear(admissionYear)
 	if err != nil {
@@ -176,7 +176,7 @@ func (dm *DBManager) ReopenAdmissionYear(admissionYear int) error {
 		return err
 	}
 	if affected, _ := result.RowsAffected(); affected == 0 {
-		return fmt.Errorf("%d학년도 확정 기록이 없습니다", admissionYear)
+		return fmt.Errorf("%d 고입 확정 기록이 없습니다", admissionYear)
 	}
 	return nil
 }

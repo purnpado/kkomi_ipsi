@@ -1,4 +1,5 @@
 import { escapeHtml, escapeAttr } from '../../core/utils.js';
+import { admissionLabel } from '../../core/admissionYear.js';
 
 // 원서대장: 결재란과 학급별 대장 페이지 HTML 구성
 export function buildRegisterPages(ctx, reg) {
@@ -191,7 +192,8 @@ export function buildRegisterPages(ctx, reg) {
 
                         <div class="flex items-end justify-between font-bold text-sm sm:text-base mb-2 px-1">
                             <div class="tracking-wider flex items-center gap-3">
-                                <span>${ctx.admissionYear}학년도</span>
+                                <span>${ctx.admissionYear - 1}학년도</span>
+                                <span class="text-xs font-semibold">(${admissionLabel(ctx.admissionYear)})</span>
                                 <span class="text-indigo-900 font-black bg-indigo-50 px-2.5 py-0.5 rounded border border-indigo-200 print:border-black print:bg-transparent">
                                     제 3학년 ${currentClass}반
                                 </span>

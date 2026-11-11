@@ -27,7 +27,7 @@ func (a *App) SaveSharedAdmissionPackageDialog(admissionYear int, password strin
 	if admissionYear <= 0 {
 		admissionYear = config.AdmissionYear
 	}
-	defaultName := fmt.Sprintf("%s_%d학년도_고입결과_공유.kkomi", config.SchoolName, admissionYear)
+	defaultName := fmt.Sprintf("%s_%d고입_결과_공유.kkomi", config.SchoolName, admissionYear)
 	path, err := a.saveFileDialog(
 		"관내 공유용 고입 결과 자료 내보내기 (V2)",
 		defaultName,

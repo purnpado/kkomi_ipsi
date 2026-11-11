@@ -110,7 +110,7 @@ func (dm *DBManager) GetExpectedSupportToken() (string, error) {
 // does not recreate teacher accounts or touch their password/key envelopes.
 func (dm *DBManager) UpdateAdmissionYear(admissionYear int) error {
 	if admissionYear < 2000 || admissionYear > 2100 {
-		return fmt.Errorf("입학년도는 2000~2100년 사이여야 합니다")
+		return fmt.Errorf("고입 학년도는 2000~2100 사이여야 합니다")
 	}
 	db, err := dm.OpenDB(dm.GetConfigDBPath())
 	if err != nil {
@@ -119,7 +119,7 @@ func (dm *DBManager) UpdateAdmissionYear(admissionYear int) error {
 	defer db.Close()
 	result, err := db.Exec(`UPDATE school_config SET admission_year = ?, updated_at = CURRENT_TIMESTAMP`, admissionYear)
 	if err != nil {
-		return fmt.Errorf("입학년도 설정 저장 실패: %w", err)
+		return fmt.Errorf("고입 학년도 설정 저장 실패: %w", err)
 	}
 	count, err := result.RowsAffected()
 	if err != nil {

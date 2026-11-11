@@ -2,6 +2,7 @@ import { printOnly } from '../../print/printEngine.js';
 import { buildRegisterPages } from './registerPages.js';
 import { bindRegisterExcelExport } from './registerExcel.js';
 import { state } from '../../core/store.js';
+import { currentAdmissionYear } from '../../core/admissionYear.js';
 
 export async function openApplicationRegisterModal() {
     // 화면 구성 요소들이 공유하는 상태 (파트 함수 간 전달)
@@ -16,7 +17,7 @@ async function prepareRegisterModal(ctx) {
     document.getElementById('applicationRegisterModal')?.remove();
 
     ctx.schoolName = '중학교';
-    ctx.admissionYear = 2026;
+    ctx.admissionYear = currentAdmissionYear();
     try {
         const config = await window.go.main.App.GetSchoolConfig();
         if (config) {

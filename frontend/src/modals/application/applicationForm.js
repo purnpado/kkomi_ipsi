@@ -33,7 +33,7 @@ export function defineApplicationRenderer(ctx) {
             const cleanTrack = rawTrk.includes('특별') ? '특별' : (rawTrk.includes('취업') ? '취업희망자' : '일반');
 
             const presetRecord = {
-                admissionYear: new Date().getFullYear() + 1,
+                admissionYear: ctx.defaultAdmissionYear,
                 category: cat,
                 schoolName: exactSchoolName,
                 track: cleanTrack,
@@ -59,7 +59,7 @@ export function defineApplicationRenderer(ctx) {
             activePreset = null;
         }
 
-        const record = workingRecords[activeIdx] || { admissionYear: new Date().getFullYear() + 1, category: 'meister', status: '지원희망', preferences: [] };
+        const record = workingRecords[activeIdx] || { admissionYear: ctx.defaultAdmissionYear, category: 'meister', status: '지원희망', preferences: [] };
         const isGeneral = record.category === 'general';
         const isNone = record.category === 'none';
         const isOther = record.category === 'other';
@@ -121,7 +121,7 @@ export function defineApplicationRenderer(ctx) {
           ${list}
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4 rounded-xl border border-slate-700 p-5 bg-slate-900/40">
             ${lockedBannerHTML}
-            <label class="text-sm font-bold">입학년도<input id="appYear" type="text" inputmode="numeric" value="${record.admissionYear || ''}" class="input-field mt-1 w-full" ${ctx.canEdit && !isLocked ? '' : 'disabled'}></label>
+            <label class="text-sm font-bold">고입 학년도<input id="appYear" type="text" inputmode="numeric" value="${record.admissionYear || ''}" class="input-field mt-1 w-full" ${ctx.canEdit && !isLocked ? '' : 'disabled'}></label>
             <label class="text-sm font-bold">전형 구분<select id="appCategory" class="input-field mt-1 w-full" ${ctx.canEdit && !isLocked ? '' : 'disabled'}>${ctx.categoryOptions.map(([v, t]) => `<option value="${v}" ${record.category === v ? 'selected' : ''}>${t}</option>`).join('')}</select></label>
             <label class="text-sm font-bold">지원 학교<select id="appSchool" class="input-field mt-1 w-full" ${(!needsSchool && record.category !== 'other') || isNone || !ctx.canEdit || isLocked ? 'disabled' : ''}>${ctx.schoolOptions(record.category, record.schoolName)}</select></label>
             <label class="text-sm font-bold">전형 / 지원 유형<select id="appTrack" class="input-field mt-1 w-full" ${ctx.canEdit && !isOther && !isLocked ? '' : 'disabled'}>${ctx.trackOptions(record.category, record.schoolName, record.track)}</select></label>
@@ -146,7 +146,7 @@ export function defineApplicationRenderer(ctx) {
         ctx.modal.querySelectorAll('.app-record-tab').forEach(btn => btn.onclick = () => ctx.render(parseInt(btn.dataset.index)));
         ctx.modal.querySelector('#btnAddNewApplication')?.addEventListener('click', () => {
             activePreset = {
-                admissionYear: new Date().getFullYear() + 1,
+                admissionYear: ctx.defaultAdmissionYear,
                 category: 'meister',
                 schoolName: '',
                 track: '일반',

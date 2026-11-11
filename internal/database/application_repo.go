@@ -32,7 +32,7 @@ func (dm *DBManager) SaveApplication(record model.ApplicationRecord) error {
 		return err
 	}
 	if closed {
-		return fmt.Errorf("%d학년도 입시 결과가 확정되어 지원현황을 수정할 수 없습니다. 학년부장이 확정을 해제한 뒤 수정해주세요", record.AdmissionYear)
+		return fmt.Errorf("%d 고입 결과가 확정되어 지원현황을 수정할 수 없습니다. 학년부장이 확정을 해제한 뒤 수정해주세요", record.AdmissionYear)
 	}
 	if len(record.Preferences) > 5 {
 		return fmt.Errorf("학과 지망은 최대 5개까지 입력할 수 있습니다")

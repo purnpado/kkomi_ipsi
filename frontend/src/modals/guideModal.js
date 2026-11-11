@@ -188,10 +188,10 @@ export function getMasterGuideHTML() {
 
             <div class="p-4 rounded-2xl bg-indigo-950/30 border border-indigo-500/20">
                 <h3 class="font-bold text-indigo-300 text-base mb-2 flex items-center gap-2">
-                    <span>1️⃣</span> 1단계: 학교 기초 설정, 입학년도 관리 & 공용 암호 관리
+                    <span>1️⃣</span> 1단계: 학교 기초 설정, 고입 연도 관리 & 공용 암호 관리
                 </h3>
                 <p class="text-slate-300 leading-relaxed">
-                    • 최초 실행 시 학교명, 3학년 전체 학급 수, 고교 입학년도(예: 2026학년도 입학)를 설정합니다.<br>
+                    • 최초 실행 시 학교명, 3학년 전체 학급 수, 고입 학년도(고교 입학 연도)를 설정합니다. 예: 2026학년도 중3이면 <strong>2027 고입</strong>.<br>
                     • 담임교사 PC와 안전하게 오프라인 암호화 통신을 수행하기 위한 <strong>[공용 데이터 잠금 암호]</strong>를 지정합니다.
                 </p>
             </div>
@@ -252,7 +252,7 @@ export function getMasterGuideHTML() {
                 <p class="text-slate-300 leading-relaxed">
                     • <strong>[🔒 입시 결과 확정]:</strong> 모든 고입 전형 종료 후 결과를 확정하여 당해 연도 최종 커트라인을 통계에 반영합니다.<br>
                     • <strong>[🗄️ 최종 보관본 생성]:</strong> 감사 및 차후 조회를 위한 100% 암호화 백업 아카이브를 생성합니다.<br>
-                    • <strong>[📅 새 학년도 전환]:</strong> 졸업생 개인정보를 안전하게 비우고, 다음 학년도(예: 2027학년도 입학)로 5개년 커트라인 기준을 한 칸씩 자동 시프트(Shift)하여 완벽한 인수인계를 준비합니다.
+                    • <strong>[📅 고입 연도 전환]:</strong> 졸업생 개인정보를 안전하게 비우고, 다음 고입 연도(예: 2028 고입)로 5개년 커트라인 기준을 한 칸씩 자동 시프트(Shift)하여 완벽한 인수인계를 준비합니다.
                 </p>
             </div>
 

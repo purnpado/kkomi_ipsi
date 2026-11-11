@@ -6,6 +6,7 @@ import { FEEDBACK_BOARD_URL, GITHUB_RELEASE_URL, openExternalUrlSafe, quitAppSaf
 import { getAppRoot } from './authRoot.js';
 import { navigate } from '../../core/navigation.js';
 import { state } from '../../core/store.js';
+import { admissionLabel, admissionYearHint, currentAdmissionYear } from '../../core/admissionYear.js';
 
 // 새 프로그램 폴더의 첫 화면. 새 학교 설정과 학년부장 배포 자료 적용을
 // 명확히 분리해, data 폴더가 없는 담임 PC에서도 배포 자료를 가져올 수 있다.
@@ -109,7 +110,7 @@ export function renderSetupScreen(existingConfig = null) {
     const schoolName = existingConfig?.schoolName || '';
     const classCount = existingConfig?.classCount || '';
     const isSmallSchool = existingConfig?.isSmallSchool || false;
-    const admissionYear = existingConfig?.admissionYear || 2026;
+    const admissionYear = existingConfig?.admissionYear || currentAdmissionYear();
     const isEdit = existingConfig !== null;
 
     const app = getAppRoot();
@@ -143,10 +144,10 @@ export function renderSetupScreen(existingConfig = null) {
                 </div>
 
                 <div>
-                    <label class="block text-sm font-semibold text-text-muted mb-2">고교 입학년도</label>
+                    <label class="block text-sm font-semibold text-text-muted mb-2">고입 학년도 (고교 입학 연도)</label>
                     <input type="text" inputmode="numeric" id="admissionYear" class="input-field" value="${admissionYear}" maxlength="4" required />
-                    <p class="text-xs text-text-muted mt-1">현재 중3 학생이 다음 해 3월에 고등학교에 입학하는 연도입니다. 예: 2026년 중3 → 2027학년도</p>
-                    <div id="admissionYearError" class="error-msg">입학년도는 2000~2100년 사이로 입력해 주세요.</div>
+                    <p class="text-xs text-text-muted mt-1">${admissionYearHint(currentAdmissionYear())}. 화면에는 "${admissionLabel(currentAdmissionYear())}"처럼 표시됩니다.</p>
+                    <div id="admissionYearError" class="error-msg">고입 학년도는 2000~2100 사이로 입력해 주세요.</div>
                 </div>
 
                 <div class="flex items-center gap-2 mt-2">

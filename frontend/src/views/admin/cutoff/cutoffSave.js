@@ -1,6 +1,7 @@
 import { showModalAlert, showModalConfirm } from '../../../core/dialogs.js';
 import { app } from '../../../core/dom.js';
 import { notifyStatsRecalculated } from '../../../core/navigation.js';
+import { admissionLabel } from '../../../core/admissionYear.js';
 
 // 커트라인 관리: 현재 연도·전체 연도 저장 함수
 export function defineCutoffSavers(ctx, ui) {
@@ -13,7 +14,7 @@ export function defineCutoffSavers(ctx, ui) {
             if (allIndices.length > 0) {
                 const confirmed = await showModalConfirm({
                     title: '공식 데이터 일괄 반영',
-                    message: `공개자료 탭에 표시된 <strong>${allIndices.length}개</strong> 공식 데이터를 현재 입학년도 커트라인으로 일괄 반영 및 저장하시겠습니까?`,
+                    message: `공개자료 탭에 표시된 <strong>${allIndices.length}개</strong> 공식 데이터를 현재 선택한 고입 연도 커트라인으로 일괄 반영 및 저장하시겠습니까?`,
                     confirmText: '반영 및 저장',
                     type: 'info'
                 });
@@ -79,7 +80,7 @@ export function defineCutoffSavers(ctx, ui) {
                 const totalAllYears = (ctx.allSavedCutoffs || []).length;
                 await showModalAlert({
                     title: '커트라인 저장 완료',
-                    message: `<strong>${ctx.currentAdmissionYear}학년도</strong>에는 입력된 커트라인 점수가 없어 해당 학년도 커트라인이 빈 상태(초기화)로 저장되었습니다.<br><span class="text-xs text-slate-400 mt-1.5 block">※ 다른 학년도(2024, 2026 등)의 커트라인은 안전하게 보존됩니다. (전체 누적: 총 <strong>${totalAllYears}건</strong> 유지 중)</span>`,
+                    message: `<strong>${admissionLabel(ctx.currentAdmissionYear)}</strong>에는 입력된 커트라인 점수가 없어 해당 연도 커트라인이 빈 상태(초기화)로 저장되었습니다.<br><span class="text-xs text-slate-400 mt-1.5 block">※ 다른 고입 연도의 커트라인은 안전하게 보존됩니다. (전체 누적: 총 <strong>${totalAllYears}건</strong> 유지 중)</span>`,
                     type: 'info'
                 });
             }
@@ -95,7 +96,7 @@ export function defineCutoffSavers(ctx, ui) {
                 const totalAllYears = (ctx.allSavedCutoffs || []).length;
                 await showModalAlert({
                     title: '커트라인 저장 완료',
-                    message: `<strong>${ctx.currentAdmissionYear}학년도</strong> 총 <strong>${cutoffs.length}건</strong>의 고교·학과별 커트라인 및 공식 공개 입결 자료가 안전하게 저장되었습니다!<br><span class="text-xs text-slate-400 mt-1.5 block">※ 전체 학년도 누적 커트라인은 총 <strong>${totalAllYears}건</strong>이 안전하게 보관 중입니다.</span>`,
+                    message: `<strong>${admissionLabel(ctx.currentAdmissionYear)}</strong> 총 <strong>${cutoffs.length}건</strong>의 고교·학과별 커트라인 및 공식 공개 입결 자료가 안전하게 저장되었습니다!<br><span class="text-xs text-slate-400 mt-1.5 block">※ 전체 고입 연도 누적 커트라인은 총 <strong>${totalAllYears}건</strong>이 안전하게 보관 중입니다.</span>`,
                     type: 'success'
                 });
             }
@@ -147,11 +148,11 @@ export function defineCutoffSavers(ctx, ui) {
             return false;
         }
 
-        const yearListText = ctx.admissionYears.map(y => `<strong>${y}학년도</strong>`).join(', ');
+        const yearListText = ctx.admissionYears.map(y => `<strong>${admissionLabel(y)}</strong>`).join(', ');
         const confirmed = await showModalConfirm({
             title: '전체 연도 커트라인 일괄 저장',
             message: `현재 화면에 입력된 <strong>총 ${baseCutoffs.length}개</strong>의 고교·학과별 커트라인을<br>최근 5개년 전체(${yearListText})에 일괄 복제 저장하시겠습니까?<br><br>` +
-                     `<span class="text-xs text-indigo-300">✓ 5개년 전체에 동일한 기준 커트라인이 한 번에 등록됩니다.<br>✓ 저장 후 어떤 학년도를 선택하셔도 커트라인이 정상 표시됩니다.<br>✓ 특정 학년도의 세부 점수는 언제든 개별 수정 가능합니다.</span>`,
+                     `<span class="text-xs text-indigo-300">✓ 5개년 전체에 동일한 기준 커트라인이 한 번에 등록됩니다.<br>✓ 저장 후 어떤 고입 연도를 선택하셔도 커트라인이 정상 표시됩니다.<br>✓ 특정 고입 연도의 세부 점수는 언제든 개별 수정 가능합니다.</span>`,
             confirmText: '5개년 전체 일괄 저장',
             type: 'info'
         });
@@ -175,7 +176,7 @@ export function defineCutoffSavers(ctx, ui) {
             notifyStatsRecalculated({ cutoffs: ctx.allSavedCutoffs });
             await showModalAlert({
                 title: '전체 연도 일괄 저장 완료',
-                message: `최근 5개년 전체(${yearListText})에 걸쳐<br>총 <strong>${allYearsToSave.length}건</strong>(${baseCutoffs.length}개 항목 × ${ctx.admissionYears.length}개년)의 커트라인이 안전하게 일괄 저장되었습니다!<br><br>이제 상단 학년도를 어떤 연도로 바꾸셔도 등록된 커트라인을 바로 확인하실 수 있습니다.`,
+                message: `최근 5개년 전체(${yearListText})에 걸쳐<br>총 <strong>${allYearsToSave.length}건</strong>(${baseCutoffs.length}개 항목 × ${ctx.admissionYears.length}개년)의 커트라인이 안전하게 일괄 저장되었습니다!<br><br>이제 상단 고입 연도를 어떤 연도로 바꾸셔도 등록된 커트라인을 바로 확인하실 수 있습니다.`,
                 type: 'success'
             });
             ctx.renderMainScreen();

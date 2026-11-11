@@ -2,6 +2,7 @@ import { normalizeSchoolName } from '../../../core/utils.js';
 import { showModalAlert, showModalConfirm } from '../../../core/dialogs.js';
 import { app } from '../../../core/dom.js';
 import { notifyStatsRecalculated } from '../../../core/navigation.js';
+import { admissionLabel } from '../../../core/admissionYear.js';
 
 // 커트라인 관리: 연도 복사·연도 선택·검색·탭 전환
 export function bindCutoffYearAndSearch(ctx, ui) {
@@ -11,7 +12,7 @@ export function bindCutoffYearAndSearch(ctx, ui) {
         if (sourceData.length === 0) {
             await showModalAlert({
                 title: '복사 불가',
-                message: `<strong>${sourceYear}학년도</strong>에는 저장된 유효 커트라인 점수가 없습니다.`,
+                message: `<strong>${admissionLabel(sourceYear)}</strong>에는 저장된 유효 커트라인 점수가 없습니다.`,
                 type: 'warning'
             });
             return;
@@ -19,7 +20,7 @@ export function bindCutoffYearAndSearch(ctx, ui) {
 
         const confirmed = await showModalConfirm({
             title: '커트라인 데이터 복사',
-            message: `<strong>${sourceYear}학년도</strong>의 커트라인(총 <strong>${sourceData.length}건</strong>)을 현재 <strong>${ctx.currentAdmissionYear}학년도</strong>로 복사해 오시겠습니까?<br><br><span class="text-xs text-amber-300">※ 복사 후 상단의 <strong>[💾 커트라인 저장]</strong> 버튼을 누르시면 ${ctx.currentAdmissionYear}학년도 데이터로 DB에 최종 저장됩니다.</span>`,
+            message: `<strong>${admissionLabel(sourceYear)}</strong>의 커트라인(총 <strong>${sourceData.length}건</strong>)을 현재 <strong>${admissionLabel(ctx.currentAdmissionYear)}</strong>로 복사해 오시겠습니까?<br><br><span class="text-xs text-amber-300">※ 복사 후 상단의 <strong>[💾 커트라인 저장]</strong> 버튼을 누르시면 ${admissionLabel(ctx.currentAdmissionYear)} 데이터로 DB에 최종 저장됩니다.</span>`,
             confirmText: '복사하기',
             type: 'info'
         });
@@ -52,7 +53,7 @@ export function bindCutoffYearAndSearch(ctx, ui) {
 
         await showModalAlert({
             title: '복사 완료',
-            message: `<strong>${sourceYear}학년도</strong> 커트라인 중 <strong>${filledCount}개</strong> 항목이 현재 화면에 채워졌습니다!<br><br>내용을 확인하신 후 상단의 <strong>[💾 커트라인 저장]</strong> 버튼을 꼭 눌러주세요.`,
+            message: `<strong>${admissionLabel(sourceYear)}</strong> 커트라인 중 <strong>${filledCount}개</strong> 항목이 현재 화면에 채워졌습니다!<br><br>내용을 확인하신 후 상단의 <strong>[💾 커트라인 저장]</strong> 버튼을 꼭 눌러주세요.`,
             type: 'success'
         });
     };
@@ -63,7 +64,7 @@ export function bindCutoffYearAndSearch(ctx, ui) {
         if (availableYears.length === 0) {
             await showModalAlert({
                 title: '복사 가능한 연도 없음',
-                message: '다른 학년도에 저장된 커트라인 데이터가 없습니다.<br>타교자료를 병합하거나 직접 커트라인을 먼저 입력해 주세요.',
+                message: '다른 고입 연도에 저장된 커트라인 데이터가 없습니다.<br>타교자료를 병합하거나 직접 커트라인을 먼저 입력해 주세요.',
                 type: 'info'
             });
             return;
@@ -278,7 +279,7 @@ export function bindPublicDataApply(ctx, ui) {
     document.getElementById('resetCutoffsBtn')?.addEventListener('click', async () => {
         const confirmed = await showModalConfirm({
             title: '커트라인 초기화 확인',
-            message: `현재 선택된 <strong>${ctx.currentAdmissionYear}학년도</strong> 커트라인을 초기화하시겠습니까?<br><br><span class="text-xs text-slate-400">※ 전체 5개년 모든 데이터를 완전 백지화하려면 다음 질문에서 전체 초기화를 선택할 수 있습니다.</span>`,
+            message: `현재 선택된 <strong>${admissionLabel(ctx.currentAdmissionYear)}</strong> 커트라인을 초기화하시겠습니까?<br><br><span class="text-xs text-slate-400">※ 전체 5개년 모든 데이터를 완전 백지화하려면 다음 질문에서 전체 초기화를 선택할 수 있습니다.</span>`,
             confirmText: '초기화 진행',
             type: 'warning'
         });
@@ -286,7 +287,7 @@ export function bindPublicDataApply(ctx, ui) {
 
         const isAllYears = await showModalConfirm({
             title: '전체 연도 초기화 선택',
-            message: `모든 연도(5개년 전체)의 커트라인과 공개 입결 데이터를 완전 백지화하시겠습니까?<br><br>- <strong>[전체 백지화]</strong>: 5개년 전체 데이터 삭제<br>- <strong>[해당 연도만]</strong>: 현재 ${ctx.currentAdmissionYear}학년도 데이터만 삭제`,
+            message: `모든 연도(5개년 전체)의 커트라인과 공개 입결 데이터를 완전 백지화하시겠습니까?<br><br>- <strong>[전체 백지화]</strong>: 5개년 전체 데이터 삭제<br>- <strong>[해당 연도만]</strong>: 현재 ${admissionLabel(ctx.currentAdmissionYear)} 데이터만 삭제`,
             confirmText: '전체 백지화',
             cancelText: '해당 연도만',
             type: 'error'
@@ -312,7 +313,7 @@ export function bindPublicDataApply(ctx, ui) {
                 title: '초기화 완료',
                 message: isAllYears 
                     ? '전체 연도의 고교 커트라인 및 공개 입결 데이터가 완전히 초기화되었습니다.' 
-                    : `<strong>${ctx.currentAdmissionYear}학년도</strong>의 고교 커트라인이 안전하게 초기화되었습니다.`,
+                    : `<strong>${admissionLabel(ctx.currentAdmissionYear)}</strong>의 고교 커트라인이 안전하게 초기화되었습니다.`,
                 type: 'success'
             });
             ctx.renderMainScreen();

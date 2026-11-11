@@ -1,6 +1,7 @@
 import { escapeHtml } from '../core/utils.js';
 import { showModalAlert, showModalConfirm, showModalPrompt } from '../core/dialogs.js';
 import { state } from '../core/store.js';
+import { admissionLabel, admissionLongLabel, currentAdmissionYear, resolveAdmissionYear } from '../core/admissionYear.js';
 
 /**
  * 관내 고입 결과 공유 및 취합 관리 모달 (V2 규격)
@@ -9,12 +10,12 @@ export async function openSharedAdmissionModal() {
     document.getElementById('sharedAdmissionModal')?.remove();
 
     let schoolConfig = null;
-    let admissionYear = 2026;
+    let admissionYear = currentAdmissionYear();
     let schoolName = '우리학교';
     try {
         schoolConfig = await window.go.main.App.GetSchoolConfig();
         if (schoolConfig) {
-            admissionYear = schoolConfig.admissionYear || 2026;
+            admissionYear = resolveAdmissionYear(schoolConfig);
             schoolName = schoolConfig.schoolName || '우리학교';
         }
     } catch (e) {
@@ -49,7 +50,7 @@ export async function openSharedAdmissionModal() {
                             관내 고입 결과 공유 및 취합 관리
                             <span class="px-2 py-0.5 text-xs font-semibold rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">V2 익명화 규격</span>
                         </h2>
-                        <p class="text-xs text-slate-400 mt-0.5">${admissionYear}학년도 관내 중학교 간 고입 지원·합격 결과 익명 자료 교환 및 통계 통합</p>
+                        <p class="text-xs text-slate-400 mt-0.5">${admissionLongLabel(admissionYear)} · 관내 중학교 간 고입 지원·합격 결과 익명 자료 교환 및 통계 통합</p>
                     </div>
                 </div>
                 <button type="button" id="closeSharedModalBtn" class="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/80 transition-colors">
@@ -98,7 +99,7 @@ export async function openSharedAdmissionModal() {
                                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                     </svg>
-                                    ${admissionYear}학년도 공유 파일 내보내기 (.phgc)
+                                    ${admissionLabel(admissionYear)} 공유 파일 내보내기 (.phgc)
                                 </button>
                             ` : `
                                 <div class="p-2.5 text-center text-xs text-slate-500 bg-slate-900/40 rounded-xl border border-slate-800">
@@ -163,7 +164,7 @@ export async function openSharedAdmissionModal() {
                             <thead class="bg-slate-800/80 text-slate-400 uppercase font-semibold border-b border-slate-700/60">
                                 <tr>
                                     <th class="py-3 px-4">참여 중학교명</th>
-                                    <th class="py-3 px-4 text-center">학년도</th>
+                                    <th class="py-3 px-4 text-center">고입</th>
                                     <th class="py-3 px-4 text-center">규격</th>
                                     <th class="py-3 px-4 text-center">포함 레코드 수</th>
                                     <th class="py-3 px-4 text-right">취합 일시</th>
@@ -270,7 +271,7 @@ export async function openSharedAdmissionModal() {
             const confirmImport = await showModalConfirm(
                 `다음 학교의 공유 자료를 취합하시겠습니까?\n\n` +
                 `• 발송 학교: ${cover.schoolName}\n` +
-                `• 입학 학년도: ${cover.admissionYear}학년도\n` +
+                `• 고입 학년도: ${admissionLabel(cover.admissionYear)}\n` +
                 `• 자료 규격: ${formatLabel}\n` +
                 `• 포함 레코드: ${cover.recordCount}건\n\n` +
                 `(동일 학교의 이전 자료가 존재할 경우 최신 파일로 자동 교체됩니다)`,
@@ -329,7 +330,7 @@ function renderParticipatingSchoolsRows(schools) {
                     <span class="w-1.5 h-1.5 rounded-full bg-indigo-400"></span>
                     ${escapeHtml(s.schoolName)}
                 </td>
-                <td class="py-3 px-4 text-center">${s.admissionYear}학년도</td>
+                <td class="py-3 px-4 text-center">${admissionLabel(s.admissionYear)}</td>
                 <td class="py-3 px-4 text-center">${formatBadge}</td>
                 <td class="py-3 px-4 text-center font-mono font-medium text-slate-200">${s.recordCount}건</td>
                 <td class="py-3 px-4 text-right text-slate-400 font-mono text-[11px]">${dateStr}</td>

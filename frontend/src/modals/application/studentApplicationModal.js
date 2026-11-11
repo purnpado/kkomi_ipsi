@@ -1,6 +1,7 @@
 import { escapeHtml, escapeAttr } from '../../core/utils.js';
 import { defineApplicationRenderer } from './applicationForm.js';
 import { state } from '../../core/store.js';
+import { resolveAdmissionYear } from '../../core/admissionYear.js';
 
 // ===== 학생별 지원·합격 결과 (학교 내부 암호화 DB 전용) =====
 export async function openStudentApplicationModal(classNum, studentNum, name, preset = null) {
@@ -32,6 +33,8 @@ async function prepareApplicationModal(ctx) {
         if (e.target === ctx.modal) ctx.closeModal();
     };
 
+    // 새 원서의 고입 학년도 기본값은 날짜가 아니라 학교 설정을 따른다(확정·공유·통계와 일치).
+    ctx.defaultAdmissionYear = resolveAdmissionYear(await window.go.main.App.GetSchoolConfig().catch(() => null));
     ctx.canEdit = !state.currentUser || state.currentUser.Role !== 'viewer';
     ctx.statusOptions = ['지원희망', '지원완료', '합격', '불합격'];
     ctx.categoryOptions = [['meister', '마이스터고'], ['special', '특성화고'], ['self_foreign', '자사고·외고'], ['general', '후기 일반고'], ['other', '기타 (전기 기타고/타시도 등)'], ['none', '미진학 (진학포기)']];

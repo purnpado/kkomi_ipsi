@@ -1,5 +1,6 @@
 import { normalizeSchoolName } from '../../../core/utils.js';
 import { showModalAlert } from '../../../core/dialogs.js';
+import { admissionOptionLabel, currentAdmissionYear } from '../../../core/admissionYear.js';
 
 // 울산 관내 고교 공식 공개자료 신규 추가 모달 (학교별 학과·전형 자동 연동 & 최고/평균/최저점)
 export async function renderAddPublicDataModal(defaultYear, availableYears, onAddCallback) {
@@ -30,10 +31,10 @@ export async function renderAddPublicDataModal(defaultYear, availableYears, onAd
         console.warn('공식자료 모달: 고교 목록 동적 로드 실패', e);
     }
 
-    // 입학년도 기준: 2026년 기준 직전 5개년(2026, 2025, 2024, 2023, 2022) 연동
-    const fallbackYear = 2026;
+    // 고입 연도 기준: 화면에서 넘겨받은 연도 목록, 없으면 오늘 기준 현재 중3 입시부터 직전 5개년
+    const fallbackYear = currentAdmissionYear();
     const yearOptions = (availableYears && availableYears.length > 0)
-        ? availableYears.filter(y => y <= 2026)
+        ? availableYears.filter(y => y <= Math.max(fallbackYear, ...availableYears))
         : Array.from({ length: 5 }, (_, idx) => fallbackYear - idx);
 
     const selectedYear = (yearOptions.includes(defaultYear)) ? defaultYear : yearOptions[0];
@@ -52,14 +53,14 @@ export async function renderAddPublicDataModal(defaultYear, availableYears, onAd
             </div>
 
             <div class="space-y-3.5 text-xs">
-                <!-- 1. 입학년도 (직전 5개년 자동 연동) -->
+                <!-- 1. 고입 연도 (직전 5개년 자동 연동) -->
                 <div>
                     <label class="text-slate-300 font-bold mb-1 flex items-center justify-between">
-                        <span>📅 입학년도</span>
+                        <span>📅 고입 연도</span>
                         <span class="text-[11px] text-slate-400 font-normal">결과 발표된 최근 5개년 기준</span>
                     </label>
                     <select id="modalPublicYear" class="input-field w-full py-2.5 px-3 bg-slate-900 border-slate-700 rounded-xl text-white font-bold cursor-pointer text-xs">
-                        ${yearOptions.map(y => `<option value="${y}" ${y === selectedYear ? 'selected' : ''}>${y}학년도 입학 기준</option>`).join('')}
+                        ${yearOptions.map(y => `<option value="${y}" ${y === selectedYear ? 'selected' : ''}>${admissionOptionLabel(y)}</option>`).join('')}
                     </select>
                 </div>
 

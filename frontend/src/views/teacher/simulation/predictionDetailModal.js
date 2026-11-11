@@ -3,6 +3,7 @@ import { printOnly } from '../../../print/printEngine.js';
 import { getPredictionAnalysisList } from './prediction.js';
 import { showSchoolScoreDetailModal } from './schoolScoreDetail.js';
 import { openModal } from '../../../core/navigation.js';
+import { admissionLabel } from '../../../core/admissionYear.js';
 
 // ===== 마이스터고 및 특성화고 합격 예측 상세 분석 팝업 모달 =====
 export async function openPredictionDetailModal(classNum, studentNum, studentName, category, extraData = {}) {
@@ -213,7 +214,7 @@ export async function openPredictionDetailModal(classNum, studentNum, studentNam
                     <tr class="border-b border-slate-700/40 hover:bg-slate-800/50 transition-colors text-center text-xs">
                         ${yearSpans[idx] > 0 ? `
                             <td rowspan="${yearSpans[idx]}" class="p-3 text-center font-bold text-amber-300/90 font-mono bg-slate-900/40 border-r border-slate-700/60 align-middle whitespace-nowrap">
-                                ${item.year}학년도
+                                ${admissionLabel(item.year)}
                             </td>
                         ` : ''}
                         ${schoolSpans[idx] > 0 ? `

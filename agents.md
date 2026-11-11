@@ -58,6 +58,7 @@ Gitea 원본을 복제한 뒤 다음 개발 도구를 설치해야 합니다.
 - `app.go`, `app_*.go`: Wails 바인딩 시그니처를 유지하는 얇은 위임 계층(권한 확인·파일 대화상자). 공개 메서드명과 JSON 필드는 바꾸지 않습니다.
 - 모든 `.go`·`.js`·`.css` 파일은 **500줄 이하**를 유지합니다. 줄바꿈 제거 같은 편법 없이 책임 단위로 파일을 나눕니다.
 - `frontend/src/main.js`: 앱 부트스트랩과 최상위 이벤트 라우팅(화면·모달 라우팅 표)만 담당
+- `frontend/src/core/admissionYear.js`: 고입 학년도 계산·표시의 단일 기준. 저장값은 고교 입학 학년도(예: 2027) 하나이고, 화면에는 "2027 고입 (현 중3 · 2026학년도)" / "2026 고입 결과"처럼 표시합니다. 학년도는 3월에 시작하므로 1~2월도 직전 학년도로 계산합니다. 연도 표기·기본값은 반드시 이 함수를 씁니다.
 - `frontend/src/core/`: `eventBus.js`(이벤트 버스), `navigation.js`(navigate·openModal·변경 알림 발행 함수), `store.js`(중앙 상태 저장소), `wailsBridge.js`(Wails v3에서 `window.go.main.App.*` 호환), `dialogs.js`, `screenLock.js`, `updater.js`
 - `frontend/src/views/auth/`, `views/admin/`(대시보드·계정·취합 병합·`cutoff/` 커트라인), `views/teacher/`(학급 명렬표·`studentList/`·`counsel/` 1:1 상담·`simulation/` 합격 예측): 메뉴별 화면
 - `frontend/src/modals/`(`summary/`, `application/`, `analysis/`, `matrix/`), `frontend/src/styles/`(`app.css`가 `@import`): 모달과 스타일

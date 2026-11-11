@@ -7,6 +7,7 @@ import { bindCutoffYearAndSearch, bindCutoffRowEditing, bindPublicDataApply } fr
 import { bindPublicDataTab, bindCutoffShareAndBack } from './cutoffPublicTab.js';
 import { defineCutoffSavers } from './cutoffSave.js';
 import { state } from '../../../core/store.js';
+import { currentAdmissionYear } from '../../../core/admissionYear.js';
 
 // ===== 고교별 커트라인 관리 화면 (단일 페이지 통합 네비게이션 & 최저/최고/평균 입력 지원) =====
 export async function renderCutoffScreen(schoolName) {
@@ -22,13 +23,13 @@ export async function renderCutoffScreen(schoolName) {
 async function loadCutoffScreenData(ctx) {
     app.className = 'wide-layout';
 
-    // 최신 고교 입학년도 기준: 2026학년도 (미래 연도 2027 이상은 제외하고 2026년 기준 직전 5개년 산출)
-    let baseAdmissionYear = 2026;
+    // 기준 고입 학년도: 학교 설정값(없으면 오늘 기준 현재 중3 입시). 그보다 미래 연도는 제외하고 직전 5개년을 보여 준다.
+    let baseAdmissionYear = currentAdmissionYear();
     try {
         const config = await GetSchoolConfig();
         if (config && config.admissionYear) {
             const cfgYear = Number(config.admissionYear);
-            if (cfgYear > 2000 && cfgYear <= 2026) {
+            if (cfgYear > 2000 && cfgYear <= 2100) {
                 baseAdmissionYear = cfgYear;
             }
         }
@@ -73,7 +74,7 @@ async function loadCutoffScreenData(ctx) {
         }
     };
 
-    // 2026년 최근 기준 및 그 밑으로 5년치(2026, 2025, 2024, 2023, 2022) 산출 (2027년 이상 미래 연도는 원천 배제)
+    // 기준 고입 연도와 그 직전 4개년(총 5개년)을 목록으로 만든다. 기준보다 미래 연도는 제외한다.
     const existingYears = (ctx.allSavedCutoffs || []).map(c => Number(c.year)).filter(y => !isNaN(y) && y > 2000 && y <= baseAdmissionYear);
     const candidateYears = new Set([baseAdmissionYear, ...existingYears]);
     for (let i = 0; i < 5; i++) {

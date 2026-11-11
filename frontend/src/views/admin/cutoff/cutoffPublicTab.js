@@ -3,6 +3,7 @@ import { showModalAlert, showModalConfirm } from '../../../core/dialogs.js';
 import { app } from '../../../core/dom.js';
 import { renderAddPublicDataModal } from './publicDataModal.js';
 import { navigate, notifyStatsRecalculated } from '../../../core/navigation.js';
+import { admissionLabel } from '../../../core/admissionYear.js';
 
 // 커트라인 관리: 공식자료 탭 전용 이벤트
 export function bindPublicDataTab(ctx, ui) {
@@ -189,7 +190,7 @@ export function bindCutoffShareAndBack(ctx, ui) {
             if (path) {
                 await showModalAlert({
                     title: '자료 내보내기 완료',
-                    message: `<strong>${ctx.currentAdmissionYear}학년도</strong> 관내 진학자료가 안전하게 저장되었습니다!<br><br>📂 <strong>저장 파일:</strong><br><span class="text-xs text-indigo-300 font-mono break-all">${path}</span><br><br><span class="text-emerald-400 text-xs">✓ 학생 성명, 학급 등 개인정보는 100% 원천 배제되었습니다.<br>✓ 이 파일을 타 학교 진학 담당 선생님께 전달하여 공유하세요.</span>`,
+                    message: `<strong>${admissionLabel(ctx.currentAdmissionYear)}</strong> 관내 진학자료가 안전하게 저장되었습니다!<br><br>📂 <strong>저장 파일:</strong><br><span class="text-xs text-indigo-300 font-mono break-all">${path}</span><br><br><span class="text-emerald-400 text-xs">✓ 학생 성명, 학급 등 개인정보는 100% 원천 배제되었습니다.<br>✓ 이 파일을 타 학교 진학 담당 선생님께 전달하여 공유하세요.</span>`,
                     type: 'success'
                 });
             }
@@ -215,10 +216,10 @@ export function bindCutoffShareAndBack(ctx, ui) {
                     title: '타교자료 일괄 병합 완료',
                     message: `선택하신 타 학교 진학자료가 성공적으로 병합되었습니다!<br><br>` +
                              `• 처리된 파일: <strong>${res.files || 1}개 학교 자료</strong><br>` +
-                             `• 커트라인 갱신: 총 <strong>${res.cutoffs || 0}건</strong> (전체 학년도 누적 병합)<br>` +
+                             `• 커트라인 갱신: 총 <strong>${res.cutoffs || 0}건</strong> (전체 고입 연도 누적 병합)<br>` +
                              `• 타교 지원현황 합격선 반영: <strong>${res.applications || 0}건</strong><br>` +
                              `• 공식 공개자료 보완: <strong>${res.official || 0}건</strong><br><br>` +
-                             `<span class="text-xs text-slate-400 block">💡 상단 학년도(2026, 2025 등)를 전환하시면 각 학년도별로 분할 저장된 커트라인(${res.cutoffs || 0}건 중 해당 연도분)을 확인하실 수 있습니다. (전체 보관: ${totalAllYears}건)</span>`,
+                             `<span class="text-xs text-slate-400 block">💡 상단 고입 연도를 전환하시면 각 연도별로 분할 저장된 커트라인(${res.cutoffs || 0}건 중 해당 연도분)을 확인하실 수 있습니다. (전체 보관: ${totalAllYears}건)</span>`,
                     type: 'success'
                 });
                 ctx.renderMainScreen();

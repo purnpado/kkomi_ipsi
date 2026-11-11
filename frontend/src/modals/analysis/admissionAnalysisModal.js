@@ -1,5 +1,6 @@
 import { escapeHtml, escapeAttr } from '../../core/utils.js';
 import { renderStatsDashboard } from './statsDashboard.js';
+import { admissionOptionLabel, currentAdmissionYear } from '../../core/admissionYear.js';
 
 /**
  * 고입 결과 정밀 분석 및 시각화 차트 모달 (설계서 10-1절 기준)
@@ -8,7 +9,7 @@ export async function openAdmissionAnalysisModal() {
     document.getElementById('admissionAnalysisModal')?.remove();
 
     let schoolConfig = null;
-    let admissionYear = 2026;
+    let admissionYear = currentAdmissionYear();
     try {
         schoolConfig = await window.go.main.App.GetSchoolConfig();
         if (schoolConfig && schoolConfig.admissionYear) {
@@ -92,13 +93,13 @@ export async function openAdmissionAnalysisModal() {
                 <!-- 상단 필터 바 -->
                 <div class="p-4 rounded-xl bg-slate-800/60 border border-slate-700/60 flex flex-wrap items-center justify-between gap-4">
                     <div class="flex flex-wrap items-center gap-3">
-                        <!-- 입학 학년도 선택 -->
+                        <!-- 고입 연도 선택 -->
                         <div class="flex items-center gap-2">
-                            <span class="text-xs font-bold text-slate-400">학년도:</span>
+                            <span class="text-xs font-bold text-slate-400">고입:</span>
                             <select id="analysisYearSelect" class="bg-slate-900 text-white font-bold text-xs border border-slate-700 rounded-lg px-2.5 py-1.5 outline-none cursor-pointer">
-                                <option value="${admissionYear}" selected>${admissionYear}학년도</option>
-                                <option value="${admissionYear - 1}">${admissionYear - 1}학년도</option>
-                                <option value="${admissionYear - 2}">${admissionYear - 2}학년도</option>
+                                <option value="${admissionYear}" selected>${admissionOptionLabel(admissionYear)}</option>
+                                <option value="${admissionYear - 1}">${admissionOptionLabel(admissionYear - 1)}</option>
+                                <option value="${admissionYear - 2}">${admissionOptionLabel(admissionYear - 2)}</option>
                             </select>
                         </div>
 
