@@ -47,8 +47,17 @@ func GetAllSchoolRuleNames() []map[string]string {
 			"trackName":  r.TrackName,
 			"totalMax":   fmt.Sprintf("%.0f", r.TotalMax),
 		})
+		last := names[len(names)-1]
+		// 산출 규칙 안내 문구(화면의 "공식 성적 산출 상세"에서 사용)
+		guide := DescribeRule(r)
+		last["allSubjectMax"] = fmt.Sprintf("%g", r.AllSubjectMax)
+		last["guideSemesters"] = guide.Semesters
+		last["guideWeightedSubjects"] = guide.WeightedSubjects
+		last["guideAttendance"] = guide.AttendanceRule
+		last["guideVolunteer"] = guide.VolunteerRule
+		last["guideLeadership"] = guide.LeadershipRule
+		last["guideNote"] = guide.Note
 		if stage, ok := FindAdmissionStage(r.SchoolName, r.TrackName); ok {
-			last := names[len(names)-1]
 			last["firstStageMultiplier"] = fmt.Sprintf("%g", stage.Multiplier)
 			last["firstStageRounding"] = stage.Rounding
 			last["secondStageNote"] = stage.SecondStageNote

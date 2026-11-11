@@ -1,135 +1,48 @@
 import { normalizeSchoolName, normalizeTrack } from '../../../core/utils.js';
 
-// ===== 학교별 공식 성적 산출 규칙 안내 맵 =====
-const SCHOOL_CALC_RULES = {
-    '울산마이스터고': {
-        '일반': {
-            totalMax: 300,
-            semesters: '1-2, 2-1, 2-2, 3-1 균등 반영',
-            allSubjectMax: 150,
-            weightedSubjects: '영어(20점), 수학(20점), 기술가정(10점) = 50점 만점',
-            attendanceMax: 80,
-            attendanceRule: '미인정 결석 1일당 8점 감점',
-            volunteerMax: 20,
-            volunteerRule: '12시간 이상 만점(20점), 2시간 단위 1점 감점 (최저 14점)',
-            leadershipMax: 0,
-        },
-        '특별': {
-            totalMax: 280,
-            semesters: '1-2, 2-1, 2-2, 3-1 균등 반영',
-            allSubjectMax: 70,
-            weightedSubjects: '영어(20점), 수학(20점), 기술가정(10점) = 50점 만점',
-            attendanceMax: 120,
-            attendanceRule: '미인정 결석 1일당 12점 감점',
-            volunteerMax: 40,
-            volunteerRule: '12시간 이상 만점(40점), 2시간 단위 2점 감점 (최저 28점)',
-            leadershipMax: 0,
-            note: '심층면접 20점 별도 (총 전형 만점 300점)',
-        }
-    },
-    '울산에너지고': {
-        '일반': {
-            totalMax: 230,
-            semesters: '1-2(10%), 2-1(25%), 2-2(25%), 3-1(40%) 가중 반영 (예체능 제외)',
-            allSubjectMax: 90,
-            weightedSubjects: '영어(20점), 수학(20점), 기술가정/과학(20점) = 60점 만점',
-            attendanceMax: 30,
-            attendanceRule: '미인정 결석 1일당 5점 감점',
-            volunteerMax: 40,
-            volunteerRule: '12시간 이상 만점(40점), 2시간 단위 1점 감점 (최저 34점)',
-            leadershipMax: 10,
-            leadershipRule: '학생회/학급임원 학기당 2.5점 (최대 10점)',
-        },
-        '특별': {
-            totalMax: 200,
-            semesters: '1-2(10%), 2-1(25%), 2-2(25%), 3-1(40%) 가중 반영 (예체능 제외)',
-            allSubjectMax: 60,
-            weightedSubjects: '영어(10점), 수학(10점), 기술가정/과학(10점) = 30점 만점',
-            attendanceMax: 60,
-            attendanceRule: '미인정 결석 1일당 5점 감점',
-            volunteerMax: 40,
-            volunteerRule: '12시간 이상 만점(40점), 2시간 단위 1점 감점 (최저 34점)',
-            leadershipMax: 10,
-            leadershipRule: '학생회/학급임원 학기당 2.5점 (최대 10점)',
-        }
-    },
-    '현대공업고': {
-        '일반': {
-            totalMax: 200,
-            semesters: '1-2(10%), 2-1(25%), 2-2(25%), 3-1(40%) 가중 반영 (예체능 제외)',
-            allSubjectMax: 100,
-            weightedSubjects: '영어(20점), 수학(20점), 기술가정(10점) = 50점 만점',
-            attendanceMax: 30,
-            attendanceRule: '미인정 결석 1일당 6점 감점 / 미인정 지각·조퇴·결과 1회당 2점 직접 감점',
-            volunteerMax: 15,
-            volunteerRule: '12시간 이상 만점(15점), 2시간 단위 1점 감점 (최저 9점)',
-            leadershipMax: 5,
-            leadershipRule: '학생회/학급임원 학기당 2.5점 (최대 5점)',
-        },
-        '특별': {
-            totalMax: 150,
-            semesters: '1-2(10%), 2-1(25%), 2-2(25%), 3-1(40%) 가중 반영 (예체능 제외)',
-            allSubjectMax: 50,
-            weightedSubjects: '영어(15점), 수학(15점), 기술가정(10점) = 40점 만점',
-            attendanceMax: 40,
-            attendanceRule: '미인정 결석 1일당 6점 감점 / 미인정 지각·조퇴·결과 1회당 2점 직접 감점',
-            volunteerMax: 15,
-            volunteerRule: '12시간 이상 만점(15점), 2시간 단위 1점 감점 (최저 9점)',
-            leadershipMax: 5,
-            leadershipRule: '학생회/학급임원 학기당 2.5점 (최대 5점)',
-        }
-    },
-    '울산상업고': {
-        '일반': { totalMax: 100, semesters: '1-2, 2-1, 2-2, 3-1 균등 25% (예체능 감점 반영)', allSubjectMax: 80, attendanceMax: 20, attendanceRule: '10/31 기준 결석 1일당 2점 감점', volunteerMax: 0 },
-        '취업희망자': { totalMax: 60, semesters: '1-2, 2-1, 2-2, 3-1 균등 25%', allSubjectMax: 20, attendanceMax: 30, attendanceRule: '9/30 기준 결석 1일당 3점 감점', volunteerMax: 10, volunteerRule: '12시간 10점, 10시간 9점, 8시간 8점 등' }
-    },
-    '울산여자상업고': {
-        '일반': { totalMax: 100, semesters: '1-2, 2-1, 2-2, 3-1 균등 25%', allSubjectMax: 80, attendanceMax: 20, attendanceRule: '10/31 기준 결석 1일당 2점 감점', volunteerMax: 0 },
-        '취업희망자': { totalMax: 80, semesters: '1-2, 2-1, 2-2, 3-1 균등 25%', allSubjectMax: 40, attendanceMax: 30, attendanceRule: '9/30 기준 결석 1일당 3점 감점', volunteerMax: 10, volunteerRule: '12시간 10점, 10시간 9점, 8시간 8점 등' }
-    },
-    '울산생활과학고': {
-        '일반': { totalMax: 100, semesters: '1-2(20%), 2-1(20%), 2-2(20%), 3-1(40%)', allSubjectMax: 80, attendanceMax: 20, attendanceRule: '10/31 기준 결석 1일당 2점 감점', volunteerMax: 0 },
-        '취업희망자': { totalMax: 50, semesters: '1-2(20%), 2-1(20%), 2-2(20%), 3-1(40%)', allSubjectMax: 25, attendanceMax: 20, attendanceRule: '9/30 기준 결석 1일당 2점 감점', volunteerMax: 5, volunteerRule: '12시간 5점, 10시간 4.5점 등' }
-    },
-    '울산공업고': {
-        '일반': { totalMax: 100, semesters: '1-2, 2-1, 2-2, 3-1 균등 25%', allSubjectMax: 80, attendanceMax: 20, attendanceRule: '10/31 기준 결석 1일당 2점 감점', volunteerMax: 0 },
-        '취업희망자': { totalMax: 50, semesters: '1-2, 2-1, 2-2, 3-1 균등 25%', allSubjectMax: 20, attendanceMax: 20, attendanceRule: '9/30 기준 결석 1일당 2점 감점', volunteerMax: 10, volunteerRule: '12시간 10점, 10시간 9점 등' }
-    },
-    '울산산업고': {
-        '일반': { totalMax: 100, semesters: '1-2, 2-1, 2-2, 3-1 균등 25%', allSubjectMax: 80, attendanceMax: 20, attendanceRule: '10/31 기준 결석 1일당 2점 감점', volunteerMax: 0 },
-        '취업희망자': { totalMax: 50, semesters: '1-2, 2-1, 2-2, 3-1 균등 25%', allSubjectMax: 20, attendanceMax: 20, attendanceRule: '9/30 기준 결석 1일당 2점 감점', volunteerMax: 10, volunteerRule: '12시간 10점, 10시간 9점 등' }
-    },
-    '울산미용예술고': {
-        '일반': { totalMax: 100, semesters: '1-2, 2-1, 2-2, 3-1 균등 25%', allSubjectMax: 80, attendanceMax: 20, attendanceRule: '10/31 기준 결석 1일당 2점 감점', volunteerMax: 0 },
-        '취업희망자': { totalMax: 50, semesters: '1-2, 2-1, 2-2, 3-1 균등 25%', allSubjectMax: 20, attendanceMax: 20, attendanceRule: '9/30 기준 결석 1일당 2점 감점', volunteerMax: 10, volunteerRule: '12시간 10점, 10시간 9점 등' }
-    },
-    '울산기술공업고': {
-        '일반': { totalMax: 100, semesters: '1-2, 2-1, 2-2, 3-1 균등 25%', allSubjectMax: 80, attendanceMax: 20, attendanceRule: '10/31 기준 결석 1일당 2점 감점', volunteerMax: 0 },
-        '취업희망자': { totalMax: 50, semesters: '1-2, 2-1, 2-2, 3-1 균등 25%', allSubjectMax: 20, attendanceMax: 20, attendanceRule: '9/30 기준 결석 1일당 2점 감점', volunteerMax: 10, volunteerRule: '12시간 10점, 10시간 9점 등' }
-    },
-    '울산애니원고': {
-        '일반': { totalMax: 100, semesters: '1-2, 2-1, 2-2, 3-1 균등 25%', allSubjectMax: 80, attendanceMax: 20, attendanceRule: '10/31 기준 결석 1일당 2점 감점', volunteerMax: 0 },
-        '취업희망자': { totalMax: 50, semesters: '1-2, 2-1, 2-2, 3-1 균등 25%', allSubjectMax: 20, attendanceMax: 20, attendanceRule: '9/30 기준 결석 1일당 2점 감점', volunteerMax: 10, volunteerRule: '12시간 10점, 10시간 9점 등' }
+// ===== 학교별 산출 규칙 안내 =====
+// 안내 문구는 백엔드 산출 규칙(internal/calc)에서 만들어 GetSchoolRuleList로 내려온다.
+// 화면에 규칙을 직접 적지 않으므로 요강이 바뀌어 규칙을 고치면 안내도 함께 바뀐다.
+let schoolRuleListPromise = null;
+
+function loadSchoolRuleList() {
+    if (!schoolRuleListPromise) {
+        schoolRuleListPromise = Promise.resolve(window.go?.main?.App?.GetSchoolRuleList?.())
+            .then(list => (Array.isArray(list) ? list : []))
+            .catch(() => {
+                schoolRuleListPromise = null; // 다음에 다시 시도
+                return [];
+            });
     }
-};
+    return schoolRuleListPromise;
+}
+
+function findRuleGuide(list, schoolName, trackName) {
+    const school = normalizeSchoolName(schoolName);
+    const track = normalizeTrack(trackName);
+    const item = list.find(r => normalizeSchoolName(r.schoolName) === school && normalizeTrack(r.trackName) === track);
+    if (!item) return {};
+    return {
+        totalMax: Number(item.totalMax) || 0,
+        semesters: item.guideSemesters || '',
+        weightedSubjects: item.guideWeightedSubjects || '',
+        attendanceRule: item.guideAttendance || '',
+        volunteerRule: item.guideVolunteer || '',
+        leadershipRule: item.guideLeadership || '',
+        note: item.guideNote || ''
+    };
+}
 
 // ===== 학교별 공식 환산점수 세부 산출 명세 모달 =====
-export function showSchoolScoreDetailModal(studentName, classNum, studentNum, r, fullStudent) {
+export async function showSchoolScoreDetailModal(studentName, classNum, studentNum, r, fullStudent) {
     document.getElementById('schoolScoreDetailModal')?.remove();
 
     const sName = r.schoolName || '';
     const tName = r.trackName || '';
-    const sNorm = normalizeSchoolName(sName);
-    const tNorm = normalizeTrack(tName);
-
-    const sRule = (SCHOOL_CALC_RULES[sName] || SCHOOL_CALC_RULES[sNorm] || {})[tNorm] || 
-                  (SCHOOL_CALC_RULES[sName] || SCHOOL_CALC_RULES[sNorm] || {})['일반'] || {};
-
-    let defaultMax = 100;
-    if (sNorm.includes('마이스터')) defaultMax = (tNorm.includes('특별') ? 280 : 300);
-    else if (sNorm.includes('에너지')) defaultMax = (tNorm.includes('특별') ? 200 : 230);
-    else if (sNorm.includes('현대공업')) defaultMax = (tNorm.includes('특별') ? 150 : 200);
-    const totalMax = r.totalMax || r.TotalMax || sRule.totalMax || defaultMax;
+    const sRule = findRuleGuide(await loadSchoolRuleList(), sName, tName);
+    // 그사이 다른 상세 창이 열렸으면 그 창을 닫고 이 창을 띄운다.
+    document.getElementById('schoolScoreDetailModal')?.remove();
+    const totalMax = r.totalMax || r.TotalMax || sRule.totalMax || 0;
 
     // 가중치 상세 카드 HTML
     let weightedDetailsHTML = '';
