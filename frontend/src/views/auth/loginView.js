@@ -17,6 +17,7 @@ import {
 import { renderAgreementModal } from './agreementView.js';
 import { navigate, notifyLoginSuccess } from '../../core/navigation.js';
 import { state } from '../../core/store.js';
+import { importDistributionWithPreservation } from './distributionImport.js';
 
 // ===== 모드 선택 화면 =====
 export function renderModeSelectScreen(schoolName) {
@@ -246,8 +247,9 @@ export async function renderLoginScreen(schoolName) {
             try {
                 button.disabled = true;
                 button.innerHTML = '<span class="spinner" style="width:12px;height:12px;border-width:1.5px;"></span> <span class="text-xs font-bold text-emerald-200">배포 자료 적용 중...</span>';
-                const username = await window.go.main.App.OpenDistributionPackage();
-                if (!username) return;
+                const imported = await importDistributionWithPreservation();
+                if (!imported) return;
+                const { username, summary } = imported;
                 const accountSelect = document.getElementById('loginUsername');
                 const exists = [...accountSelect.options].some(option => option.value === username);
                 if (!exists) {
@@ -256,7 +258,7 @@ export async function renderLoginScreen(schoolName) {
                 accountSelect.value = username;
                 await refreshSharedPasswordRequirement();
                 document.getElementById('loginPassword').focus();
-                await showModalAlert(`'${username}' 계정의 배포 자료를 성공적으로 적용했습니다.\n(기존에 작성하신 상담 일지와 희망학교 데이터도 안전하게 보존되었습니다)\n\n학년부장에게 받은 공용 데이터 암호와 초기 비밀번호로 처음 로그인하세요.`, '배포 자료 적용 완료', 'success');
+                await showModalAlert(`'${username}' 계정의 배포 자료를 적용했습니다.${summary ? '\n\n' + summary : ''}\n\n학년부장에게 받은 공용 데이터 암호와 초기 비밀번호로 처음 로그인하세요.`, '배포 자료 적용 완료', 'success');
             } catch (err) {
                 await showModalAlert('배포 자료 가져오기 실패: ' + err, '오류', 'error');
             } finally {

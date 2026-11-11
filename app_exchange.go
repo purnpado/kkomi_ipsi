@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"PHGC/internal/crypto"
+	"PHGC/internal/exchange"
 	"PHGC/internal/model"
 )
 
@@ -74,6 +75,25 @@ func (a *App) OpenDistributionPackage() (string, error) {
 		return "", err
 	}
 	return a.ImportDistributionPackage(path)
+}
+
+// OpenDistributionPackageWithPassword 배포자료를 선택해 가져오면서, 이 PC의 기존 학급 자료(상담 일지·원서·
+// 수기 비교과)를 새 DB로 옮긴다. 암호가 틀리면 파일 선택 창을 열기 전에 알려 준다.
+func (a *App) OpenDistributionPackageWithPassword(password string) (*exchange.DistributionImportResult, error) {
+	if exchange.DistributionImportNeedsPassword(a.db) {
+		if _, err := exchange.ResolveLocalDataKey(a.db.DataDir, password); err != nil {
+			return nil, err
+		}
+	}
+	path, err := a.openFileDialog(
+		"교사용 배포 자료 선택",
+		"꼬미입시 교사용 배포 자료 (*.kkomipkg · 이전 버전 파일 포함)",
+		"*.kkomipkg;*.phgcpkg",
+	)
+	if err != nil || path == "" {
+		return nil, err
+	}
+	return a.ImportDistributionPackageWithPassword(path, password)
 }
 
 // SaveFinalArchive creates a portable AES-256-GCM encrypted archive of every

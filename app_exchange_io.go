@@ -34,6 +34,16 @@ func (a *App) ImportDistributionPackage(inputPath string) (string, error) {
 	return exchange.ImportDistributionPackage(a.db, inputPath)
 }
 
+// DistributionImportNeedsPassword 이 PC에 기존 학급 자료가 있어, 배포자료를 다시 가져올 때 병합용 암호가 필요한지 알려 준다.
+func (a *App) DistributionImportNeedsPassword() bool {
+	return exchange.DistributionImportNeedsPassword(a.db)
+}
+
+// ImportDistributionPackageWithPassword 배포자료를 가져오면서 기존 학급 자료를 새 DB로 옮긴다.
+func (a *App) ImportDistributionPackageWithPassword(inputPath, password string) (*exchange.DistributionImportResult, error) {
+	return exchange.ImportDistributionPackageWithPassword(a.db, inputPath, password)
+}
+
 // ExportFinalArchive 암호화 최종 보관본 생성
 func (a *App) ExportFinalArchive(archivePassword, outputPath string) error {
 	if !a.isMaster() {

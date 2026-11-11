@@ -7,6 +7,7 @@ import { getAppRoot } from './authRoot.js';
 import { navigate } from '../../core/navigation.js';
 import { state } from '../../core/store.js';
 import { admissionLabel, admissionYearHint, currentAdmissionYear } from '../../core/admissionYear.js';
+import { importDistributionWithPreservation } from './distributionImport.js';
 
 // 새 프로그램 폴더의 첫 화면. 새 학교 설정과 학년부장 배포 자료 적용을
 // 명확히 분리해, data 폴더가 없는 담임 PC에서도 배포 자료를 가져올 수 있다.
@@ -52,9 +53,10 @@ export function renderFirstRunScreen() {
         try {
             button.disabled = true;
             button.textContent = '배포자료 적용 중...';
-            const username = await window.go.main.App.OpenDistributionPackage();
-            if (!username) return;
-            await showModalAlert(`'${username}' 계정의 배포자료를 적용했습니다.\n(기존 학급의 상담 일지와 희망학교 데이터도 안전하게 보존되었습니다)\n\n공용 데이터 암호와 초기 비밀번호로 로그인하세요.`, '배포자료 적용 완료', 'success');
+            const imported = await importDistributionWithPreservation();
+            if (!imported) return;
+            const { username, summary } = imported;
+            await showModalAlert(`'${username}' 계정의 배포자료를 적용했습니다.${summary ? '\n\n' + summary : ''}\n\n공용 데이터 암호와 초기 비밀번호로 로그인하세요.`, '배포자료 적용 완료', 'success');
             window.location.reload();
         } catch (err) {
             await showModalAlert('배포자료 가져오기 실패: ' + err, '오류', 'error');

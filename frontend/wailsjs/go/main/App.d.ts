@@ -92,6 +92,12 @@ export function GetStudentTranscript(arg1:number,arg2:string,arg3:string):Promis
 
 export function GetUsers():Promise<Array<main.User>>;
 
+export function DistributionImportNeedsPassword():Promise<boolean>;
+
+export function ImportDistributionPackageWithPassword(arg1:string,arg2:string):Promise<any>;
+
+export function OpenDistributionPackageWithPassword(arg1:string):Promise<any>;
+
 export function ImportDistributionPackage(arg1:string):Promise<string>;
 
 export function ImportFinalArchive(arg1:string,arg2:string):Promise<string>;

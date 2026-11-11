@@ -176,66 +176,108 @@ func ExportDistributionPackage(dm *database.DBManager, dataKey []byte, username,
 	return writeDistributionZip(outputPath, tmpDir, files)
 }
 
+// ImportDistributionPackage 배포자료를 가져온다. 기존 학급 DB는 백업만 하고 새 DB로 옮기지 않는다
+// (암호를 모르는 경우의 선택지). 기존 자료를 옮기려면 ImportDistributionPackageWithPassword 를 쓴다.
 func ImportDistributionPackage(dm *database.DBManager, inputPath string) (string, error) {
+	result, err := importDistributionPackage(dm, inputPath, "", false)
+	if err != nil {
+		return "", err
+	}
+	return result.Username, nil
+}
+
+// ImportDistributionPackageWithPassword 배포자료를 가져오면서 기존 학급 DB의 상담 일지·원서·수기 비교과를
+// 새 DB로 옮긴다. 기존 학급 DB가 있으면 공용 데이터 암호 또는 본인 비밀번호가 필요하다.
+func ImportDistributionPackageWithPassword(dm *database.DBManager, inputPath, password string) (*DistributionImportResult, error) {
+	return importDistributionPackage(dm, inputPath, password, true)
+}
+
+func importDistributionPackage(dm *database.DBManager, inputPath, password string, merge bool) (*DistributionImportResult, error) {
 	reader, err := zip.OpenReader(inputPath)
 	if err != nil {
-		return "", fmt.Errorf("배포 자료를 열 수 없습니다: %w", err)
+		return nil, fmt.Errorf("배포 자료를 열 수 없습니다: %w", err)
 	}
 	defer reader.Close()
 	entries := map[string]*zip.File{}
 	for _, file := range reader.File {
 		if filepath.Base(file.Name) != file.Name || strings.Contains(file.Name, "..") {
-			return "", fmt.Errorf("허용되지 않은 배포 파일 경로입니다")
+			return nil, fmt.Errorf("허용되지 않은 배포 파일 경로입니다")
 		}
 		entries[file.Name] = file
 	}
 	pkgFile := entries["package.json"]
 	if pkgFile == nil {
-		return "", fmt.Errorf("배포 자료 정보가 없습니다")
+		return nil, fmt.Errorf("배포 자료 정보가 없습니다")
 	}
 	pkgBytes, err := readZipEntry(pkgFile)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	var manifest DistributionPackageManifest
 	if err := json.Unmarshal(pkgBytes, &manifest); err != nil {
-		return "", fmt.Errorf("배포 자료 정보가 올바르지 않습니다")
+		return nil, fmt.Errorf("배포 자료 정보가 올바르지 않습니다")
 	}
 	if (manifest.Format != "KKOMI-DEPLOYMENT-1" && manifest.Format != "PHGC-DEPLOYMENT-1") || manifest.Username == "" || (manifest.Role != "homeroom" && manifest.Role != "viewer") {
-		return "", fmt.Errorf("지원하지 않는 배포 자료입니다")
+		return nil, fmt.Errorf("지원하지 않는 배포 자료입니다")
 	}
 
 	// 안전장치: 현재 프로그램이 학년부장(master) 원본 관리자 데이터인 경우 실수로 덮어쓰는 것 방지
 	if isMasterDataFolder(dm) {
-		return "", fmt.Errorf("현재 프로그램은 학년부장 원본 데이터가 보관된 폴더입니다. 학년부장 자료는 담임 배포 패키지로 덮어쓸 수 없습니다. 담임 교사용 폴더에서 실행해주세요")
+		return nil, fmt.Errorf("현재 프로그램은 학년부장 원본 데이터가 보관된 폴더입니다. 학년부장 자료는 담임 배포 패키지로 덮어쓸 수 없습니다. 담임 교사용 폴더에서 실행해주세요")
 	}
 
-	// 1. 기존 학급 데이터(상담 일지, 진학 희망학교, 수기 출결/봉사 등) 사전 보존 및 백업
-	preservedDataMap := make(map[string]preservedClassData)
-	existingClassDBs, _ := filepath.Glob(filepath.Join(dm.DataDir, "class_*.db"))
-	for _, dbPath := range existingClassDBs {
-		baseName := filepath.Base(dbPath)
-		pData, pErr := extractPreservedClassData(dm, dbPath)
-		if pErr == nil && (len(pData.Apps) > 0 || len(pData.Counsels) > 0 || len(pData.Overrides) > 0) {
-			preservedDataMap[baseName] = pData
+	// 새 배포자료 내용을 먼저 모두 읽어 둔다(파일 누락 시 아무것도 지우지 않고 중단).
+	packageFiles := map[string][]byte{}
+	for _, name := range manifest.Files {
+		file := entries[name]
+		if file == nil {
+			return nil, fmt.Errorf("배포 자료에 %s 파일이 없습니다", name)
 		}
+		data, err := readZipEntry(file)
+		if err != nil {
+			return nil, err
+		}
+		packageFiles[name] = data
+	}
+
+	tmpDir, err := os.MkdirTemp("", "kkomi-import-*")
+	if err != nil {
+		return nil, err
+	}
+	defer os.RemoveAll(tmpDir)
+	result := &DistributionImportResult{Username: manifest.Username}
+
+	// 1. 기존 학급 자료(상담 일지, 지원현황, 수기 출결/봉사/가산점) 추출 — 암호가 맞을 때만, 삭제 전에 모두 확인
+	var key []byte
+	var preserved map[int]preservedClassData
+	if merge && DistributionImportNeedsPassword(dm) {
+		if key, err = ResolveLocalDataKey(dm.DataDir, password); err != nil {
+			return nil, err
+		}
+		if err := verifyPackageKey(packageFiles, tmpDir, key); err != nil {
+			return nil, err
+		}
+		if preserved, err = collectLocalClassData(dm, tmpDir, key); err != nil {
+			return nil, err
+		}
+		result.MergedWithLocalData = true
 	}
 
 	// 만약의 사태를 대비해 지우기 전의 DB 파일(평문·암호화 모두)을 backup_before_pkg_import/<시각>/ 에 복사한다.
-	// 로그인 전(잠긴 상태)에는 암호화 DB만 있으므로, 이 복사본이 기존 상담·원서 기록을 되살릴 유일한 원본이 된다.
 	if existing, _ := filepath.Glob(filepath.Join(dm.DataDir, "*.db*")); len(existing) > 0 {
 		backupDir := filepath.Join(dm.DataDir, "backup_before_pkg_import", time.Now().Format("20060102-150405"))
 		if err := os.MkdirAll(backupDir, 0700); err != nil {
-			return "", fmt.Errorf("기존 자료 백업 폴더를 만들 수 없어 가져오기를 중단했습니다: %w", err)
+			return nil, fmt.Errorf("기존 자료 백업 폴더를 만들 수 없어 가져오기를 중단했습니다: %w", err)
 		}
 		for _, f := range existing {
 			if err := copyPackageFile(f, filepath.Join(backupDir, filepath.Base(f))); err != nil {
-				return "", fmt.Errorf("기존 자료 백업에 실패해 가져오기를 중단했습니다: %w", err)
+				return nil, fmt.Errorf("기존 자료 백업에 실패해 가져오기를 중단했습니다: %w", err)
 			}
 		}
+		result.BackupFolder = backupDir
 	}
 
-	// 기존 평문 DB 파일들 및 이전 캐시 정리 (새 배포 패키지로 갱신 준비)
+	// 기존 DB 파일들 및 이전 캐시 정리 (새 배포 패키지로 갱신 준비)
 	cleanFiles, _ := filepath.Glob(filepath.Join(dm.DataDir, "*.db*"))
 	for _, f := range cleanFiles {
 		_ = os.Remove(f)
@@ -247,33 +289,28 @@ func ImportDistributionPackage(dm *database.DBManager, inputPath string) (string
 		}
 	}
 
-	// 2. 새 배포 패키지 파일 추출 및 저장
+	// 2. 새 배포 패키지 파일 저장
 	for _, name := range manifest.Files {
-		file := entries[name]
-		if file == nil {
-			return "", fmt.Errorf("배포 자료에 %s 파일이 없습니다", name)
-		}
-		data, err := readZipEntry(file)
-		if err != nil {
-			return "", err
-		}
-		if err := crypto.WritePrivateFileAtomically(filepath.Join(dm.DataDir, name), data); err != nil {
-			return "", err
+		if err := crypto.WritePrivateFileAtomically(filepath.Join(dm.DataDir, name), packageFiles[name]); err != nil {
+			return nil, err
 		}
 	}
 
-	// 3. 기존에 보존해 둔 담임의 상담 일지 및 진학 희망학교 데이터가 있다면 새 DB에 안전하게 자동 병합 복원
-	for baseName, pData := range preservedDataMap {
-		newDBPath := filepath.Join(dm.DataDir, baseName)
-		if _, err := os.Stat(newDBPath); err == nil {
-			_ = restorePreservedClassData(dm, newDBPath, pData)
+	// 새 배포자료의 계정 정보(학년부장이 정한 초기 비밀번호)로 다시 등록하도록, 대상 계정의 기존 개인 잠금
+	// 파일을 백업 폴더로 옮긴다. 남겨 두면 담임이 바꾼 예전 비밀번호와 새 계정 정보가 어긋나 로그인할 수 없다.
+	retireUserEnvelope(dm.DataDir, manifest.Username, result)
+
+	// 3. 보존해 둔 기존 학급 자료를 새 DB에 병합하고 다시 암호화
+	if key != nil && len(preserved) > 0 {
+		if err := mergeLocalDataIntoPackage(dm, tmpDir, key, preserved, result); err != nil {
+			return nil, fmt.Errorf("%w (기존 자료 원본은 %s 에 보관되어 있습니다)", err, result.BackupFolder)
 		}
 	}
 
 	// 4. 누락된 원서 점수 스냅샷 자동 역산 보완 (Self-healing)
 	_, _ = dm.BackfillAllApplicationsScoreDetails()
 
-	return manifest.Username, nil
+	return result, nil
 }
 
 // isMasterDataFolder 는 이 data 폴더가 학년부장 원본 자료인지 판별한다.

@@ -182,6 +182,18 @@ export function GetUsers() {
   return window['go']['main']['App']['GetUsers']();
 }
 
+export function DistributionImportNeedsPassword() {
+  return window['go']['main']['App']['DistributionImportNeedsPassword']();
+}
+
+export function ImportDistributionPackageWithPassword(arg1, arg2) {
+  return window['go']['main']['App']['ImportDistributionPackageWithPassword'](arg1, arg2);
+}
+
+export function OpenDistributionPackageWithPassword(arg1) {
+  return window['go']['main']['App']['OpenDistributionPackageWithPassword'](arg1);
+}
+
 export function ImportDistributionPackage(arg1) {
   return window['go']['main']['App']['ImportDistributionPackage'](arg1);
 }

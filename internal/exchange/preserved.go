@@ -1,6 +1,8 @@
 package exchange
 
 import (
+	"fmt"
+
 	"PHGC/internal/database"
 )
 
@@ -17,6 +19,7 @@ type preservedAppRow struct {
 	PreferencesJSON    string
 	AssignedDepartment string
 	AssignedSchool     string
+	ScoreDetailsJSON   string
 	UpdatedAt          string
 }
 
@@ -56,12 +59,12 @@ func extractPreservedClassData(dm *database.DBManager, dbPath string) (preserved
 	defer db.Close()
 
 	// 1. Applications 추출
-	appRows, err := db.Query(`SELECT student_num, student_name, admission_year, category, school_name, track, status, score, score_basis, preferences_json, assigned_department, COALESCE(assigned_school, ''), updated_at FROM student_applications`)
+	appRows, err := db.Query(`SELECT student_num, student_name, admission_year, category, school_name, track, status, score, score_basis, preferences_json, assigned_department, COALESCE(assigned_school, ''), COALESCE(score_details_json, ''), updated_at FROM student_applications`)
 	if err == nil {
 		defer appRows.Close()
 		for appRows.Next() {
 			var a preservedAppRow
-			if err := appRows.Scan(&a.StudentNum, &a.StudentName, &a.AdmissionYear, &a.Category, &a.SchoolName, &a.Track, &a.Status, &a.Score, &a.ScoreBasis, &a.PreferencesJSON, &a.AssignedDepartment, &a.AssignedSchool, &a.UpdatedAt); err == nil {
+			if err := appRows.Scan(&a.StudentNum, &a.StudentName, &a.AdmissionYear, &a.Category, &a.SchoolName, &a.Track, &a.Status, &a.Score, &a.ScoreBasis, &a.PreferencesJSON, &a.AssignedDepartment, &a.AssignedSchool, &a.ScoreDetailsJSON, &a.UpdatedAt); err == nil {
 				result.Apps = append(result.Apps, a)
 			}
 		}
@@ -100,11 +103,17 @@ func restorePreservedClassData(dm *database.DBManager, dbPath string, data prese
 		return err
 	}
 	defer db.Close()
+	var firstErr error
+	keep := func(err error) {
+		if err != nil && firstErr == nil {
+			firstErr = err
+		}
+	}
 
-	// 1. Applications 복원 (INSERT OR REPLACE)
+	// 1. Applications 복원 (같은 학생·학년도·전형이면 담임 PC의 최신 입력으로 갱신)
 	for _, a := range data.Apps {
-		_, _ = db.Exec(`INSERT INTO student_applications (student_num, student_name, admission_year, category, school_name, track, status, score, score_basis, preferences_json, assigned_department, assigned_school, updated_at)
-			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+		_, err := db.Exec(`INSERT INTO student_applications (student_num, student_name, admission_year, category, school_name, track, status, score, score_basis, preferences_json, assigned_department, assigned_school, score_details_json, updated_at)
+			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 			ON CONFLICT(student_num, student_name, admission_year, category, school_name, track) DO UPDATE SET
 				status = excluded.status,
 				score = excluded.score,
@@ -112,27 +121,34 @@ func restorePreservedClassData(dm *database.DBManager, dbPath string, data prese
 				preferences_json = excluded.preferences_json,
 				assigned_department = excluded.assigned_department,
 				assigned_school = excluded.assigned_school,
+				score_details_json = CASE WHEN excluded.score_details_json <> '' THEN excluded.score_details_json ELSE student_applications.score_details_json END,
 				updated_at = excluded.updated_at`,
-			a.StudentNum, a.StudentName, a.AdmissionYear, a.Category, a.SchoolName, a.Track, a.Status, a.Score, a.ScoreBasis, a.PreferencesJSON, a.AssignedDepartment, a.AssignedSchool, a.UpdatedAt)
+			a.StudentNum, a.StudentName, a.AdmissionYear, a.Category, a.SchoolName, a.Track, a.Status, a.Score, a.ScoreBasis, a.PreferencesJSON, a.AssignedDepartment, a.AssignedSchool, a.ScoreDetailsJSON, a.UpdatedAt)
+		keep(err)
 	}
 
 	// 2. Counseling records 복원 (중복이 없는 건만 추가)
 	for _, c := range data.Counsels {
 		var exists int
-		_ = db.QueryRow(`SELECT COUNT(*) FROM student_counseling_records WHERE student_num = ? AND student_name = ? AND counsel_date = ? AND author_username = ? AND content = ?`,
-			c.StudentNum, c.StudentName, c.CounselDate, c.AuthorUsername, c.Content).Scan(&exists)
+		keep(db.QueryRow(`SELECT COUNT(*) FROM student_counseling_records WHERE student_num = ? AND student_name = ? AND counsel_date = ? AND author_username = ? AND content = ?`,
+			c.StudentNum, c.StudentName, c.CounselDate, c.AuthorUsername, c.Content).Scan(&exists))
 		if exists == 0 {
-			_, _ = db.Exec(`INSERT INTO student_counseling_records (student_num, student_name, class_num, counsel_date, target_school, content, author_username, author_name, created_at, updated_at)
+			_, err := db.Exec(`INSERT INTO student_counseling_records (student_num, student_name, class_num, counsel_date, target_school, content, author_username, author_name, created_at, updated_at)
 				VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
 				c.StudentNum, c.StudentName, c.ClassNum, c.CounselDate, c.TargetSchool, c.Content, c.AuthorUsername, c.AuthorName, c.CreatedAt, c.UpdatedAt)
+			keep(err)
 		}
 	}
 
-	// 3. Student overrides 복원
+	// 3. Student overrides 복원 (담임이 직접 입력한 출결·봉사·가산점)
 	for _, so := range data.Overrides {
-		_, _ = db.Exec(`UPDATE students SET attendance_json = ?, volunteer_json = ?, extra_json = ? WHERE student_num = ? AND name = ?`,
+		_, err := db.Exec(`UPDATE students SET attendance_json = ?, volunteer_json = ?, extra_json = ? WHERE student_num = ? AND name = ?`,
 			so.AttendanceJSON, so.VolunteerJSON, so.ExtraJSON, so.StudentNum, so.Name)
+		keep(err)
 	}
-
-	return nil
+	if firstErr != nil {
+		return fmt.Errorf("기존 학급 자료 병합 중 오류: %w", firstErr)
+	}
+	_, err = db.Exec("PRAGMA wal_checkpoint(TRUNCATE); PRAGMA journal_mode=DELETE")
+	return err
 }

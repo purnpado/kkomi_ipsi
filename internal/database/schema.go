@@ -136,7 +136,12 @@ func (dm *DBManager) InitConfigDB() error {
 
 // InitClassDB 학급 DB 초기화 (테이블 생성)
 func (dm *DBManager) InitClassDB(classNum int) error {
-	dbPath := filepath.Join(dm.DataDir, fmt.Sprintf("class_%d.db", classNum))
+	return dm.EnsureClassDBSchema(filepath.Join(dm.DataDir, fmt.Sprintf("class_%d.db", classNum)))
+}
+
+// EnsureClassDBSchema 는 지정한 경로의 학급 DB에 빠진 표와 열을 추가한다(기존 자료는 보존).
+// 배포자료 재가져오기처럼 data 폴더 밖 임시 사본을 다룰 때도 쓴다.
+func (dm *DBManager) EnsureClassDBSchema(dbPath string) error {
 	db, err := dm.OpenDB(dbPath)
 	if err != nil {
 		return err
