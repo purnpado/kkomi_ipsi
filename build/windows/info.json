@@ -1,15 +1,17 @@
 {
 	"fixed": {
-		"file_version": "{{.Info.ProductVersion}}"
+		"file_version": "1.6.2",
+		"product_version": "1.6.2"
 	},
 	"info": {
-		"0000": {
-			"ProductVersion": "{{.Info.ProductVersion}}",
-			"CompanyName": "{{.Info.CompanyName}}",
-			"FileDescription": "{{.Info.ProductName}}",
-			"LegalCopyright": "{{.Info.Copyright}}",
-			"ProductName": "{{.Info.ProductName}}",
-			"Comments": "{{.Info.Comments}}"
+		"0409": {
+			"FileVersion": "1.6.2",
+			"ProductVersion": "1.6.2",
+			"CompanyName": "푸른파도소리",
+			"FileDescription": "울산 관내 중학교 3학년 고입 진학지도 오프라인 데스크톱 프로그램",
+			"LegalCopyright": "(c) 2026, 푸른파도소리",
+			"ProductName": "꼬미입시",
+			"Comments": "꼬미입시(PHGC) 오프라인 진학상담"
 		}
 	}
 }

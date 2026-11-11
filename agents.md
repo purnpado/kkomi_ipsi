@@ -27,7 +27,7 @@ Gitea 원본을 복제한 뒤 다음 개발 도구를 설치해야 합니다.
 
 - Go
 - Node.js 및 npm (현재 프론트엔드는 Vite + 일반 JavaScript)
-- Wails CLI
+- Wails v3 CLI(`go install github.com/wailsapp/wails/v3/cmd/wails3@v3.1.0`)
 - Microsoft Edge WebView2 Runtime
 
 설치 후 프로젝트 루트에서 `go test ./...`를 실행하고, 프론트엔드 작업 시 `frontend` 폴더에서 `npm install`과 `npm run build`를 실행합니다. 실제 학생 자료와 `data/` 폴더는 원본 저장소에서 내려받지 않습니다.
@@ -55,8 +55,9 @@ Gitea 원본을 복제한 뒤 다음 개발 도구를 설치해야 합니다.
 - `internal/database/`, `internal/crypto/`: 로컬 DB 저장소 계층(`*_repo.go`, `manager.go`, `schema.go`)과 AES-GCM 저장 계층
 - `internal/exchange/`: 배포자료·취합자료·최종 보관본·비밀번호 재설정·관내 공유 파일 입출력
 - `internal/parser/`, `internal/model/`: 나이스 엑셀 파서와 공용 데이터 구조
+- Wails v3 빌드: `Taskfile.yml`, `build/Taskfile.yml`, `build/{windows,darwin}/Taskfile.yml`, 제품 정보 `build/config.yml`. 프론트 바인딩은 `wails3 generate bindings`가 만드는 `frontend/bindings/`(커밋 대상, `wails3 build` 때 자동 갱신)이며 `core/wailsBridge.js`가 이를 `window.go.main.App.*`로 연결합니다.
 - `app.go`, `app_*.go`: Wails 바인딩 시그니처를 유지하는 얇은 위임 계층(권한 확인·파일 대화상자). 공개 메서드명과 JSON 필드는 바꾸지 않습니다.
-- 모든 `.go`·`.js`·`.css` 파일은 **500줄 이하**를 유지합니다. 줄바꿈 제거 같은 편법 없이 책임 단위로 파일을 나눕니다.
+- 모든 `.go`·`.js`·`.css` 파일은 **500줄 이하**를 유지합니다. 줄바꿈 제거 같은 편법 없이 책임 단위로 파일을 나눕니다. 단, `wails3 generate bindings`가 자동 생성하는 `frontend/bindings/` 아래 파일(직접 수정 금지)은 예외입니다.
 - `frontend/src/main.js`: 앱 부트스트랩과 최상위 이벤트 라우팅(화면·모달 라우팅 표)만 담당
 - `frontend/src/core/admissionYear.js`: 고입 학년도 계산·표시의 단일 기준. 저장값은 고교 입학 학년도(예: 2027) 하나이고, 화면에는 "2027 고입 (현 중3 · 2026학년도)" / "2026 고입 결과"처럼 표시합니다. 학년도는 3월에 시작하므로 1~2월도 직전 학년도로 계산합니다. 연도 표기·기본값은 반드시 이 함수를 씁니다.
 - `frontend/src/core/`: `eventBus.js`(이벤트 버스), `navigation.js`(navigate·openModal·변경 알림 발행 함수), `store.js`(중앙 상태 저장소), `wailsBridge.js`(Wails v3에서 `window.go.main.App.*` 호환), `dialogs.js`, `screenLock.js`, `updater.js`
@@ -76,17 +77,17 @@ Gitea 원본을 복제한 뒤 다음 개발 도구를 설치해야 합니다.
 4. `server-data/highschools.json`의 학교·학과 변경을 반영합니다. 내장 기본 목록(`internal/sync/manager.go`)도 함께 확인합니다.
 5. 공개 커트라인은 공식·교육청 자료와 학교 자료를 구분해 갱신합니다. 평균은 실제 확정 결과가 쌓일 때 자동 계산합니다.
 6. `frontend/src/views/`·`frontend/src/modals/`의 입학년도·마감일·전형 표시를 확인합니다. 3학년 1학기 예상값과 마감 후 확정값을 혼동하지 않습니다.
-7. `go test ./...`, `npm run build`, `wails build -s -trimpath -ldflags "-s -w"`를 실행합니다.
+7. `go test ./...`, `npm run build`, `wails3 build`(윈도우: `bin/PHGC.exe`)를 실행합니다.
 
 ## 명칭·실행 파일 변경 시
 
 올해 배포본은 기존 호환성을 위해 실행 파일·릴리즈 에셋을 `PHGC.exe`로 유지합니다. 내년도 입시요강을 반영하는 정기 갱신 때 화면 공식 명칭과 실행 파일을 `꼬미입시`/`꼬미입시.exe`로 전환할지 최종 확정합니다. 전환 전까지는 현재 기술 식별자 `PHGC`를 함부로 바꾸지 않습니다.
 
-> 현재 `wails.json`의 출력 설정은 `꼬미입시`이고 `publish.ps1`은 `PHGC.exe`를 기대합니다. 정식 릴리즈 전에는 반드시 둘을 같은 정책으로 맞추고 Wails 빌드·릴리즈 스크립트를 다시 검증합니다.
+> Wails v3 표준 구조로 전환하면서 실행 파일 이름은 `Taskfile.yml`의 `APP_NAME: "PHGC"`로 통일했습니다(`wails3 build` → `bin/PHGC.exe`, `publish.ps1`도 같은 경로 사용). 제품명 "꼬미입시"는 `build/config.yml`의 `info.productName`으로 exe 속성·맥 Info.plist에 들어갑니다. `wails.json`은 v2 설정이라 제거했습니다.
 
 실제 파일명을 `꼬미입시.exe`로 바꾸기로 확정하면 다음을 한 번에 검토해야 합니다.
 
-- `wails.json`의 `outputfilename`
+- `Taskfile.yml`의 `APP_NAME`(그리고 `wails3 task common:update:build-assets`로 빌드 자산 재생성)
 - `publish.ps1`의 빌드·복사·GitHub/Gitea 에셋명
 - `server-data/version.json`과 `internal/sync/manager.go` 자동 업데이트 주소
 - README·인수인계 문서·학교 배포 안내

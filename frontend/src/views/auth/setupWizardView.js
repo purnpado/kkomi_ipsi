@@ -1,4 +1,4 @@
-import { SyncWithServer } from '../../../wailsjs/go/main/App';
+import { SyncWithServer } from '../../core/backend.js';
 import middleSchools from '../../assets/middleschools.json';
 import logoUniversal from '../../assets/images/logo-universal.png';
 import { showModalAlert, showModalPrompt } from '../../core/dialogs.js';

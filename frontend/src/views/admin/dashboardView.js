@@ -1,4 +1,4 @@
-import { GetSchoolConfig, GetClassStatus } from '../../../wailsjs/go/main/App';
+import { GetSchoolConfig, GetClassStatus } from '../../core/backend.js';
 import logoUniversal from '../../assets/images/logo-universal.png';
 import { updateAppWindowTitle } from '../../core/utils.js';
 import { ScreenLockManager } from '../../core/screenLock.js';

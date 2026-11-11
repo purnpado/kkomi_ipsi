@@ -1,4 +1,4 @@
-import { GetSchoolConfig } from '../../../../wailsjs/go/main/App';
+import { GetSchoolConfig } from '../../../core/backend.js';
 import { normalizeSchoolName } from '../../../core/utils.js';
 import { app } from '../../../core/dom.js';
 import { buildCutoffRowsHTML } from './cutoffRows.js';

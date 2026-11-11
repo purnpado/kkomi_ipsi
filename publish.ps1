@@ -13,7 +13,7 @@ param (
 - 고교 커트라인 관리 관내 타교 진학자료(.phgcdata) 다중 파일 동시 선택 및 일괄 병합 보강
 "@.Trim(),
     [string]$Version = "1.6.1",
-    [switch]$SkipBindings,
+    [switch]$SkipBindings,       # (Wails v3에서는 사용하지 않음: wails3 build 가 바인딩을 항상 다시 생성)
     [switch]$SkipGitHubRelease,  # GitHub 릴리즈 바이너리 업로드를 건너뛸 때 사용
     [switch]$UploadGiteaRelease  # Gitea에도 바이너리 릴리즈 업로드할 때 사용
 )
@@ -61,33 +61,50 @@ if (Test-Path $syncFile) {
     Set-Content -Path $syncFile -Value $syncContent -Encoding UTF8
 }
 
+# Wails v3 제품 정보(build/config.yml)의 버전도 맞춘다. exe 속성(파일 버전)과 맥 Info.plist 에 반영된다.
+$buildConfig = "build/config.yml"
+if (Test-Path $buildConfig) {
+    $cfgText = [System.IO.File]::ReadAllText((Resolve-Path $buildConfig), [System.Text.Encoding]::UTF8)
+    $cfgText = [regex]::Replace($cfgText, '(?m)^(  version: )"[^"]*"', ('$1"' + $newVer + '"'))
+    [System.IO.File]::WriteAllText((Resolve-Path $buildConfig), $cfgText, (New-Object System.Text.UTF8Encoding($false)))
+}
+
 # ===== 2. 실행 중인 PHGC 프로세스 종료 (버전명 실행파일 포함) =====
 Get-Process | Where-Object { $_.ProcessName -like "PHGC*" } | Stop-Process -Force -ErrorAction SilentlyContinue
 Start-Sleep -Milliseconds 500
 
-# ===== 3. Wails 빌드 =====
-Write-Host ">>> Wails 빌드 실행 중..." -ForegroundColor Cyan
+# ===== 3. Wails v3 빌드 =====
+Write-Host ">>> Wails v3 빌드 실행 중..." -ForegroundColor Cyan
 $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
 # 일부 PC에서는 사용자 Go bin 경로가 환경 변수에 즉시 반영되지 않는다.
-# 현재 사용자 홈의 기본 Go 설치 경로를 보완해 Wails CLI를 안정적으로 찾는다.
-$goBin = Join-Path $env:USERPROFILE "go\\bin"
-if (Test-Path (Join-Path $goBin "wails.exe")) {
+# 현재 사용자 홈의 기본 Go 설치 경로를 보완해 Wails v3 CLI(wails3)를 안정적으로 찾는다.
+$goBin = Join-Path $env:USERPROFILE "go\bin"
+if (Test-Path (Join-Path $goBin "wails3.exe")) {
     $env:Path = "$goBin;$env:Path"
 }
-# 개발 PC의 사용자명·절대 경로가 EXE 디버그 정보에 남지 않도록 경로와
-# 디버그 심볼을 제거한 배포용 바이너리를 생성한다.
-$wailsArgs = @("build", "-trimpath", "-ldflags", "-s -w")
-if ($SkipBindings) {
-    $wailsArgs += "-skipbindings"
+if (-not (Get-Command wails3 -ErrorAction SilentlyContinue)) {
+    Write-Host ">>> wails3 CLI를 찾을 수 없습니다. 설치: go install github.com/wailsapp/wails/v3/cmd/wails3@v3.1.0" -ForegroundColor Red
+    exit 1
 }
-& wails @wailsArgs
+if ($SkipBindings) {
+    Write-Host ">>> [안내] -SkipBindings 는 Wails v3에서 사용하지 않습니다(바인딩은 빌드 때 항상 다시 생성)." -ForegroundColor Yellow
+}
 
+# 버전이 바뀐 제품 정보로 exe 파일 정보·매니페스트를 다시 생성한 뒤 빌드한다.
+& wails3 task common:update:build-assets
+if ($LASTEXITCODE -ne 0) {
+    Write-Host ">>> 빌드 자산 갱신 실패!" -ForegroundColor Red
+    exit 1
+}
+# Taskfile.yml 의 windows:build 작업: 프론트엔드 빌드 → 바인딩 생성 → 아이콘·리소스(syso) → go build
+# (-tags production -trimpath -ldflags "-w -s -H windowsgui": 개발 PC 경로·디버그 정보 제거)
+& wails3 build
 if ($LASTEXITCODE -ne 0) {
     Write-Host ">>> Wails 빌드 실패!" -ForegroundColor Red
     exit 1
 }
 
-$exePath = "build\bin\PHGC.exe"
+$exePath = "bin\PHGC.exe"
 if (-not (Test-Path $exePath)) {
     Write-Host ">>> 생성된 exe 파일을 찾을 수 없습니다: $exePath" -ForegroundColor Red
     exit 1
@@ -96,13 +113,13 @@ Write-Host ">>> 빌드 성공: $exePath" -ForegroundColor Green
 
 # 버전 명시 바이너리 파일명 생성 (예: PHGC_v1.2.2.exe)
 $versionedExeName = "PHGC_v$newVer.exe"
-$versionedExePath = "build\bin\$versionedExeName"
+$versionedExePath = "bin\$versionedExeName"
 Copy-Item $exePath $versionedExePath -Force
 Write-Host ">>> 실행 파일 확인: $exePath" -ForegroundColor Green
 
 # 압축 배포 파일 생성 (phgc_v$newVer.zip)
 $zipName = "phgc_v$newVer.zip"
-$zipPath = "build\bin\$zipName"
+$zipPath = "bin\$zipName"
 
 if (Test-Path $zipPath) { Remove-Item $zipPath -Force }
 

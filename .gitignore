@@ -1,5 +1,10 @@
 # 빌드 산출물
 bin/
+.task/
+.wails/
+# Wails v3 build-assets 갱신 시 생성되지만 쓰지 않는 플랫폼(모바일·리눅스)
+build/ios/
+build/linux/
 build/bin/
 *.syso
 

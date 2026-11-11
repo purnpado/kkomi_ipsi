@@ -82,7 +82,7 @@
 
 ### 다른 컴퓨터에서 이어서 개발하기
 
-Gitea 원본 저장소를 복제하고 Go, Node.js/npm, Wails CLI, Microsoft Edge WebView2 Runtime을 설치합니다. 프론트엔드는 기능별 ES Modules(`core/`, `modals/`, `views/`, `print/`)로 분리되어 있으며, 모듈 간 결합도를 최소화하기 위해 **이벤트 기반 아키텍처(Event-Driven Pub/Sub)**를 지향합니다.
+Gitea 원본 저장소를 복제하고 Go, Node.js/npm, Wails v3 CLI(`go install github.com/wailsapp/wails/v3/cmd/wails3@v3.1.0`), Microsoft Edge WebView2 Runtime을 설치합니다. 프론트엔드는 기능별 ES Modules(`core/`, `modals/`, `views/`, `print/`)로 분리되어 있으며, 모듈 간 결합도를 최소화하기 위해 **이벤트 기반 아키텍처(Event-Driven Pub/Sub)**를 지향합니다.
 
 ```powershell
 git clone https://gitea.gguk.link/purnpadosori/PHGC-OFFLINE.git
@@ -98,20 +98,24 @@ Set-Location ..
 
 ```powershell
 # 개발 실행
-wails dev
+wails3 dev
 
-# 배포용 실행 파일 빌드
-wails build -trimpath -ldflags "-s -w"
+# 배포용 실행 파일 빌드 (현재 OS 기준, 윈도우: bin/PHGC.exe)
+wails3 build
+
+# 맥에서 윈도우용 교차 빌드 / 맥 유니버설 앱(bin/PHGC.app)
+wails3 build GOOS=windows
+wails3 task darwin:package:universal
 
 # 릴리즈 파이프라인(버전·노트는 매 릴리즈마다 명시)
 .\publish.ps1 -Version "1.6.0" -Notes "릴리즈 노트"
 ```
 
-현재 `wails.json`은 `build/bin/꼬미입시.exe`를 만들도록 설정되어 있습니다. 다만 공식 릴리즈·자동 업데이트·배포 안내는 기존 호환성을 위해 `PHGC.exe`를 기준으로 하므로, 정식 릴리즈 전에는 `wails.json`과 `publish.ps1`의 파일명 정책을 통일한 뒤 빌드 결과를 확인해야 합니다.
+빌드는 Wails v3 표준 구조(`Taskfile.yml`, `build/config.yml`)를 따릅니다. 실행 파일 이름은 공식 릴리즈·자동 업데이트 호환을 위해 `PHGC`(`bin/PHGC.exe`)로 통일했고, 화면·파일 정보의 제품명은 "꼬미입시"입니다.
 
 ### MacBook에서 개발 이어가기
 
-MacBook에서는 Xcode Command Line Tools, Go, Node.js/npm, Wails CLI를 설치한 뒤 위의 Gitea 복제·테스트 명령을 그대로 실행합니다. Windows 전용 WebView2는 필요하지 않습니다. `wails dev`와 `wails build` 결과는 macOS 개발 검증용이며, 학교 배포용 `PHGC.exe`를 만들거나 기존 Windows 자료를 전환하는 용도로 사용하지 않습니다.
+MacBook에서는 Xcode Command Line Tools, Go, Node.js/npm, Wails v3 CLI(`go install github.com/wailsapp/wails/v3/cmd/wails3@v3.1.0`)를 설치한 뒤 위의 Gitea 복제·테스트 명령을 그대로 실행합니다. Windows 전용 WebView2는 필요하지 않습니다. `wails3 dev`와 `wails3 build` 결과(`bin/PHGC`, `bin/PHGC.app`)는 macOS 개발 검증용이며, 학교 배포용 `PHGC.exe`를 만들거나 기존 Windows 자료를 전환하는 용도로 사용하지 않습니다.
 
 ## 책임 고지
 

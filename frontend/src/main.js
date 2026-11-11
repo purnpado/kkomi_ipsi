@@ -4,7 +4,7 @@
 import './core/wailsBridge.js';
 import './style.css';
 import './app.css';
-import { CheckSetupComplete } from '../wailsjs/go/main/App';
+import { CheckSetupComplete } from './core/backend.js';
 import { app } from './core/dom.js';
 import { eventBus, EVENTS } from './core/eventBus.js';
 import { state, patchState } from './core/store.js';

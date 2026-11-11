@@ -10,7 +10,7 @@
 - 최신 소스 커밋: `e72b8be 분석: 원서 스냅샷 출처와 학년도 분리 보강`
 - 원본 Gitea: `https://gitea.gguk.link/purnpadosori/PHGC-OFFLINE.git`
 - GitHub 백업: `https://github.com/purnpado/PHGC`
-- 실행 파일 정책: 현재 릴리즈·업데이트는 `PHGC.exe`를 기준으로 하나, `wails.json`은 `꼬미입시.exe`를 출력하도록 설정되어 있어 **릴리즈 전 반드시 통일해야 함**
+- 실행 파일 정책: Wails v3 전환으로 `Taskfile.yml`(`APP_NAME: "PHGC"`)과 `publish.ps1`이 모두 `bin/PHGC.exe`를 사용하도록 통일됨(`wails.json` 제거). `publish.ps1`은 윈도우에서 한 번 실제 실행해 검증 필요
 
 ## 최근 완료 사항
 
@@ -24,7 +24,7 @@
 
 - 백엔드: 루트에는 `main.go`와 Wails 바인딩 위임 파일 `app*.go`만 두고, 도메인 로직은 `internal/{model,parser,calc,crypto,database,exchange,sync}`에 있습니다. `App` 공개 메서드명과 JSON 필드는 그대로입니다.
 - 프론트엔드: `frontend/src/main.js`는 부트스트랩·이벤트 라우팅 전용이며, 화면은 `views/`, 모달은 `modals/`, 공통 기반은 `core/`, 스타일은 `styles/`에 있습니다. 화면 간 연결은 `core/navigation.js`(이벤트 버스)로만 합니다.
-- Wails v3 연결: `core/wailsBridge.js`가 `@wailsio/runtime`(3.1.0 고정)의 `Call.ByName("main.App.메서드")`로 기존 `window.go.main.App.*` 호출을 연결합니다. Go 쪽 `App` 메서드를 추가하면 `frontend/wailsjs/go/main/App.js`에도 같은 이름을 추가해야 브릿지가 노출합니다.
+- Wails v3 연결: `core/wailsBridge.js`가 v3 바인딩 생성기가 만든 `frontend/bindings/PHGC/app.js`(메서드 ID 호출)를 기존 `window.go.main.App.*` 호출로 연결하고 오류를 문자열로 맞춥니다. Go `App` 메서드를 추가·변경하면 `wails3 build`(또는 `wails3 generate bindings -clean=true -i`)로 바인딩을 다시 생성해 커밋합니다.
 - 고입 연도 표기: 저장은 고교 입학 학년도 하나, 화면은 `core/admissionYear.js`로 "2027 고입 (현 중3 · 2026학년도)"처럼 표시합니다. 새 원서 기본값은 학교 설정 연도를 따르고, 설정이 현재 중3 입시보다 이전이면 학년부장 대시보드에 안내 띠가 뜹니다(자동 변경 없음).
 - 고입 연도 변경: 대시보드 **[📅 고입 연도 변경]**은 학교 설정 연도만 바꾸고 학생 자료를 보존합니다(`UpdateAdmissionYear`, 학년부장 전용). **[🔄 새 학년 시작]**(`ResetAcademicYear`)은 커트라인만 남기고 학생 자료를 비웁니다. 이미 저장된 원서는 원래 연도로 남습니다.
 - 구버전(PHGC v1.6.2) 자료 전환: 같은 `data` 폴더에서 꼬미입시로 **처음 로그인할 때** `*.db.phgc`(헤더 `PHGC-GCM-1`)를 풀어 `*.db.kkomi`로 다시 암호화하고, 원본 `.phgc`는 `data/backup_phgc_migration/`에 보존합니다. 이어서 모든 학급 DB 구조를 최신으로 맞춥니다(`MigrateExistingClassDBs`). 전환 뒤에는 구버전 `PHGC.exe`로 그 폴더를 열 수 없으므로 전환 전 폴더 복제본을 따로 보관합니다.
@@ -36,7 +36,7 @@
 
 ## macOS(MacBook) 작업 시작
 
-macOS에서는 소스·합성 테스트·프론트엔드 작업을 이어갈 수 있습니다. Xcode Command Line Tools, Go, Node.js/npm, Wails CLI를 준비한 뒤 아래 순서로 확인합니다. WebView2는 Windows 전용이므로 설치하지 않습니다.
+macOS에서는 소스·합성 테스트·프론트엔드 작업을 이어갈 수 있습니다. Xcode Command Line Tools, Go, Node.js/npm, Wails v3 CLI(`go install github.com/wailsapp/wails/v3/cmd/wails3@v3.1.0`)를 준비한 뒤 아래 순서로 확인합니다. WebView2는 Windows 전용이므로 설치하지 않습니다.
 
 ```bash
 git clone https://gitea.gguk.link/purnpadosori/PHGC-OFFLINE.git
@@ -45,7 +45,7 @@ git status -sb
 git log -5 --oneline
 go test ./...
 cd frontend && npm install && npm run build && cd ..
-wails dev
+wails3 dev
 ```
 
 - macOS에서는 실제 학교 `data/`, 나이스 원본, 암호화 배포·취합 파일을 사용하지 않습니다.
@@ -63,7 +63,7 @@ wails dev
 - 2026-10-21 운영 결정: 올해는 `꼬미입시.exe` 후보 빌드와 실제 데이터 **복제본** 검증을 먼저 완료하고, 확인된 참여 학교를 모두 꼬미입시로 전환한 뒤 정식 릴리즈합니다.
 - 전환 전에는 기존 `PHGC.exe`와 `data` 폴더를 삭제하지 않습니다. 같은 프로그램 폴더에 `꼬미입시.exe`를 추가해 검증하고, 정상 확인 뒤에도 기존 exe는 백업용으로만 보관합니다.
 - 모든 참여 학교가 전환을 확인하기 전에는 정식 릴리즈·자동 업데이트를 진행하지 않습니다.
-- 전환 완료 뒤 `wails.json`의 `outputfilename`, `publish.ps1`의 복사·업로드 대상, `internal/sync/manager.go` 및 `server-data/version.json`의 다운로드 URL을 꼬미입시 정책으로 한 번에 맞춥니다.
+- 전환 완료 뒤 `Taskfile.yml`의 `APP_NAME`, `publish.ps1`의 복사·업로드 대상, `internal/sync/manager.go` 및 `server-data/version.json`의 다운로드 URL을 꼬미입시 정책으로 한 번에 맞춥니다.
 
 ### 2. 2027학년도 입시자료 점검
 
@@ -88,7 +88,7 @@ wails dev
 
 ### 4. 내년도 명칭·실행 파일 전환 시점
 
-올해 배포본은 `PHGC.exe`와 기존 기술 식별자를 유지합니다. 내년도 입시요강 갱신을 시작할 때 `꼬미입시` 공식 명칭과 `꼬미입시.exe` 전환 여부를 확정하고, 자동 업데이트·기존 배포자료 호환을 위해 한동안 `PHGC.exe`와 새 파일명을 함께 릴리즈하는 방안을 먼저 검토합니다. 관련 수정 대상은 `wails.json`, `publish.ps1`, `internal/sync/manager.go`, `server-data/version.json`, README류입니다.
+올해 배포본은 `PHGC.exe`와 기존 기술 식별자를 유지합니다. 내년도 입시요강 갱신을 시작할 때 `꼬미입시` 공식 명칭과 `꼬미입시.exe` 전환 여부를 확정하고, 자동 업데이트·기존 배포자료 호환을 위해 한동안 `PHGC.exe`와 새 파일명을 함께 릴리즈하는 방안을 먼저 검토합니다. 관련 수정 대상은 `Taskfile.yml`(`APP_NAME`), `publish.ps1`, `internal/sync/manager.go`, `server-data/version.json`, README류입니다.
 
 ### 5. 실제 학교 데이터 검증
 
@@ -104,7 +104,7 @@ go test ./...
 Set-Location frontend
 npm run build
 Set-Location ..
-wails build -s -trimpath -ldflags "-s -w"
+wails3 build
 git status -sb
 ```
 
