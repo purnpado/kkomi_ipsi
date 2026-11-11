@@ -51,6 +51,8 @@ type StudentCalcResult struct {
 	ThirdYearFinalUsed   bool    // S22에 실제 3학년 2학기 성적을 반영했는지(false면 3-1 성적으로 대신한 예상치)
 	hasThirdYearFinal    bool
 	s22Projected         float64
+	gradePresent         [3]bool    // 학년별 성적 기록 유무(중도 입국·유학 등 학년 결손 판단)
+	tieKeys              [4]float64 // 동점자 비교용 학기 평균 성취도(가중치 없음): 3-2, 3-1, 2-2, 2-1
 }
 
 // CalculateGrades 전체 학생들의 내신 성적을 계산하여 석차 및 최종 점수를 반환
@@ -83,30 +85,26 @@ func CalculateGrades(allStudents map[int][]parser.StudentExcelData, isSmallSchoo
 	for i := range results {
 		if !allHaveFinal {
 			results[i].S22 = results[i].s22Projected
+			results[i].tieKeys[0] = results[i].tieKeys[1]
 		}
 		results[i].ThirdYearFinalUsed = allHaveFinal
 		results[i].TotalSubjectScore = roundToTwoDecimals(results[i].S11 + results[i].S12 + results[i].S13 + results[i].S21 + results[i].S22)
 	}
 
 	// 2. 총점(TotalSubjectScore) 기준으로 정렬하여 석차 구하기
-	// (동점자 처리: S22(가산출) > S21 > S13 > S12 > 반 오름차순 > 번호 오름차순)
+	// (동점자 처리: 3-2(가산출) > 3-1 > 2-2 > 2-1 평균 성취도 > 반 오름차순 > 번호 오름차순)
 	sort.Slice(results, func(i, j int) bool {
 		a, b := results[i], results[j]
 		if math.Abs(a.TotalSubjectScore-b.TotalSubjectScore) > 0.0001 {
 			return a.TotalSubjectScore > b.TotalSubjectScore
 		}
-		// 총점이 같을 경우 동점자 우선순위
-		if math.Abs(a.S22-b.S22) > 0.0001 {
-			return a.S22 > b.S22
-		}
-		if math.Abs(a.S21-b.S21) > 0.0001 {
-			return a.S21 > b.S21
-		}
-		if math.Abs(a.S13-b.S13) > 0.0001 {
-			return a.S13 > b.S13
-		}
-		if math.Abs(a.S12-b.S12) > 0.0001 {
-			return a.S12 > b.S12
+		// 총점이 같을 경우 동점자 우선순위: 3-2 > 3-1 > 2-2 > 2-1 학기 평균 성취도.
+		// 학년 결손 학생은 학기 배점(×9.6, ×16)이 커서 가중 점수로 비교하면 부당하게 앞서므로
+		// 가중치를 뺀 평균 성취도로 비교한다.
+		for k := 0; k < 4; k++ {
+			if math.Abs(a.tieKeys[k]-b.tieKeys[k]) > 0.0001 {
+				return a.tieKeys[k] > b.tieKeys[k]
+			}
 		}
 		// 모든 교과 점수가 동일한 경우 호출 시마다 순서가 바뀌지 않도록 결정적 tie-breaker 적용
 		if a.ClassNum != b.ClassNum {
@@ -136,11 +134,13 @@ func CalculateGrades(allStudents map[int][]parser.StudentExcelData, isSmallSchoo
 		if i > 0 {
 			prev := results[i-1]
 			curr := results[i]
-			if math.Abs(prev.TotalSubjectScore-curr.TotalSubjectScore) < 0.0001 &&
-				math.Abs(prev.S22-curr.S22) < 0.0001 &&
-				math.Abs(prev.S21-curr.S21) < 0.0001 &&
-				math.Abs(prev.S13-curr.S13) < 0.0001 &&
-				math.Abs(prev.S12-curr.S12) < 0.0001 {
+			sameTie := true
+			for k := 0; k < 4; k++ {
+				if math.Abs(prev.tieKeys[k]-curr.tieKeys[k]) >= 0.0001 {
+					sameTie = false
+				}
+			}
+			if math.Abs(prev.TotalSubjectScore-curr.TotalSubjectScore) < 0.0001 && sameTie {
 				// 완전히 동점인 경우 동일한 석차(동석차) 부여
 				ranks[i] = ranks[i-1]
 			} else {
@@ -281,36 +281,92 @@ func calcSingleStudent(s parser.StudentExcelData) (StudentCalcResult, error) {
 		semesters[key] = append(semesters[key], score)
 	}
 
-	// S11: 1학년 중 성취도가 산출된 학기 (자유학기는 성취도 과목이 0개이므로 자동 제외)
-	s11Scores := []int{}
-	if len(semesters["1_1"]) > 0 {
-		s11Scores = semesters["1_1"]
-	} else if len(semesters["1_2"]) > 0 {
-		s11Scores = semesters["1_2"]
-	}
-	res.S11 = calcSemesterScore(s11Scores, 5.44)
-
 	// 요강: 성적이 없는 학기는 같은 학년의 다른 학기 성적을 그대로 인정한다
-	// (1학기 ← 2학기, 2학기 ← 1학기). 전·편입생 등 결손 학기 대비.
+	// (1학기 ← 2학기, 2학기 ← 1학기). 자유학기·전·편입생 등 결손 학기 대비.
 	semesterOrSibling := func(grade, sem, sibling string) []int {
 		if len(semesters[grade+"_"+sem]) > 0 {
 			return semesters[grade+"_"+sem]
 		}
 		return semesters[grade+"_"+sibling]
 	}
+	present := func(grade string) bool { return len(semesters[grade+"_1"]) > 0 || len(semesters[grade+"_2"]) > 0 }
+	res.gradePresent = [3]bool{present("1"), present("2"), present("3")}
+	missing := 0
+	for _, p := range res.gradePresent {
+		if !p {
+			missing++
+		}
+	}
+	term := func(grade, sem string, ratio float64) float64 {
+		sibling := map[string]string{"1": "2", "2": "1"}[sem]
+		return calcSemesterScore(semesterOrSibling(grade, sem, sibling), ratio)
+	}
 
-	// S12: 2학년 1학기, S13: 2학년 2학기
-	res.S12 = calcSemesterScore(semesterOrSibling("2", "1", "2"), 5.44)
-	res.S13 = calcSemesterScore(semesterOrSibling("2", "2", "1"), 5.44)
-
-	// S21: 3학년 1학기
-	res.S21 = calcSemesterScore(semesterOrSibling("3", "1", "2"), 7.84)
-
-	// S22: 3학년 2학기. 요강은 3학년 2학기 기말까지 반영하므로 3-2 성적이 올라오면
-	// 그 성적을 쓰고, 올라오기 전(상담 시점)에는 3-1 성적으로 대신한 예상값이다.
-	res.S22 = calcSemesterScore(semesterOrSibling("3", "2", "1"), 7.84)
+	switch {
+	case missing == 0 || res.gradePresent == [3]bool{false, false, false}:
+		// 기본(5학기): 1학년 자유학기가 아닌 학기(들)의 성취점수 총합 ÷ 이수 과목 수 × 5.44,
+		// 2-1·2-2 × 5.44, 3-1·3-2 × 7.84
+		res.S11 = calcSemesterScore(append(append([]int{}, semesters["1_1"]...), semesters["1_2"]...), 5.44)
+		res.S12 = term("2", "1", 5.44)
+		res.S13 = term("2", "2", 5.44)
+		res.S21 = term("3", "1", 7.84)
+		res.S22 = term("3", "2", 7.84)
+	case missing == 1:
+		// 한 학년 기록이 없는 경우(조기진급·유학생·중도 입국 등): 낮은 학년 40% + 높은 학년 60%
+		// S = 낮은 학년 두 학기 × 6.4 + 높은 학년 두 학기 × 9.6
+		low, high := "", ""
+		for i, p := range res.gradePresent {
+			if p && low == "" {
+				low = fmt.Sprint(i + 1)
+			} else if p {
+				high = fmt.Sprint(i + 1)
+			}
+		}
+		lowA, lowB := term(low, "1", 6.4), term(low, "2", 6.4)
+		highA, highB := term(high, "1", 9.6), term(high, "2", 9.6)
+		if low == "1" {
+			res.S11 = roundToTwoDecimals(lowA + lowB)
+		} else {
+			res.S12, res.S13 = lowA, lowB
+		}
+		if high == "3" {
+			res.S21, res.S22 = highA, highB
+		} else {
+			res.S12, res.S13 = highA, highB
+		}
+	default:
+		// 두 학년 기록이 없는 경우: 남은 한 학년 성적만 100% (두 학기 × 16)
+		for i, p := range res.gradePresent {
+			if !p {
+				continue
+			}
+			g := fmt.Sprint(i + 1)
+			a, b := term(g, "1", 16), term(g, "2", 16)
+			switch g {
+			case "3":
+				res.S21, res.S22 = a, b
+			case "2":
+				res.S12, res.S13 = a, b
+			default:
+				res.S11 = roundToTwoDecimals(a + b)
+			}
+		}
+	}
+	// S22(3학년 2학기): 3-2 성적이 올라오면 그 성적, 올라오기 전(상담 시점)에는 3-1 성적으로 대신한 예상값.
 	res.hasThirdYearFinal = len(semesters["3_2"]) > 0
 	res.s22Projected = res.S21
+	avg := func(scores []int) float64 {
+		if len(scores) == 0 {
+			return 0
+		}
+		sum := 0
+		for _, v := range scores {
+			sum += v
+		}
+		return float64(sum) / float64(len(scores))
+	}
+	res.tieKeys = [4]float64{avg(semesterOrSibling("3", "2", "1")), avg(semesterOrSibling("3", "1", "2")),
+		avg(semesterOrSibling("2", "2", "1")), avg(semesterOrSibling("2", "1", "2"))}
 
 	// 소수 셋째자리 반올림 (5개 학기 모두 합산)
 	res.TotalSubjectScore = roundToTwoDecimals(res.S11 + res.S12 + res.S13 + res.S21 + res.S22)

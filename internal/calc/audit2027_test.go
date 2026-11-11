@@ -174,3 +174,31 @@ func TestAdmissionStagesFromGuidelines(t *testing.T) {
 		}
 	}
 }
+
+// 한 학년 기록이 없으면 낮은 학년 두 학기 × 6.4 + 높은 학년 두 학기 × 9.6,
+// 두 학년이 없으면 남은 학년 두 학기 × 16. 전 과목 A는 어느 경우든 160점 만점(교과점수 총점 160).
+func TestGeneralMissingGradeFormula(t *testing.T) {
+	cases := []struct {
+		name string
+		rows [][3]string
+	}{
+		{"정상(1-1 자유학기)", [][3]string{{"1", "2", "A"}, {"2", "1", "A"}, {"2", "2", "A"}, {"3", "1", "A"}, {"3", "2", "A"}}},
+		{"1학년 없음", [][3]string{{"2", "1", "A"}, {"2", "2", "A"}, {"3", "1", "A"}, {"3", "2", "A"}}},
+		{"2학년 2학기부터", [][3]string{{"2", "2", "A"}, {"3", "1", "A"}, {"3", "2", "A"}}},
+		{"1·2학년 없음", [][3]string{{"3", "1", "A"}, {"3", "2", "A"}}},
+	}
+	for _, c := range cases {
+		got, err := calcSingleStudent(parser.StudentExcelData{RawData: gradeRows(t, c.rows)})
+		if err != nil {
+			t.Fatal(err)
+		}
+		if got.TotalSubjectScore != 160 {
+			t.Errorf("%s: 교과점수 총점 = %.2f, want 160", c.name, got.TotalSubjectScore)
+		}
+	}
+	// 1학년 없음 + 2학년 B(4), 3학년 A(5): 4×6.4×2 + 5×9.6×2 = 51.2 + 96 = 147.2
+	got, _ := calcSingleStudent(parser.StudentExcelData{RawData: gradeRows(t, [][3]string{{"2", "1", "B"}, {"2", "2", "B"}, {"3", "1", "A"}, {"3", "2", "A"}})})
+	if got.TotalSubjectScore != 147.2 {
+		t.Fatalf("40/60 가중 = %.2f, want 147.20", got.TotalSubjectScore)
+	}
+}

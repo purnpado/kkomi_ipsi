@@ -60,3 +60,23 @@ func TestGeneralPendingBonusRange(t *testing.T) {
 		t.Fatalf("확정: complete=%v 남은 가산=%.0f 합계=%.2f(want 34)", complete, r.PendingBonus, r.Total)
 	}
 }
+
+// 요강 예시 1: 1학년 봉사 실적이 없고(중도 입국) 2학년 4시간, 3학년 3시간이면
+// 1학년 환산 시수 = 4 × (4+3) ÷ 8 = 3.5시간 → 1.7점. 봉사 = 2 + 1.7 + 2.0 + 1.7 = 7.4점.
+func TestGeneralVolunteerConvertedForMissingGrade(t *testing.T) {
+	s := parser.StudentExcelData{ClassNum: 1, StudentNum: "1", Name: "가",
+		AttendanceData: `{"2_absence":0,"3_absence":0}`, VolunteerData: `{"2_time":4,"3_time":3,"total_time":7}`, ExtraData: `{}`}
+	all := map[int][]parser.StudentExcelData{1: {s}}
+	target := StudentCalcResult{ClassNum: 1, StudentNum: "1", Name: "가", gradePresent: [3]bool{false, true, true}}
+	r, _ := calculateGeneralNonAcademic(all, target)
+	if r.VolunteerScore != 7.4 {
+		t.Fatalf("환산 봉사 = %.2f, want 7.40", r.VolunteerScore)
+	}
+	// 요강 예시 2: 1·2학년 실적이 없고 3학년 3시간 → 1·2학년 각 3시간 환산 → 2 + 1.7×3 = 7.1
+	s.AttendanceData, s.VolunteerData = `{"3_absence":0}`, `{"3_time":3,"total_time":3}`
+	all = map[int][]parser.StudentExcelData{1: {s}}
+	target.gradePresent = [3]bool{false, false, true}
+	if r, _ = calculateGeneralNonAcademic(all, target); r.VolunteerScore != 7.1 {
+		t.Fatalf("두 학년 환산 봉사 = %.2f, want 7.10", r.VolunteerScore)
+	}
+}

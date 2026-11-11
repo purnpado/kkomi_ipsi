@@ -3,6 +3,7 @@ package calc
 import (
 	"encoding/json"
 	"fmt"
+	"math"
 	"strings"
 
 	"PHGC/internal/parser"
@@ -36,11 +37,14 @@ func findExcelStudent(all map[int][]parser.StudentExcelData, target StudentCalcR
 // generalYearValues는 학년별 값(결석 환산일수 또는 봉사시간)을 고른다.
 // 우선순위: ① 담임 수기 학년별 입력 ② 나이스 자료의 학년별 값 ③ 누적값을 학년별로 고르게 나눈 예상치.
 // exact는 세 학년 모두 ①·②로 정해졌는지 여부다.
-func generalYearValues(manual func(int) (int, bool), neis func(int) (int, bool), total int) (values [3]int, exact bool) {
+func generalYearValues(manual func(int) (int, bool), neis func(int) (int, bool), total int, enrolled [3]bool) (values [3]int, exact bool) {
 	exact = true
 	known, knownSum := 0, 0
 	unknown := []int{}
 	for g := 1; g <= 3; g++ {
+		if !enrolled[g-1] {
+			continue // 재학하지 않은 학년(중도 입국 등)은 누적값을 나누지 않는다
+		}
 		if v, ok := manual(g); ok {
 			values[g-1] = v
 		} else if v, ok := neis(g); ok {
@@ -105,8 +109,18 @@ func calculateGeneralNonAcademic(all map[int][]parser.StudentExcelData, target S
 		return p("absence") + (p("late")+p("early")+p("result"))/3, true
 	}
 	totalAbsence := attendance["absence"] + (attendance["late"]+attendance["early"]+attendance["result"])/3
+	// 재학 학년: 성적 기록이 있거나 나이스 출결에 그 학년 행이 있는 학년. 판단 자료가 전혀 없으면 세 학년 모두 재학으로 본다.
+	enrolled := target.gradePresent
+	for g := 1; g <= 3; g++ {
+		if _, ok := attendance[fmt.Sprintf("%d_absence", g)]; ok {
+			enrolled[g-1] = true
+		}
+	}
+	if enrolled == [3]bool{} {
+		enrolled = [3]bool{true, true, true}
+	}
 	absenceDays, attExact := generalYearValues(func(g int) (int, bool) { return extraInt(fmt.Sprintf("general_absence_%d", g)) },
-		neisAbsence, totalAbsence)
+		neisAbsence, totalAbsence, [3]bool{true, true, true})
 
 	// 봉사: 학년별 값이 하나라도 있으면 없는 학년은 0시간, 봉사 파일에 이름만 있고 기록이 없으면 전 학년 0시간.
 	volPerGrade := hasGradeKey(volunteer, "time") || (strings.TrimSpace(s.VolunteerData) != "" && volunteer["total_time"] == 0)
@@ -117,12 +131,16 @@ func calculateGeneralNonAcademic(all map[int][]parser.StudentExcelData, target S
 		return volunteer[fmt.Sprintf("%d_time", g)], true
 	}
 	hours, volExact := generalYearValues(func(g int) (int, bool) { return extraInt(fmt.Sprintf("general_volunteer_%d", g)) },
-		neisHours, volunteer["total_time"])
+		neisHours, volunteer["total_time"], enrolled)
+
+	// 요강 Ⅴ-5-다-4): 전·편입학(해외 귀국·북한이탈주민 자녀 등)으로 특정 학년 봉사 실적이 없으면
+	// 특정 학년 환산 시수 = 4 × (실시한 학년 봉사 시수 총합 ÷ 실시한 학년 기준시수 총합), 학년별 최대 4시간 인정.
+	converted := generalConvertedHours(hours, enrolled)
 
 	r := generalNonAcademic{AttendanceScore: 4, VolunteerScore: 2, BehaviorScore: 5, CreativeScore: 5}
 	for g := 0; g < 3; g++ {
 		r.AttendanceScore += generalAttendanceYearScore(absenceDays[g])
-		r.VolunteerScore += generalVolunteerYearScore(hours[g])
+		r.VolunteerScore += generalVolunteerYearScore(int(converted[g]))
 	}
 
 	// 행발·창체 가산점: 징계 등으로 가산 제외된 학년은 인정하지 않는다.
@@ -179,4 +197,32 @@ func generalVolunteerYearScore(hours int) float64 {
 		return 1
 	}
 	return 0
+}
+
+// generalConvertedHours 재학하지 않은 학년의 봉사 시수를 요강 공식으로 환산한다(소수 둘째 자리 반올림).
+// 점수표는 시간 단위이므로 환산 시수의 정수 부분으로 찾는다(요강 예시: 3.5시간 → 1.7점).
+func generalConvertedHours(hours [3]int, enrolled [3]bool) [3]float64 {
+	var out [3]float64
+	doneSum, doneCount := 0, 0
+	for g := 0; g < 3; g++ {
+		out[g] = float64(hours[g])
+		if enrolled[g] {
+			h := hours[g]
+			if h > 4 {
+				h = 4 // 학년별 실시 시간은 최대 4시간만 인정
+			}
+			doneSum += h
+			doneCount++
+		}
+	}
+	if doneCount == 0 || doneCount == 3 {
+		return out
+	}
+	value := math.Round(4*float64(doneSum)/float64(4*doneCount)*10) / 10
+	for g := 0; g < 3; g++ {
+		if !enrolled[g] {
+			out[g] = value
+		}
+	}
+	return out
 }

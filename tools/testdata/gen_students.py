@@ -70,14 +70,36 @@ def make_names(rng, n):
     return list(names)
 
 
+def effective_ability(st):
+    """성적 유형까지 반영한 실제 학력(하위권은 낮게, 전 과목 A는 높게)."""
+    return st["ability"] - (1.2 if "하위권" in st["tags"] else 0) + (2.0 if "전 과목 A" in st["tags"] else 0)
+
+
+def weighted_sample(rng, items, k, weight):
+    """가중치에 비례해 중복 없이 k개를 고른다."""
+    pool = list(items)
+    picked = []
+    for _ in range(min(k, len(pool))):
+        weights = [weight(x) for x in pool]
+        idx = rng.choices(range(len(pool)), weights=weights)[0]
+        picked.append(pool.pop(idx))
+    return picked
+
+
 def build_students(rng, total):
     names = make_names(rng, total)
     students = []
     for i in range(total):
         students.append({"name": names[i], "ability": rng.gauss(0.1, 0.9), "tags": [], "grades": {}, "att": {}, "vol": {}})
-    for group in PROFILE_GROUPS.values():
+    for name, group in PROFILE_GROUPS.items():
         tags = [tag for tag, count in group for _ in range(count)]
-        for student, tag in zip(rng.sample(students, len(tags)), tags):
+        if name in ("출결", "봉사"):
+            # 미인정 결석·지각과 낮은 봉사 시간은 중하위권에 많이 몰리게 한다(상위권에도 드물게 남긴다).
+            # 학력이 낮을수록 뽑힐 가중치가 커진다: 하위 30% ≈ 상위 30%의 5배.
+            chosen = weighted_sample(rng, students, len(tags), lambda st: 0.25 + max(0.0, 1.0 - effective_ability(st)) ** 2)
+        else:
+            chosen = rng.sample(students, len(tags))
+        for student, tag in zip(chosen, tags):
             student["tags"].append(tag)
     for s in students:
         build_grades(rng, s)
@@ -162,7 +184,7 @@ def build_attendance(rng, s):
             absent = 10
         if "지각·조퇴 누적" in tags:
             late, early, result = rng.randint(1, 6), rng.randint(0, 3), rng.randint(0, 2)
-        elif rng.random() < 0.15:
+        elif rng.random() < (0.25 if effective_ability(s) < -0.3 else 0.08):
             late = rng.randint(1, 2)
         if g < 3:
             s["att"][g] = (sick, absent, late, early, result)
@@ -178,7 +200,7 @@ def build_volunteer(rng, s):
     tags = s["tags"]
     plan = {g: 0 for g in (1, 2, 3)}
     for g in enrolled_grades(tags):
-        hours = rng.choice([4, 4, 5, 6, 8])
+        hours = rng.choice([4, 4, 5, 6, 8] if effective_ability(s) > -0.3 else [2, 3, 4, 4, 5])
         if "봉사 학년마다 2시간" in tags:
             hours = 2
         if "봉사 학년마다 1~3시간" in tags:
