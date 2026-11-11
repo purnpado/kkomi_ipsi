@@ -1,12 +1,12 @@
 {
 	"fixed": {
-		"file_version": "1.6.4",
-		"product_version": "1.6.4"
+		"file_version": "1.6.5",
+		"product_version": "1.6.5"
 	},
 	"info": {
 		"0409": {
-			"FileVersion": "1.6.4",
-			"ProductVersion": "1.6.4",
+			"FileVersion": "1.6.5",
+			"ProductVersion": "1.6.5",
 			"CompanyName": "푸른파도소리",
 			"FileDescription": "울산 관내 중학교 3학년 고입 진학지도 오프라인 데스크톱 프로그램",
 			"LegalCopyright": "(c) 2026, 푸른파도소리",

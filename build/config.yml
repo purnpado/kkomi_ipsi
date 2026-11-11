@@ -11,7 +11,7 @@ info:
   description: "울산 관내 중학교 3학년 고입 진학지도 오프라인 데스크톱 프로그램" # The application description
   copyright: "(c) 2026, 푸른파도소리" # Copyright text
   comments: "꼬미입시(PHGC) 오프라인 진학상담" # Comments
-  version: "1.6.4" # The application version
+  version: "1.6.5" # The application version
   # cfBundleIconName: "appicon" # The macOS icon name in Assets.car icon bundles (optional)
   #                               # Should match the name of your .icon file without the extension
   #                               # If not set and Assets.car exists, defaults to "appicon"
