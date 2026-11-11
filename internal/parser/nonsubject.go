@@ -59,6 +59,7 @@ func ParseAttendanceExcel(filePath string) (map[int][]StudentExcelData, error) {
 	unrecognizedLateIdx := -1
 	unrecognizedEarlyIdx := -1
 	unrecognizedResultIdx := -1
+	gradeColIdx := -1 // "학년" 열이 있으면 학년별 값도 저장한다(후기 일반고 학년별 출석 계산용)
 
 	var lastName, lastStudentNum string
 	skipNextRow := false
@@ -107,6 +108,8 @@ func ParseAttendanceExcel(filePath string) (map[int][]StudentExcelData, error) {
 				unrecognizedEarlyIdx = j + 1
 			} else if val == "결과" {
 				unrecognizedResultIdx = j + 1
+			} else if val == "학년" {
+				gradeColIdx = j
 			}
 		}
 		if isHeaderRow {
@@ -175,6 +178,12 @@ func ParseAttendanceExcel(filePath string) (map[int][]StudentExcelData, error) {
 			addVal(unrecognizedLateIdx, "late")
 			addVal(unrecognizedEarlyIdx, "early")
 			addVal(unrecognizedResultIdx, "result")
+			if g := gradeOf(row, gradeColIdx); g > 0 {
+				addVal(unrecognizedAbsenceIdx, fmt.Sprintf("%d_absence", g))
+				addVal(unrecognizedLateIdx, fmt.Sprintf("%d_late", g))
+				addVal(unrecognizedEarlyIdx, fmt.Sprintf("%d_early", g))
+				addVal(unrecognizedResultIdx, fmt.Sprintf("%d_result", g))
+			}
 
 			b, _ := json.Marshal(dataMap)
 			existingStudent.AttendanceData = string(b)
@@ -204,6 +213,9 @@ func ParseVolunteerExcel(filePath string) (map[int][]StudentExcelData, error) {
 	studentNumColIdx := -1
 	dateColIdx := -1
 	totalTimeIdx := -1
+	gradeColIdx := -1 // "학년"·"시간" 열이 있으면 학년별 봉사시간도 저장한다
+	hoursColIdx := -1
+	lastVolunteerGrade := 0
 
 	var lastName, lastStudentNum string
 
@@ -242,6 +254,10 @@ func ParseVolunteerExcel(filePath string) (map[int][]StudentExcelData, error) {
 				dateColIdx = j
 			} else if strings.Contains(val, "시간누계(전체)") {
 				totalTimeIdx = j
+			} else if val == "학년" {
+				gradeColIdx = j
+			} else if val == "시간" {
+				hoursColIdx = j
 			}
 		}
 		if isHeaderRow {
@@ -284,6 +300,7 @@ func ParseVolunteerExcel(filePath string) (map[int][]StudentExcelData, error) {
 				}
 				lastName = rawName
 				lastStudentNum = rawNum
+				lastVolunteerGrade = 0
 			}
 
 			if rawName == "" || rawNum == "" {
@@ -319,6 +336,18 @@ func ParseVolunteerExcel(filePath string) (map[int][]StudentExcelData, error) {
 				json.Unmarshal([]byte(existingStudent.VolunteerData), &dataMap)
 			}
 
+			// 병합된 학년 칸(빈칸)은 같은 학생의 바로 위 행 학년을 이어 쓴다.
+			g := gradeOf(row, gradeColIdx)
+			if g > 0 {
+				lastVolunteerGrade = g
+			} else if existingStudent.Name == lastName && existingStudent.StudentNum == lastStudentNum {
+				g = lastVolunteerGrade
+			}
+			if g > 0 && hoursColIdx != -1 && hoursColIdx < len(row) {
+				if v, err := strconv.Atoi(strings.TrimSpace(row[hoursColIdx])); err == nil {
+					dataMap[fmt.Sprintf("%d_time", g)] += v
+				}
+			}
 			if totalTimeIdx != -1 && totalTimeIdx < len(row) {
 				vStr := strings.TrimSpace(row[totalTimeIdx])
 				if v, err := strconv.Atoi(vStr); err == nil {
@@ -340,4 +369,17 @@ func ParseVolunteerExcel(filePath string) (map[int][]StudentExcelData, error) {
 		}
 	}
 	return result, nil
+}
+
+// gradeOf 행의 학년 칸 값(1~3)을 읽는다. 없거나 숫자가 아니면 0.
+func gradeOf(row []string, idx int) int {
+	if idx < 0 || idx >= len(row) {
+		return 0
+	}
+	v := strings.TrimSpace(strings.ReplaceAll(row[idx], "학년", ""))
+	g, err := strconv.Atoi(v)
+	if err != nil || g < 1 || g > 3 {
+		return 0
+	}
+	return g
 }

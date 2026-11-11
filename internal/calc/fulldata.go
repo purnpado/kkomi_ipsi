@@ -78,7 +78,7 @@ type StudentFullData struct {
 	GeneralHSTotalHigh       float64 `json:"generalHSTotalHigh"`       // 가산점 미정분까지 받을 때 상한
 	GeneralHSBonusEntered    bool    `json:"generalHSBonusEntered"`    // 창체·행발 가산점 입력 완료
 	GeneralHSThirdYearFinal  bool    `json:"generalHSThirdYearFinal"`  // 3-2 성적 반영(아니면 3-1 복사 예상)
-	GeneralHSPerGradeExact   bool    `json:"generalHSPerGradeExact"` // 출결·봉사 학년별 실제 값 사용
+	GeneralHSPerGradeExact   bool    `json:"generalHSPerGradeExact"`   // 출결·봉사 학년별 실제 값 사용
 
 	// 학교별 산출 결과
 	SchoolResults []SchoolCalcResult `json:"schoolResults"`

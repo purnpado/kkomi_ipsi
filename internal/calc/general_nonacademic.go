@@ -3,6 +3,7 @@ package calc
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"PHGC/internal/parser"
 )
@@ -84,15 +85,20 @@ func calculateGeneralNonAcademic(all map[int][]parser.StudentExcelData, target S
 	extraBool := func(key string) bool { v, _ := extra[key].(bool); return v }
 
 	// 출결: 미인정 지각·조퇴·결과는 학년별로 합산해 3회 = 결석 1일(2회 이하 버림).
-	neisAbsence := func(g int) (int, bool) {
-		keys := []string{"absence", "late", "early", "result"}
-		found := false
-		for _, k := range keys {
-			if _, ok := attendance[fmt.Sprintf("%d_%s", g, k)]; ok {
-				found = true
+	// 나이스 학년별 자료가 한 학년이라도 있으면 기록이 없는 학년은 0으로 본다.
+	hasGradeKey := func(m map[string]int, suffixes ...string) bool {
+		for g := 1; g <= 3; g++ {
+			for _, suf := range suffixes {
+				if _, ok := m[fmt.Sprintf("%d_%s", g, suf)]; ok {
+					return true
+				}
 			}
 		}
-		if !found {
+		return false
+	}
+	attPerGrade := hasGradeKey(attendance, "absence", "late", "early", "result")
+	neisAbsence := func(g int) (int, bool) {
+		if !attPerGrade {
 			return 0, false
 		}
 		p := func(k string) int { return attendance[fmt.Sprintf("%d_%s", g, k)] }
@@ -102,7 +108,14 @@ func calculateGeneralNonAcademic(all map[int][]parser.StudentExcelData, target S
 	absenceDays, attExact := generalYearValues(func(g int) (int, bool) { return extraInt(fmt.Sprintf("general_absence_%d", g)) },
 		neisAbsence, totalAbsence)
 
-	neisHours := func(g int) (int, bool) { v, ok := volunteer[fmt.Sprintf("%d_time", g)]; return v, ok }
+	// 봉사: 학년별 값이 하나라도 있으면 없는 학년은 0시간, 봉사 파일에 이름만 있고 기록이 없으면 전 학년 0시간.
+	volPerGrade := hasGradeKey(volunteer, "time") || (strings.TrimSpace(s.VolunteerData) != "" && volunteer["total_time"] == 0)
+	neisHours := func(g int) (int, bool) {
+		if !volPerGrade {
+			return 0, false
+		}
+		return volunteer[fmt.Sprintf("%d_time", g)], true
+	}
 	hours, volExact := generalYearValues(func(g int) (int, bool) { return extraInt(fmt.Sprintf("general_volunteer_%d", g)) },
 		neisHours, volunteer["total_time"])
 
