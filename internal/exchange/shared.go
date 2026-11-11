@@ -41,15 +41,14 @@ func ExportSharedPackageV2(dm *database.DBManager, admissionYear int, password, 
 		return err
 	}
 
+	if err := os.MkdirAll(filepath.Dir(outputPath), 0700); err != nil {
+		return err
+	}
 	tmpFile := outputPath + ".plain.tmp"
 	if err := os.WriteFile(tmpFile, jsonData, 0600); err != nil {
 		return err
 	}
 	defer os.Remove(tmpFile)
-
-	if err := os.MkdirAll(filepath.Dir(outputPath), 0700); err != nil {
-		return err
-	}
 
 	return crypto.EncryptFileGCM(password, tmpFile, outputPath)
 }
