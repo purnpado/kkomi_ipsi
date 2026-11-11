@@ -173,6 +173,7 @@ func (dm *DBManager) EnsureClassDBSchema(dbPath string) error {
 			assigned_department TEXT DEFAULT '',
 			assigned_school TEXT DEFAULT '',
 			score_details_json TEXT DEFAULT '',
+			first_stage_result TEXT DEFAULT '',
 			updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 			UNIQUE(student_num, student_name, admission_year, category, school_name, track)
 		);
@@ -207,6 +208,7 @@ func (dm *DBManager) EnsureClassDBSchema(dbPath string) error {
 	_, _ = db.Exec(`ALTER TABLE students ADD COLUMN extra_json TEXT DEFAULT ''`)
 	_, _ = db.Exec(`ALTER TABLE student_applications ADD COLUMN assigned_school TEXT DEFAULT ''`)
 	_, _ = db.Exec(`ALTER TABLE student_applications ADD COLUMN score_details_json TEXT DEFAULT ''`)
+	_, _ = db.Exec(`ALTER TABLE student_applications ADD COLUMN first_stage_result TEXT DEFAULT ''`)
 
 	if err != nil {
 		return fmt.Errorf("학급 DB 초기화 실패: %w", err)

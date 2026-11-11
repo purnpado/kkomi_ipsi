@@ -68,7 +68,7 @@ export async function openClassApplicationSummaryModal(classNum) {
                         <td class="p-3 text-center text-cyan-200 font-medium">${g.plannedCount}</td>
                         <td class="p-3 text-center text-indigo-200 font-medium">${g.submittedCount}</td>
                         <td class="p-3 text-center text-emerald-300 font-medium">${g.acceptedCount}</td>
-                        <td class="p-3 text-center text-rose-300 font-medium">${g.rejectedCount}</td>
+                        <td class="p-3 text-center text-rose-300 font-medium">${g.rejectedCount}${g.stage2FailCount ? `<div class="text-[10px] text-amber-300 font-normal" title="1차 합격 후 2차(면접 등)에서 불합격">1차합격 후 ${g.stage2FailCount}</div>` : ''}</td>
                         <td class="p-3 text-center font-bold text-white">${g.finalCount}</td>
                     </tr>
                 `;
@@ -238,7 +238,7 @@ export async function openApplicationSummaryModal() {
                         <td class="p-3 text-center text-cyan-200 font-medium">${g.plannedCount}</td>
                         <td class="p-3 text-center text-indigo-200 font-medium">${g.submittedCount}</td>
                         <td class="p-3 text-center text-emerald-300 font-medium">${g.acceptedCount}</td>
-                        <td class="p-3 text-center text-rose-300 font-medium">${g.rejectedCount}</td>
+                        <td class="p-3 text-center text-rose-300 font-medium">${g.rejectedCount}${g.stage2FailCount ? `<div class="text-[10px] text-amber-300 font-normal" title="1차 합격 후 2차(면접 등)에서 불합격">1차합격 후 ${g.stage2FailCount}</div>` : ''}</td>
                         <td class="p-3 text-center font-bold text-white">${g.finalCount}</td>
                         <td class="p-3 text-right font-mono text-xs pr-3">${scoreDisplay}</td>
                     </tr>

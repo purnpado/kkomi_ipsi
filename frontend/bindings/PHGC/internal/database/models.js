@@ -70,6 +70,12 @@
  * @property {number} minExpectedScore
  * @property {number} maxExpectedScore
  * @property {number} avgExpectedScore
+ * @property {number} stage1PassCount - 1차·2차 단계 구분(마이스터고·특성화고). 1차 미구분 기존 기록은 단계 통계에서 빠진다. 1차 합격(최종 합격·2차 탈락·2차 대기 포함)
+ * @property {number} stage1FailCount - 1차 불합격
+ * @property {number} stage2FailCount - 1차 합격 후 최종 불합격
+ * @property {number} minStage1PassScore - 1차 합격선(1차 합격자 최저점)
+ * @property {number} maxStage1FailScore - 1차 불합격자 최고점
+ * @property {number} avgStage2FailScore - 2차 탈락자 평균(면접 등 점수화 어려운 전형 영향)
  */
 
 /**

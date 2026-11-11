@@ -120,6 +120,8 @@ export function buildSmartApplicationGroups(records) {
                     submittedCount: 0,
                     acceptedCount: 0,
                     rejectedCount: 0,
+                    stage1PassCount: 0, // 1차 합격(최종 합격·2차 탈락·2차 대기 포함)
+                    stage2FailCount: 0, // 1차 합격 후 최종 불합격
                     finalCount: 0,
                     acceptedScores: [],
                     maxRejectedScore: 0
@@ -133,12 +135,16 @@ export function buildSmartApplicationGroups(records) {
                 prefRank: rank,
                 score: r.score,
                 status: r.status,
+                firstStageResult: r.firstStageResult || '',
                 assignedDepartment: r.assignedDepartment
             };
             if (!g.ranks[rank]) g.ranks[rank] = [];
             g.ranks[rank].push(studentInfo);
             g.allStudents.push(studentInfo);
 
+            const stage2Fail = r.status === '불합격' && r.firstStageResult === '합격';
+            if (r.firstStageResult === '합격') g.stage1PassCount++;
+            if (stage2Fail) g.stage2FailCount++;
             if (r.status === '지원희망' || r.status === '지원예정') g.plannedCount++;
             else if (r.status === '지원완료') g.submittedCount++;
             else if (r.status === '합격') {
@@ -146,7 +152,8 @@ export function buildSmartApplicationGroups(records) {
                 if (r.score > 0) g.acceptedScores.push(r.score);
             } else if (r.status === '불합격') {
                 g.rejectedCount++;
-                if (r.score > g.maxRejectedScore) g.maxRejectedScore = r.score;
+                // 2차(면접 등) 탈락자는 점수 때문이 아니므로 불합격 최고점에서 뺀다.
+                if (!stage2Fail && r.score > g.maxRejectedScore) g.maxRejectedScore = r.score;
             } else if (r.status === '최종 진학' || r.status === '최종진학') {
                 g.finalCount++;
                 g.acceptedCount++;

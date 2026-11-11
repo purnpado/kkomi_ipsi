@@ -43,6 +43,13 @@ type ApplicationSummary struct {
 	MinExpectedScore float64 `json:"minExpectedScore"`
 	MaxExpectedScore float64 `json:"maxExpectedScore"`
 	AvgExpectedScore float64 `json:"avgExpectedScore"`
+	// 1차·2차 단계 구분(마이스터고·특성화고). 1차 미구분 기존 기록은 단계 통계에서 빠진다.
+	Stage1PassCount    int     `json:"stage1PassCount"`    // 1차 합격(최종 합격·2차 탈락·2차 대기 포함)
+	Stage1FailCount    int     `json:"stage1FailCount"`    // 1차 불합격
+	Stage2FailCount    int     `json:"stage2FailCount"`    // 1차 합격 후 최종 불합격
+	MinStage1PassScore float64 `json:"minStage1PassScore"` // 1차 합격선(1차 합격자 최저점)
+	MaxStage1FailScore float64 `json:"maxStage1FailScore"` // 1차 불합격자 최고점
+	AvgStage2FailScore float64 `json:"avgStage2FailScore"` // 2차 탈락자 평균(면접 등 점수화 어려운 전형 영향)
 }
 
 // GetApplicationSummaries aggregates only data held inside this school's
@@ -83,6 +90,9 @@ func (dm *DBManager) getApplicationSummaries(classNums []int) ([]ApplicationSumm
 		hasRejectedMax     bool
 		hasExpectedMin     bool
 		hasExpectedMax     bool
+		hasStage1Pass      bool
+		stage2FailSum      float64
+		stage2FailScored   int
 	}
 	groups := map[string]*accumulator{}
 	add := func(r model.ApplicationRecord, department string, rank int) {
@@ -129,7 +139,30 @@ func (dm *DBManager) getApplicationSummaries(classNums []int) ([]ApplicationSumm
 				a.MaxAcceptedScore, a.hasAcceptedMax = r.Score, true
 			}
 		}
-		if r.Status == "불합격" && r.Score > 0 {
+		stage2Fail := r.Status == "불합격" && r.FirstStageResult == "합격"
+		stage1Pass := r.FirstStageResult == "합격" || ((r.Status == "합격" || r.Status == "최종 진학") && (r.Category == "meister" || r.Category == "special"))
+		if stage1Pass {
+			a.Stage1PassCount++
+			if r.Score > 0 && (!a.hasStage1Pass || r.Score < a.MinStage1PassScore) {
+				a.MinStage1PassScore, a.hasStage1Pass = r.Score, true
+			}
+		}
+		if r.FirstStageResult == "불합격" {
+			a.Stage1FailCount++
+			if r.Score > a.MaxStage1FailScore {
+				a.MaxStage1FailScore = r.Score
+			}
+		}
+		if stage2Fail {
+			// 1차를 통과한 뒤 면접 등에서 떨어진 학생은 점수 커트라인 아래가 아니므로
+			// 불합격 점수 분포(겹침 구간)에 넣지 않고 따로 집계한다.
+			a.Stage2FailCount++
+			if r.Score > 0 {
+				a.stage2FailSum += r.Score
+				a.stage2FailScored++
+			}
+		}
+		if r.Status == "불합격" && r.Score > 0 && !stage2Fail {
 			a.rejectedSum += r.Score
 			a.rejectedScores = append(a.rejectedScores, r.Score)
 			if !a.hasRejectedMax || r.Score > a.MaxRejectedScore {
@@ -145,7 +178,7 @@ func (dm *DBManager) getApplicationSummaries(classNums []int) ([]ApplicationSumm
 			}
 			return nil, err
 		}
-		rows, err := db.Query(`SELECT student_num,student_name,admission_year,category,school_name,track,status,score,score_basis,preferences_json,assigned_department,COALESCE(assigned_school, ''),updated_at FROM student_applications`)
+		rows, err := db.Query(`SELECT student_num,student_name,admission_year,category,school_name,track,status,score,score_basis,preferences_json,assigned_department,COALESCE(assigned_school, ''),COALESCE(first_stage_result, ''),updated_at FROM student_applications`)
 		if err != nil {
 			db.Close()
 			continue
@@ -153,7 +186,7 @@ func (dm *DBManager) getApplicationSummaries(classNums []int) ([]ApplicationSumm
 		for rows.Next() {
 			var r model.ApplicationRecord
 			var prefs string
-			if err := rows.Scan(&r.StudentNum, &r.StudentName, &r.AdmissionYear, &r.Category, &r.SchoolName, &r.Track, &r.Status, &r.Score, &r.ScoreBasis, &prefs, &r.AssignedDepartment, &r.AssignedSchool, &r.UpdatedAt); err == nil {
+			if err := rows.Scan(&r.StudentNum, &r.StudentName, &r.AdmissionYear, &r.Category, &r.SchoolName, &r.Track, &r.Status, &r.Score, &r.ScoreBasis, &prefs, &r.AssignedDepartment, &r.AssignedSchool, &r.FirstStageResult, &r.UpdatedAt); err == nil {
 				_ = json.Unmarshal([]byte(prefs), &r.Preferences)
 				if r.Category == "meister" || r.Category == "special" {
 					if r.Status == "지원희망" || r.Status == "지원 희망" || r.Status == "지원예정" || r.Status == "지원 예정" || r.Status == "지원완료" || r.Status == "지원 완료" {
@@ -196,6 +229,9 @@ func (dm *DBManager) getApplicationSummaries(classNums []int) ([]ApplicationSumm
 		}
 		if a.expectedCount > 0 {
 			a.AvgExpectedScore = calc.Round2(a.expectedSum / float64(a.expectedCount))
+		}
+		if a.stage2FailScored > 0 {
+			a.AvgStage2FailScore = calc.Round2(a.stage2FailSum / float64(a.stage2FailScored))
 		}
 		if len(a.rejectedScores) > 0 {
 			a.AvgRejectedScore = calc.Round2(a.rejectedSum / float64(len(a.rejectedScores)))

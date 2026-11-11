@@ -21,6 +21,7 @@
  * @property {string[] | null} preferences
  * @property {string} assignedDepartment
  * @property {string} assignedSchool
+ * @property {string} firstStageResult - FirstStageResult 1차 전형 결과("" 미구분·해당 없음, "합격", "불합격"). 1차에서 정원의 1.3~1.5배를 뽑고 2차(면접 등)를 거쳐 최종 합격자를 정하는 학교에서 "1차 합격 후 최종 불합격"을 따로 분석하기 위해 쓴다.
  * @property {ApplicationScoreDetails | null} [scoreDetails]
  * @property {string} updatedAt
  */

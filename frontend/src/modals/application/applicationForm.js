@@ -127,6 +127,7 @@ export function defineApplicationRenderer(ctx) {
             <label class="text-sm font-bold">지원 학교<select id="appSchool" class="input-field mt-1 w-full" ${(!needsSchool && record.category !== 'other') || isNone || !ctx.canEdit || isLocked ? 'disabled' : ''}>${ctx.schoolOptions(record.category, record.schoolName)}</select></label>
             <label class="text-sm font-bold">전형 / 지원 유형<select id="appTrack" class="input-field mt-1 w-full" ${ctx.canEdit && !isOther && !isLocked ? '' : 'disabled'}>${ctx.trackOptions(record.category, record.schoolName, record.track)}</select></label>
             <label class="text-sm font-bold">지원 상태<select id="appStatus" class="input-field mt-1 w-full" ${ctx.canEdit && !isNone && !isLocked ? '' : 'disabled'}>${statusSelectHTML}</select></label>
+            <label id="appStageArea" class="text-sm font-bold ${needsDepartment ? '' : 'hidden'}">1차 전형 결과 <span class="text-[11px] font-normal text-slate-400">(1차 합격 후 면접 등에서 떨어지면 '1차 합격' + 지원 상태 '불합격')</span><select id="appStage" class="input-field mt-1 w-full" ${ctx.canEdit && !isLocked ? '' : 'disabled'}>${ctx.stageOptions(record.firstStageResult || '')}</select></label>
             <label class="text-sm font-bold">점수 스냅샷 <span class="text-[11px] text-cyan-300">자동</span><input id="appScore" type="text" inputmode="decimal" value="${displayedScore || ''}" placeholder="${isUnscored && !isNone ? '별도 전형 학교 — 점수 미기록' : '학교·전형 선택 시 자동 산출'}" class="input-field mt-1 w-full" ${isUnscored ? 'disabled' : (autoScore || isLocked ? 'readonly' : (ctx.canEdit ? '' : 'disabled'))}></label>
             <label class="text-sm font-bold md:col-span-2">점수 기준 / 메모<input id="appBasis" value="${displayedBasis}" data-auto="${isAutoBasis}" placeholder="${isNone ? '예: 진학포기 사유, 기타 진로 등' : (isUnscored ? '예: 실기·면접 전형, 지원 학과, 메모 등' : '예: 3-1 누적 예상, 1차 서류점수 등')}" class="input-field mt-1 w-full" ${ctx.canEdit && !isLocked ? '' : 'disabled'}></label>
             <div id="appPreferenceArea" class="md:col-span-2 ${needsDepartment ? '' : 'hidden'}">${ctx.departmentControls(record.schoolName, record.preferences || [], record.assignedDepartment || '', ctx.preferenceLimit(record.category, record.track))}</div>
@@ -173,6 +174,7 @@ export function defineApplicationRenderer(ctx) {
             document.getElementById('appSchool').disabled = (!reqSchool && curCat !== 'other') || curCat === 'none';
             document.getElementById('appTrack').disabled = curCat === 'other';
             document.getElementById('appStatus').disabled = curCat === 'none';
+            document.getElementById('appStage').disabled = false;
             if (!autoScore && curCat !== 'none') {
                 document.getElementById('appScore').readOnly = false;
             }
@@ -287,6 +289,8 @@ export function defineApplicationRenderer(ctx) {
             trackSelect.disabled = other || !ctx.canEdit || isLocked;
 
             document.getElementById('appPreferenceArea').classList.toggle('hidden', !departmentRequired);
+            document.getElementById('appStageArea').classList.toggle('hidden', !departmentRequired);
+            if (!departmentRequired) document.getElementById('appStage').value = '';
             document.getElementById('appGeneralAssignedArea')?.classList.toggle('hidden', !general);
             document.getElementById('generalApplicationGuide').classList.toggle('hidden', !general);
             document.getElementById('noneApplicationGuide')?.classList.toggle('hidden', !none);
@@ -322,6 +326,14 @@ export function defineApplicationRenderer(ctx) {
             refreshDepartmentControls();
             refreshTrackAndScore();
         };
+        // 최종 합격이면 1차도 합격, 1차 불합격이면 최종도 불합격으로 맞춘다.
+        document.getElementById('appStatus').addEventListener('change', () => {
+            const stage = document.getElementById('appStage');
+            if (document.getElementById('appStatus').value === '합격' && !stage.closest('.hidden')) stage.value = '합격';
+        });
+        document.getElementById('appStage').addEventListener('change', () => {
+            if (document.getElementById('appStage').value === '불합격') document.getElementById('appStatus').value = '불합격';
+        });
         document.getElementById('appTrack').onchange = () => {
             refreshDepartmentControls();
             refreshTrackAndScore();
@@ -350,12 +362,14 @@ export function defineApplicationRenderer(ctx) {
                 scoreBasis: document.getElementById('appBasis').value.trim(),
                 preferences: hasDepartment ? preferences : [],
                 assignedDepartment: hasDepartment ? document.getElementById('appAssigned').value.trim() : '',
-                assignedSchool: assignedSchoolVal
+                assignedSchool: assignedSchoolVal,
+                firstStageResult: hasDepartment ? document.getElementById('appStage').value : ''
             };
             const sameYear = records.filter(r => r.admissionYear === payload.admissionYear && r.schoolName !== payload.schoolName);
             const active = r => ['지원예정', '지원완료', '지원 예정', '지원 완료', '합격', '최종 진학'].includes(r.status);
             const activeIn = categoryName => sameYear.some(r => r.category === categoryName && active(r));
             if ((category === 'meister' || category === 'special' || category === 'self_foreign') && !payload.schoolName) return alert('마이스터고·특성화고·자사고·외고는 목록에서 지원 학교를 선택해주세요.');
+            if (payload.firstStageResult === '불합격' && payload.status !== '불합격') return alert('1차 전형 불합격 학생은 지원 상태도 불합격으로 기록해주세요.');
             if (category === 'special' && trackVal.includes('취업') && payload.preferences.length > 1) return alert('특성화고 취업희망자 특별전형은 1지망(1개 학과)만 지원할 수 있습니다.');
             if ((category === 'meister' || category === 'special') && ['합격', '최종 진학'].includes(payload.status) && !payload.assignedDepartment) return alert('합격 또는 최종 진학 결과는 실제 배정 학과를 선택해주세요.');
 

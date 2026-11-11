@@ -24,22 +24,26 @@ type ApplicationScoreDetails struct {
 // frozen at the time of application so later formula changes do not alter
 // historical results.
 type ApplicationRecord struct {
-	ID                 int                      `json:"id"`
-	ClassNum           int                      `json:"classNum"`
-	StudentNum         string                   `json:"studentNum"`
-	StudentName        string                   `json:"studentName"`
-	AdmissionYear      int                      `json:"admissionYear"`
-	Category           string                   `json:"category"` // meister, special, self_foreign, general, other
-	SchoolName         string                   `json:"schoolName"`
-	Track              string                   `json:"track"`
-	Status             string                   `json:"status"`
-	Score              float64                  `json:"score"`
-	ScoreBasis         string                   `json:"scoreBasis"`
-	Preferences        []string                 `json:"preferences"`
-	AssignedDepartment string                   `json:"assignedDepartment"`
-	AssignedSchool     string                   `json:"assignedSchool"`
-	ScoreDetails       *ApplicationScoreDetails `json:"scoreDetails,omitempty"`
-	UpdatedAt          string                   `json:"updatedAt"`
+	ID                 int      `json:"id"`
+	ClassNum           int      `json:"classNum"`
+	StudentNum         string   `json:"studentNum"`
+	StudentName        string   `json:"studentName"`
+	AdmissionYear      int      `json:"admissionYear"`
+	Category           string   `json:"category"` // meister, special, self_foreign, general, other
+	SchoolName         string   `json:"schoolName"`
+	Track              string   `json:"track"`
+	Status             string   `json:"status"`
+	Score              float64  `json:"score"`
+	ScoreBasis         string   `json:"scoreBasis"`
+	Preferences        []string `json:"preferences"`
+	AssignedDepartment string   `json:"assignedDepartment"`
+	AssignedSchool     string   `json:"assignedSchool"`
+	// FirstStageResult 1차 전형 결과("" 미구분·해당 없음, "합격", "불합격").
+	// 1차에서 정원의 1.3~1.5배를 뽑고 2차(면접 등)를 거쳐 최종 합격자를 정하는 학교에서
+	// "1차 합격 후 최종 불합격"을 따로 분석하기 위해 쓴다.
+	FirstStageResult string                   `json:"firstStageResult"`
+	ScoreDetails     *ApplicationScoreDetails `json:"scoreDetails,omitempty"`
+	UpdatedAt        string                   `json:"updatedAt"`
 }
 
 // IsScoredCategory reports whether a category's recorded score is comparable

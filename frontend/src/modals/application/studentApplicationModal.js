@@ -147,6 +147,9 @@ async function prepareApplicationModal(ctx) {
     };
     // 자사고·외고·과학고·예술고·스포츠과학고·애니원고 등(기타 포함)은 실기·면접 등 별도 전형이므로
     // 점수를 기록·집계하지 않고 지원·합격 결과만 남긴다.
+    // 1차(정원의 1.3~1.5배 선발)·2차(면접 등) 전형 단계 결과. 커트라인 분석에서 2차 탈락을 구분한다.
+    ctx.stageOptions = (selected = '') => [['', '미발표 · 구분 안 함'], ['합격', '1차 합격'], ['불합격', '1차 불합격']]
+        .map(([v, t]) => `<option value="${v}" ${v === selected ? 'selected' : ''}>${t}</option>`).join('');
     ctx.isUnscoredCategory = category => ['self_foreign', 'other', 'none'].includes(category);
     // 특성화고 취업희망자 특별전형은 1개 학과(1지망)만 지원할 수 있다.
     ctx.preferenceLimit = (category, track) => (category === 'special' && String(track || '').includes('취업') ? 1 : 5);

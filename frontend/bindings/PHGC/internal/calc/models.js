@@ -21,6 +21,7 @@ import * as model$0 from "../model/models.js";
  * @property {number} submittedCount
  * @property {number} acceptedCount
  * @property {number} rejectedCount
+ * @property {number} stage2FailCount - 1차 합격 후 최종 불합격(면접 등)
  * @property {number} finalCount
  * @property {number} acceptedMin - Accepted Scores
  * @property {number} acceptedMax
@@ -94,6 +95,7 @@ import * as model$0 from "../model/models.js";
  * @property {number} GeneralTotalScore - 후기 일반고 내신 총점(200)
  * @property {boolean} GeneralDataComplete - 학년별 비교과 입력 완료 여부
  * @property {boolean} GeneralProjected - 11/30 마감 전 누적자료 기준 예상치
+ * @property {boolean} ThirdYearFinalUsed - S22에 실제 3학년 2학기 성적을 반영했는지(false면 3-1 성적으로 대신한 예상치)
  */
 
 /**

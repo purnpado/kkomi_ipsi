@@ -34,6 +34,9 @@ func (dm *DBManager) SaveApplication(record model.ApplicationRecord) error {
 	if closed {
 		return fmt.Errorf("%d 고입 결과가 확정되어 지원현황을 수정할 수 없습니다. 학년부장이 확정을 해제한 뒤 수정해주세요", record.AdmissionYear)
 	}
+	if err := normalizeFirstStageResult(&record); err != nil {
+		return err
+	}
 	if len(record.Preferences) > 5 {
 		return fmt.Errorf("학과 지망은 최대 5개까지 입력할 수 있습니다")
 	}
@@ -75,8 +78,8 @@ func (dm *DBManager) SaveApplication(record model.ApplicationRecord) error {
 		return err
 	}
 	defer db.Close()
-	_, err = db.Exec(`INSERT INTO student_applications (student_num,student_name,admission_year,category,school_name,track,status,score,score_basis,preferences_json,assigned_department,assigned_school,score_details_json,updated_at)
-	VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,CURRENT_TIMESTAMP)
+	_, err = db.Exec(`INSERT INTO student_applications (student_num,student_name,admission_year,category,school_name,track,status,score,score_basis,preferences_json,assigned_department,assigned_school,score_details_json,first_stage_result,updated_at)
+	VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,CURRENT_TIMESTAMP)
 	ON CONFLICT(student_num,student_name,admission_year,category,school_name,track) DO UPDATE SET 
 		status=excluded.status,
 		score=excluded.score,
@@ -84,9 +87,10 @@ func (dm *DBManager) SaveApplication(record model.ApplicationRecord) error {
 		preferences_json=excluded.preferences_json,
 		assigned_department=excluded.assigned_department,
 		assigned_school=excluded.assigned_school,
+		first_stage_result=excluded.first_stage_result,
 		score_details_json=CASE WHEN excluded.score_details_json != '' THEN excluded.score_details_json ELSE student_applications.score_details_json END,
 		updated_at=CURRENT_TIMESTAMP`,
-		record.StudentNum, record.StudentName, record.AdmissionYear, record.Category, record.SchoolName, record.Track, record.Status, record.Score, record.ScoreBasis, string(prefs), record.AssignedDepartment, record.AssignedSchool, scoreDetailsJSON)
+		record.StudentNum, record.StudentName, record.AdmissionYear, record.Category, record.SchoolName, record.Track, record.Status, record.Score, record.ScoreBasis, string(prefs), record.AssignedDepartment, record.AssignedSchool, scoreDetailsJSON, record.FirstStageResult)
 	return err
 }
 
@@ -121,7 +125,7 @@ func (dm *DBManager) GetStudentApplications(classNum int, studentNum, name strin
 		return nil, err
 	}
 	defer db.Close()
-	rows, err := db.Query(`SELECT id,admission_year,category,school_name,track,status,score,score_basis,preferences_json,assigned_department,COALESCE(assigned_school, ''),COALESCE(score_details_json, ''),updated_at FROM student_applications WHERE student_num=? AND student_name=? ORDER BY updated_at DESC`, studentNum, name)
+	rows, err := db.Query(`SELECT id,admission_year,category,school_name,track,status,score,score_basis,preferences_json,assigned_department,COALESCE(assigned_school, ''),COALESCE(score_details_json, ''),COALESCE(first_stage_result, ''),updated_at FROM student_applications WHERE student_num=? AND student_name=? ORDER BY updated_at DESC`, studentNum, name)
 	if err != nil {
 		return nil, err
 	}
@@ -130,7 +134,7 @@ func (dm *DBManager) GetStudentApplications(classNum int, studentNum, name strin
 	for rows.Next() {
 		var r model.ApplicationRecord
 		var prefs, detailsJSON string
-		if err := rows.Scan(&r.ID, &r.AdmissionYear, &r.Category, &r.SchoolName, &r.Track, &r.Status, &r.Score, &r.ScoreBasis, &prefs, &r.AssignedDepartment, &r.AssignedSchool, &detailsJSON, &r.UpdatedAt); err != nil {
+		if err := rows.Scan(&r.ID, &r.AdmissionYear, &r.Category, &r.SchoolName, &r.Track, &r.Status, &r.Score, &r.ScoreBasis, &prefs, &r.AssignedDepartment, &r.AssignedSchool, &detailsJSON, &r.FirstStageResult, &r.UpdatedAt); err != nil {
 			return nil, err
 		}
 		r.ClassNum = classNum
@@ -162,7 +166,7 @@ func (dm *DBManager) GetSchoolApplicationRecords() ([]model.ApplicationRecord, e
 			}
 			return nil, err
 		}
-		rows, err := db.Query(`SELECT student_num,student_name,admission_year,category,school_name,track,status,score,score_basis,preferences_json,assigned_department,COALESCE(assigned_school, ''),COALESCE(score_details_json, ''),updated_at FROM student_applications ORDER BY student_num,updated_at`)
+		rows, err := db.Query(`SELECT student_num,student_name,admission_year,category,school_name,track,status,score,score_basis,preferences_json,assigned_department,COALESCE(assigned_school, ''),COALESCE(score_details_json, ''),COALESCE(first_stage_result, ''),updated_at FROM student_applications ORDER BY student_num,updated_at`)
 		if err != nil {
 			db.Close()
 			continue
@@ -170,7 +174,7 @@ func (dm *DBManager) GetSchoolApplicationRecords() ([]model.ApplicationRecord, e
 		for rows.Next() {
 			var r model.ApplicationRecord
 			var prefs, detailsJSON string
-			if err := rows.Scan(&r.StudentNum, &r.StudentName, &r.AdmissionYear, &r.Category, &r.SchoolName, &r.Track, &r.Status, &r.Score, &r.ScoreBasis, &prefs, &r.AssignedDepartment, &r.AssignedSchool, &detailsJSON, &r.UpdatedAt); err == nil {
+			if err := rows.Scan(&r.StudentNum, &r.StudentName, &r.AdmissionYear, &r.Category, &r.SchoolName, &r.Track, &r.Status, &r.Score, &r.ScoreBasis, &prefs, &r.AssignedDepartment, &r.AssignedSchool, &detailsJSON, &r.FirstStageResult, &r.UpdatedAt); err == nil {
 				r.ClassNum = classNum
 				_ = json.Unmarshal([]byte(prefs), &r.Preferences)
 				if strings.TrimSpace(detailsJSON) != "" {
@@ -241,6 +245,28 @@ func (dm *DBManager) ApplyPatchChange(change model.PatchChange) error {
 		if err := dm.SaveApplication(record); err != nil {
 			return err
 		}
+	}
+	return nil
+}
+
+// normalizeFirstStageResult는 1차 전형 결과를 최종 상태와 맞춘다.
+// 1차·2차로 나눠 뽑는 전형은 마이스터고·특성화고뿐이며, 최종 합격이면 1차도 합격이다.
+// 1차 불합격인데 최종 결과가 불합격이 아니면 모순이므로 저장하지 않는다.
+func normalizeFirstStageResult(record *model.ApplicationRecord) error {
+	switch record.FirstStageResult {
+	case "", "합격", "불합격":
+	default:
+		return fmt.Errorf("1차 전형 결과 값이 올바르지 않습니다")
+	}
+	if record.Category != "meister" && record.Category != "special" {
+		record.FirstStageResult = ""
+		return nil
+	}
+	if (record.Status == "합격" || record.Status == "최종 진학") && record.FirstStageResult == "" {
+		record.FirstStageResult = "합격"
+	}
+	if record.FirstStageResult == "불합격" && record.Status != "불합격" && record.Status != "포기" {
+		return fmt.Errorf("1차 전형 불합격 학생은 최종 결과도 불합격으로 기록해주세요")
 	}
 	return nil
 }

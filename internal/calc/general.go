@@ -44,6 +44,9 @@ type StudentCalcResult struct {
 	GeneralTotalScore   float64 // 후기 일반고 내신 총점(200)
 	GeneralDataComplete bool    // 학년별 비교과 입력 완료 여부
 	GeneralProjected    bool    // 11/30 마감 전 누적자료 기준 예상치
+	ThirdYearFinalUsed  bool    // S22에 실제 3학년 2학기 성적을 반영했는지(false면 3-1 성적으로 대신한 예상치)
+	hasThirdYearFinal   bool
+	s22Projected        float64
 }
 
 // CalculateGrades 전체 학생들의 내신 성적을 계산하여 석차 및 최종 점수를 반환
@@ -60,6 +63,25 @@ func CalculateGrades(allStudents map[int][]parser.StudentExcelData, isSmallSchoo
 			}
 			results = append(results, calc)
 		}
+	}
+
+	// 1-1. 3학년 2학기 성적 반영 여부는 학교 전체에 똑같이 적용한다. 전기고(마이스터고·특성화고)
+	// 입시가 후기 일반고보다 먼저라 2학기 성적이 나오기 전에는 3-1 성적을 3-2에 복사한 예상치로
+	// 일반고 지원 가능성을 가늠한다. 일부 학생만 3-2가 올라온 상태로 석차를 섞지 않도록,
+	// 모든 학생에게 3-2가 있을 때만 실제 3-2 성적을 쓴다.
+	allHaveFinal := len(results) > 0
+	for _, r := range results {
+		if !r.hasThirdYearFinal {
+			allHaveFinal = false
+			break
+		}
+	}
+	for i := range results {
+		if !allHaveFinal {
+			results[i].S22 = results[i].s22Projected
+		}
+		results[i].ThirdYearFinalUsed = allHaveFinal
+		results[i].TotalSubjectScore = roundToTwoDecimals(results[i].S11 + results[i].S12 + results[i].S13 + results[i].S21 + results[i].S22)
 	}
 
 	// 2. 총점(TotalSubjectScore) 기준으로 정렬하여 석차 구하기
@@ -361,17 +383,27 @@ func calcSingleStudent(s parser.StudentExcelData) (StudentCalcResult, error) {
 	}
 	res.S11 = calcSemesterScore(s11Scores, 5.44)
 
-	// S12: 2학년 1학기
-	res.S12 = calcSemesterScore(semesters["2_1"], 5.44)
+	// 요강: 성적이 없는 학기는 같은 학년의 다른 학기 성적을 그대로 인정한다
+	// (1학기 ← 2학기, 2학기 ← 1학기). 전·편입생 등 결손 학기 대비.
+	semesterOrSibling := func(grade, sem, sibling string) []int {
+		if len(semesters[grade+"_"+sem]) > 0 {
+			return semesters[grade+"_"+sem]
+		}
+		return semesters[grade+"_"+sibling]
+	}
 
-	// S13: 2학년 2학기
-	res.S13 = calcSemesterScore(semesters["2_2"], 5.44)
+	// S12: 2학년 1학기, S13: 2학년 2학기
+	res.S12 = calcSemesterScore(semesterOrSibling("2", "1", "2"), 5.44)
+	res.S13 = calcSemesterScore(semesterOrSibling("2", "2", "1"), 5.44)
 
 	// S21: 3학년 1학기
-	res.S21 = calcSemesterScore(semesters["3_1"], 7.84)
+	res.S21 = calcSemesterScore(semesterOrSibling("3", "1", "2"), 7.84)
 
-	// S22: 3학년 2학기 (성적이 없으므로 S21 미러링)
-	res.S22 = res.S21
+	// S22: 3학년 2학기. 요강은 3학년 2학기 기말까지 반영하므로 3-2 성적이 올라오면
+	// 그 성적을 쓰고, 올라오기 전(상담 시점)에는 3-1 성적으로 대신한 예상값이다.
+	res.S22 = calcSemesterScore(semesterOrSibling("3", "2", "1"), 7.84)
+	res.hasThirdYearFinal = len(semesters["3_2"]) > 0
+	res.s22Projected = res.S21
 
 	// 소수 셋째자리 반올림 (5개 학기 모두 합산)
 	res.TotalSubjectScore = roundToTwoDecimals(res.S11 + res.S12 + res.S13 + res.S21 + res.S22)
@@ -390,8 +422,7 @@ func calcSemesterScore(scores []int, ratio float64) float64 {
 		sum += s
 	}
 	val := (float64(sum) / float64(len(scores))) * ratio
-	// 울산 지침상 S11 등 각 학기 점수에 대한 반올림 규정이 없다면そのまま 사용, 있다면 여기서 반올림.
-	// 일반적으로 소수 셋째자리에서 반올림 적용.
+	// 요강: 학기 점수도 소수 셋째 자리에서 반올림한다.
 	return roundToTwoDecimals(val)
 }
 

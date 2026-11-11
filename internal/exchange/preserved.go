@@ -20,6 +20,7 @@ type preservedAppRow struct {
 	AssignedDepartment string
 	AssignedSchool     string
 	ScoreDetailsJSON   string
+	FirstStageResult   string
 	UpdatedAt          string
 }
 
@@ -59,12 +60,12 @@ func extractPreservedClassData(dm *database.DBManager, dbPath string) (preserved
 	defer db.Close()
 
 	// 1. Applications 추출
-	appRows, err := db.Query(`SELECT student_num, student_name, admission_year, category, school_name, track, status, score, score_basis, preferences_json, assigned_department, COALESCE(assigned_school, ''), COALESCE(score_details_json, ''), updated_at FROM student_applications`)
+	appRows, err := db.Query(`SELECT student_num, student_name, admission_year, category, school_name, track, status, score, score_basis, preferences_json, assigned_department, COALESCE(assigned_school, ''), COALESCE(score_details_json, ''), COALESCE(first_stage_result, ''), updated_at FROM student_applications`)
 	if err == nil {
 		defer appRows.Close()
 		for appRows.Next() {
 			var a preservedAppRow
-			if err := appRows.Scan(&a.StudentNum, &a.StudentName, &a.AdmissionYear, &a.Category, &a.SchoolName, &a.Track, &a.Status, &a.Score, &a.ScoreBasis, &a.PreferencesJSON, &a.AssignedDepartment, &a.AssignedSchool, &a.ScoreDetailsJSON, &a.UpdatedAt); err == nil {
+			if err := appRows.Scan(&a.StudentNum, &a.StudentName, &a.AdmissionYear, &a.Category, &a.SchoolName, &a.Track, &a.Status, &a.Score, &a.ScoreBasis, &a.PreferencesJSON, &a.AssignedDepartment, &a.AssignedSchool, &a.ScoreDetailsJSON, &a.FirstStageResult, &a.UpdatedAt); err == nil {
 				result.Apps = append(result.Apps, a)
 			}
 		}
@@ -112,8 +113,8 @@ func restorePreservedClassData(dm *database.DBManager, dbPath string, data prese
 
 	// 1. Applications 복원 (같은 학생·학년도·전형이면 담임 PC의 최신 입력으로 갱신)
 	for _, a := range data.Apps {
-		_, err := db.Exec(`INSERT INTO student_applications (student_num, student_name, admission_year, category, school_name, track, status, score, score_basis, preferences_json, assigned_department, assigned_school, score_details_json, updated_at)
-			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+		_, err := db.Exec(`INSERT INTO student_applications (student_num, student_name, admission_year, category, school_name, track, status, score, score_basis, preferences_json, assigned_department, assigned_school, score_details_json, first_stage_result, updated_at)
+			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 			ON CONFLICT(student_num, student_name, admission_year, category, school_name, track) DO UPDATE SET
 				status = excluded.status,
 				score = excluded.score,
@@ -121,9 +122,10 @@ func restorePreservedClassData(dm *database.DBManager, dbPath string, data prese
 				preferences_json = excluded.preferences_json,
 				assigned_department = excluded.assigned_department,
 				assigned_school = excluded.assigned_school,
+				first_stage_result = excluded.first_stage_result,
 				score_details_json = CASE WHEN excluded.score_details_json <> '' THEN excluded.score_details_json ELSE student_applications.score_details_json END,
 				updated_at = excluded.updated_at`,
-			a.StudentNum, a.StudentName, a.AdmissionYear, a.Category, a.SchoolName, a.Track, a.Status, a.Score, a.ScoreBasis, a.PreferencesJSON, a.AssignedDepartment, a.AssignedSchool, a.ScoreDetailsJSON, a.UpdatedAt)
+			a.StudentNum, a.StudentName, a.AdmissionYear, a.Category, a.SchoolName, a.Track, a.Status, a.Score, a.ScoreBasis, a.PreferencesJSON, a.AssignedDepartment, a.AssignedSchool, a.ScoreDetailsJSON, a.FirstStageResult, a.UpdatedAt)
 		keep(err)
 	}
 

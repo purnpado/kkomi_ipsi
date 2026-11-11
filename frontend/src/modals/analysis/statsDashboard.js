@@ -30,7 +30,7 @@ export function renderStatsDashboard(container, stats, sourceMode) {
                 </div>
                 <div class="text-[11px] text-slate-400 flex items-center gap-1.5 pt-1 border-t border-slate-700/40">
                     <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-                    <span>불합격 ${stats.rejectedCount}명</span>
+                    <span>불합격 ${stats.rejectedCount}명${stats.stage2FailCount ? ` (1차 합격 후 ${stats.stage2FailCount}명)` : ''}</span>
                     <span class="text-slate-600">·</span>
                     <span class="text-indigo-300 font-medium">${sourceMode === 'consolidated' ? `관내 ${stats.totalParticipatingSchool}개교` : '우리 학교'}</span>
                 </div>

@@ -34,6 +34,7 @@ type DepartmentAdmissionStats struct {
 	SubmittedCount  int `json:"submittedCount"`
 	AcceptedCount   int `json:"acceptedCount"`
 	RejectedCount   int `json:"rejectedCount"`
+	Stage2FailCount int `json:"stage2FailCount"` // 1차 합격 후 최종 불합격(면접 등)
 	FinalCount      int `json:"finalCount"`
 
 	// Accepted Scores
@@ -251,6 +252,9 @@ func ComputeDepartmentAdmissionStats(records []model.ApplicationRecord, bucketSt
 			g.stats.AcceptedCount++
 		case "불합격":
 			g.stats.RejectedCount++
+			if r.FirstStageResult == "합격" {
+				g.stats.Stage2FailCount++
+			}
 		case "최종 진학", "최종진학":
 			g.stats.FinalCount++
 			g.stats.AcceptedCount++
@@ -263,6 +267,10 @@ func ComputeDepartmentAdmissionStats(records []model.ApplicationRecord, bucketSt
 				g.acceptedScores = append(g.acceptedScores, r.Score)
 				g.acceptedSum += r.Score
 			case "불합격":
+				// 1차 통과 후 2차에서 떨어진 학생은 점수 때문이 아니므로 불합격 점수 분포에서 뺀다.
+				if r.FirstStageResult == "합격" {
+					break
+				}
 				g.rejectedScores = append(g.rejectedScores, r.Score)
 				g.rejectedSum += r.Score
 			default:

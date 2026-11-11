@@ -85,7 +85,8 @@ export function buildRegisterPages(ctx, reg) {
                 deptDisplayHTML = `<span class="font-semibold">${escapeHtml(app.assignedDepartment)}</span> <span class="text-[10px] text-slate-500 font-normal">(배정)</span>`;
             }
 
-            const resultClass = { '합격': 'font-black text-emerald-800 text-xs', '불합격': 'font-black text-rose-800 text-xs' }[entry.resultText]
+            const resultClass = entry.resultText === '합격' ? 'font-black text-emerald-800 text-xs'
+                : (entry.resultText.startsWith('불합격') ? 'font-black text-rose-800 text-xs' : (entry.resultText === '1차 합격' ? 'font-bold text-indigo-800 text-xs' : null))
                 || 'text-[11px] text-slate-600 font-medium';
             const scoreClass = entry.scoreText === '별도전형' ? 'text-[10.5px] text-slate-500' : 'font-mono font-medium';
 

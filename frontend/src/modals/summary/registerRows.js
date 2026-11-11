@@ -69,7 +69,12 @@ function departmentText(app) {
 /** 합격 여부 표시: 합격·불합격·진행(지원완료)·예정(지원희망) */
 function resultText(app) {
     if (ACCEPTED.includes(app.status)) return '합격';
-    if (app.status === '불합격') return '불합격';
+    if (app.status === '불합격') {
+        if (app.firstStageResult === '합격') return '불합격(2차)';
+        if (app.firstStageResult === '불합격') return '불합격(1차)';
+        return '불합격';
+    }
+    if (app.firstStageResult === '합격') return '1차 합격';
     if (app.status === '지원완료' || app.status === '지원 완료') return '진행';
     if (app.status === '지원희망' || app.status === '지원 희망') return '예정';
     if (app.category === 'none') return '-';
