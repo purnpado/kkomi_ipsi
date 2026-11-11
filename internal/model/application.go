@@ -41,3 +41,14 @@ type ApplicationRecord struct {
 	ScoreDetails       *ApplicationScoreDetails `json:"scoreDetails,omitempty"`
 	UpdatedAt          string                   `json:"updatedAt"`
 }
+
+// IsScoredCategory reports whether a category's recorded score is comparable
+// across students. 자사고·외고·과학고·예술고·스포츠과학고·애니원고 등은 실기·면접
+// 같은 별도 전형으로 선발하므로 점수 통계·커트라인에서 빼고 결과만 기록한다.
+func IsScoredCategory(category string) bool {
+	switch category {
+	case "meister", "special", "general":
+		return true
+	}
+	return false
+}

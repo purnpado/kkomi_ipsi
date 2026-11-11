@@ -37,7 +37,7 @@ async function prepareApplicationModal(ctx) {
     ctx.defaultAdmissionYear = resolveAdmissionYear(await window.go.main.App.GetSchoolConfig().catch(() => null));
     ctx.canEdit = !state.currentUser || state.currentUser.Role !== 'viewer';
     ctx.statusOptions = ['지원희망', '지원완료', '합격', '불합격'];
-    ctx.categoryOptions = [['meister', '마이스터고'], ['special', '특성화고'], ['self_foreign', '자사고·외고'], ['general', '후기 일반고'], ['other', '기타 (전기 기타고/타시도 등)'], ['none', '미진학 (진학포기)']];
+    ctx.categoryOptions = [['meister', '마이스터고'], ['special', '특성화고'], ['self_foreign', '자사고·외고'], ['general', '후기 일반고'], ['other', '기타 (예술·스포츠과학·과학·애니원고, 타시도 등)'], ['none', '미진학 (진학포기)']];
     // 지원현황 창은 목록 조회 실패 때문에 열리지 않으면 안 된다. Wails 바인딩
     // 누락·손상 또는 로컬 목록 파일 문제도 1.5초 안에 빈 목록으로 처리한다.
     ctx.withFallback = (operation, fallback, timeoutMs = 1500) => Promise.race([
@@ -145,18 +145,23 @@ async function prepareApplicationModal(ctx) {
             return `<option value="${escapeAttr(d)}" ${isSelectedHere ? 'selected' : ''}>${escapeHtml(d)}</option>`;
         }).join('')}`;
     };
-    ctx.departmentControls = (schoolName, preferences = [], assignedDepartment = '') => {
+    // 자사고·외고·과학고·예술고·스포츠과학고·애니원고 등(기타 포함)은 실기·면접 등 별도 전형이므로
+    // 점수를 기록·집계하지 않고 지원·합격 결과만 남긴다.
+    ctx.isUnscoredCategory = category => ['self_foreign', 'other', 'none'].includes(category);
+    // 특성화고 취업희망자 특별전형은 1개 학과(1지망)만 지원할 수 있다.
+    ctx.preferenceLimit = (category, track) => (category === 'special' && String(track || '').includes('취업') ? 1 : 5);
+    ctx.departmentControls = (schoolName, preferences = [], assignedDepartment = '', limit = 5) => {
         const school = ctx.catalog.find(s => s.name === schoolName || ctx.normalizedSchoolName(s.name) === ctx.normalizedSchoolName(schoolName));
         const departments = school?.departments || [];
         if (!schoolName) return '<p class="text-xs text-text-muted">지원 학교를 선택하면 해당 학교의 학과 수에 맞춰 지망 입력란이 표시됩니다.</p>';
         if (!departments.length) return '<p class="text-xs text-amber-300">이 학교의 학과 목록을 불러오지 못했습니다. 학년부장에게 최신 배포자료를 받아 다시 적용하세요.</p>';
-        const count = Math.min(5, departments.length);
+        const count = Math.min(limit, departments.length);
         const paddedPrefs = Array.from({ length: count }, (_, i) => preferences[i] || '');
         return `
             <div class="mb-2 flex items-center justify-between">
                 <p class="text-sm font-bold text-white flex items-center gap-1.5">
                     <span>🎯</span> 학과 지망
-                    <span class="text-xs font-normal text-slate-400">(다른 지망에 선택된 학과는 비활성화되어 중복 선택이 방지됩니다)</span>
+                    <span class="text-xs font-normal text-slate-400">${limit === 1 ? '(취업희망자 특별전형은 1지망 1개 학과만 지원할 수 있습니다)' : '(다른 지망에 선택된 학과는 비활성화되어 중복 선택이 방지됩니다)'}</span>
                 </p>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-3">

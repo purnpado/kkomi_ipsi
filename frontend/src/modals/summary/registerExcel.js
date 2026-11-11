@@ -1,5 +1,6 @@
 import { escapeHtml } from '../../core/utils.js';
 import { admissionLabel } from '../../core/admissionYear.js';
+import { buildRegisterEntries } from './registerRows.js';
 
 // 원서대장: 엑셀 내보내기
 export function bindRegisterExcelExport(ctx, reg) {
@@ -48,13 +49,7 @@ export function bindRegisterExcelExport(ctx, reg) {
                 return numA - numB;
             });
 
-            const studentGroupMap = new Map();
-            classRecords.forEach(r => {
-                const sKey = r.studentNum || 0;
-                if (!studentGroupMap.has(sKey)) studentGroupMap.set(sKey, []);
-                studentGroupMap.get(sKey).push(r);
-            });
-            const uniqueStudentNums = Array.from(studentGroupMap.keys()).sort((a, b) => parseInt(a, 10) - parseInt(b, 10));
+            const entries = buildRegisterEntries(ctx, classRecords, currentClass);
 
             html += `
                 <table>
@@ -89,67 +84,29 @@ export function bindRegisterExcelExport(ctx, reg) {
                     </tr>
                 `;
 
-            if (uniqueStudentNums.length === 0) {
+            if (entries.length === 0) {
                 html += `<tr><td colspan="${totalCols}" style="height:40px;color:#888;">등록된 학생 데이터가 없습니다.</td></tr>`;
             } else {
-                uniqueStudentNums.forEach((sNum, idx) => {
-                    const apps = studentGroupMap.get(sNum) || [];
-                    const acceptedApp = apps.find(a => a.status === '합격' || a.status === '최종 진학' || a.status === '최종진학');
-                    const mainApp = acceptedApp || (apps.length > 0 ? apps[apps.length - 1] : {});
-                    const priorApps = apps.filter(a => a !== mainApp);
-
-                    const paddedClass = String(mainApp.classNum || currentClass || 1);
-                    const paddedNum = String(mainApp.studentNum || sNum).padStart(2, '0');
-                    const studentId = `3${paddedClass.padStart(2, '0')}${paddedNum}`;
-
-                    let schoolDisplay = mainApp.schoolName || '-';
-                    if (mainApp.category === 'general') schoolDisplay = '후기 일반고';
-                    else if (mainApp.category === 'none') schoolDisplay = '미진학 (진학포기)';
-
-                    let deptDisplay = '-';
-                    if (mainApp.category === 'general') {
-                        deptDisplay = mainApp.assignedSchool ? `배정: ${mainApp.assignedSchool}` : '배정고 미입력';
-                    } else if (mainApp.assignedDepartment) {
-                        deptDisplay = `${mainApp.assignedDepartment} (배정)`;
-                    } else if (mainApp.preferences && mainApp.preferences.length > 0) {
-                        deptDisplay = mainApp.preferences[0];
-                    }
-
-                    let passDisplay = mainApp.status || '-';
-                    let scoreDisplay = '-';
-                    if (mainApp.score && mainApp.score > 0) {
-                        const formattedScore = mainApp.score.toFixed(2);
-                        const maxVal = ctx.getSchoolTotalMaxString(mainApp.schoolName, mainApp.category);
-                        scoreDisplay = maxVal === '%' ? `${formattedScore}%` : (maxVal ? `${formattedScore}/${maxVal}` : formattedScore);
-                    }
-
-                    let noteParts = [];
-                    if (mainApp.track && mainApp.track !== '해당 없음' && mainApp.track !== '해당없음') {
-                        noteParts.push(mainApp.track.includes('전형') ? mainApp.track : `${mainApp.track}전형`);
-                    }
-                    const isExtra = (mainApp.schoolName || '').includes('추가') || (mainApp.track || '').includes('추가') || (mainApp.status || '').includes('추가');
-                    if (isExtra) noteParts.push('[추가모집]');
-                    if (priorApps.length > 0) {
-                        const priorSummary = priorApps.map(p => {
-                            const dept = p.assignedDepartment || (p.preferences && p.preferences[0]) || '';
-                            const scoreStr = p.score ? ` (${p.score.toFixed(1)}점)` : '';
-                            return `${p.schoolName}${dept ? ' ' + dept : ''}[${p.status || '불합격'}${scoreStr}]`;
-                        }).join(', ');
-                        noteParts.push(`(전기이력: ${priorSummary})`);
-                    }
-                    const noteDisplay = noteParts.join(' ');
-
+                // 누적 기입: 지원한 학교마다 한 줄씩(불합격·합격 각각) 적고 학생 칸은 병합한다.
+                let studentIndex = 0;
+                entries.forEach(entry => {
+                    const { app } = entry;
+                    const span = entry.applyCount > 1 ? ` rowspan="${entry.applyCount}"` : '';
+                    if (entry.applyOrder === 1) studentIndex += 1;
+                    const studentCells = entry.applyOrder === 1 ? `
+                            <td${span} style="mso-number-format:'\\@';">${studentIndex}</td>
+                            <td${span} style="mso-number-format:'\\@';">${entry.studentId}</td>
+                            <td${span} style="font-weight:bold;">${escapeHtml(app.studentName || '')}</td>` : '';
+                    const deptDisplay = app.category === 'general' ? (entry.departmentText || '배정고 미입력') : entry.departmentText;
                     html += `
                         <tr style="height:28px;">
-                            <td style="mso-number-format:'\\@';">${idx + 1}</td>
-                            <td style="mso-number-format:'\\@';">${studentId}</td>
-                            <td style="font-weight:bold;">${escapeHtml(mainApp.studentName || '')}</td>
-                            <td style="mso-number-format:'\\@';">${scoreDisplay}</td>
-                            <td style="text-align:left;padding-left:6px;">${escapeHtml(schoolDisplay)}</td>
+                            ${studentCells}
+                            <td style="mso-number-format:'\\@';">${escapeHtml(entry.scoreText)}</td>
+                            <td style="text-align:left;padding-left:6px;">${escapeHtml(entry.schoolText)}</td>
                             <td style="text-align:left;padding-left:6px;">${escapeHtml(deptDisplay)}</td>
-                            <td>${escapeHtml(passDisplay)}</td>
+                            <td>${escapeHtml(entry.resultText)}</td>
                             ${ctx.activeApprovals.map(() => `<td></td>`).join('')}
-                            <td style="text-align:left;padding-left:6px;font-size:9pt;color:#555;">${escapeHtml(noteDisplay)}</td>
+                            <td style="text-align:left;padding-left:6px;font-size:9pt;color:#555;">${escapeHtml(entry.noteText)}</td>
                         </tr>
                         `;
                 });

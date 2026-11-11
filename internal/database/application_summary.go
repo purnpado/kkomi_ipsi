@@ -86,6 +86,9 @@ func (dm *DBManager) getApplicationSummaries(classNums []int) ([]ApplicationSumm
 	}
 	groups := map[string]*accumulator{}
 	add := func(r model.ApplicationRecord, department string, rank int) {
+		if !model.IsScoredCategory(r.Category) {
+			r.Score = 0 // 별도 전형 학교는 인원만 집계한다.
+		}
 		key := strings.Join([]string{strconv.Itoa(r.AdmissionYear), r.Category, r.SchoolName, r.Track, department, strconv.Itoa(rank)}, "\x1f")
 		a := groups[key]
 		if a == nil {

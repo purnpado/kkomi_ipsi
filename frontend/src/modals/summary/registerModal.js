@@ -63,13 +63,14 @@ async function prepareRegisterModal(ctx) {
     ctx.records.forEach(r => { if (r.classNum) classSet.add(r.classNum); });
     ctx.classList = Array.from(classSet).sort((a, b) => a - b);
 
-    ctx.getSchoolTotalMaxString = (schName, cat) => {
+    ctx.getSchoolTotalMaxString = (schName, cat, track = '') => {
         if (!schName) return '';
         const name = schName.trim();
-        if (name.includes('마이스터') || name.includes('울산마이스터')) return '300';
-        if (name.includes('에너지') || name.includes('울산에너지')) return '230';
-        if (name.includes('현대공업') || name.includes('현대공고')) return '200';
-        if (name.includes('일반고') || cat === 'general') return '%';
+        const special = String(track || '').includes('특별');
+        if (name.includes('마이스터') || name.includes('울산마이스터')) return special ? '280' : '300';
+        if (name.includes('에너지') || name.includes('울산에너지')) return special ? '200' : '230';
+        if (name.includes('현대공업') || name.includes('현대공고')) return special ? '150' : '200';
+        if (name.includes('일반고') || cat === 'general') return '200'; // 후기 일반고 내신 총점(200점 만점)
         if (cat === 'special' || name.includes('공업고') || name.includes('미용예술') || name.includes('생활과학') || name.includes('산업고') || name.includes('상업고') || name.includes('애니원고')) {
             return '100';
         }
@@ -260,7 +261,7 @@ function bindRegisterControls(ctx, reg) {
                     await window.go.main.App.UpdateAssignedSchool(cNum, sNum, sName, val);
                 }
                 // 메모리 레코드에도 즉시 반영
-                const target = ctx.records.find(r => r.classNum === cNum && r.studentNum === sNum);
+                const target = ctx.records.find(r => r.classNum === cNum && r.studentNum === sNum && r.category === 'general');
                 if (target) target.assignedSchool = val;
             } catch (err) {
                 console.error('배정학교 저장 실패:', err);

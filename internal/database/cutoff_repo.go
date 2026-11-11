@@ -2,6 +2,8 @@ package database
 
 import (
 	"strings"
+
+	"PHGC/internal/model"
 )
 
 // CutoffInfo 고교 커트라인 정보 (연도 및 전형, 최고/최저/평균점 포함)
@@ -428,7 +430,7 @@ func (dm *DBManager) applyApplicationCutoffs(admissionYear int) (int, error) {
 		if admissionYear > 0 && summary.AdmissionYear != admissionYear {
 			continue
 		}
-		if summary.AcceptedCount == 0 || summary.SchoolName == "" || summary.Category == "other" || summary.Category == "general" {
+		if summary.AcceptedCount == 0 || summary.SchoolName == "" || !model.IsScoredCategory(summary.Category) || summary.Category == "general" {
 			continue
 		}
 		cutoffs = append(cutoffs, CutoffInfo{

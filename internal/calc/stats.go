@@ -256,8 +256,8 @@ func ComputeDepartmentAdmissionStats(records []model.ApplicationRecord, bucketSt
 			g.stats.AcceptedCount++
 		}
 
-		// Score gathering
-		if r.Score > 0 {
+		// Score gathering (별도 전형 학교는 인원만 집계)
+		if r.Score > 0 && model.IsScoredCategory(r.Category) {
 			switch cleanStatus {
 			case "합격", "최종 진학", "최종진학":
 				g.acceptedScores = append(g.acceptedScores, r.Score)

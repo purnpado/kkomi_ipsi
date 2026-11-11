@@ -1,5 +1,6 @@
 import { escapeHtml, escapeAttr } from '../../core/utils.js';
 import { admissionLabel } from '../../core/admissionYear.js';
+import { buildRegisterEntries } from './registerRows.js';
 
 // 원서대장: 결재란과 학급별 대장 페이지 HTML 구성
 export function buildRegisterPages(ctx, reg) {
@@ -50,124 +51,53 @@ export function buildRegisterPages(ctx, reg) {
             tableHeaderFont = 'font-size: 12px;';
         }
 
-        // 학급 내 학생 번호순으로 학생별 지원 기록들을 그룹화
-        const studentGroupMap = new Map();
-        classRecords.forEach(r => {
-            const sKey = r.studentNum || 0;
-            if (!studentGroupMap.has(sKey)) {
-                studentGroupMap.set(sKey, []);
-            }
-            studentGroupMap.get(sKey).push(r);
-        });
+        // 원서대장은 누적 기록: 학생이 지원한 학교마다 한 줄(불합격·합격 각각)을 전형 순서대로 적는다.
+        const entries = buildRegisterEntries(ctx, classRecords, currentClass);
+        let studentIndex = 0;
+        const approvalCellsHTML = ctx.activeApprovals.length > 0
+            ? ctx.activeApprovals.map(() => `<td class="border border-black p-0 w-16 text-center" style="${approvalCellHeight}"></td>`).join('')
+            : `<td class="border border-black p-0 text-center text-slate-300" style="${approvalCellHeight}">-</td>`;
 
-        // 학생 번호순 정렬된 고유 학생 목록
-        const uniqueStudentNums = Array.from(studentGroupMap.keys()).sort((a, b) => parseInt(a, 10) - parseInt(b, 10));
+        const rowsHTML = entries.length > 0 ? entries.map(entry => {
+            const { app } = entry;
+            const span = entry.applyCount > 1 ? ` rowspan="${entry.applyCount}"` : '';
+            if (entry.applyOrder === 1) studentIndex += 1;
+            const studentCells = entry.applyOrder === 1 ? `
+                        <td class="border border-black font-mono"${span} style="${cellPaddingStyle}">${studentIndex}</td>
+                        <td class="border border-black font-mono font-medium"${span} style="${cellPaddingStyle}">${escapeHtml(entry.studentId)}</td>
+                        <td class="border border-black font-bold whitespace-nowrap"${span} style="${cellPaddingStyle}">${escapeHtml(app.studentName)}</td>` : '';
 
-        const rowsHTML = uniqueStudentNums.length > 0 ? uniqueStudentNums.map((sNum, idx) => {
-            const apps = studentGroupMap.get(sNum) || [];
-            // 1순위: 최종 합격/최종 진학 기록, 2순위: 가장 마지막 지원 기록 (후기 일반고 등)
-            const acceptedApp = apps.find(a => a.status === '합격' || a.status === '최종 진학' || a.status === '최종진학');
-            const mainApp = acceptedApp || (apps.length > 0 ? apps[apps.length - 1] : {});
-            // 이전 지원 이력 (메인 기록을 제외한 나머지 기록들, 주로 전기 불합격 등)
-            const priorApps = apps.filter(a => a !== mainApp);
-
-            const paddedClass = String(mainApp.classNum || currentClass || 1);
-            const paddedNum = String(mainApp.studentNum || sNum).padStart(2, '0');
-            const studentId = `3${paddedClass.padStart(2, '0')}${paddedNum}`;
-
-            let schoolDisplay = escapeHtml(mainApp.schoolName || '-');
-            if (mainApp.category === 'general') {
-                schoolDisplay = '후기 일반고';
-            } else if (mainApp.category === 'none') {
-                schoolDisplay = '미진학 (진학포기)';
-            }
-
-            let deptDisplayHTML = '';
-            if (mainApp.category === 'general') {
+            let deptDisplayHTML = escapeHtml(entry.departmentText);
+            if (app.category === 'general') {
                 deptDisplayHTML = `
                         <div class="flex items-center justify-center gap-1 w-full">
-                            <input type="text" 
+                            <input type="text"
                                    class="register-assigned-school-input font-bold text-indigo-900 border-b border-dashed border-indigo-400 bg-transparent text-left w-full outline-none print:border-none print:text-black print:p-0"
                                    style="border-bottom-style: dashed; ${cellFontSizeStyle} padding: 1px 2px;"
-                                   value="${escapeAttr(mainApp.assignedSchool || '')}" 
-                                   placeholder="배정고 입력(수기)" 
-                                   data-class="${escapeAttr(mainApp.classNum || currentClass)}" 
-                                   data-num="${escapeAttr(mainApp.studentNum || sNum)}" 
-                                   data-name="${escapeAttr(mainApp.studentName)}" />
+                                   value="${escapeAttr(app.assignedSchool || '')}"
+                                   placeholder="배정고 입력(수기)"
+                                   data-class="${escapeAttr(app.classNum || currentClass)}"
+                                   data-num="${escapeAttr(app.studentNum)}"
+                                   data-name="${escapeAttr(app.studentName)}" />
                         </div>
                     `;
-            } else {
-                if (mainApp.assignedDepartment) {
-                    deptDisplayHTML = `<span class="font-semibold">${escapeHtml(mainApp.assignedDepartment)}</span> <span class="text-[10px] text-slate-500 font-normal">(배정)</span>`;
-                } else if (mainApp.preferences && mainApp.preferences.length > 0) {
-                    deptDisplayHTML = `<span class="font-medium">${escapeHtml(mainApp.preferences[0])}</span>`;
-                } else {
-                    deptDisplayHTML = '-';
-                }
+            } else if (app.assignedDepartment && entry.departmentText.endsWith('(배정)')) {
+                deptDisplayHTML = `<span class="font-semibold">${escapeHtml(app.assignedDepartment)}</span> <span class="text-[10px] text-slate-500 font-normal">(배정)</span>`;
             }
 
-            // 합격 여부 (O/X 대신 '합격', '불합격', '진행'으로 명확히 표기)
-            let passDisplay = '-';
-            if (mainApp.status === '합격' || mainApp.status === '최종 진학' || mainApp.status === '최종진학') {
-                passDisplay = '<span class="font-black text-emerald-800 text-xs">합격</span>';
-            } else if (mainApp.status === '불합격') {
-                passDisplay = '<span class="font-black text-rose-800 text-xs">불합격</span>';
-            } else if (mainApp.status === '지원완료' || mainApp.status === '지원희망') {
-                passDisplay = '<span class="text-[11px] text-slate-600 font-medium">진행</span>';
-            }
-
-            let scoreDisplay = '-';
-            if (mainApp.score && mainApp.score > 0) {
-                const formattedScore = mainApp.score.toFixed(2);
-                const maxVal = ctx.getSchoolTotalMaxString(mainApp.schoolName, mainApp.category);
-                if (maxVal === '%') {
-                    scoreDisplay = `${formattedScore}%`;
-                } else if (maxVal) {
-                    scoreDisplay = `${formattedScore}/${maxVal}`;
-                } else {
-                    scoreDisplay = formattedScore;
-                }
-            }
-
-            // 비고란: 전형 표시 + 추가모집 뱃지 + 이전 전기 지원이력(전기 불합격 학교·학과·점수)
-            let noteParts = [];
-            if (mainApp.track && mainApp.track !== '해당 없음' && mainApp.track !== '해당없음') {
-                const trackText = mainApp.track.includes('전형') ? mainApp.track : `${mainApp.track}전형`;
-                noteParts.push(escapeHtml(trackText));
-            }
-            const isExtraRecruit = (mainApp.schoolName || '').includes('추가') || (mainApp.track || '').includes('추가') || (mainApp.status || '').includes('추가');
-            if (isExtraRecruit) {
-                noteParts.push('<span class="font-bold text-indigo-700">[추가모집]</span>');
-            }
-
-            // 이전 전기 지원이력 표시 (마이스터고, 특성화고 불합격 이력 등)
-            if (priorApps.length > 0) {
-                const priorSummary = priorApps.map(p => {
-                    const dept = p.assignedDepartment || (p.preferences && p.preferences[0]) || '';
-                    const scoreStr = p.score ? ` (${p.score.toFixed(1)}점)` : '';
-                    const statusStr = p.status || '불합격';
-                    return `${p.schoolName}${dept ? ' ' + dept : ''}[${statusStr}${scoreStr}]`;
-                }).join(', ');
-                noteParts.push(`<div class="text-[9.5px] text-slate-600 leading-tight mt-0.5"><span class="text-rose-700 font-semibold">전기이력:</span> ${escapeHtml(priorSummary)}</div>`);
-            }
-
-            const noteDisplay = noteParts.join(' ') || '';
-
-            const approvalCellsHTML = ctx.activeApprovals.length > 0
-                ? ctx.activeApprovals.map(() => `<td class="border border-black p-0 w-16 text-center" style="${approvalCellHeight}"></td>`).join('')
-                : `<td class="border border-black p-0 text-center text-slate-300" style="${approvalCellHeight}">-</td>`;
+            const resultClass = { '합격': 'font-black text-emerald-800 text-xs', '불합격': 'font-black text-rose-800 text-xs' }[entry.resultText]
+                || 'text-[11px] text-slate-600 font-medium';
+            const scoreClass = entry.scoreText === '별도전형' ? 'text-[10.5px] text-slate-500' : 'font-mono font-medium';
 
             return `
                     <tr class="text-center text-black font-sans hover:bg-slate-50 print:hover:bg-transparent" style="${cellFontSizeStyle}">
-                        <td class="border border-black font-mono" style="${cellPaddingStyle}">${idx + 1}</td>
-                        <td class="border border-black font-mono font-medium" style="${cellPaddingStyle}">${escapeHtml(studentId)}</td>
-                        <td class="border border-black font-bold whitespace-nowrap" style="${cellPaddingStyle}">${escapeHtml(mainApp.studentName)}</td>
-                        <td class="border border-black font-mono font-medium whitespace-nowrap" style="${cellPaddingStyle}">${scoreDisplay}</td>
-                        <td class="border border-black font-semibold text-left pl-2.5" style="${cellPaddingStyle}">${schoolDisplay}</td>
+                        ${studentCells}
+                        <td class="border border-black ${scoreClass} whitespace-nowrap" style="${cellPaddingStyle}">${escapeHtml(entry.scoreText)}</td>
+                        <td class="border border-black font-semibold text-left pl-2.5" style="${cellPaddingStyle}">${escapeHtml(entry.schoolText)}</td>
                         <td class="border border-black text-left pl-2.5" style="${cellPaddingStyle} min-width: 190px;">${deptDisplayHTML}</td>
-                        <td class="border border-black" style="${cellPaddingStyle}">${passDisplay}</td>
+                        <td class="border border-black" style="${cellPaddingStyle}"><span class="${resultClass}">${escapeHtml(entry.resultText)}</span></td>
                         ${approvalCellsHTML}
-                        <td class="border border-black text-left pl-2 text-[10.5px] text-slate-700" style="${cellPaddingStyle}">${noteDisplay}</td>
+                        <td class="border border-black text-left pl-2 text-[10.5px] text-slate-700" style="${cellPaddingStyle}">${escapeHtml(entry.noteText)}</td>
                     </tr>
                 `;
         }).join('') : `
@@ -213,8 +143,8 @@ export function buildRegisterPages(ctx, reg) {
                                         <th rowspan="2" class="border border-black w-28" style="${tableHeaderPadding}">내신총점<br><span class="text-[10px] font-normal">(취득점/만점)</span></th>
                                         <th rowspan="2" class="border border-black w-48" style="${tableHeaderPadding}">지원고등학교</th>
                                         <th rowspan="2" class="border border-black text-center" style="${tableHeaderPadding} min-width: 190px;">
-                                            지원학과(전기, 1지망)<br>
-                                             OR 최종배정학교(후기고)
+                                            지원학과(전기: 1지망·배정학과)<br>
+                                             또는 배정학교(후기고)
                                         </th>
                                         <th rowspan="2" class="border border-black p-2 w-16">
                                             합격여부
