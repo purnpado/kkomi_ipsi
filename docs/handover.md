@@ -26,6 +26,10 @@
 - 프론트엔드: `frontend/src/main.js`는 부트스트랩·이벤트 라우팅 전용이며, 화면은 `views/`, 모달은 `modals/`, 공통 기반은 `core/`, 스타일은 `styles/`에 있습니다. 화면 간 연결은 `core/navigation.js`(이벤트 버스)로만 합니다.
 - Wails v3 연결: `core/wailsBridge.js`가 `@wailsio/runtime`(3.1.0 고정)의 `Call.ByName("main.App.메서드")`로 기존 `window.go.main.App.*` 호출을 연결합니다. Go 쪽 `App` 메서드를 추가하면 `frontend/wailsjs/go/main/App.js`에도 같은 이름을 추가해야 브릿지가 노출합니다.
 - 고입 연도 표기: 저장은 고교 입학 학년도 하나, 화면은 `core/admissionYear.js`로 "2027 고입 (현 중3 · 2026학년도)"처럼 표시합니다. 새 원서 기본값은 학교 설정 연도를 따르고, 설정이 현재 중3 입시보다 이전이면 학년부장 대시보드에 안내 띠가 뜹니다(자동 변경 없음).
+- 고입 연도 변경: 대시보드 **[📅 고입 연도 변경]**은 학교 설정 연도만 바꾸고 학생 자료를 보존합니다(`UpdateAdmissionYear`, 학년부장 전용). **[🔄 새 학년 시작]**(`ResetAcademicYear`)은 커트라인만 남기고 학생 자료를 비웁니다. 이미 저장된 원서는 원래 연도로 남습니다.
+- 구버전(PHGC v1.6.2) 자료 전환: 같은 `data` 폴더에서 꼬미입시로 **처음 로그인할 때** `*.db.phgc`(헤더 `PHGC-GCM-1`)를 풀어 `*.db.kkomi`로 다시 암호화하고, 원본 `.phgc`는 `data/backup_phgc_migration/`에 보존합니다. 이어서 모든 학급 DB 구조를 최신으로 맞춥니다(`MigrateExistingClassDBs`). 전환 뒤에는 구버전 `PHGC.exe`로 그 폴더를 열 수 없으므로 전환 전 폴더 복제본을 따로 보관합니다.
+- 교환 파일(`.phgcpkg`·`.phgcpatch`·`.phgcarchive`·`.phgcreset`·`.phgcdata`·`.phgc`)은 이름을 바꾸지 않고 계속 가져올 수 있으며, 새로 만드는 파일은 모두 `.kkomi*`입니다.
+- 배포자료 가져오기: 학년부장 폴더(계정 목록에 학년부장 또는 `keys/admin.json` 존재)는 잠긴 상태에서도 거부합니다. 담임 폴더에 다시 가져올 때는 지우기 전 DB 파일 전체를 `data/backup_before_pkg_import/<시각>/`에 복사합니다. 단, 로그인 전(암호화 상태)에는 기존 상담·원서를 새 DB로 자동 병합하지 못합니다(백업본만 남음).
 - 모든 `.go`·`.js`·`.css` 파일은 500줄 이하입니다. 새 코드도 이 기준을 지킵니다.
 - 화면 검증 방법(macOS): `go build -tags server -o <임시폴더>/kkomi .` 후 `WAILS_SERVER_PORT=<포트> ./kkomi`로 띄우면 브라우저에서 실제 백엔드와 함께 화면을 확인할 수 있습니다(파일 대화상자는 동작하지 않음, `data`는 실행 파일 옆에 생성).
 

@@ -139,7 +139,7 @@ func MergeJointShareFiles(dm *database.DBManager, paths []string) (map[string]in
 	}
 
 	if validFileCount == 0 {
-		return nil, fmt.Errorf("선택된 파일 중 올바른 PHGC 관내 진학자료가 없습니다")
+		return nil, fmt.Errorf("선택된 파일 중 올바른 꼬미입시 관내 진학자료가 없습니다")
 	}
 
 	mergedCutoffCount, err := dm.MergeCutoffs(allCutoffsToMerge)

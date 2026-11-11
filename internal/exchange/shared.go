@@ -12,7 +12,7 @@ import (
 	"PHGC/internal/database"
 )
 
-// ExportSharedPackageV2 암호화된 관내 공유 파일(.phgc)로 내보내기
+// ExportSharedPackageV2 암호화된 관내 공유 파일(.kkomi)로 내보내기
 func ExportSharedPackageV2(dm *database.DBManager, admissionYear int, password, outputPath string) error {
 	if strings.TrimSpace(password) == "" {
 		return fmt.Errorf("관내 공유 비밀번호를 입력해주세요")

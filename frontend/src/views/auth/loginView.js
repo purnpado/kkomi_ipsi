@@ -207,12 +207,12 @@ export async function renderLoginScreen(schoolName) {
                         <button type="button" id="distributionPackageImportBtn" 
                                 class="group w-full py-2.5 px-4 rounded-xl border border-emerald-500/40 bg-emerald-950/25 hover:bg-emerald-900/40 hover:border-emerald-400/70 transition-all duration-200 flex items-center justify-center gap-2 shadow-sm cursor-pointer active:scale-[0.99]">
                             <span class="text-base group-hover:scale-110 transition-transform">📦</span>
-                            <span class="font-bold text-emerald-300 text-xs tracking-wide">학년부장 배포 자료 가져오기 (.phgcpkg)</span>
+                            <span class="font-bold text-emerald-300 text-xs tracking-wide">학년부장 배포 자료 가져오기 (.kkomipkg)</span>
                         </button>
                         <button type="button" id="passwordResetImportBtn" 
                                 class="group w-full py-2.5 px-4 rounded-xl border border-sky-500/40 bg-sky-950/25 hover:bg-sky-900/40 hover:border-sky-400/70 transition-all duration-200 flex items-center justify-center gap-2 shadow-sm cursor-pointer active:scale-[0.99]">
                             <span class="text-base group-hover:scale-110 transition-transform">🔑</span>
-                            <span class="font-bold text-sky-300 text-xs tracking-wide">비밀번호 재설정 파일 가져오기 (.phgcreset)</span>
+                            <span class="font-bold text-sky-300 text-xs tracking-wide">비밀번호 재설정 파일 가져오기 (.kkomireset)</span>
                         </button>
                         <button type="button" id="finalArchiveImportBtn" 
                                 class="group w-full py-2.5 px-4 rounded-xl border border-amber-500/30 bg-amber-950/15 hover:bg-amber-900/30 hover:border-amber-400/60 transition-all duration-200 flex items-center justify-center gap-2 shadow-sm cursor-pointer active:scale-[0.99]">
@@ -261,7 +261,7 @@ export async function renderLoginScreen(schoolName) {
                 await showModalAlert('배포 자료 가져오기 실패: ' + err, '오류', 'error');
             } finally {
                 button.disabled = false;
-                button.innerHTML = '<span class="text-base group-hover:scale-110 transition-transform">📦</span><span class="font-bold text-emerald-300 text-xs tracking-wide">학년부장 배포 자료 가져오기 (.phgcpkg)</span>';
+                button.innerHTML = '<span class="text-base group-hover:scale-110 transition-transform">📦</span><span class="font-bold text-emerald-300 text-xs tracking-wide">학년부장 배포 자료 가져오기 (.kkomipkg)</span>';
             }
         });
 
@@ -278,7 +278,7 @@ export async function renderLoginScreen(schoolName) {
                 await showModalAlert('비밀번호 재설정 파일 적용 실패: ' + err, '오류', 'error');
             } finally {
                 button.disabled = false;
-                button.innerHTML = '<span class="text-base group-hover:scale-110 transition-transform">🔑</span><span class="font-bold text-sky-300 text-xs tracking-wide">비밀번호 재설정 파일 가져오기 (.phgcreset)</span>';
+                button.innerHTML = '<span class="text-base group-hover:scale-110 transition-transform">🔑</span><span class="font-bold text-sky-300 text-xs tracking-wide">비밀번호 재설정 파일 가져오기 (.kkomireset)</span>';
             }
         });
 

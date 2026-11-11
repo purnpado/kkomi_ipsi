@@ -16,7 +16,7 @@ export function openPatchImportModal(schoolName) {
                         <span>📥</span> 담임교사 취합자료 병합
                     </h2>
                     <p class="text-xs text-text-muted mt-1">
-                        각 학급 담임선생님이 제출한 취합 파일(<strong>.phgcpatch</strong>)을 학년부장 시스템에 반영합니다.
+                        각 학급 담임선생님이 제출한 취합 파일(<strong>.kkomipatch</strong>)을 학년부장 시스템에 반영합니다.
                     </p>
                 </div>
                 <button id="closePatchImportModeModal" class="text-2xl text-slate-400 hover:text-white transition-colors">×</button>
@@ -191,7 +191,7 @@ function openPatchMergeSelection(preview, password, schoolName) {
                         <div class="rounded-xl border border-indigo-500/30 bg-indigo-950/40 p-3.5 text-xs text-indigo-200 leading-relaxed">
                             <span class="font-bold text-indigo-300 block mb-1">📢 담임교사 재배포 안내</span>
                             • 병합된 최신 내용이 학년부장 시스템에 반영되었습니다.<br>
-                            • 다른 담임교사에게 최신 취합본을 전달하시려면, <strong>[사용자 및 권한 관리]</strong> 메뉴에서 각 반의 <strong>'배포 자료 만들기'</strong>(.phgcpkg)를 실행하여 전달하시면 됩니다.
+                            • 다른 담임교사에게 최신 취합본을 전달하시려면, <strong>[사용자 및 권한 관리]</strong> 메뉴에서 각 반의 <strong>'배포 자료 만들기'</strong>(.kkomipkg)를 실행하여 전달하시면 됩니다.
                         </div>
                     </div>
                 `,

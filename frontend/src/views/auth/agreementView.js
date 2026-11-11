@@ -48,8 +48,8 @@ export function renderAgreementModal(onAcceptCallback) {
                         <h3 class="font-bold text-emerald-200 text-sm sm:text-base">교내 안전 배포 및 파일 기반 오프라인 취합 체계</h3>
                     </div>
                     <ul class="list-disc list-inside space-y-1.5 text-slate-300 leading-relaxed">
-                        <li>학년부장과 담임교사 간의 데이터 전달은 암호화된 학급별 배포 패키지(<span class="px-1.5 py-0.5 rounded bg-slate-800 text-emerald-300 font-mono text-xs border border-emerald-500/30">.phgcpkg</span>)와 변경분 취합 파일(<span class="px-1.5 py-0.5 rounded bg-slate-800 text-emerald-300 font-mono text-xs border border-emerald-500/30">.phgcpatch</span>)을 통해서만 안전하게 오프라인으로 교환됩니다.</li>
-                        <li>관내 타 학교와의 커트라인 공유 파일(<span class="px-1.5 py-0.5 rounded bg-slate-800 text-indigo-300 font-mono text-xs border border-indigo-500/30">.phgcdata</span>) 내보내기 시 <strong class="text-white">학생 개인 식별 정보(성명, 학번, 개별 성적 등)는 100% 원천 배제</strong>되며, 고교별 합격선 및 학교 단위 단순 통계 수치만 안전하게 포함됩니다.</li>
+                        <li>학년부장과 담임교사 간의 데이터 전달은 암호화된 학급별 배포 패키지(<span class="px-1.5 py-0.5 rounded bg-slate-800 text-emerald-300 font-mono text-xs border border-emerald-500/30">.kkomipkg</span>)와 변경분 취합 파일(<span class="px-1.5 py-0.5 rounded bg-slate-800 text-emerald-300 font-mono text-xs border border-emerald-500/30">.kkomipatch</span>)을 통해서만 안전하게 오프라인으로 교환됩니다.</li>
+                        <li>관내 타 학교와의 커트라인 공유 파일(<span class="px-1.5 py-0.5 rounded bg-slate-800 text-indigo-300 font-mono text-xs border border-indigo-500/30">.kkomidata</span>) 내보내기 시 <strong class="text-white">학생 개인 식별 정보(성명, 학번, 개별 성적 등)는 100% 원천 배제</strong>되며, 고교별 합격선 및 학교 단위 단순 통계 수치만 안전하게 포함됩니다.</li>
                     </ul>
                 </div>
 

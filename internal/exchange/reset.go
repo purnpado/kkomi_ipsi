@@ -112,7 +112,7 @@ func ImportPasswordResetPackage(dm *database.DBManager, inputPath string) (strin
 	if err := crypto.WritePrivateFileAtomically(plainConfig+".kkomi", reset.ConfigDatabase); err != nil {
 		return "", fmt.Errorf("재설정 정보 적용 실패: %w", err)
 	}
-	_ = os.Remove(plainConfig + ".phgc")
+	crypto.BackupLegacyFile(plainConfig + ".phgc")
 	if err := os.Remove(crypto.UserEnvelopePath(dm.DataDir, reset.Username)); err != nil && !os.IsNotExist(err) {
 		return "", fmt.Errorf("기존 개인 잠금 정보 초기화 실패: %w", err)
 	}

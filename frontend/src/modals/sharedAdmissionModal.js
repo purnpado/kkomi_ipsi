@@ -90,7 +90,7 @@ export async function openSharedAdmissionModal() {
                                 <h3 class="text-base font-bold text-white">우리 학교 공유 자료 내보내기</h3>
                             </div>
                             <p class="text-xs text-slate-400 leading-relaxed">
-                                우리 학교의 고입 지원 및 합격 결과를 관내 공유 형식(V2)의 암호화 파일(<code class="text-indigo-300">.phgc</code>)로 안전하게 생성합니다.
+                                우리 학교의 고입 지원 및 합격 결과를 관내 공유 형식(V2)의 암호화 파일(<code class="text-indigo-300">.kkomi</code>)로 안전하게 생성합니다.
                             </p>
                         </div>
                         <div>
@@ -99,7 +99,7 @@ export async function openSharedAdmissionModal() {
                                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                     </svg>
-                                    ${admissionLabel(admissionYear)} 공유 파일 내보내기 (.phgc)
+                                    ${admissionLabel(admissionYear)} 공유 파일 내보내기 (.kkomi)
                                 </button>
                             ` : `
                                 <div class="p-2.5 text-center text-xs text-slate-500 bg-slate-900/40 rounded-xl border border-slate-800">
@@ -121,7 +121,7 @@ export async function openSharedAdmissionModal() {
                                 <h3 class="text-base font-bold text-white">타 중학교 공유 자료 취합</h3>
                             </div>
                             <p class="text-xs text-slate-400 leading-relaxed">
-                                관내 타 중학교에서 전달받은 암호화 파일(<code class="text-indigo-300">.phgc</code>)을 관내 통합 분석 데이터베이스로 불러옵니다. (V1 호환 지원)
+                                관내 타 중학교에서 전달받은 암호화 파일(<code class="text-indigo-300">.kkomi</code>)을 관내 통합 분석 데이터베이스로 불러옵니다. (V1 호환 지원)
                             </p>
                         </div>
                         <div>
@@ -130,7 +130,7 @@ export async function openSharedAdmissionModal() {
                                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                     </svg>
-                                    공유 파일 선택 및 취합 (.phgc)
+                                    공유 파일 선택 및 취합 (.kkomi)
                                 </button>
                             ` : `
                                 <div class="p-2.5 text-center text-xs text-slate-500 bg-slate-900/40 rounded-xl border border-slate-800">
@@ -180,7 +180,7 @@ export async function openSharedAdmissionModal() {
 
             <!-- Footer -->
             <div class="px-6 py-4 border-t border-slate-800 bg-slate-900/90 flex items-center justify-between text-xs text-slate-500">
-                <span>PHGC 고입 진학상담 데스크톱 플랫폼</span>
+                <span>꼬미입시 고입 진학상담 데스크톱 플랫폼</span>
                 <button type="button" id="closeSharedModalFooterBtn" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-medium transition-colors cursor-pointer">
                     닫기
                 </button>

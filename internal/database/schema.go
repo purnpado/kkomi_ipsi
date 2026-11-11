@@ -3,6 +3,7 @@ package database
 import (
 	"fmt"
 	"path/filepath"
+	"strings"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -204,6 +205,31 @@ func (dm *DBManager) InitClassDB(classNum int) error {
 
 	if err != nil {
 		return fmt.Errorf("학급 DB 초기화 실패: %w", err)
+	}
+	return nil
+}
+
+// MigrateExistingClassDBs 는 data 폴더에 있는 모든 학급 DB(class_N.db)의 구조를 최신으로 맞춘다.
+// 구버전(v1.6.2 등)에서 넘어온 학급 DB에는 새 열(score_details_json 등)이 없어서, 일부 조회가
+// 오류 없이 그 반을 건너뛰어 원서가 0건으로 보일 수 있다. 로그인 직후 한 번 호출해 이를 막는다.
+// 기존 자료는 지우거나 바꾸지 않고 빠진 표와 열만 추가한다.
+func (dm *DBManager) MigrateExistingClassDBs() error {
+	paths, err := filepath.Glob(filepath.Join(dm.DataDir, "class_*.db"))
+	if err != nil {
+		return err
+	}
+	var failed []string
+	for _, path := range paths {
+		var classNum int
+		if _, scanErr := fmt.Sscanf(filepath.Base(path), "class_%d.db", &classNum); scanErr != nil || classNum < 1 {
+			continue
+		}
+		if err := dm.InitClassDB(classNum); err != nil {
+			failed = append(failed, fmt.Sprintf("%d반: %v", classNum, err))
+		}
+	}
+	if len(failed) > 0 {
+		return fmt.Errorf("학급 DB 구조 갱신 실패: %s", strings.Join(failed, "; "))
 	}
 	return nil
 }

@@ -99,13 +99,13 @@ export function getTeacherGuideHTML() {
 
             <div class="p-4 rounded-2xl bg-indigo-950/30 border border-indigo-500/20">
                 <h3 class="font-bold text-indigo-300 text-base mb-2 flex items-center gap-2">
-                    <span>1️⃣</span> 1단계: 배포 자료(.phgcpkg) 적용 및 안전 로그인
+                    <span>1️⃣</span> 1단계: 배포 자료(.kkomipkg) 적용 및 안전 로그인
                 </h3>
                 <p class="text-slate-300 leading-relaxed">
-                    • <strong>배포 패키지 적용:</strong> 학년부장 선생님께 전달받은 학급 패키지 파일(<strong>.phgcpkg</strong>)을 로그인 화면의 <strong>[📦 학년부장 배포 자료 가져오기]</strong> 버튼을 눌러 적용합니다.<br>
+                    • <strong>배포 패키지 적용:</strong> 학년부장 선생님께 전달받은 학급 패키지 파일(<strong>.kkomipkg</strong>)을 로그인 화면의 <strong>[📦 학년부장 배포 자료 가져오기]</strong> 버튼을 눌러 적용합니다.<br>
                     • <strong>상담 이력 자동 보존·병합:</strong> 학기 중 학년부장 배포 자료를 새로 다시 받더라도, <strong>기존에 담임이 입력해 둔 상담일지·희망학교·메모는 100% 안전하게 자동 보존</strong>됩니다.<br>
                     • <strong>안전 접속 및 초기 비밀번호:</strong> 본인 학급을 선택하고 접속합니다. 초기 비밀번호는 학급번호(예: 3반은 301)로 바로 로그인 가능합니다.<br>
-                    • <strong>비밀번호 재설정 파일(.phgcreset) 지원:</strong> 비밀번호를 분실했을 경우, 학년부장에게 발급받은 재설정 파일을 <strong>[🔑 재설정 파일 가져오기]</strong> 버튼으로 불러와 즉시 복구할 수 있습니다.
+                    • <strong>비밀번호 재설정 파일(.kkomireset) 지원:</strong> 비밀번호를 분실했을 경우, 학년부장에게 발급받은 재설정 파일을 <strong>[🔑 재설정 파일 가져오기]</strong> 버튼으로 불러와 즉시 복구할 수 있습니다.
                 </p>
             </div>
 
@@ -151,11 +151,11 @@ export function getTeacherGuideHTML() {
 
             <div class="p-4 rounded-2xl bg-slate-800/50 border border-slate-700/60">
                 <h3 class="font-bold text-sky-300 text-base mb-2 flex items-center gap-2">
-                    <span>5️⃣</span> 5단계: 변경분 취합자료(.phgcpatch) 학년부장 제출
+                    <span>5️⃣</span> 5단계: 변경분 취합자료(.kkomipatch) 학년부장 제출
                 </h3>
                 <p class="text-slate-300 leading-relaxed">
                     • 2학기 출결(미인정 결석/지각)이나 추가 봉사시간, 리더십 가산점을 상담창에서 수기 반영합니다.<br>
-                    • 학급 상담이 마무리되면 화면 상단의 <strong>[📤 취합자료제출(담임)]</strong> 버튼을 눌러 공용 암호로 암호화된 변경분 파일(<strong>.phgcpatch</strong>)을 생성하여 학년부장 선생님께 전달합니다.
+                    • 학급 상담이 마무리되면 화면 상단의 <strong>[📤 취합자료제출(담임)]</strong> 버튼을 눌러 공용 암호로 암호화된 변경분 파일(<strong>.kkomipatch</strong>)을 생성하여 학년부장 선생님께 전달합니다.
                 </p>
             </div>
 
@@ -203,18 +203,18 @@ export function getMasterGuideHTML() {
                 <p class="text-slate-300 leading-relaxed">
                     • 관리자 대시보드에서 나이스 출력 엑셀(<strong>교과성적, 출결, 봉사활동</strong>) 3종을 업로드하여 전교생 데이터를 연동합니다.<br>
                     • <strong>📊 공식 공개 입결자료 등록:</strong> [공식 공개자료 추가] 버튼으로 관내 고교별 <strong>최신 개편 학과명</strong>과 전형(일반/특별), <strong>최고점·평균점·최저점 3대 합격 지표</strong>를 등록하여 상담의 공신력을 극대화합니다.<br>
-                    • <strong>타교 커트라인 다중 파일 일괄 병합:</strong> [관내자료 병합] 시 여러 학교의 <strong>.phgcdata</strong> 파일을 한꺼번에 다중 선택하여 1초 만에 일괄 병합할 수 있습니다.
+                    • <strong>타교 커트라인 다중 파일 일괄 병합:</strong> [관내자료 병합] 시 여러 학교의 <strong>.kkomidata</strong> 파일을 한꺼번에 다중 선택하여 1초 만에 일괄 병합할 수 있습니다.
                 </p>
             </div>
 
             <div class="p-4 rounded-2xl bg-slate-800/50 border border-slate-700/60">
                 <h3 class="font-bold text-amber-300 text-base mb-2 flex items-center gap-2">
-                    <span>3️⃣</span> 3단계: 담임교사용 배포 패키지(.phgcpkg) 생성 & 비밀번호 관리
+                    <span>3️⃣</span> 3단계: 담임교사용 배포 패키지(.kkomipkg) 생성 & 비밀번호 관리
                 </h3>
                 <p class="text-slate-300 leading-relaxed">
-                    • <strong>전교 석차 스냅샷 자동 내장:</strong> 학급 배포 파일(<strong>.phgcpkg</strong>) 생성 시 전교생 석차백분율 스냅샷이 암호화 패키지에 자동 내장되어, 담임 PC에서도 학년부장 화면과 100% 동일한 전교 백분율이 산출됩니다.<br>
-                    • <strong>비밀번호 재설정 파일(.phgcreset) 발급:</strong> 담임선생님이 비밀번호를 분실했을 경우, [사용자 관리]에서 비밀번호를 재설정한 뒤 <strong>[비밀번호 재설정 파일 저장]</strong> 버튼으로 발급하여 안전하게 전달할 수 있습니다.<br>
-                    • <strong>[배포 자료 만들기]:</strong> 학급별 패키지 파일(<strong>.phgcpkg</strong>)을 생성하여 공용 암호와 함께 각 반 담임선생님께 전달합니다.
+                    • <strong>전교 석차 스냅샷 자동 내장:</strong> 학급 배포 파일(<strong>.kkomipkg</strong>) 생성 시 전교생 석차백분율 스냅샷이 암호화 패키지에 자동 내장되어, 담임 PC에서도 학년부장 화면과 100% 동일한 전교 백분율이 산출됩니다.<br>
+                    • <strong>비밀번호 재설정 파일(.kkomireset) 발급:</strong> 담임선생님이 비밀번호를 분실했을 경우, [사용자 관리]에서 비밀번호를 재설정한 뒤 <strong>[비밀번호 재설정 파일 저장]</strong> 버튼으로 발급하여 안전하게 전달할 수 있습니다.<br>
+                    • <strong>[배포 자료 만들기]:</strong> 학급별 패키지 파일(<strong>.kkomipkg</strong>)을 생성하여 공용 암호와 함께 각 반 담임선생님께 전달합니다.
                 </p>
             </div>
 
@@ -223,7 +223,7 @@ export function getMasterGuideHTML() {
                     <span>4️⃣</span> 4단계: 담임교사 취합 자료 '다중 파일 일괄 병합 (1초 완료)'
                 </h3>
                 <p class="text-slate-300 leading-relaxed">
-                    • 담임선생님들이 상담 후 제출한 패치 파일(<strong>.phgcpatch</strong>)들을 수신합니다.<br>
+                    • 담임선생님들이 상담 후 제출한 패치 파일(<strong>.kkomipatch</strong>)들을 수신합니다.<br>
                     • 관리자 도구 바의 <strong>[📥 취합자료병합]</strong> 버튼을 클릭하고 파일 선택 창에서 <strong>Ctrl 또는 Shift 키로 전 학급 파일을 한꺼번에 다중 선택</strong>합니다.<br>
                     • 1초 만에 전 학급의 변경 내역(출결, 봉사, 가산점, 지망학교)이 한 번에 검토 화면으로 로드되어 간편하게 승인·병합됩니다.
                 </p>
@@ -252,7 +252,8 @@ export function getMasterGuideHTML() {
                 <p class="text-slate-300 leading-relaxed">
                     • <strong>[🔒 입시 결과 확정]:</strong> 모든 고입 전형 종료 후 결과를 확정하여 당해 연도 최종 커트라인을 통계에 반영합니다.<br>
                     • <strong>[🗄️ 최종 보관본 생성]:</strong> 감사 및 차후 조회를 위한 100% 암호화 백업 아카이브를 생성합니다.<br>
-                    • <strong>[📅 고입 연도 전환]:</strong> 졸업생 개인정보를 안전하게 비우고, 다음 고입 연도(예: 2028 고입)로 5개년 커트라인 기준을 한 칸씩 자동 시프트(Shift)하여 완벽한 인수인계를 준비합니다.
+                    • <strong>[📅 고입 연도 변경]:</strong> 학생 자료는 그대로 두고 학교 설정의 고입 연도만 바꿉니다(예: 2026 고입 → 2027 고입).<br>
+                    • <strong>[🔄 새 학년 시작]:</strong> 졸업생 개인정보를 안전하게 비우고, 다음 고입 연도(예: 2028 고입)로 5개년 커트라인 기준을 한 칸씩 자동 시프트(Shift)하여 완벽한 인수인계를 준비합니다.
                 </p>
             </div>
 

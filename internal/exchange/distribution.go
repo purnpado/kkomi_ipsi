@@ -8,10 +8,12 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"PHGC/internal/crypto"
 	"PHGC/internal/database"
 	"PHGC/internal/model"
+
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -204,13 +206,8 @@ func ImportDistributionPackage(dm *database.DBManager, inputPath string) (string
 	}
 
 	// 안전장치: 현재 프로그램이 학년부장(master) 원본 관리자 데이터인 경우 실수로 덮어쓰는 것 방지
-	if dm.HasEncryptedConfigDB() || database.HasSchoolConfigTable(dm.GetConfigDBPath()) {
-		users, _ := dm.GetUsers()
-		for _, u := range users {
-			if u.Role == "master" {
-				return "", fmt.Errorf("현재 프로그램은 학년부장 원본 데이터가 보관된 폴더입니다. 학년부장 자료는 담임 배포 패키지로 덮어쓸 수 없습니다. 담임 교사용 폴더에서 실행해주세요")
-			}
-		}
+	if isMasterDataFolder(dm) {
+		return "", fmt.Errorf("현재 프로그램은 학년부장 원본 데이터가 보관된 폴더입니다. 학년부장 자료는 담임 배포 패키지로 덮어쓸 수 없습니다. 담임 교사용 폴더에서 실행해주세요")
 	}
 
 	// 1. 기존 학급 데이터(상담 일지, 진학 희망학교, 수기 출결/봉사 등) 사전 보존 및 백업
@@ -224,12 +221,17 @@ func ImportDistributionPackage(dm *database.DBManager, inputPath string) (string
 		}
 	}
 
-	// 만약의 사태를 대비해 기존 data 폴더를 backup_before_pkg_import 폴더에 안전 복사
-	if len(existingClassDBs) > 0 {
-		backupDir := filepath.Join(dm.DataDir, "backup_before_pkg_import")
-		_ = os.MkdirAll(backupDir, 0700)
-		for _, f := range existingClassDBs {
-			_ = copyPackageFile(f, filepath.Join(backupDir, filepath.Base(f)))
+	// 만약의 사태를 대비해 지우기 전의 DB 파일(평문·암호화 모두)을 backup_before_pkg_import/<시각>/ 에 복사한다.
+	// 로그인 전(잠긴 상태)에는 암호화 DB만 있으므로, 이 복사본이 기존 상담·원서 기록을 되살릴 유일한 원본이 된다.
+	if existing, _ := filepath.Glob(filepath.Join(dm.DataDir, "*.db*")); len(existing) > 0 {
+		backupDir := filepath.Join(dm.DataDir, "backup_before_pkg_import", time.Now().Format("20060102-150405"))
+		if err := os.MkdirAll(backupDir, 0700); err != nil {
+			return "", fmt.Errorf("기존 자료 백업 폴더를 만들 수 없어 가져오기를 중단했습니다: %w", err)
+		}
+		for _, f := range existing {
+			if err := copyPackageFile(f, filepath.Join(backupDir, filepath.Base(f))); err != nil {
+				return "", fmt.Errorf("기존 자료 백업에 실패해 가져오기를 중단했습니다: %w", err)
+			}
 		}
 	}
 
@@ -272,4 +274,29 @@ func ImportDistributionPackage(dm *database.DBManager, inputPath string) (string
 	_, _ = dm.BackfillAllApplicationsScoreDetails()
 
 	return manifest.Username, nil
+}
+
+// isMasterDataFolder 는 이 data 폴더가 학년부장 원본 자료인지 판별한다.
+// 잠긴 상태(로그인 전)에서도 판별할 수 있도록 암호화되지 않은 계정 목록(login-index.json)과
+// 학년부장 개인 잠금 파일(keys/admin.json)을 함께 확인한다. 담임·진로부장 배포자료에는 둘 다 없다.
+func isMasterDataFolder(dm *database.DBManager) bool {
+	if index, err := database.LoadLoginIndex(dm.DataDir); err == nil {
+		for _, account := range index.Accounts {
+			if account.Role == "master" {
+				return true
+			}
+		}
+	}
+	if _, err := os.Stat(crypto.UserEnvelopePath(dm.DataDir, "admin")); err == nil {
+		return true
+	}
+	if dm.HasEncryptedConfigDB() || database.HasSchoolConfigTable(dm.GetConfigDBPath()) {
+		users, _ := dm.GetUsers()
+		for _, u := range users {
+			if u.Role == "master" {
+				return true
+			}
+		}
+	}
+	return false
 }

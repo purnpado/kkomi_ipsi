@@ -32,7 +32,7 @@ func (a *App) SavePasswordResetPackage(username string) (string, error) {
 func (a *App) OpenPasswordResetPackage() (string, error) {
 	path, err := a.openFileDialog(
 		"담임 비밀번호 재설정 파일 선택",
-		"꼬미입시 비밀번호 재설정 파일 (*.kkomireset, *.phgcreset)",
+		"꼬미입시 비밀번호 재설정 파일 (*.kkomireset · 이전 버전 파일 포함)",
 		"*.kkomireset;*.phgcreset",
 	)
 	if err != nil || path == "" {
@@ -67,7 +67,7 @@ func (a *App) SaveDistributionPackage(username string) (string, error) {
 func (a *App) OpenDistributionPackage() (string, error) {
 	path, err := a.openFileDialog(
 		"교사용 배포 자료 선택",
-		"꼬미입시 교사용 배포 자료 (*.kkomipkg, *.phgcpkg)",
+		"꼬미입시 교사용 배포 자료 (*.kkomipkg · 이전 버전 파일 포함)",
 		"*.kkomipkg;*.phgcpkg",
 	)
 	if err != nil || path == "" {
@@ -107,7 +107,7 @@ func (a *App) SaveFinalArchive(archivePassword string) (string, error) {
 func (a *App) OpenFinalArchive() (string, error) {
 	path, err := a.openFileDialog(
 		"암호화 최종 보관본 선택",
-		"꼬미입시 암호화 보관본 (*.kkomiarchive, *.phgcarchive)",
+		"꼬미입시 암호화 보관본 (*.kkomiarchive · 이전 버전 파일 포함)",
 		"*.kkomiarchive;*.phgcarchive",
 	)
 	if err != nil || path == "" {
@@ -166,7 +166,7 @@ func (a *App) OpenTeacherPatchPreview(password string) (model.PatchPreview, erro
 	}
 	path, err := a.openFileDialog(
 		"취합자료 미리보기(학년부장)",
-		"꼬미입시 취합자료 (*.kkomipatch, *.phgcpatch)",
+		"꼬미입시 취합자료 (*.kkomipatch · 이전 버전 파일 포함)",
 		"*.kkomipatch;*.phgcpatch",
 	)
 	if err != nil || path == "" {
@@ -183,7 +183,7 @@ func (a *App) OpenTeacherPatch(password string) (map[string]int, error) {
 	}
 	paths, err := a.openMultipleFilesDialog(
 		"취합자료 일괄 병합(학년부장) - 여러 파일 동시 선택 가능 (Ctrl 또는 Shift 클릭)",
-		"꼬미입시 취합자료 (*.kkomipatch, *.phgcpatch)",
+		"꼬미입시 취합자료 (*.kkomipatch · 이전 버전 파일 포함)",
 		"*.kkomipatch;*.phgcpatch",
 	)
 	if err != nil || len(paths) == 0 {

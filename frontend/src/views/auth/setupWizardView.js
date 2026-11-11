@@ -31,15 +31,15 @@ export function renderFirstRunScreen() {
                 </button>
                 <button id="firstRunDistributionImportBtn" type="button" class="rounded-xl border border-emerald-500/50 bg-emerald-500/10 p-5 text-left hover:bg-emerald-500/20 transition-colors cursor-pointer">
                     <div class="font-bold text-white text-base">📦 학년부장 배포자료 가져오기</div>
-                    <p class="text-xs text-slate-300 mt-2">담임·진로부장이 받은 <strong>.phgcpkg</strong> 파일을 적용합니다. 적용 후 본인 초기 비밀번호로 로그인합니다.</p>
+                    <p class="text-xs text-slate-300 mt-2">담임·진로부장이 받은 <strong>.kkomipkg</strong> 파일을 적용합니다. 적용 후 본인 초기 비밀번호로 로그인합니다.</p>
                 </button>
                 <button id="firstRunPasswordResetBtn" type="button" class="rounded-xl border border-sky-500/50 bg-sky-500/10 p-5 text-left hover:bg-sky-500/20 transition-colors cursor-pointer">
                     <div class="font-bold text-white text-base">🔑 비밀번호 재설정 파일 가져오기</div>
-                    <p class="text-xs text-slate-300 mt-2">학년부장에게 받은 <strong>.phgcreset</strong> 파일을 적용합니다. 기존 학급 작업 데이터는 그대로 보존됩니다.</p>
+                    <p class="text-xs text-slate-300 mt-2">학년부장에게 받은 <strong>.kkomireset</strong> 파일을 적용합니다. 기존 학급 작업 데이터는 그대로 보존됩니다.</p>
                 </button>
                 <button id="firstRunArchiveImportBtn" type="button" class="rounded-xl border border-amber-500/50 bg-amber-500/10 p-5 text-left hover:bg-amber-500/20 transition-colors cursor-pointer">
                     <div class="font-bold text-white text-base">🗄️ 암호화 최종 보관본 복원</div>
-                    <p class="text-xs text-slate-300 mt-2">학년부장이 보관한 <strong>.phgcarchive</strong>를 새 프로그램 폴더에 복원합니다.</p>
+                    <p class="text-xs text-slate-300 mt-2">학년부장이 보관한 <strong>.kkomiarchive</strong>를 새 프로그램 폴더에 복원합니다.</p>
                 </button>
             </div>
             <p class="text-[11px] text-slate-400 mt-6 text-center">기존 data 폴더가 있는 경우에는 이 화면이 아닌 로그인 화면으로 자동 이동합니다.</p>
@@ -60,7 +60,7 @@ export function renderFirstRunScreen() {
             await showModalAlert('배포자료 가져오기 실패: ' + err, '오류', 'error');
         } finally {
             button.disabled = false;
-            button.innerHTML = '<div class="font-bold text-white text-base">📦 학년부장 배포자료 가져오기</div><p class="text-xs text-slate-300 mt-2">담임·진로부장이 받은 <strong>.phgcpkg</strong> 파일을 적용합니다. 적용 후 본인 초기 비밀번호로 로그인합니다.</p>';
+            button.innerHTML = '<div class="font-bold text-white text-base">📦 학년부장 배포자료 가져오기</div><p class="text-xs text-slate-300 mt-2">담임·진로부장이 받은 <strong>.kkomipkg</strong> 파일을 적용합니다. 적용 후 본인 초기 비밀번호로 로그인합니다.</p>';
         }
     });
     document.getElementById('firstRunPasswordResetBtn')?.addEventListener('click', async () => {
@@ -76,7 +76,7 @@ export function renderFirstRunScreen() {
             await showModalAlert('비밀번호 재설정 파일 적용 실패: ' + err, '오류', 'error');
         } finally {
             button.disabled = false;
-            button.innerHTML = '<div class="font-bold text-white text-base">🔑 비밀번호 재설정 파일 가져오기</div><p class="text-xs text-slate-300 mt-2">학년부장에게 받은 <strong>.phgcreset</strong> 파일을 적용합니다. 기존 학급 작업 데이터는 그대로 보존됩니다.</p>';
+            button.innerHTML = '<div class="font-bold text-white text-base">🔑 비밀번호 재설정 파일 가져오기</div><p class="text-xs text-slate-300 mt-2">학년부장에게 받은 <strong>.kkomireset</strong> 파일을 적용합니다. 기존 학급 작업 데이터는 그대로 보존됩니다.</p>';
         }
     });
     document.getElementById('firstRunArchiveImportBtn').addEventListener('click', async () => {
@@ -100,7 +100,7 @@ export function renderFirstRunScreen() {
             await showModalAlert('최종 보관본 복원 실패: ' + err, '오류', 'error');
         } finally {
             button.disabled = false;
-            button.innerHTML = '<div class="font-bold text-white text-base">🗄️ 암호화 최종 보관본 복원</div><p class="text-xs text-slate-300 mt-2">학년부장이 보관한 <strong>.phgcarchive</strong>를 새 프로그램 폴더에 복원합니다.</p>';
+            button.innerHTML = '<div class="font-bold text-white text-base">🗄️ 암호화 최종 보관본 복원</div><p class="text-xs text-slate-300 mt-2">학년부장이 보관한 <strong>.kkomiarchive</strong>를 새 프로그램 폴더에 복원합니다.</p>';
         }
     });
 }

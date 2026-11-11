@@ -98,7 +98,7 @@ func (a *App) ImportJointShareData(admissionYear int) (map[string]int, error) {
 	}
 	paths, err := a.openMultipleFilesDialog(
 		"타교 진학자료 일괄 병합 - 여러 파일 동시 선택 가능",
-		"꼬미입시 관내 진학자료 (*.kkomidata, *.phgcdata)",
+		"꼬미입시 관내 진학자료 (*.kkomidata · 이전 버전 파일 포함)",
 		"*.kkomidata;*.phgcdata",
 	)
 	if err != nil || len(paths) == 0 {

@@ -9,8 +9,10 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"time"
 
 	"PHGC/internal/model"
+
 	"golang.org/x/crypto/argon2"
 )
 
@@ -167,9 +169,33 @@ func SealDatabaseFile(password, dbPath string) (string, error) {
 	if err := os.Remove(dbPath); err != nil {
 		return "", err
 	}
-	// 구버전 .phgc 암호화 파일이 남아 있다면 .kkomi 생성 완료 후 자동 정리
-	_ = os.Remove(dbPath + ".phgc")
+	// 구버전 .phgc 암호화 파일이 남아 있다면 .kkomi 생성 완료 후 백업 폴더로 옮긴다.
+	BackupLegacyFile(dbPath + ".phgc")
 	return encryptedPath, nil
+}
+
+// LegacyBackupDirName 구버전(PHGC) 암호화 파일을 옮겨 두는 data 하위 폴더 이름
+const LegacyBackupDirName = "backup_phgc_migration"
+
+// BackupLegacyFile 구버전 .phgc 파일을 삭제하지 않고 data/backup_phgc_migration/ 으로 옮긴다.
+// 전환 전 원본을 그대로 보존해 문제가 생겼을 때 되돌릴 수 있게 하기 위함이다.
+// 같은 이름의 백업이 이미 있으면(최초 전환 원본) 시각을 붙여 따로 보관한다. 파일이 없으면 아무것도 하지 않는다.
+func BackupLegacyFile(path string) {
+	if _, err := os.Stat(path); err != nil {
+		return
+	}
+	dir := filepath.Join(filepath.Dir(path), LegacyBackupDirName)
+	if err := os.MkdirAll(dir, 0700); err != nil {
+		return
+	}
+	target := filepath.Join(dir, filepath.Base(path))
+	if _, err := os.Stat(target); err == nil {
+		target = filepath.Join(dir, fmt.Sprintf("%s.%s", filepath.Base(path), time.Now().Format("20060102-150405")))
+	}
+	if err := os.Rename(path, target); err != nil {
+		// 다른 드라이브 등으로 이동이 실패하면 원본을 그대로 둔다(삭제하지 않음).
+		return
+	}
 }
 
 // UnsealDatabaseFile restores a database only to the caller-specified working

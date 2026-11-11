@@ -45,7 +45,7 @@ func copyPackageFile(source, destination string) error {
 }
 
 func writeDistributionZip(outputPath, sourceDir string, names []string) error {
-	tmp, err := os.CreateTemp(filepath.Dir(outputPath), ".phgc-package-*.tmp")
+	tmp, err := os.CreateTemp(filepath.Dir(outputPath), ".kkomi-package-*.tmp")
 	if err != nil {
 		return err
 	}

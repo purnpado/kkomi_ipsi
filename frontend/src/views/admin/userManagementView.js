@@ -346,7 +346,7 @@ export async function renderUserManagementScreen(schoolName) {
         try {
             const path = await window.go.main.App.SaveDistributionPackage(username);
             if (!path) return;
-            await showModalAlert(`'${username}' 계정용 배포 자료 생성이 완료되었습니다!\n\n📂 저장 위치:\n${path}\n\n💡 [안내 사항]\n• 담임 선생님께 프로그램 실행 파일과 위 배포 자료(.phgcpkg), 그리고 학년부장의 [공용 데이터 암호]를 함께 전달해 주세요.\n• 담임 선생님은 로그인 화면에서 ‘배포 자료 가져오기’를 누른 후, 공용 데이터 암호를 입력하여 안전하게 최초 로그인하실 수 있습니다.`, '배포 자료 준비 완료', 'success');
+            await showModalAlert(`'${username}' 계정용 배포 자료 생성이 완료되었습니다!\n\n📂 저장 위치:\n${path}\n\n💡 [안내 사항]\n• 담임 선생님께 프로그램 실행 파일과 위 배포 자료(.kkomipkg), 그리고 학년부장의 [공용 데이터 암호]를 함께 전달해 주세요.\n• 담임 선생님은 로그인 화면에서 ‘배포 자료 가져오기’를 누른 후, 공용 데이터 암호를 입력하여 안전하게 최초 로그인하실 수 있습니다.`, '배포 자료 준비 완료', 'success');
         } catch (err) {
             await showModalAlert('배포 자료 생성 실패: ' + err, '오류', 'error');
         }

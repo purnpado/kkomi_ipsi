@@ -124,7 +124,7 @@ export async function renderAdminScreen(schoolName) {
                     </button>
                     <span class="text-slate-600 hidden sm:inline">|</span>
                     <!-- 취합 및 보관 -->
-                    <button id="importPatchBtn" class="btn-secondary text-xs px-3 py-1.5 rounded-lg font-bold inline-flex items-center gap-1.5 hover:border-emerald-400/50 text-emerald-300" style="width: auto;" title="담임교사가 제출한 취합자료(.phgcpatch) 병합">
+                    <button id="importPatchBtn" class="btn-secondary text-xs px-3 py-1.5 rounded-lg font-bold inline-flex items-center gap-1.5 hover:border-emerald-400/50 text-emerald-300" style="width: auto;" title="담임교사가 제출한 취합자료(.kkomipatch) 병합">
                         📥 취합자료병합
                     </button>
                     <button id="finalArchiveBtn" class="btn-secondary text-xs px-3 py-1.5 rounded-lg font-bold inline-flex items-center gap-1.5 hover:border-amber-400/50 text-amber-300" style="width: auto;" title="입시 종료 후 암호화 보관본 생성">
@@ -132,8 +132,9 @@ export async function renderAdminScreen(schoolName) {
                     </button>
                     <span class="text-slate-600 hidden sm:inline">|</span>
                     <!-- 연도 전환 및 초기화 -->
-                    <button id="resetYearBtn" class="text-amber-400/90 border border-amber-500/30 hover:bg-amber-500/10 transition-colors cursor-pointer text-xs px-2.5 py-1.5 rounded-lg font-bold inline-flex items-center gap-1" style="width: auto;" title="커트라인은 유지하고 학생 데이터만 삭제">
-                        📅 고입 연도 전환
+                    <button id="changeAdmissionYearBtn" class="text-sky-300/90 border border-sky-500/30 hover:bg-sky-500/10 transition-colors cursor-pointer text-xs px-2.5 py-1.5 rounded-lg font-bold inline-flex items-center gap-1" style="width: auto;" title="학생 자료는 그대로 두고 학교 설정의 고입 연도만 바꿉니다">📅 고입 연도 변경</button>
+                    <button id="resetYearBtn" class="text-amber-400/90 border border-amber-500/30 hover:bg-amber-500/10 transition-colors cursor-pointer text-xs px-2.5 py-1.5 rounded-lg font-bold inline-flex items-center gap-1" style="width: auto;" title="커트라인은 보존하고 학생 성적·출결·봉사 자료를 비운 뒤 새 고입 연도로 시작합니다">
+                        🔄 새 학년 시작
                     </button>
                     <button id="resetDataBtn" class="text-rose-400/90 border border-rose-500/30 hover:bg-rose-500/10 transition-colors cursor-pointer text-xs px-2.5 py-1.5 rounded-lg font-bold inline-flex items-center gap-1" style="width: auto;">
                         전체 초기화
@@ -247,7 +248,7 @@ export async function renderAdminScreen(schoolName) {
 
     // 이벤트 바인딩
     ScreenLockManager.resetTimer();
-    renderAdmissionYearNotice(app.querySelector('.glass-card'), configuredYear);
+    renderAdmissionYearNotice(app.querySelector('.glass-card'), configuredYear, schoolName);
 
     document.getElementById('lockScreenAdminBtn')?.addEventListener('click', () => {
         requestScreenLock('수동 잠금');
@@ -271,15 +272,15 @@ export async function renderAdminScreen(schoolName) {
 
     document.getElementById('resetYearBtn')?.addEventListener('click', async () => {
         const nextYear = await showModalPrompt({
-            title: '새 고입 연도로 전환',
-            message: `전환할 고입 학년도를 입력하세요.\n${admissionYearHint(currentAdmissionYear())}`,
+            title: '새 학년 시작 (학생 자료 초기화)',
+            message: `학생 성적·출결·봉사 자료를 비우고 새로 시작할 고입 학년도를 입력하세요.\n${admissionYearHint(currentAdmissionYear())}\n\n※ 학생 자료를 지우지 않으려면 [고입 연도 변경]을 사용하세요.`,
             defaultValue: String(currentAdmissionYear()),
             placeholder: String(currentAdmissionYear())
         });
         if (!nextYear) return;
 
         const confirmed = await showModalConfirm({
-            title: '고입 연도 전환 확인',
+            title: '새 학년 시작 확인',
             message: `[${admissionLongLabel(parseInt(nextYear))}]로 전환하시겠습니까?\n\n※ 고교별 커트라인 데이터는 안전하게 보존되며, 학생들의 성적/출결/봉사 데이터만 깔끔하게 초기화됩니다.`,
             confirmText: '전환하기',
             type: 'warning'
@@ -290,7 +291,7 @@ export async function renderAdminScreen(schoolName) {
                 await showModalAlert(`${admissionLabel(parseInt(nextYear))}으로 전환되었습니다!`, '전환 완료', 'success');
                 renderAdminScreen(schoolName);
             } catch (err) {
-                await showModalAlert("고입 연도 전환 실패: " + err, '오류', 'error');
+                await showModalAlert("새 학년 시작 실패: " + err, '오류', 'error');
             }
         }
     });

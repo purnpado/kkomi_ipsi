@@ -45,7 +45,8 @@ func (dm *DBManager) SealAllDatabases() error {
 // UnsealAllDatabases restores the encrypted package only after a user has
 // successfully opened their personal key envelope. Plain DB files exist only
 // while the application is running and are sealed again during shutdown.
-// Legacy *.db.phgc files are automatically converted to *.db.kkomi.
+// Legacy *.db.phgc files are automatically converted to *.db.kkomi; the original
+// .phgc files are kept in data/backup_phgc_migration/ for rollback.
 func (dm *DBManager) UnsealAllDatabases() error {
 	if len(dm.dataKey) != 32 {
 		return fmt.Errorf("데이터 잠금 키가 준비되지 않았습니다")
@@ -109,10 +110,11 @@ func (dm *DBManager) UnsealAllDatabases() error {
 			}
 		}
 
-		// 평문 workingPath가 준비되었으므로 새 .kkomi 암호화 본을 즉시 생성하고 구버전 .phgc 삭제
+		// 평문 workingPath가 준비되었으므로 새 .kkomi 암호화 본을 즉시 생성하고,
+		// 구버전 .phgc 원본은 삭제하지 않고 data/backup_phgc_migration/ 으로 옮긴다.
 		if _, statErr := os.Stat(workingPath); statErr == nil {
 			if err := crypto.EncryptFileGCM(password, workingPath, kkomiPath); err == nil {
-				_ = os.Remove(legacyPath)
+				crypto.BackupLegacyFile(legacyPath)
 			}
 		}
 	}

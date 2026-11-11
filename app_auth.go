@@ -27,7 +27,11 @@ func (a *App) GetSchoolConfig() (*database.SchoolConfig, error) {
 
 // UpdateAdmissionYear updates the default cutoff entry year without changing
 // accounts, passwords, or encrypted data-key envelopes.
+// 학생·원서·상담 자료는 지우지 않는다. 학교 설정을 바꾸는 일이므로 학년부장만 할 수 있다.
 func (a *App) UpdateAdmissionYear(admissionYear int) error {
+	if a.user == nil || a.user.Role != "master" {
+		return fmt.Errorf("고입 연도 변경은 학년부장 계정만 할 수 있습니다")
+	}
 	return a.db.UpdateAdmissionYear(admissionYear)
 }
 
@@ -136,6 +140,10 @@ func (a *App) UnlockAndLogin(username, password string) (*database.User, error) 
 		a.db.SetDataKey(nil)
 		return nil, err
 	}
+	// 구버전에서 넘어온 학급 DB도 새 열을 갖추도록 로그인 직후 구조를 맞춘다(자료는 보존).
+	if err := a.db.MigrateExistingClassDBs(); err != nil {
+		fmt.Println(err)
+	}
 	user, err := a.db.VerifyUserLogin(username, password)
 	if err != nil {
 		_ = a.db.SealAllDatabases()
@@ -172,6 +180,10 @@ func (a *App) UnlockSharedAndLogin(username, password, sharedPassword string) (*
 		a.dataKey = nil
 		a.db.SetDataKey(nil)
 		return nil, err
+	}
+	// 구버전에서 넘어온 학급 DB도 새 열을 갖추도록 로그인 직후 구조를 맞춘다(자료는 보존).
+	if err := a.db.MigrateExistingClassDBs(); err != nil {
+		fmt.Println(err)
 	}
 	user, err := a.db.VerifyUserLogin(username, password)
 	if err != nil {

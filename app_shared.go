@@ -7,7 +7,7 @@ import (
 	"PHGC/internal/exchange"
 )
 
-// ExportSharedAdmissionPackage 우리 학교의 익명 학생 점수 및 학과별 통계가 포함된 관내 공유 파일(.phgc) 내보내기
+// ExportSharedAdmissionPackage 우리 학교의 익명 학생 점수 및 학과별 통계가 포함된 관내 공유 파일(.kkomi) 내보내기
 func (a *App) ExportSharedAdmissionPackage(admissionYear int, password, outputPath string) error {
 	if a.user == nil || a.user.Role != "master" {
 		return fmt.Errorf("관내 공유 자료 내보내기는 학년부장만 가능합니다")
@@ -50,7 +50,7 @@ func (a *App) OpenSharedAdmissionPackageDialog() (string, error) {
 	}
 	path, err := a.openFileDialog(
 		"관내 공유 고입 결과 자료 선택 (V1/V2)",
-		"꼬미입시 관내 공유 파일 (*.kkomi;*.phgc;*.json)",
+		"꼬미입시 관내 공유 파일 (*.kkomi · 이전 버전 파일 포함)",
 		"*.kkomi;*.phgc;*.json",
 	)
 	if err != nil || path == "" {
