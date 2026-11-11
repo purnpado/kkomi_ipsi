@@ -99,7 +99,11 @@ func main() {
 	}
 
 	// 학교·전형별 1차 점수 분포
-	type agg struct{ min, max, sum float64; n int; full float64 }
+	type agg struct {
+		min, max, sum float64
+		n             int
+		full          float64
+	}
 	byRule := map[string]*agg{}
 	for _, s := range all {
 		for _, r := range s.SchoolResults {
