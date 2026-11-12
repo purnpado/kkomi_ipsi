@@ -31,6 +31,20 @@ function dock(el, mount) {
     }, true);
 }
 
+/** 화면에서는 [닫기]가 들어오기 전 화면으로 돌아가므로 글자를 "돌아가기"로 바꾼다(아이콘만 있는 버튼은 그대로). */
+function relabelCloseButtons(el) {
+    el.querySelectorAll('button[id*="lose"]').forEach((button) => {
+        const walker = document.createTreeWalker(button, NodeFilter.SHOW_TEXT);
+        let node = walker.nextNode();
+        while (node) {
+            // 화면에서는 Esc 로 닫히지 않으므로 "(ESC)" 안내도 뺀다.
+            node.textContent = node.textContent.replace(/(창|상담 모달|모달)?\s*닫기/u, '돌아가기').replace(/\s*\(ESC\)/iu, '');
+            node = walker.nextNode();
+        }
+        button.title = '들어오기 전 화면으로 돌아갑니다';
+    });
+}
+
 /**
  * @param {{ screen: string, elementId: string, open: () => any, title: string }} options
  */
@@ -55,6 +69,7 @@ export async function renderPanelScreen({ screen, elementId, open, title }) {
     const el = document.getElementById(elementId);
     if (!el || state.currentScreen !== screen) return;
     if (el.parentElement !== mount) dock(el, mount);
+    relabelCloseButtons(el);
 
     // 창의 [닫기]를 누르면(요소가 사라지면) 대시보드로 돌아간다.
     // 단, 위에 뜬 창을 Esc 로 닫을 때 창 모듈의 Esc 처리가 화면까지 지웠다면 되돌려 놓는다.
