@@ -100,6 +100,7 @@ import * as model$0 from "../model/models.js";
  * @property {boolean} GeneralDataComplete - 학년별 비교과 입력 완료 여부
  * @property {boolean} GeneralProjected - 11/30 마감 전 누적자료 기준 예상치
  * @property {boolean} ThirdYearFinalUsed - S22에 실제 3학년 2학기 성적을 반영했는지(false면 3-1 성적으로 대신한 예상치)
+ * @property {boolean} ThirdYearProjected - 학기 초라 3학년(3-1·3-2)을 2학년 성적으로 대신한 예상치인지
  */
 
 /**
@@ -144,6 +145,7 @@ import * as model$0 from "../model/models.js";
  * @property {number} generalHSTotalHigh - 가산점 미정분까지 받을 때 상한
  * @property {boolean} generalHSBonusEntered - 창체·행발 가산점 입력 완료
  * @property {boolean} generalHSThirdYearFinal - 3-2 성적 반영(아니면 3-1 복사 예상)
+ * @property {boolean} generalHSThirdYearProjected - 학기 초: 3학년을 2학년 성적으로 대신한 예상치
  * @property {boolean} generalHSPerGradeExact - 출결·봉사 학년별 실제 값 사용
  * @property {SchoolCalcResult[] | null} schoolResults - 학교별 산출 결과
  * @property {model$0.ApplicationRecord[] | null} applications - 학생 지원 희망 학교 목록 (1~5지망)
