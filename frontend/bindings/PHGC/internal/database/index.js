@@ -124,3 +124,15 @@ import * as $models from "./models.js";
  * User represents a system user
  * @typedef {$models.User} User
  */
+
+/**
+ * @typedef {$models.WhatIfGeneral} WhatIfGeneral
+ */
+
+/**
+ * @typedef {$models.WhatIfResult} WhatIfResult
+ */
+
+/**
+ * @typedef {$models.WhatIfSchoolChange} WhatIfSchoolChange
+ */

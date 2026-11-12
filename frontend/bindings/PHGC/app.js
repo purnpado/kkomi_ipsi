@@ -1107,3 +1107,16 @@ export function VerifyAdminPassword(password) {
 export function VerifyUserLogin(username, password) {
     return $Call.ByID(1788137444, username, password);
 }
+
+/**
+ * WhatIfStudent 상담 화면 "가정해 보기": 남은 학기 성적·결석·봉사·리더십·가산점 가정값으로
+ * 학교별 점수와 후기고 석차를 다시 계산한다. 아무것도 저장하지 않는다(진로부장도 조회 가능).
+ * @param {number} classNum
+ * @param {string} studentNum
+ * @param {string} name
+ * @param {calc$0.WhatIfInput} input
+ * @returns {$CancellablePromise<database$0.WhatIfResult | null>}
+ */
+export function WhatIfStudent(classNum, studentNum, name, input) {
+    return $Call.ByID(1033437599, classNum, studentNum, name, input);
+}

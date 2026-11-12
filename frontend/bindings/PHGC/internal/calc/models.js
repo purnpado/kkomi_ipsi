@@ -149,6 +149,17 @@ import * as model$0 from "../model/models.js";
  * @property {model$0.ApplicationRecord[] | null} applications - 학생 지원 희망 학교 목록 (1~5지망)
  */
 
+/**
+ * WhatIfInput 가정값. 0이거나 "keep"이면 그 항목은 바꾸지 않는다.
+ * @typedef {Object} WhatIfInput
+ * @property {number} remainingStep - 성적이 아직 없는 반영 학기(3-1·3-2) 성취도: 최근 학기보다 몇 단계 오르내리는지(-2~+2)
+ * @property {number} futureAbsence - 앞으로 더해질 3학년 미인정 결석 일수
+ * @property {number} addVolunteer - 앞으로 더해질 3학년 봉사 시간
+ * @property {number} leadershipTerms - 리더십 인정 학기 수(-1이면 그대로)
+ * @property {string} changche3 - 후기고 3학년 창체 가산점: keep | yes | no
+ * @property {string} haengbal3 - 후기고 3학년 행발 가산점: keep | yes | no
+ */
+
 // In interface mode, this file is likely to contain just comments.
 // We add a dummy export statement to ensure it is recognised as an ES module.
 export {};

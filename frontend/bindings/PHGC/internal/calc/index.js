@@ -29,3 +29,8 @@ import * as $models from "./models.js";
  * StudentFullData 학생 1명의 전과목/비교과/고교별 결과 종합 데이터
  * @typedef {$models.StudentFullData} StudentFullData
  */
+
+/**
+ * WhatIfInput 가정값. 0이거나 "keep"이면 그 항목은 바꾸지 않는다.
+ * @typedef {$models.WhatIfInput} WhatIfInput
+ */

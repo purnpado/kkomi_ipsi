@@ -19,6 +19,9 @@ export function renderStudentModalLayout(ctx) {
                         <input type="checkbox" id="printIncludeCounselCheck" class="rounded accent-indigo-500 cursor-pointer w-4 h-4" />
                         <span class="font-medium">상담 메모 포함</span>
                     </label>
+                    <button id="openWhatIfBtn" class="px-3.5 h-9 rounded-xl font-bold text-xs bg-purple-700/70 hover:bg-purple-600 text-white border border-purple-400/50 flex items-center gap-1.5 transition-all cursor-pointer whitespace-nowrap active:scale-95" title="남은 학기 성적·결석·봉사·리더십·가산점을 바꿔 학교별 점수와 판정 변화를 봅니다(저장 안 함)">
+                        <span>🔮</span> <span>가정해 보기</span>
+                    </button>
                     <button id="printReportBtn" class="px-4 h-9 rounded-xl font-bold text-xs bg-indigo-600 hover:bg-indigo-500 text-white flex items-center gap-1.5 shadow-md shadow-indigo-500/20 transition-all cursor-pointer whitespace-nowrap active:scale-95">
                         <span>🖨️</span> <span>인쇄 / PDF</span>
                     </button>

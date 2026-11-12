@@ -7,6 +7,7 @@ import { fillGeneralCityCutoff } from './generalCityCutoff.js';
 import { bindCounselRecords } from './counselLog.js';
 import { bindWishlistControls } from './wishlist.js';
 import { notifyClassUpdated, notifyStudentSelected } from '../../../core/navigation.js';
+import { openWhatIfModal } from './whatIfModal.js';
 
 export async function openStudentModal(classNum, studentNum, name) {
     // 기존 모달 제거
@@ -66,6 +67,7 @@ export function renderStudentModalContent(modalEl, classNum, studentNum, name, d
     fillGeneralCityCutoff(ctx);
     bindCounselRecords(ctx);
     bindWishlistControls(ctx);
+    ctx.modalEl.querySelector('#openWhatIfBtn')?.addEventListener('click', () => openWhatIfModal(ctx));
 }
 
 // 상담 모달: 학교명 비교 도우미와 목표고교(위시리스트) 초기 상태

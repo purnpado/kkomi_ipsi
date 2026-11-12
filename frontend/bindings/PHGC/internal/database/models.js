@@ -317,6 +317,36 @@
  * @property {boolean} MustChangePassword
  */
 
+/**
+ * @typedef {Object} WhatIfGeneral
+ * @property {number} rank
+ * @property {number} totalStudents
+ * @property {number} percentile
+ * @property {number} academic - 교과(160)
+ * @property {number} nonAcademic - 비교과(40)
+ * @property {number} total - 총점(200)
+ * @property {number} base - 기본 지표(가산점 제외)
+ * @property {number} high - 아직 정해지지 않은 가산점까지 받을 때
+ */
+
+/**
+ * @typedef {Object} WhatIfResult
+ * @property {WhatIfSchoolChange[] | null} schools
+ * @property {WhatIfGeneral} generalBefore
+ * @property {WhatIfGeneral} generalAfter
+ * @property {string} generalMethod - exact(전교생 자료로 계산) · estimated(우리 반 전교 석차로 추정) · none
+ * @property {string[] | null} notes
+ */
+
+/**
+ * @typedef {Object} WhatIfSchoolChange
+ * @property {string} schoolName
+ * @property {string} trackName
+ * @property {number} totalMax
+ * @property {number} before
+ * @property {number} after
+ */
+
 // In interface mode, this file is likely to contain just comments.
 // We add a dummy export statement to ensure it is recognised as an ES module.
 export {};

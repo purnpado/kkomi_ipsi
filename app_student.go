@@ -120,3 +120,15 @@ func (a *App) GetStudentTranscript(classNum int, studentNum, name string) (*data
 func (a *App) GetClassFullGrades(classNum int) ([]calc.StudentFullData, error) {
 	return a.db.GetClassFullGrades(classNum, a.isMaster())
 }
+
+// WhatIfStudent 상담 화면 "가정해 보기": 남은 학기 성적·결석·봉사·리더십·가산점 가정값으로
+// 학교별 점수와 후기고 석차를 다시 계산한다. 아무것도 저장하지 않는다(진로부장도 조회 가능).
+func (a *App) WhatIfStudent(classNum int, studentNum, name string, input calc.WhatIfInput) (*database.WhatIfResult, error) {
+	if a.user == nil {
+		return nil, fmt.Errorf("로그인이 필요합니다")
+	}
+	if a.user.Role == "homeroom" && a.user.ClassNum != classNum {
+		return nil, fmt.Errorf("담당 학급(%d반) 학생만 계산할 수 있습니다", a.user.ClassNum)
+	}
+	return a.db.WhatIfStudent(classNum, studentNum, name, input)
+}
