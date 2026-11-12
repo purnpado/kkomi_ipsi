@@ -20,13 +20,13 @@ export function buildShellMenu(user) {
                 { id: 'classes', label: '학급 명렬표·상담', hint: '학급을 골라 학생 상담', screen: 'teacher', params: { classNum: null } }
             ] },
             { id: 'apps', label: '원서·결과', items: [
-                { id: 'app-summary', label: '우리 학교 지원현황', modal: 'application-summary' },
-                { id: 'register', label: '원서대장', modal: 'register' },
-                { id: 'matrix', label: '신호등 매트릭스', modal: 'matrix', params: { classNum: null } }
+                { id: 'app-summary', label: '우리 학교 지원현황', screen: 'school-summary' },
+                { id: 'register', label: '원서대장', screen: 'register' },
+                { id: 'matrix', label: '신호등 매트릭스', screen: 'matrix', params: { classNum: null } }
             ] },
             { id: 'analysis', label: '입시 분석', items: [
-                { id: 'analysis', label: '입시 분석·추세', modal: 'admission-analysis' },
-                { id: 'shared', label: '관내 공유 결과', modal: 'shared-admission' }
+                { id: 'analysis', label: '입시 분석·추세', screen: 'analysis' },
+                { id: 'shared', label: '관내 공유 결과', screen: 'shared' }
             ] },
             { id: 'basis', label: '기준 자료', items: [
                 { id: 'cutoff', label: '커트라인·경쟁률', screen: 'cutoff' },
@@ -50,13 +50,13 @@ export function buildShellMenu(user) {
                 { id: 'classes', label: '우리 반 명렬표·상담', hint: `3학년 ${myClass}반 · 취합자료 제출`, screen: 'teacher', params: { classNum: myClass } }
             ] },
             { id: 'apps', label: '원서·결과', items: [
-                { id: 'class-summary', label: '우리 반 지원현황', modal: 'class-summary', params: { classNum: myClass } },
-                { id: 'register', label: '원서대장', modal: 'register' },
-                { id: 'matrix', label: '신호등 매트릭스', modal: 'matrix', params: { classNum: myClass } }
+                { id: 'class-summary', label: '우리 반 지원현황', screen: 'class-summary', params: { classNum: myClass } },
+                { id: 'register', label: '원서대장', screen: 'register' },
+                { id: 'matrix', label: '신호등 매트릭스', screen: 'matrix', params: { classNum: myClass } }
             ] },
             { id: 'analysis', label: '입시 분석', items: [
-                { id: 'analysis', label: '입시 분석·추세', modal: 'admission-analysis' },
-                { id: 'shared', label: '관내 공유 결과', modal: 'shared-admission' }
+                { id: 'analysis', label: '입시 분석·추세', screen: 'analysis' },
+                { id: 'shared', label: '관내 공유 결과', screen: 'shared' }
             ] }
         ];
     }
@@ -70,12 +70,12 @@ export function buildShellMenu(user) {
                 { id: 'classes', label: '학급 둘러보기', hint: '명렬표·상담 조회 전용', screen: 'teacher', params: { classNum: null } }
             ] },
             { id: 'apps', label: '원서·결과', items: [
-                { id: 'app-summary', label: '우리 학교 지원현황', modal: 'application-summary' },
-                { id: 'matrix', label: '신호등 매트릭스', modal: 'matrix', params: { classNum: null } }
+                { id: 'app-summary', label: '우리 학교 지원현황', screen: 'school-summary' },
+                { id: 'matrix', label: '신호등 매트릭스', screen: 'matrix', params: { classNum: null } }
             ] },
             { id: 'analysis', label: '입시 분석', items: [
-                { id: 'analysis', label: '입시 분석·추세', modal: 'admission-analysis' },
-                { id: 'shared', label: '관내 공유 결과', modal: 'shared-admission' }
+                { id: 'analysis', label: '입시 분석·추세', screen: 'analysis' },
+                { id: 'shared', label: '관내 공유 결과', screen: 'shared' }
             ] }
         ];
     }
@@ -83,6 +83,6 @@ export function buildShellMenu(user) {
 }
 
 /** 공통 틀을 보여 줄 화면(로그인 뒤 화면)인지 */
-export const SHELL_SCREENS = new Set(['admin', 'home', 'teacher', 'users', 'cutoff']);
+export const SHELL_SCREENS = new Set(['admin', 'home', 'teacher', 'users', 'cutoff', 'analysis', 'matrix', 'school-summary', 'class-summary', 'register', 'shared']);
 
 export const ROLE_LABELS = { master: '학년부장', homeroom: '담임', viewer: '진로부장' };

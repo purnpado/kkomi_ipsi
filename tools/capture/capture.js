@@ -61,18 +61,20 @@ async function masterScenario(page, accounts) {
             await openStudentBySearch(page);
             shots.push(await shot(page, OUT, `07-학년부장-상담창-${theme}`, { fullPage: false }));
             await closeModals(page);
-            await clickMenu(page, 'matrix');
-            await wait(2500);
-            shots.push(await shot(page, OUT, `08-학년부장-매트릭스-${theme}`, { fullPage: false }));
-            await closeModals(page);
-            await clickMenu(page, 'analysis');
-            await wait(2500);
-            shots.push(await shot(page, OUT, `09-학년부장-입시분석-${theme}`, { fullPage: false }));
-            await closeModals(page);
         } catch (err) {
-            problems.push(`창 캡처-${theme}: ${err.message}`);
+            problems.push(`상담 창-${theme}: ${err.message}`);
             await closeModals(page);
         }
+    }
+    // 메뉴에서 화면으로 여는 기능(원래 창)
+    const panels = [['08', '매트릭스', 'matrix'], ['09', '입시분석', 'analysis'], ['10', '지원현황', 'app-summary'], ['10b', '원서대장', 'register'], ['10c', '관내공유', 'shared']];
+    for (const [no, label, item] of panels) {
+        await each(page, `${no}-학년부장-${label}`, async () => {
+            await clickMenu(page, item);
+            await wait(2000);
+            const docked = await page.$('#panelScreenMount .docked-panel');
+            if (!docked) throw new Error('화면 안에 띄워지지 않았습니다');
+        });
     }
     await logout(page);
 }

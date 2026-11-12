@@ -250,7 +250,8 @@ export function bindMatrixControls(ctx, mx) {
                 const cNum = parseInt(e.currentTarget.dataset.class);
                 const sNum = e.currentTarget.dataset.num;
                 const sName = e.currentTarget.dataset.name;
-                ctx.modalEl.remove();
+                // 창으로 띄웠을 때만 매트릭스를 닫는다. 메뉴의 화면(docked-panel)은 상담 창을 닫으면 그대로 돌아온다.
+                if (!ctx.modalEl.classList.contains('docked-panel')) ctx.modalEl.remove();
                 openModal('student', { classNum: cNum, studentNum: sNum, name: sName });
             });
         });

@@ -45,14 +45,14 @@ export async function openClassApplicationSummaryModal(classNum) {
                 ` : '';
 
                 const rankBadges = Object.keys(g.ranks).sort((a, b) => a - b).map(rank => `
-                    <button type="button" class="btn-show-class-rank px-2 py-0.5 rounded-md bg-indigo-950/90 hover:bg-indigo-800 text-indigo-200 border border-indigo-500/40 text-[11px] font-semibold transition-colors cursor-pointer"
+                    <button type="button" class="btn-show-class-rank px-2 py-0.5 rounded-md whitespace-nowrap bg-indigo-950/90 hover:bg-indigo-800 text-indigo-200 border border-indigo-500/40 text-[11px] font-semibold transition-colors cursor-pointer"
                             data-group-key="${g.key}" data-rank="${rank}" title="클릭하여 ${rank}지망 학생 명단 보기">
                         ${rank > 0 ? `${rank}지망: ` : ''}<b>${g.ranks[rank].length}명</b>
                     </button>
                 `).join('');
 
                 const totalBadge = `
-                    <button type="button" class="btn-show-class-all px-2 py-0.5 rounded-md bg-slate-800 hover:bg-slate-700 text-white font-black text-[11px] border border-slate-600 transition-colors cursor-pointer"
+                    <button type="button" class="btn-show-class-all px-2 py-0.5 rounded-md whitespace-nowrap bg-slate-800 hover:bg-slate-700 text-white font-black text-[11px] border border-slate-600 transition-colors cursor-pointer"
                             data-group-key="${g.key}" title="클릭하여 전체 지원 학생 명단 보기">
                         (총 ${g.allStudents.length}명)
                     </button>
@@ -97,7 +97,7 @@ export async function openClassApplicationSummaryModal(classNum) {
                                 <th class="p-3 border-r border-slate-700/50 w-40 text-left pl-3">학교</th>
                                 <th class="p-3 w-28 text-left pl-3">전형</th>
                                 <th class="p-3 w-36 text-left pl-3">학과</th>
-                                <th class="p-3 text-left pl-3">지망별 지원 분포 (클릭 시 학생 명단)</th>
+                                <th class="p-3 text-left pl-3 min-w-36">지망별 지원 분포 (클릭 시 학생 명단)</th>
                                 <th class="p-3 w-16 text-center text-cyan-300">예정</th>
                                 <th class="p-3 w-16 text-center text-indigo-300">지원</th>
                                 <th class="p-3 w-16 text-center text-emerald-300">합격</th>
@@ -209,14 +209,14 @@ export async function openApplicationSummaryModal() {
                 ` : '';
 
                 const rankBadges = Object.keys(g.ranks).sort((a, b) => a - b).map(rank => `
-                    <button type="button" class="btn-show-school-rank px-2 py-0.5 rounded-md bg-indigo-950/90 hover:bg-indigo-800 text-indigo-200 border border-indigo-500/40 text-[11px] font-semibold transition-colors cursor-pointer"
+                    <button type="button" class="btn-show-school-rank px-2 py-0.5 rounded-md whitespace-nowrap bg-indigo-950/90 hover:bg-indigo-800 text-indigo-200 border border-indigo-500/40 text-[11px] font-semibold transition-colors cursor-pointer"
                             data-group-key="${g.key}" data-rank="${rank}" title="클릭하여 ${rank}지망 학생 명단 보기">
                         ${rank > 0 ? `${rank}지망: ` : ''}<b>${g.ranks[rank].length}명</b>
                     </button>
                 `).join('');
 
                 const totalBadge = `
-                    <button type="button" class="btn-show-school-all px-2 py-0.5 rounded-md bg-slate-800 hover:bg-slate-700 text-white font-black text-[11px] border border-slate-600 transition-colors cursor-pointer"
+                    <button type="button" class="btn-show-school-all px-2 py-0.5 rounded-md whitespace-nowrap bg-slate-800 hover:bg-slate-700 text-white font-black text-[11px] border border-slate-600 transition-colors cursor-pointer"
                             data-group-key="${g.key}" title="클릭하여 전체 지원 학생 명단 보기">
                         (총 ${g.allStudents.length}명)
                     </button>
@@ -278,7 +278,7 @@ export async function openApplicationSummaryModal() {
                                 <th class="p-3 border-r border-slate-700/50 w-44 text-left pl-3">학교</th>
                                 <th class="p-3 w-28 text-left pl-3">전형</th>
                                 <th class="p-3 w-36 text-left pl-3">학과</th>
-                                <th class="p-3 text-left pl-3">지망별 지원 분포 (클릭 시 학생 명단)</th>
+                                <th class="p-3 text-left pl-3 min-w-36">지망별 지원 분포 (클릭 시 학생 명단)</th>
                                 <th class="p-3 w-16 text-center text-cyan-300">예정</th>
                                 <th class="p-3 w-16 text-center text-indigo-300">지원</th>
                                 <th class="p-3 w-16 text-center text-emerald-300">합격</th>

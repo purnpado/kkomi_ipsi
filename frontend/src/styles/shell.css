@@ -172,3 +172,28 @@ body.shell-on #backToAdminBtn { display: none !important; }
 /* 오른쪽 아래 고정 문구는 화면 내용과 겹치므로 공통 틀에서는 왼쪽 메뉴 아래에 둔다 */
 body.shell-on .watermark { display: none; }
 .shell-privacy { padding: 0 12px 4px; font-size: 11px; line-height: 1.4; color: var(--shell-muted); }
+
+/* 창을 화면 안에 띄울 때(core/panelScreen.js): 겹친 창의 바탕·위치를 없애고 화면 폭에 맞춘다 */
+.panel-screen { width: 100%; }
+.docked-panel {
+    position: static !important;
+    inset: auto !important;
+    z-index: auto !important;
+    display: block !important;
+    padding: 0 !important;
+    background: transparent !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    overflow: visible !important;
+    animation: none !important;
+}
+.docked-panel > * {
+    max-width: none !important;
+    max-height: none !important;
+    width: 100% !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    box-shadow: 0 2px 10px rgba(17, 24, 39, 0.06) !important;
+}
+/* 매트릭스는 학생이 많아 표가 길다: 화면 높이 안에서 위아래·좌우로 스크롤해 가로 막대가 늘 보이게 한다 */
+#matrixModal.docked-panel .overflow-x-auto { max-height: calc(100vh - 260px); overflow-y: auto; }

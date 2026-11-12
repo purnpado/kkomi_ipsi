@@ -36,6 +36,7 @@ import { openAdmissionAnalysisModal } from './modals/analysis/admissionAnalysisM
 import { openJudgmentSettingsModal } from './modals/judgmentSettingsModal.js';
 import { loadAdmissionEvidence } from './core/admissionEvidence.js';
 import { updateShell } from './core/appShell.js';
+import { renderPanelScreen, leavePanelScreen } from './core/panelScreen.js';
 
 // 화면 잠금 및 전역 ESC 핸들러 초기화
 ScreenLockManager.init();
@@ -63,7 +64,14 @@ const SCREEN_ROUTES = {
     'users': (d) => renderUserManagementScreen(d.schoolName || ''),
     'cutoff': (d) => renderCutoffScreen(d.schoolName || ''),
     'teacher': (d) => renderTeacherScreen(d.schoolName || '', d.classNum ?? null),
-    'home': (d) => renderHomeScreen(d.schoolName || '')
+    'home': (d) => renderHomeScreen(d.schoolName || ''),
+    // 창으로 만든 기능을 메뉴에서는 화면으로 연다(core/panelScreen.js)
+    'analysis': () => renderPanelScreen({ screen: 'analysis', elementId: 'admissionAnalysisModal', open: openAdmissionAnalysisModal, title: '입시 분석' }),
+    'matrix': (d) => renderPanelScreen({ screen: 'matrix', elementId: 'matrixModal', open: () => openMatrixModal(d.classNum ?? null), title: '신호등 매트릭스' }),
+    'school-summary': () => renderPanelScreen({ screen: 'school-summary', elementId: 'applicationSummaryModal', open: openApplicationSummaryModal, title: '우리 학교 지원현황' }),
+    'class-summary': (d) => renderPanelScreen({ screen: 'class-summary', elementId: 'classApplicationSummaryModal', open: () => openClassApplicationSummaryModal(d.classNum), title: '우리 반 지원현황' }),
+    'register': () => renderPanelScreen({ screen: 'register', elementId: 'applicationRegisterModal', open: openApplicationRegisterModal, title: '원서대장' }),
+    'shared': () => renderPanelScreen({ screen: 'shared', elementId: 'sharedAdmissionModal', open: openSharedAdmissionModal, title: '관내 공유 결과' })
 };
 
 // ----- 모달 라우팅 표: modal:open 이벤트의 modal 값 → 모달 열기 함수 -----
@@ -94,6 +102,7 @@ eventBus.on(EVENTS.NAVIGATE, (detail) => {
         console.warn('[라우터] 알 수 없는 화면:', detail.screen);
         return undefined;
     }
+    leavePanelScreen(detail.screen);
     patchState({
         currentScreen: detail.screen,
         schoolName: typeof detail.schoolName === 'string' ? detail.schoolName : state.schoolName
