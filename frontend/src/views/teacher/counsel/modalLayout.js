@@ -286,7 +286,7 @@ export function renderStudentModalLayout(ctx) {
                             <span class="text-xs font-bold text-slate-300 flex items-center gap-1.5">
                                 <span>📋</span> 누적 상담 이력 (<span id="counselRecordCount" class="text-indigo-400 font-bold">0</span>건)
                             </span>
-                            <span class="text-[11px] text-slate-400">최신순 정렬</span>
+                            <span class="text-[11px] text-slate-400" title="상담 일지는 쓴 선생님 본인만 볼 수 있고, 배포자료에도 담기지 않습니다">🔒 내가 쓴 기록만 보임 · 최신순</span>
                         </div>
                         <div id="counselRecordsList" class="space-y-2.5 max-h-80 overflow-y-auto pr-1">
                             <div class="text-center py-6 text-slate-500 text-xs">

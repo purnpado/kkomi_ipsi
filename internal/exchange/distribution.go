@@ -150,7 +150,7 @@ func ExportDistributionPackage(dm *database.DBManager, dataKey []byte, username,
 			return err
 		}
 		name := fmt.Sprintf("class_%d.db.kkomi", classNum)
-		if err := snapshotAndEncryptDatabase(dm, source, filepath.Join(tmpDir, name), keyPassword); err != nil {
+		if err := snapshotClassForRecipient(dm, source, tmpDir, filepath.Join(tmpDir, name), keyPassword, target.Username); err != nil {
 			return err
 		}
 		files = append(files, name)
