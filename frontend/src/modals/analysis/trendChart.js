@@ -59,20 +59,34 @@ function lineChartSVG(points, fallbackMax) {
         return `<line x1="${x}" x2="${x}" y1="${PAD.top}" y2="${H - PAD.bottom}" stroke="#f472b6" stroke-width="1.5" stroke-dasharray="4 4"/>
             <text x="${x + 4}" y="${PAD.top + 10}" font-size="10" fill="#f9a8d4">산출식 변경</text>`;
     }).join('');
-    // 같은 해 숫자 표시가 겹치지 않게 위아래로 비켜 놓는다(최소 12px 간격).
-    const labelY = new Map();
+    // 같은 해 숫자 표시가 겹치지 않게 놓는다.
+    // 점끼리 떨어져 있으면 숫자를 점 바로 위에, 점이 몰려 있으면(18px 안) 몰린 점들의 숫자를
+    // 점 옆(마지막 해는 왼쪽, 그 밖은 오른쪽)에 세로로 나란히 놓아 점·눈금 글자와 겹치지 않게 한다.
+    const LABEL_GAP = 13;
+    const labelPos = new Map();
     points.forEach((p, i) => {
-        // 가장 위 점은 숫자를 위에, 그 아래 점이 가까우면 숫자를 점 아래로 내리고 서로 12px 이상 띄운다.
+        const x = yearX(i, n);
         const items = SERIES.map(s => ({ key: s.key, v: value(p, s.key) })).filter(it => it.v !== null)
             .map(it => ({ ...it, py: y(it.v) })).sort((a, b) => a.py - b.py);
-        let last = -Infinity;
-        items.forEach((it, k) => {
-            const above = it.py - 8;
-            const crowded = k > 0 && (it.py - items[k - 1].py < 16 || above - last < 12);
-            it.y = crowded ? Math.max(it.py + 14, last + 12) : above;
-            last = it.y;
+        const clusters = [];
+        items.forEach((it) => {
+            const last = clusters[clusters.length - 1];
+            if (last && it.py - last[last.length - 1].py < 18) last.push(it);
+            else clusters.push([it]);
         });
-        items.forEach(it => labelY.set(`${i}|${it.key}`, it.y));
+        const right = i < n - 1;
+        clusters.forEach((group) => {
+            if (group.length === 1) {
+                labelPos.set(`${i}|${group[0].key}`, { x, y: group[0].py - 8, anchor: 'middle' });
+                return;
+            }
+            const center = group.reduce((sum, it) => sum + it.py, 0) / group.length;
+            group.forEach((it, k) => labelPos.set(`${i}|${it.key}`, {
+                x: right ? x + 9 : x - 9,
+                y: center - ((group.length - 1) * LABEL_GAP) / 2 + k * LABEL_GAP + 4,
+                anchor: right ? 'start' : 'end'
+            }));
+        });
     });
     const lines = SERIES.map(s => {
         const pts = points.map((p, i) => ({ v: value(p, s.key), x: yearX(i, n), p }));
@@ -92,9 +106,10 @@ function lineChartSVG(points, fallbackMax) {
             const idx = points.indexOf(pt.p);
             const raw = Number(pt.p[s.key]);
             const max = Number(pt.p.totalMax) || fallbackMax;
+            const pos = labelPos.get(`${idx}|${s.key}`) || { x: pt.x, y: y(pt.v) - 8, anchor: 'middle' };
             const tip = `${pt.p.admissionYear} 고입 ${s.label}: ${raw.toFixed(2)}점${max ? ` / ${max}점 만점 (${(raw / max * 100).toFixed(1)}%)` : ''}`;
             return `<circle cx="${pt.x}" cy="${y(pt.v)}" r="4" fill="${s.color}"><title>${escapeHtml(tip)}</title></circle>
-                <text x="${pt.x}" y="${labelY.get(`${idx}|${s.key}`) ?? y(pt.v) - 8}" text-anchor="middle" font-size="10" fill="${s.color}">${pt.v.toFixed(viewMode === 'score' ? 1 : 1)}${unit}</text>`;
+                <text x="${pos.x}" y="${pos.y}" text-anchor="${pos.anchor}" font-size="10" font-weight="600" class="trend-label" fill="${s.color}">${pt.v.toFixed(viewMode === 'score' ? 1 : 1)}${unit}</text>`;
         }).join('');
         return paths + dots;
     }).join('');

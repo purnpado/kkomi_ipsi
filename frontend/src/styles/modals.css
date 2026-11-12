@@ -9,3 +9,7 @@
 .animate-shake {
     animation: shake 0.4s ease-in-out;
 }
+
+/* 추세 그래프 숫자: 선·점 위에서도 읽히도록 바탕색 테두리를 두른다 */
+.trend-label { paint-order: stroke; stroke: #0f172a; stroke-width: 3px; stroke-linejoin: round; }
+html[data-theme="light"] .trend-label { stroke: #f8fafc; }
