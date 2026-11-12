@@ -1,5 +1,12 @@
 import { showModalAlert, showModalPrompt } from '../../core/dialogs.js';
-import { navigate } from '../../core/navigation.js';
+import { navigate, notifyApplicationsChanged } from '../../core/navigation.js';
+import { state } from '../../core/store.js';
+
+// 병합 뒤에는 보고 있던 화면(대시보드·관리 화면)을 다시 그린다.
+const reopenCurrent = (schoolName) => {
+    notifyApplicationsChanged({ source: 'patch-merge' }); // 대시보드는 이 알림으로 다시 그린다
+    if (state.currentScreen !== 'home') navigate('admin', { schoolName });
+};
 
 // 담임교사 취합자료 병합 방식 선택 모달 (다중 파일 일괄 병합 vs 단일 파일 상세 검토)
 export function openPatchImportModal(schoolName) {
@@ -85,7 +92,7 @@ export function openPatchImportModal(schoolName) {
                     message: `선택하신 <strong>${res.files}개 학급 취합 파일</strong>에서 학생 <strong>${res.students}명</strong>의 최신 데이터가 성공적으로 일괄 병합되었습니다!`,
                     type: 'success'
                 });
-                navigate('admin', { schoolName });
+                reopenCurrent(schoolName);
             }
         } catch (err) {
             await showModalAlert({
@@ -179,7 +186,7 @@ function openPatchMergeSelection(preview, password, schoolName) {
         try {
             const count = await window.go.main.App.ImportTeacherPatchSelected(password, preview.path, selections);
             close();
-            navigate('admin', { schoolName });
+            reopenCurrent(schoolName);
             await showModalAlert({
                 type: 'success',
                 title: '취합자료 병합 완료',

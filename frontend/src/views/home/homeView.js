@@ -1,5 +1,5 @@
 // ===== 대시보드 화면 (app:navigate 'home') =====
-// 역할에 따라 담임·진로부장 대시보드를 그린다. 학년부장 대시보드는 아직 기존 'admin' 화면을 쓴다.
+// 역할에 따라 학년부장·담임·진로부장 대시보드를 그린다. 나이스 자료·학년도 관리는 기존 'admin' 화면이다.
 // 다른 화면·창은 navigate·openModal 로만 요청하고, 원서·학급 자료가 바뀌면 다시 그린다.
 import { app } from '../../core/dom.js';
 import { state } from '../../core/store.js';
@@ -11,6 +11,8 @@ import { loadHomeData } from './homeData.js';
 import { loadingHTML } from './homeWidgets.js';
 import { homeroomHomeHTML } from './homeroomHome.js';
 import { viewerHomeHTML } from './viewerHome.js';
+import { loadMasterData } from './masterData.js';
+import { masterHomeHTML } from './masterHome.js';
 
 let subscriptions = [];
 let renderToken = 0;
@@ -34,7 +36,13 @@ function runAction(action, schoolName) {
         'school-summary': () => openModal('application-summary'),
         matrix: () => openModal('matrix', { classNum: myClass }),
         'matrix-all': () => openModal('matrix', { classNum: null }),
-        analysis: () => openModal('admission-analysis')
+        analysis: () => openModal('admission-analysis'),
+        register: () => openModal('register'),
+        admin: () => navigate('admin', { schoolName }),
+        settings: () => navigate('admin', { schoolName }),
+        cutoff: () => navigate('cutoff', { schoolName }),
+        users: () => navigate('users', { schoolName }),
+        patch: () => openModal('patch-import', { schoolName })
     };
     actions[action]?.();
 }
@@ -54,24 +62,27 @@ function bind(root, schoolName) {
 
 export async function renderHomeScreen(schoolName) {
     const user = state.currentUser;
-    if (!user || user.Role === 'master') {
-        return navigate('admin', { schoolName });
-    }
+    if (!user) return navigate('login', { schoolName });
     const token = ++renderToken;
     app.className = 'wide-layout';
     app.innerHTML = loadingHTML();
     if (user.Role === 'homeroom') updateAppWindowTitle('homeroom', user.ClassNum);
-    else updateAppWindowTitle('viewer');
+    else updateAppWindowTitle(user.Role === 'master' ? 'master' : 'viewer');
     ScreenLockManager.resetTimer();
 
-    const { classes, classCount } = await classesFor(user);
-    const data = await loadHomeData(classes);
+    let html = '';
+    if (user.Role === 'master') {
+        html = masterHomeHTML(await loadMasterData());
+    } else {
+        const { classes, classCount } = await classesFor(user);
+        const data = await loadHomeData(classes);
+        html = user.Role === 'homeroom'
+            ? homeroomHomeHTML({ classNum: user.ClassNum, data })
+            : viewerHomeHTML({ data, classCount });
+    }
     // 그사이 다른 화면으로 옮겼으면 그리지 않는다.
     if (token !== renderToken || state.currentScreen !== 'home') return undefined;
-
-    app.innerHTML = user.Role === 'homeroom'
-        ? homeroomHomeHTML({ classNum: user.ClassNum, data })
-        : viewerHomeHTML({ data, classCount });
+    app.innerHTML = html;
     bind(app, schoolName);
 
     subscriptions.forEach((off) => off());

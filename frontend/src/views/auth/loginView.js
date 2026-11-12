@@ -319,7 +319,7 @@ export async function renderLoginScreen(schoolName) {
                         navigate('home', { schoolName });
                     } else {
                         updateAppWindowTitle('master');
-                        navigate('admin', { schoolName });
+                        navigate('home', { schoolName });
                     }
                 }
             } catch (err) {
@@ -383,11 +383,7 @@ export function renderPasswordChangeScreen(username) {
             await window.go.main.App.ChangeUserPassword(username, pw);
             state.currentUser.MustChangePassword = false;
             const config = await window.go.main.App.GetSchoolConfig();
-            if (state.currentUser.Role === 'homeroom' || state.currentUser.Role === 'viewer') {
-                navigate('home', { schoolName: config.schoolName });
-            } else {
-                navigate('admin', { schoolName: config.schoolName });
-            }
+            navigate('home', { schoolName: config.schoolName });
         } catch (e) {
             err.textContent = e;
             err.classList.add('show');

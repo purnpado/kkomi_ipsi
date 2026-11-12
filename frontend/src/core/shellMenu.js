@@ -13,9 +13,10 @@ export function buildShellMenu(user) {
     if (role === 'master') {
         return [
             { id: 'dash', label: '대시보드', items: [
-                { id: 'dash', label: '학년부장 대시보드', hint: '나이스 올리기·학년도 관리', screen: 'admin' }
+                { id: 'dash', label: '학년부장 대시보드', hint: '올해 할 일·현황·주의 알림', screen: 'home' }
             ] },
             { id: 'students', label: '학생·성적', items: [
+                { id: 'admin', label: '나이스 자료·학년도 관리', hint: '엑셀 올리기·고입 연도·인수인계', screen: 'admin' },
                 { id: 'classes', label: '학급 명렬표·상담', hint: '학급을 골라 학생 상담', screen: 'teacher', params: { classNum: null } }
             ] },
             { id: 'apps', label: '원서·결과', items: [

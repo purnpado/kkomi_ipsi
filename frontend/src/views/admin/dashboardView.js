@@ -82,7 +82,7 @@ export async function renderAdminScreen(schoolName) {
                     <img src="${logoUniversal}" alt="로고" class="w-10 h-10 rounded-xl shadow-md border border-indigo-400/40 object-cover shrink-0" />
                     <div>
                         <h1 class="text-2xl font-black text-white flex items-center gap-2.5 whitespace-nowrap">
-                            관리자 대시보드
+                            나이스 자료·학년도 관리
                             <span class="text-xs bg-slate-800 text-indigo-300 px-2.5 py-0.5 rounded-full border border-indigo-500/30 font-mono font-bold">v${localVer}</span>
                         </h1>
                         <p class="text-text-muted text-xs mt-0.5 whitespace-nowrap">${schoolName} (총 ${classCount}학급)</p>
