@@ -16,8 +16,11 @@ export function renderStatsDashboard(container, stats, sourceMode) {
     // 4단계 구간: core/admissionJudgment.js 단일 기준(기준선 = 합격 최저점, 학교 설정 여유폭)
     const zones = judgmentZones({
         cutoff: stats.acceptedMin, totalMax: totalMaxFor(stats.highSchool, stats.track),
-        schoolName: stats.highSchool, track: stats.track, maxRejected: stats.rejectedCount > 0 ? stats.rejectedMax : 0
+        schoolName: stats.highSchool, track: stats.track, maxRejected: stats.rejectedCount > 0 ? stats.rejectedMax : 0,
+        noRejection: stats.acceptedCount > 0 && !(stats.rejectedCount > 0)
     });
+    // 불합격 사례가 없으면 합격 최저점은 합격선의 상한일 뿐이므로 그 아래를 소신·도전으로 나누지 않는다.
+    const noRejection = !!zones?.noRejection;
     const safeCutoff = zones ? zones.safeFrom : 0;
     const properCutoff = zones ? zones.properFrom : 0;
     const challengeCutoff = zones ? zones.hopeFrom : 0;
@@ -124,6 +127,15 @@ export function renderStatsDashboard(container, stats, sourceMode) {
                     <p class="text-[11px] text-slate-300">합격 최저점 이상(동점 포함)</p>
                 </div>
 
+                ${noRejection ? `
+                <div class="p-3 rounded-lg bg-slate-800/70 border border-slate-600 space-y-1 col-span-2">
+                    <div class="flex items-center justify-between font-bold text-slate-200">
+                        <span>❔ 판단 근거 부족</span>
+                        <span class="font-mono">${properCutoff > 0 ? `<${properCutoff.toFixed(2)}점` : '-'}</span>
+                    </div>
+                    <p class="text-[11px] text-slate-300">이 자료에는 불합격 사례가 없어 합격 최저점이 합격선의 상한일 뿐입니다. 이보다 낮은 점수의 합격 여부는 판단할 수 없습니다. 미달 여부는 커트라인 관리의 [공식 경쟁률]에 입력한 값으로만 표시합니다.</p>
+                </div>
+                ` : `
                 <!-- 소신 -->
                 <div class="p-3 rounded-lg bg-amber-950/40 border border-amber-500/30 space-y-1">
                     <div class="flex items-center justify-between font-bold text-amber-300">
@@ -141,6 +153,7 @@ export function renderStatsDashboard(container, stats, sourceMode) {
                     </div>
                     <p class="text-[11px] text-slate-300">소신 구간 미만</p>
                 </div>
+                `}
             </div>
         </div>
 

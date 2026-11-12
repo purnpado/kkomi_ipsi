@@ -26,6 +26,7 @@
  * @property {number} sharedPackages
  * @property {number} sharedSkipped
  * @property {number} quotas
+ * @property {number} competition
  * @property {boolean} judgmentImported
  * @property {boolean} currentYearOpen - 내보낸 쪽의 그해 결과가 아직 확정 전이었음
  */

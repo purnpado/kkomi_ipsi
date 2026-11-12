@@ -28,6 +28,20 @@
  */
 
 /**
+ * AdmissionEvidence 학년도·고교·학과·전형별 합격·불합격 사례 수(점수 기준).
+ * @typedef {Object} AdmissionEvidence
+ * @property {number} admissionYear
+ * @property {string} highSchool
+ * @property {string} department - 빈 문자열이면 학교·전형 전체 합계
+ * @property {string} track
+ * @property {number} acceptedCount
+ * @property {number} rejectedCount - 점수로 떨어진 사례(1차 통과 후 면접 탈락 제외)
+ * @property {number} stage2FailCount - 1차 통과 후 2차(면접 등) 탈락
+ * @property {number} acceptedMin
+ * @property {number} rejectedMax
+ */
+
+/**
  * ApplicationScoreSnapshot is the score currently calculated for one selected school track.
  * The support-status form uses this lightweight result instead of reloading every student.
  * @typedef {Object} ApplicationScoreSnapshot
@@ -76,6 +90,17 @@
  * @property {number} minStage1PassScore - 1차 합격선(1차 합격자 최저점)
  * @property {number} maxStage1FailScore - 1차 불합격자 최고점
  * @property {number} avgStage2FailScore - 2차 탈락자 평균(면접 등 점수화 어려운 전형 영향)
+ */
+
+/**
+ * CompetitionRecord 공식 발표 경쟁률 한 건(운영자 수동 입력).
+ * @typedef {Object} CompetitionRecord
+ * @property {number} admissionYear
+ * @property {string} schoolName
+ * @property {string} department - 빈 문자열이면 학교·전형 전체
+ * @property {string} track
+ * @property {number} quota
+ * @property {number} applicants
  */
 
 /**

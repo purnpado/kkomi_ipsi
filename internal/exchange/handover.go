@@ -14,7 +14,7 @@ import (
 )
 
 // 인수인계 파일(.kkomihandover): 다음 학년도 학년부장에게 넘기는 입시 자료. 학생 개인정보가 없다.
-//   담는 것: 고교별 커트라인, 결과 확정 기록, 지난 입시 결과(익명 누적), 관내 공유 자료, 후기고 정원 기록, 판정 기준
+//   담는 것: 고교별 커트라인, 결과 확정 기록, 지난 입시 결과(익명 누적), 관내 공유 자료, 후기고 정원 기록, 공식 경쟁률, 판정 기준
 //   담지 않는 것: 학생 이름·학번·성적·출결·봉사·상담 일지, 계정·비밀번호·열쇠
 // 해마다 새로 설치한 프로그램에서 받아 들이고, 그해 결과를 더해 다시 내보내면 누적된다.
 
@@ -30,6 +30,7 @@ type HandoverPackage struct {
 	History          []database.HistoryRecord      `json:"history"`
 	Shared           []database.SharedPackageV2    `json:"shared"`
 	Quotas           []database.GeneralQuotaRecord `json:"quotas"`
+	Competition      []database.CompetitionRecord  `json:"competition,omitempty"` // 공식 경쟁률(모집정원·지원자 수)
 	JudgmentSettings string                        `json:"judgmentSettings"`
 }
 
@@ -43,6 +44,7 @@ type HandoverImportResult struct {
 	SharedPackages   int    `json:"sharedPackages"`
 	SharedSkipped    int    `json:"sharedSkipped"`
 	Quotas           int    `json:"quotas"`
+	Competition      int    `json:"competition"`
 	JudgmentImported bool   `json:"judgmentImported"`
 	CurrentYearOpen  bool   `json:"currentYearOpen"` // 내보낸 쪽의 그해 결과가 아직 확정 전이었음
 }
@@ -72,6 +74,9 @@ func BuildHandoverPackage(dm *database.DBManager) (*HandoverPackage, error) {
 		return nil, err
 	}
 	if pkg.Quotas, err = dm.GetGeneralQuotaRecords(); err != nil {
+		return nil, err
+	}
+	if pkg.Competition, err = dm.GetCompetitionRecords(); err != nil {
 		return nil, err
 	}
 	pkg.JudgmentSettings, _ = dm.GetJudgmentSettings()
@@ -159,6 +164,9 @@ func ApplyHandoverPackage(dm *database.DBManager, pkg *HandoverPackage, includeJ
 	}
 	if res.Quotas, err = dm.ImportGeneralQuotaRecords(pkg.Quotas); err != nil {
 		return nil, fmt.Errorf("후기고 정원 기록 가져오기: %w", err)
+	}
+	if res.Competition, err = dm.ImportCompetitionRecords(pkg.Competition); err != nil {
+		return nil, fmt.Errorf("공식 경쟁률 가져오기: %w", err)
 	}
 	if includeJudgment && strings.TrimSpace(pkg.JudgmentSettings) != "" {
 		if current, _ := dm.GetJudgmentSettings(); strings.TrimSpace(current) == "" {

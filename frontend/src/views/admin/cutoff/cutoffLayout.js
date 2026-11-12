@@ -44,6 +44,9 @@ export function renderCutoffLayout(ctx, view) {
                         <button id="saveAllCutoffsBtn" class="text-xs bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-3.5 rounded-xl flex items-center gap-1.5 shadow-sm transition-all cursor-pointer h-9" title="현재 선택된 고입 연도의 커트라인만 데이터베이스에 영구 저장합니다">
                             <span>💾</span> 커트라인 저장
                         </button>
+                        <button id="openCompetitionBtn" class="text-xs bg-sky-600/30 border border-sky-500/50 text-sky-200 hover:bg-sky-600/50 px-3.5 rounded-xl font-bold flex items-center gap-1.5 transition-colors cursor-pointer h-9" title="고교가 발표한 모집정원·지원자 수를 입력합니다. 상담 화면의 '미달'·경쟁률 표시에 쓰입니다">
+                            <span>📊</span> 공식 경쟁률
+                        </button>
                         <button id="resetCutoffsBtn" class="text-xs bg-rose-950/60 border border-rose-500/50 text-rose-300 hover:bg-rose-900/70 px-3.5 rounded-xl font-bold flex items-center gap-1.5 transition-colors cursor-pointer h-9" title="입력된 커트라인 데이터를 초기화합니다">
                             <span>🗑️</span> 커트라인 초기화
                         </button>

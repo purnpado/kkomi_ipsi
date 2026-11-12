@@ -1,5 +1,5 @@
 import { escapeAttr } from '../../../core/utils.js';
-import { judgeScore, judgmentBadge, describeDiff } from '../../../core/admissionJudgment.js';
+import { judgeScore, judgmentBadge, describeDiff, describeEvidence } from '../../../core/admissionJudgment.js';
 import { admissionLabel } from '../../../core/admissionYear.js';
 
 // 상담 모달: 고교별 산출 결과 카드 HTML 구성
@@ -62,14 +62,18 @@ export function buildSchoolResultCards(ctx) {
         // 1순위: 교사가 수기 입력한 우리 학교 학과별 커트라인
         // 2순위: 교사가 수기 입력한 우리 학교 전체(공통) 커트라인
         // 3순위: 고교 공식 발표 입결 데이터 (학교 데이터가 없을 때 보완)
+        // 기준선이 한 학년도의 실제 결과일 때 그 학년도·학과(불합격 사례 수·공식 경쟁률 조회용)
+        let defaultBasis = null;
         if (deptsForSchool.length > 0) {
             defaultCutoff = deptsForSchool[0].minValue;
             defaultAvg = deptsForSchool[0].avgValue;
+            defaultBasis = { year: deptsForSchool[0].year, department: deptsForSchool[0].department };
         } else {
             const found = (ctx.cutoffs || []).find(c => c.schoolName.includes(r.schoolName.substring(0, 4)) && c.track.includes(r.trackName) && c.minValue > 0);
             if (found) {
                 defaultCutoff = found.minValue;
                 defaultAvg = found.avgValue;
+                defaultBasis = { year: found.year, department: found.department };
             } else if (officialPrimary) {
                 defaultCutoff = Number(officialPrimary.minAcceptedScore || officialPrimary.minValue);
                 defaultAvg = Number(officialPrimary.avgAcceptedScore || officialPrimary.avgValue || 0);
@@ -80,14 +84,15 @@ export function buildSchoolResultCards(ctx) {
         const defaultSource = deptsForSchool.length > 0 ? '학교 입력 기준선(학과)'
             : ((ctx.cutoffs || []).some(c => c.schoolName.includes(r.schoolName.substring(0, 4)) && c.track.includes(r.trackName) && c.minValue > 0) ? '학교 입력 기준선'
                 : (officialPrimary ? '고교 공식 발표' : ''));
-        const getCutoffBadgeAndGauge = (cutoffVal, source = defaultSource) => {
+        const getCutoffBadgeAndGauge = (cutoffVal, source = defaultSource, basis = defaultBasis) => {
             const pct = (r.totalScore / r.totalMax) * 100;
-            const result = judgeScore({ score: r.totalScore, cutoff: cutoffVal, totalMax: r.totalMax, schoolName: r.schoolName, track: r.trackName, source });
+            const result = judgeScore({ score: r.totalScore, cutoff: cutoffVal, totalMax: r.totalMax, schoolName: r.schoolName, track: r.trackName, source, year: basis?.year, department: basis?.department });
             if (result.level === 'unknown') {
                 return { badge: `<span class="text-xs text-text-muted">만점의 ${pct.toFixed(1)}%</span>`, color: 'bg-primary', pct };
             }
-            const color = { safe: 'bg-emerald-500', proper: 'bg-indigo-500', hope: 'bg-amber-500', challenge: 'bg-rose-500' }[result.level];
-            const badge = `${judgmentBadge(result)} <span class="text-[10px] text-slate-400">${describeDiff(result)}${source ? ` · ${source}` : ''}</span>`;
+            const color = { safe: 'bg-emerald-500', proper: 'bg-indigo-500', hope: 'bg-amber-500', challenge: 'bg-rose-500', insufficient: 'bg-slate-500' }[result.level];
+            const evidenceText = describeEvidence(result);
+            const badge = `${judgmentBadge(result)} <span class="text-[10px] text-slate-400">${describeDiff(result)}${source ? ` · ${source}` : ''}${evidenceText ? ` · <span class="text-amber-200">${evidenceText}</span>` : ''}</span>`;
             return { badge, color, pct };
         };
 
@@ -120,6 +125,8 @@ export function buildSchoolResultCards(ctx) {
                  data-score="${r.totalScore}"
                  data-max="${r.totalMax}"
                  data-last-cutoff="${defaultCutoff || 0}"
+                 data-last-year="${defaultBasis?.year || ''}"
+                 data-last-dept="${escapeAttr(defaultBasis?.department || '')}"
                  data-last-avg="${defaultAvg || 0}"
                  data-avg3-cutoff="${recent3Average ? recent3Average.toFixed(2) : 0}"
                  data-avg5-cutoff="${recent5Average ? recent5Average.toFixed(2) : 0}"
@@ -149,7 +156,7 @@ export function buildSchoolResultCards(ctx) {
                     <select class="dept-selector bg-slate-800 text-white font-bold border border-slate-600 rounded px-2 py-1 outline-none cursor-pointer"
                             data-card="${rIdx}" data-score="${r.totalScore}" data-max="${r.totalMax}">
                         ${deptsForSchool.map((d, dIdx) => `
-                            <option value="${d.minValue}" data-avg="${d.avgValue || 0}" ${dIdx === 0 ? 'selected' : ''}>
+                            <option value="${d.minValue}" data-avg="${d.avgValue || 0}" data-year="${d.year}" data-dept="${escapeAttr(d.department)}" ${dIdx === 0 ? 'selected' : ''}>
                                 ${d.department} (${d.year}년 · 최저: ${d.minValue}점${d.avgValue > 0 ? `, 평균: ${d.avgValue}점` : ''})
                             </option>
                         `).join('')}

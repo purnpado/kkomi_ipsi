@@ -3,6 +3,7 @@
 // 해마다 새로 설치한 프로그램에서 받아 들이고, 그해 결과를 더해 다시 내보내면 누적된다.
 import { showModalAlert, showModalConfirm, showModalPrompt } from '../../core/dialogs.js';
 import { loadJudgmentSettings } from '../../core/admissionJudgment.js';
+import { notifyStatsRecalculated } from '../../core/navigation.js';
 
 async function askNewPassword() {
     const password = await showModalPrompt({
@@ -62,9 +63,10 @@ export function bindHandoverControls({ rerender }) {
             });
             const r = await window.go.main.App.ImportPreviousYearData(path, password, previousShared, includeJudgment);
             if (r.judgmentImported) await loadJudgmentSettings();
+            notifyStatsRecalculated({ reason: 'handover-import' });
             const years = (r.years || []).map(y => `${y} 고입`).join(', ') || '없음';
             const open = r.currentYearOpen ? '\n⚠️ 보낸 쪽의 마지막 학년도 결과가 확정 전이었습니다. 빠진 결과가 있을 수 있습니다.' : '';
-            await showModalAlert(`${r.schoolName} 입시 자료를 가져왔습니다.\n\n학년도: ${years}\n지난 입시 결과 ${r.historyRecords}건 · 커트라인 ${r.cutoffs}건 · 결과 확정 ${r.closures}건 · 관내 공유 ${r.sharedPackages}건(이미 있어 건너뜀 ${r.sharedSkipped}건) · 후기고 정원 ${r.quotas}건${open}\n\n작년 프로그램 폴더와 작년 담임 PC의 배포자료 폴더에는 학생 개인정보가 남아 있습니다. 보관 기간이 지나면 삭제해 주세요.`, '가져오기 완료', 'success');
+            await showModalAlert(`${r.schoolName} 입시 자료를 가져왔습니다.\n\n학년도: ${years}\n지난 입시 결과 ${r.historyRecords}건 · 커트라인 ${r.cutoffs}건 · 결과 확정 ${r.closures}건 · 관내 공유 ${r.sharedPackages}건(이미 있어 건너뜀 ${r.sharedSkipped}건) · 후기고 정원 ${r.quotas}건 · 공식 경쟁률 ${r.competition || 0}건${open}\n\n작년 프로그램 폴더와 작년 담임 PC의 배포자료 폴더에는 학생 개인정보가 남아 있습니다. 보관 기간이 지나면 삭제해 주세요.`, '가져오기 완료', 'success');
             rerender();
         } catch (err) {
             await showModalAlert('지난 학년도 입시 자료 가져오기 실패: ' + err, '오류', 'error');

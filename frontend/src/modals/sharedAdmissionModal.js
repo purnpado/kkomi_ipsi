@@ -2,6 +2,7 @@ import { escapeHtml } from '../core/utils.js';
 import { showModalAlert, showModalConfirm, showModalPrompt } from '../core/dialogs.js';
 import { state } from '../core/store.js';
 import { admissionLabel, admissionLongLabel, currentAdmissionYear, resolveAdmissionYear } from '../core/admissionYear.js';
+import { notifyStatsRecalculated } from '../core/navigation.js';
 
 /**
  * 관내 고입 결과 공유 및 취합 관리 모달 (V2 규격)
@@ -283,6 +284,7 @@ export async function openSharedAdmissionModal() {
             }
 
             const result = await window.go.main.App.ImportSharedAdmissionPackage(password.trim(), filePath);
+            notifyStatsRecalculated({ reason: 'shared-import' });
             if (result) {
                 const replaceMsg = result.isReplaced ? ' (기존 자료 교체됨)' : '';
                 await showModalAlert(

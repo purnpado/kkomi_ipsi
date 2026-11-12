@@ -36,3 +36,24 @@ func (a *App) SaveGeneralQuotaRecord(record database.GeneralQuotaRecord) error {
 func (a *App) GetConsolidatedGeneralCutoff(admissionYear int) (*database.GeneralCutoffResult, error) {
 	return a.db.GetConsolidatedGeneralCutoff(admissionYear)
 }
+
+// GetAdmissionEvidence 판정 근거: 학년도·고교·학과·전형별 합격·불합격 사례 수(우리 학교 + 관내 공유, 개인정보 없음).
+func (a *App) GetAdmissionEvidence() ([]database.AdmissionEvidence, error) {
+	if a.user == nil {
+		return nil, fmt.Errorf("로그인이 필요합니다")
+	}
+	return a.db.GetAdmissionEvidence()
+}
+
+// GetCompetitionRecords 학년부장이 입력한 공식 경쟁률(모집정원·지원자 수) 목록.
+func (a *App) GetCompetitionRecords() ([]database.CompetitionRecord, error) {
+	return a.db.GetCompetitionRecords()
+}
+
+// SaveCompetitionRecords 공식 경쟁률 저장(고교 발표값 수동 입력, 학년부장 전용).
+func (a *App) SaveCompetitionRecords(records []database.CompetitionRecord) (int, error) {
+	if a.user == nil || a.user.Role != "master" {
+		return 0, fmt.Errorf("경쟁률 자료는 학년부장 계정만 입력할 수 있습니다")
+	}
+	return a.db.SaveCompetitionRecords(records)
+}

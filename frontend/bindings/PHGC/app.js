@@ -236,6 +236,14 @@ export function GetAdmissionClosureReview(admissionYear) {
 }
 
 /**
+ * GetAdmissionEvidence 판정 근거: 학년도·고교·학과·전형별 합격·불합격 사례 수(우리 학교 + 관내 공유, 개인정보 없음).
+ * @returns {$CancellablePromise<database$0.AdmissionEvidence[] | null>}
+ */
+export function GetAdmissionEvidence() {
+    return $Call.ByID(473531745);
+}
+
+/**
  * GetAppVersion 현재 앱 버전 반환
  * @returns {$CancellablePromise<string>}
  */
@@ -295,6 +303,14 @@ export function GetClassGrades(classNum) {
  */
 export function GetClassStatus(classCount) {
     return $Call.ByID(3214812563, classCount);
+}
+
+/**
+ * GetCompetitionRecords 학년부장이 입력한 공식 경쟁률(모집정원·지원자 수) 목록.
+ * @returns {$CancellablePromise<database$0.CompetitionRecord[] | null>}
+ */
+export function GetCompetitionRecords() {
+    return $Call.ByID(642319576);
 }
 
 /**
@@ -817,6 +833,15 @@ export function ResetAllData() {
  */
 export function ResetCutoffs(year) {
     return $Call.ByID(1775878538, year);
+}
+
+/**
+ * SaveCompetitionRecords 공식 경쟁률 저장(고교 발표값 수동 입력, 학년부장 전용).
+ * @param {database$0.CompetitionRecord[] | null} records
+ * @returns {$CancellablePromise<number>}
+ */
+export function SaveCompetitionRecords(records) {
+    return $Call.ByID(2431405103, records);
 }
 
 /**

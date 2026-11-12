@@ -17,6 +17,11 @@ import * as $models from "./models.js";
  */
 
 /**
+ * AdmissionEvidence 학년도·고교·학과·전형별 합격·불합격 사례 수(점수 기준).
+ * @typedef {$models.AdmissionEvidence} AdmissionEvidence
+ */
+
+/**
  * ApplicationScoreSnapshot is the score currently calculated for one selected school track.
  * The support-status form uses this lightweight result instead of reloading every student.
  * @typedef {$models.ApplicationScoreSnapshot} ApplicationScoreSnapshot
@@ -27,6 +32,11 @@ import * as $models from "./models.js";
  * student, class, teacher or middle-school identifier and can be used for the
  * grade-head's application dashboard.
  * @typedef {$models.ApplicationSummary} ApplicationSummary
+ */
+
+/**
+ * CompetitionRecord 공식 발표 경쟁률 한 건(운영자 수동 입력).
+ * @typedef {$models.CompetitionRecord} CompetitionRecord
  */
 
 /**

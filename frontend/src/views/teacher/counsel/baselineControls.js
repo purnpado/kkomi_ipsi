@@ -1,4 +1,4 @@
-import { judgeScore, judgmentBadge, describeDiff, describeMargin, judgmentModeToggleHTML, bindJudgmentModeToggle } from '../../../core/admissionJudgment.js';
+import { judgeScore, judgmentBadge, describeDiff, describeMargin, judgmentModeToggleHTML, bindJudgmentModeToggle, describeEvidence } from '../../../core/admissionJudgment.js';
 // 상담 모달: 커트라인 기준 탭·학과 선택 연결
 export function bindBaselineControls(ctx) {
     let currentBaselineMode = 'last';
@@ -32,16 +32,23 @@ export function bindBaselineControls(ctx) {
             let cutoffVal = 0;
             let avgVal = 0;
             let labelText = '';
+            // 직전 1개년 기준선일 때만 그 학년도·학과의 근거 자료(불합격 사례 수·공식 경쟁률)를 본다.
+            let basisYear = 0;
+            let basisDept = '';
 
             if (mode === 'last') {
                 const deptSel = card.querySelector('.dept-selector');
                 if (deptSel) {
                     cutoffVal = parseFloat(deptSel.value) || 0;
                     avgVal = parseFloat(deptSel.selectedOptions[0]?.dataset.avg || 0);
+                    basisYear = Number(deptSel.selectedOptions[0]?.dataset.year) || 0;
+                    basisDept = deptSel.selectedOptions[0]?.dataset.dept || '';
                     labelText = '직전년도 최저';
                 } else {
                     cutoffVal = parseFloat(card.dataset.lastCutoff) || 0;
                     avgVal = parseFloat(card.dataset.lastAvg) || 0;
+                    basisYear = Number(card.dataset.lastYear) || 0;
+                    basisDept = card.dataset.lastDept || '';
                     labelText = '직전년도 최저';
                 }
             } else if (mode === 'avg3') {
@@ -54,11 +61,12 @@ export function bindBaselineControls(ctx) {
 
             // 4단계 판정: core/admissionJudgment.js 단일 기준(학교 설정 여유폭)
             const pct = (score / totalMax) * 100;
-            const result = judgeScore({ score, cutoff: cutoffVal, totalMax, schoolName: card.dataset.school, track: card.dataset.track, source: labelText });
-            const color = { safe: 'bg-emerald-500', proper: 'bg-indigo-500', hope: 'bg-amber-500', challenge: 'bg-rose-500' }[result.level] || 'bg-primary';
+            const result = judgeScore({ score, cutoff: cutoffVal, totalMax, schoolName: card.dataset.school, track: card.dataset.track, source: labelText, year: basisYear, department: basisDept });
+            const color = { safe: 'bg-emerald-500', proper: 'bg-indigo-500', hope: 'bg-amber-500', challenge: 'bg-rose-500', insufficient: 'bg-slate-500' }[result.level] || 'bg-primary';
+            const evidenceText = describeEvidence(result);
             const badge = result.level === 'unknown'
                 ? `<span class="text-xs text-text-muted">만점의 ${pct.toFixed(1)}% (기준 부족)</span>`
-                : `${judgmentBadge(result)} <span class="text-[10px] text-slate-400">${describeDiff(result)} · ${describeMargin(result)}</span>`;
+                : `${judgmentBadge(result)} <span class="text-[10px] text-slate-400">${describeDiff(result)} · ${describeMargin(result)}${evidenceText ? ` · <span class="text-amber-200">${evidenceText}</span>` : ''}</span>`;
 
             const badgeEl = document.getElementById(`badge_${rIdx}`);
             if (badgeEl) badgeEl.innerHTML = badge;

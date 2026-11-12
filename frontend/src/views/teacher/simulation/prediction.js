@@ -47,7 +47,7 @@ export function getPredictionAnalysisList(results, cutoffs, schoolGroup) {
                 const isPass = studentScore >= minScore;
 
                 // 4단계 판정: core/admissionJudgment.js 단일 기준(학교 설정 여유폭)
-                const judged = judgeScore({ score: studentScore, cutoff: minScore, totalMax: r.totalMax, schoolName: r.schoolName, track: r.trackName, source: `${c.year || ''} 합격선` });
+                const judged = judgeScore({ score: studentScore, cutoff: minScore, totalMax: r.totalMax, schoolName: r.schoolName, track: r.trackName, source: `${c.year || ''} 합격선`, year: c.year, department: c.department });
                 const status = judged.label;
                 const statusColor = judgmentToneClass(judged);
                 const emoji = judged.emoji;

@@ -151,7 +151,8 @@ export function defineMatrixRows(ctx, mx) {
                 if (cutoffVal && cutoffVal > 0) {
                     // 4단계 판정은 core/admissionJudgment.js 단일 기준(학교 설정 여유폭)으로 한다.
                     const source = { last: '직전 1개년', avg3: '최근 3년 평균', avg5: '최근 5년 평균' }[yearMode] || '기준선';
-                    const result = judgeScore({ score, cutoff: cutoffVal, totalMax: r.totalMax, schoolName: r.schoolName, track: r.trackName, source });
+                    const basis = mx.getSchoolCutoffBasis(schoolItem.fullName, trackMode, yearMode);
+                    const result = judgeScore({ score, cutoff: cutoffVal, totalMax: r.totalMax, schoolName: r.schoolName, track: r.trackName, source, year: basis?.year, department: basis?.department });
                     return judgmentBadge(result, { text: `${result.emoji} ${scoreStr}`, compact: true });
                 }
                 return `<span class="text-slate-300 font-mono font-medium text-[11px] whitespace-nowrap">${scoreStr}</span>`;

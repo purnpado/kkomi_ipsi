@@ -82,10 +82,12 @@ async function loadMatrixData(ctx, mx) {
 
     // 전형별(general/special) 및 학교별 연도별 커트라인 히스토리 맵 구축 (정확한 학교명 일치)
     const cutoffHistoryMap = new Map();
+    const cutoffLastYearMap = new Map(); // 직전 1개년 기준선의 학년도·학과(근거 자료 조회용)
     mx.schoolKeywords.forEach(s => {
         const sNorm = normalizeSchoolName(s.fullName);
         ['general', 'special'].forEach(trackType => {
             const historyByYear = new Map();
+            const basisByYear = new Map();
             (cutoffs || []).filter(c => {
                 if (normalizeSchoolName(c.schoolName) !== sNorm || Number(c.minValue) <= 0) return false;
                 const isSpec = c.track.includes('특별') || c.track.includes('취업');
@@ -94,11 +96,14 @@ async function loadMatrixData(ctx, mx) {
               .forEach(c => {
                   if (!historyByYear.has(c.year)) {
                       historyByYear.set(c.year, Number(c.minValue));
+                      basisByYear.set(c.year, { year: c.year, department: c.department || '' });
                   }
               });
 
             const sortedValues = [...historyByYear.entries()].sort((a, b) => b[0] - a[0]).map(x => x[1]);
             cutoffHistoryMap.set(`${s.fullName}_${trackType}`, sortedValues);
+            const lastYear = [...historyByYear.keys()].sort((a, b) => b - a)[0];
+            if (lastYear) cutoffLastYearMap.set(`${s.fullName}_${trackType}`, basisByYear.get(lastYear));
         });
     });
 
@@ -117,6 +122,10 @@ async function loadMatrixData(ctx, mx) {
         }
         return history[0] || 0;
     };
+
+    // 직전 1개년 기준선일 때만 그 학년도·학과를 돌려준다(평균선은 근거 자료를 보지 않는다).
+    mx.getSchoolCutoffBasis = (schoolName, trackType, yearMode) =>
+        (yearMode === 'last' ? cutoffLastYearMap.get(`${schoolName}_${trackType}`) : null) || null;
 
     // 학생의 특정 고교 환산점수 반환 헬퍼 (정확한 학교명 완전 일치 매칭)
     mx.getStudentSchoolScore = (student, schoolName, trackMode) => {

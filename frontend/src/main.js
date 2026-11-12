@@ -32,6 +32,7 @@ import { openClassApplicationSummaryModal, openApplicationSummaryModal } from '.
 import { openSharedAdmissionModal } from './modals/sharedAdmissionModal.js';
 import { openAdmissionAnalysisModal } from './modals/analysis/admissionAnalysisModal.js';
 import { openJudgmentSettingsModal } from './modals/judgmentSettingsModal.js';
+import { loadAdmissionEvidence } from './core/admissionEvidence.js';
 
 // 화면 잠금 및 전역 ESC 핸들러 초기화
 ScreenLockManager.init();
@@ -78,6 +79,9 @@ const MODAL_ROUTES = {
     'judgment-settings': (d) => openJudgmentSettingsModal({ onSaved: d.onSaved })
 };
 
+// 학교 판정 기준과 판정 근거를 함께 읽는다.
+const loadJudgmentBasis = () => Promise.all([loadJudgmentSettings(), loadAdmissionEvidence()]);
+
 // ----- 중앙 이벤트 버스 구독 연결 (이벤트 기반 아키텍처) -----
 eventBus.on(EVENTS.NAVIGATE, (detail) => {
     if (!detail) return undefined;
@@ -92,7 +96,7 @@ eventBus.on(EVENTS.NAVIGATE, (detail) => {
     });
     // 로그인 뒤 첫 화면은 학교 판정 기준을 읽은 다음 그린다(기본값으로 잠깐 판정되지 않도록).
     if (state.currentUser && !state.judgmentSettings) {
-        return loadJudgmentSettings().then(() => route(detail));
+        return loadJudgmentBasis().then(() => route(detail));
     }
     return route(detail);
 });
@@ -117,12 +121,22 @@ eventBus.on(EVENTS.ADMISSION_ANALYSIS, () => openAdmissionAnalysisModal());
 // 인증·세션: 로그인 사용자와 선택 상태는 중앙 저장소에서만 바꾼다.
 eventBus.on(EVENTS.LOGIN_SUCCESS, (detail) => {
     state.currentUser = detail?.user ?? null;
-    // 4단계 판정 기준(학교 설정)을 로그인마다 다시 읽는다.
-    loadJudgmentSettings();
+    // 4단계 판정 기준(학교 설정)과 판정 근거(불합격 사례 수·공식 경쟁률)를 로그인마다 다시 읽는다.
+    loadJudgmentBasis();
 });
 
+// 원서 결과·관내 취합·커트라인·경쟁률이 바뀌면 판정 근거를 다시 읽는다(연속 변경은 한 번으로 묶음).
+let evidenceReloadTimer = null;
+const reloadEvidenceSoon = () => {
+    if (!state.currentUser) return;
+    clearTimeout(evidenceReloadTimer);
+    evidenceReloadTimer = setTimeout(() => loadAdmissionEvidence(), 800);
+};
+eventBus.on(EVENTS.APPLICATIONS_CHANGED, reloadEvidenceSoon);
+eventBus.on(EVENTS.STATS_RECALCULATED, reloadEvidenceSoon);
+
 eventBus.on(EVENTS.LOGOUT, () => {
-    patchState({ currentUser: null, activeClassNum: null, selectedStudent: null, judgmentSettings: null, judgmentViewMode: null });
+    patchState({ currentUser: null, activeClassNum: null, selectedStudent: null, judgmentSettings: null, judgmentViewMode: null, admissionEvidence: null, competitionRecords: null });
 });
 
 eventBus.on(EVENTS.SCREEN_LOCK, (detail) => {

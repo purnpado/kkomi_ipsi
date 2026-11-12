@@ -15,13 +15,16 @@ type prediction struct {
 	admitted bool
 }
 
-// judge 프론트엔드 core/admissionJudgment.js와 같은 규칙(학교 기본: 만점의 2% 여유폭)
-func judge(score, cutoff, max, maxRejected float64) string {
+// judge 프론트엔드 core/admissionJudgment.js와 같은 규칙(학교 기본: 만점의 2% 여유폭).
+// noRejection: 기준선이 불합격 사례 없는 합격 최저점이면 그보다 낮은 점수는 "판단 근거 부족"이다.
+func judge(score, cutoff, max, maxRejected float64, noRejection bool) string {
 	if cutoff <= 0 {
 		return "기준 없음"
 	}
 	m := max * 0.02
 	switch {
+	case noRejection && score < cutoff:
+		return "판단 근거 부족"
 	case score >= cutoff+m || (maxRejected > 0 && score > maxRejected && score >= cutoff):
 		return "안정"
 	case score >= cutoff:
@@ -50,6 +53,7 @@ func (sm *sim) predict(yr *yearResult, students []*student) {
 	prev := yr.year - 1
 	cache := map[string]*database.ConsolidatedStatsResult{}
 	general, _ := dm.GetConsolidatedGeneralCutoff(prev)
+	basis := newBasisIndex(dm)
 	for _, s := range students {
 		if !s.school.participating {
 			continue
@@ -74,13 +78,17 @@ func (sm *sim) predict(yr *yearResult, students []*student) {
 					if st.RejectedCount > 0 {
 						rej = st.RejectedMax
 					}
-					level = judge(a.score, st.AcceptedMin, a.maxScore, rej)
+					school := shortSchool(a.school)
+					level = judge(a.score, st.AcceptedMin, a.maxScore, rej, basis.noRejection(prev, school, a.prefs[0], a.track, st.AcceptedMin))
+					if level == "판단 근거 부족" {
+						level += "·" + basis.competitionNote(prev, school, a.prefs[0], a.track)
+					}
 				}
 				yr.predictions = append(yr.predictions, prediction{"전기", level, a.status == "합격"})
 			case "general":
 				level := "기준 없음"
 				if general != nil && general.Base.AcceptedMin > 0 {
-					level = judge(s.baseV1, general.Base.AcceptedMin, 200, general.Base.RejectedMax)
+					level = judge(s.baseV1, general.Base.AcceptedMin, 200, general.Base.RejectedMax, false)
 				}
 				yr.predictions = append(yr.predictions, prediction{"후기", level, a.status == "합격"})
 			}
@@ -230,7 +238,7 @@ func (sm *sim) report() string {
 	w("| 구분 | 판정 | 학생 | 실제 합격 | 합격률 |")
 	w("|---|---|---:|---:|---:|")
 	for _, kind := range []string{"전기", "후기"} {
-		for _, level := range []string{"안정", "적정", "소신", "도전", "기준 없음"} {
+		for _, level := range []string{"안정", "적정", "소신", "도전", "판단 근거 부족·작년 미달", "판단 근거 부족·작년 경쟁 있음", "판단 근거 부족·경쟁률 미입력", "기준 없음"} {
 			n, ok := 0, 0
 			for _, yr := range sm.years {
 				for _, p := range yr.predictions {

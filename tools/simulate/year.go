@@ -388,6 +388,10 @@ func (sm *sim) recordGeneralAndClose(yr *yearResult, students []*student) error 
 		if err := m.dm.SaveGeneralQuotaRecord(database.GeneralQuotaRecord{AdmissionYear: yr.year, Quota: yr.generalQuota, Applicants: yr.generalPool, Note: "시뮬레이터"}); err != nil {
 			return err
 		}
+		// 고교 발표 경쟁률(모집정원·지원자 수)을 학년부장이 입력한 것으로 본다.
+		if _, err := m.dm.SaveCompetitionRecords(competitionRecords(yr)); err != nil {
+			return fmt.Errorf("%s 공식 경쟁률 입력: %w", m.name, err)
+		}
 	}
 	// 학년 말: 다음 학년도 학년부장에게 넘길 인수인계 파일
 	for i, m := range sm.schools {

@@ -3,6 +3,7 @@ import { showModalAlert, showModalConfirm } from '../../../core/dialogs.js';
 import { app } from '../../../core/dom.js';
 import { notifyStatsRecalculated } from '../../../core/navigation.js';
 import { admissionLabel } from '../../../core/admissionYear.js';
+import { openCompetitionModal } from './competitionModal.js';
 
 // 커트라인 관리: 연도 복사·연도 선택·검색·탭 전환
 export function bindCutoffYearAndSearch(ctx, ui) {
@@ -59,6 +60,9 @@ export function bindCutoffYearAndSearch(ctx, ui) {
     };
 
     // 0-1. 다른 학년도 복사 버튼 클릭 시
+    // 공식 경쟁률(모집정원·지원자 수) 입력 창
+    document.getElementById('openCompetitionBtn')?.addEventListener('click', () => openCompetitionModal(ctx));
+
     document.getElementById('copyFromOtherYearBtn')?.addEventListener('click', async () => {
         const availableYears = ctx.admissionYears.filter(y => Number(y) !== Number(ctx.currentAdmissionYear) && ctx.getCutoffCountByYear(y) > 0);
         if (availableYears.length === 0) {

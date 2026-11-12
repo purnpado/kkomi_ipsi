@@ -5,6 +5,7 @@ import { openApplicantDetailModal, buildSmartApplicationGroups } from './smartGr
 import { openApplicationRegisterModal } from './registerModal.js';
 import { state } from '../../core/store.js';
 import { admissionLabel, admissionLongLabel, resolveAdmissionYear } from '../../core/admissionYear.js';
+import { notifyStatsRecalculated } from '../../core/navigation.js';
 
 // 1. 우리 반 지원희망 모달 (스마트 지망 가로 뱃지 + 학생 명단 팝업 지원)
 export async function openClassApplicationSummaryModal(classNum) {
@@ -351,6 +352,7 @@ export async function openApplicationSummaryModal() {
             try {
                 const note = document.getElementById('admissionClosureNote')?.value?.trim() || '';
                 const result = await window.go.main.App.CloseAdmissionYear(admissionYear, note);
+                notifyStatsRecalculated({ reason: 'closure' });
                 await showModalAlert(`${admissionLabel(admissionYear)} 입시 결과를 확정했습니다.\n커트라인 ${result.cutoffsApplied || 0}건이 반영되었습니다.`, '확정 완료', 'success');
                 closeModal();
                 openApplicationSummaryModal();
@@ -366,6 +368,7 @@ export async function openApplicationSummaryModal() {
             if (!confirmed) return;
             try {
                 await window.go.main.App.ReopenAdmissionYear(admissionYear);
+                notifyStatsRecalculated({ reason: 'closure' });
                 await showModalAlert('입시 결과 확정을 해제했습니다.', '해제 완료', 'success');
                 closeModal();
                 openApplicationSummaryModal();
