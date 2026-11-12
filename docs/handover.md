@@ -5,14 +5,14 @@
 ## 한눈에 보는 현재 상태
 
 - 서비스명: **꼬미입시** / 기술명 `PHGC`(저장소·Go 모듈·교환 파일 형식)
-- 최신 안정 릴리즈: `v1.6.5` (2026-11-11, GitHub·Gitea 게시)
-- `main`에는 v1.6.5 이후 **미배포 변경**이 있음(다음 릴리즈 후보 v1.6.6, 아래 목록). 산출식이 바뀌므로 윈도우에서 실제 학교 `data` **복제본**으로 확인한 뒤 릴리즈한다.
+- 최신 안정 릴리즈: `v1.6.6` (2026-11-12, GitHub·Gitea 게시). 윈도우 실제 학교 data 복제본 검증 없이 사용자 결정으로 게시함 → 학교 현장 첫 실행 결과를 확인할 것
+- 아래 "v1.6.5 이후 변경" 목록은 v1.6.6에 모두 포함되어 배포되었다.
 - 원본 Gitea: `https://gitea.gguk.link/purnpadosori/PHGC-OFFLINE.git` (git remote `origin`)
 - GitHub 백업·공개 릴리즈: `https://github.com/purnpado/kkomi_ipsi` (git remote 없음 → `git push https://github.com/purnpado/kkomi_ipsi.git main`)
 - 실행 파일: `꼬미입시.exe`(PRODUCT_FILENAME), 기술용 영문 이름 `kkomi-ipsi`(APP_NAME, 맥 앱 내부·GitHub 릴리즈 파일)
-- 릴리즈 절차(v1.6.5에서 맥으로 수행): `build/config.yml`·`build/windows/info.json`·`wails.exe.manifest`·`build/darwin/Info*.plist`·`internal/sync/manager.go`(AppVersion)·`server-data/version.json` 버전/노트 갱신 → `wails3 build GOOS=windows` → zip(`kkomi-ipsi_v<버전>.zip`, 안에 `꼬미입시.exe`) → 커밋·태그 → Gitea 먼저 푸시 → GitHub 푸시 → GitHub 릴리즈(`kkomi-ipsi.exe`, zip) → Gitea 릴리즈 API(`꼬미입시.exe`, zip). 사용자 승인 후에만.
+- 릴리즈 절차(v1.6.5에서 맥으로 수행): `build/config.yml`·`build/windows/info.json`·`wails.exe.manifest`·`build/darwin/Info*.plist`·`internal/sync/manager.go`(AppVersion)·`server-data/version.json` 버전/노트 갱신 → `wails3 build GOOS=windows` → zip(`kkomi-ipsi_v<버전>.zip`, 안에 `꼬미입시.exe`. **맥 `zip` 명령은 한글 이름에 UTF-8 표시를 넣지 않아 윈도우에서 깨지므로 Python `zipfile`로 만든다**) → `SHA256SUMS.txt`(exe·zip 지문값, 자동 업데이트 검증용) → 커밋·태그 → Gitea 먼저 푸시 → GitHub 푸시 → GitHub 릴리즈(`kkomi-ipsi.exe`, zip, SHA256SUMS.txt — GitHub는 첨부 파일 이름의 한글을 바꾸므로 exe는 영문 이름에 표시 이름 "꼬미입시.exe"를 붙임) → Gitea 릴리즈 API(`꼬미입시.exe`, zip, SHA256SUMS.txt; 인증은 `git credential fill`). 사용자 승인 후에만.
 
-## v1.6.5 이후 미배포 변경 (main)
+## v1.6.5 이후 변경 (v1.6.6에 포함)
 
 - 후기 일반고: 출석·봉사 학년별 계산(나이스 파일에 `학년` 칸이 있으면 학년별로 읽음), 학년 결손(전입·중도 입국) 요강 공식(40/60·100%), 미재학 학년 봉사 환산, 동점자는 학기 평균 성취도로 비교, 총점 범위(가산점 미정분)·기본 지표
 - 4단계 판정 통일(`frontend/src/core/admissionJudgment.js`): 여유폭 비율·점수 두 방식, 학년부장 설정(`school_config.judgment_settings`), 상담 화면 보기 전환
