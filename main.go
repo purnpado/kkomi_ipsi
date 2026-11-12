@@ -57,6 +57,10 @@ func legacyWebviewDataPath() string {
 
 func main() {
 	sync.EmbeddedHighSchoolsJSON = defaultHighSchoolsJSON
+	// 지난 자동 업데이트에서 남은 .exe.old·덜 받은 파일 정리
+	if exe, err := os.Executable(); err == nil {
+		sync.CleanupOldExecutables(exe)
+	}
 	// 1. 과거 버전 실행 잔여 임시 캐시 폴더 자동 청소
 	cleanupLegacyWebViewData()
 

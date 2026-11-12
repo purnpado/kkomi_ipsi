@@ -27,6 +27,10 @@ import * as model$0 from "./internal/model/models.js";
 // @ts-ignore: Unused imports
 import * as sync$0 from "./internal/sync/models.js";
 
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore: Unused imports
+import * as $models from "./models.js";
+
 /**
  * AcceptAgreement 프로그램 이용 및 개인정보 보호 서약 동의 처리
  * @returns {$CancellablePromise<void>}
@@ -52,6 +56,15 @@ export function AddViewerUser(username, newPassword) {
  */
 export function ApplyApplicationCutoffs() {
     return $Call.ByID(524366783);
+}
+
+/**
+ * ApplyUpdate 새 버전을 내려받아 확인한 뒤 실행 파일을 바꾸고 프로그램을 다시 시작한다(윈도우 전용).
+ * 학생 자료는 봉인(암호화 저장)한 뒤 암호화 파일만 "업데이트전_백업" 폴더에 복사해 둔다. 아무것도 밖으로 보내지 않는다.
+ * @returns {$CancellablePromise<$models.UpdateResult | null>}
+ */
+export function ApplyUpdate() {
+    return $Call.ByID(4175318290);
 }
 
 /**

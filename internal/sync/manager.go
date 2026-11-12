@@ -270,7 +270,7 @@ func (sm *SyncManager) FullSync() *SyncResult {
 		result.ReleaseNotes = vInfo.ReleaseNotes
 		result.DownloadURL = vInfo.DownloadURL
 
-		if isNewerVersion(vInfo.LatestVersion, AppVersion) {
+		if IsNewerVersion(vInfo.LatestVersion, AppVersion) {
 			result.HasUpdate = true
 			result.Message = fmt.Sprintf("새 버전 v%s 사용 가능!", vInfo.LatestVersion)
 		}
@@ -279,8 +279,8 @@ func (sm *SyncManager) FullSync() *SyncResult {
 	return result
 }
 
-// isNewerVersion 버전 비교 함수
-func isNewerVersion(remote, local string) bool {
+// IsNewerVersion 버전 비교 함수
+func IsNewerVersion(remote, local string) bool {
 	remote = strings.TrimPrefix(strings.TrimSpace(remote), "v")
 	local = strings.TrimPrefix(strings.TrimSpace(local), "v")
 

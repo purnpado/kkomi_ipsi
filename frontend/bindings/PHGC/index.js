@@ -6,3 +6,10 @@ import * as App from "./app.js";
 export {
     App
 };
+
+import * as $models from "./models.js";
+
+/**
+ * UpdateResult 자동 업데이트 결과(화면 안내용)
+ * @typedef {$models.UpdateResult} UpdateResult
+ */

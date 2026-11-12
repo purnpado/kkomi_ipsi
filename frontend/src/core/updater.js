@@ -60,6 +60,8 @@ export function quitAppSafe() {
 
 export function showStartupUpdateModal(result) {
     document.getElementById('startupUpdateModal')?.remove();
+    // 프로그램 안 자동 업데이트는 윈도우에서만 한다(맥은 다운로드 페이지).
+    const canAutoUpdate = /Windows/.test(navigator.userAgent || '') && !!window.go?.main?.App?.ApplyUpdate;
 
     const latestVer = result.latestVersion || '1.0.0';
     const currentVer = result.currentVersion || '1.0.0';
@@ -94,7 +96,7 @@ export function showStartupUpdateModal(result) {
             <!-- 안내 메시지 -->
             <div class="text-xs sm:text-sm text-slate-300 leading-relaxed">
                 더욱 안정적이고 편리한 진학 상담을 위해 최신 버전 이용을 권장합니다.<br>
-                <strong>공식 다운로드 페이지(GitHub Releases)</strong>로 이동하시겠습니까?
+                ${canAutoUpdate ? '<strong>[지금 업데이트]</strong>를 누르면 새 버전을 내려받아 확인한 뒤 프로그램을 다시 시작합니다.' : '<strong>공식 다운로드 페이지(GitHub Releases)</strong>에서 새 버전을 받아 주세요.'}
             </div>
 
             <!-- 주요 변경 사항 카드 -->
@@ -110,7 +112,7 @@ ${releaseNotes}
             <!-- 안전 보장 안내 -->
             <div class="flex items-center gap-2 p-2.5 rounded-xl bg-slate-800/40 border border-slate-700/40 text-[11px] text-slate-400">
                 <span class="text-emerald-400 text-sm shrink-0">🔒</span>
-                <span>기존 학생 상담 데이터와 합격선 설정은 안전하게 그대로 유지됩니다.</span>
+                <span>기존 학생 자료와 설정은 그대로 유지됩니다.${canAutoUpdate ? ' 업데이트 전에 암호화된 자료를 "업데이트전_백업" 폴더에 복사해 둡니다.' : ''}</span>
             </div>
 
             <!-- 하단 액션 버튼 영역 -->
@@ -124,8 +126,12 @@ ${releaseNotes}
                     <button id="goToDownloadReleaseBtn" 
                             type="button"
                             class="w-full py-2.5 px-4 rounded-xl bg-linear-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white font-bold text-xs shadow-lg shadow-indigo-950/50 hover:shadow-indigo-500/25 transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-95">
-                        <span>🌐</span> 다운로드 받으러 이동
+                        ${canAutoUpdate ? '<span>⬇️</span> 지금 업데이트' : '<span>🌐</span> 다운로드 받으러 이동'}
                     </button>
+                </div>
+                <div id="updateProgressArea" class="hidden text-xs text-slate-200 p-3 rounded-xl bg-slate-900/80 border border-slate-700"></div>
+                <div class="text-center">
+                    <button id="openReleasePageBtn" type="button" class="text-[11px] text-slate-400 hover:text-indigo-300 underline underline-offset-2 cursor-pointer ${canAutoUpdate ? '' : 'hidden'}">다운로드 페이지에서 직접 받기</button>
                 </div>
                 <div class="text-center pt-1">
                     <button id="openFeedbackInUpdateBtn" 
@@ -147,12 +153,27 @@ ${releaseNotes}
         modal.remove();
     });
 
-    document.getElementById('goToDownloadReleaseBtn')?.addEventListener('click', () => {
-        openExternalUrlSafe(GITHUB_RELEASE_URL);
-        modal.remove();
-        setTimeout(() => {
-            quitAppSafe();
-        }, 400);
+    document.getElementById('openReleasePageBtn')?.addEventListener('click', () => openExternalUrlSafe(GITHUB_RELEASE_URL));
+
+    document.getElementById('goToDownloadReleaseBtn')?.addEventListener('click', async () => {
+        if (!canAutoUpdate) {
+            openExternalUrlSafe(GITHUB_RELEASE_URL);
+            modal.remove();
+            setTimeout(() => quitAppSafe(), 400);
+            return;
+        }
+        const area = document.getElementById('updateProgressArea');
+        const buttons = modal.querySelectorAll('button');
+        buttons.forEach(b => { b.disabled = true; });
+        area.classList.remove('hidden');
+        area.innerHTML = '<span class="spinner" style="width:12px;height:12px;border-width:2px;"></span> 새 버전을 내려받고 지문값을 확인하는 중입니다. 창을 닫지 마세요...';
+        try {
+            const r = await window.go.main.App.ApplyUpdate();
+            area.innerHTML = `✅ v${r.version}으로 바꿨습니다. 새 프로그램이 곧 실행됩니다.<br><span class="text-slate-400">자료 백업: ${r.backupPath}</span>`;
+        } catch (err) {
+            area.innerHTML = `<span class="text-rose-300 font-bold">업데이트하지 못했습니다.</span> ${String(err)}<br><span class="text-slate-400">다운로드 페이지에서 직접 받을 수 있습니다.</span>`;
+            buttons.forEach(b => { b.disabled = false; });
+        }
     });
 }
 
