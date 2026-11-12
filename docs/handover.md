@@ -10,7 +10,7 @@
 - 원본 Gitea: `https://gitea.gguk.link/purnpadosori/PHGC-OFFLINE.git` (git remote `origin`)
 - GitHub 백업·공개 릴리즈: `https://github.com/purnpado/kkomi_ipsi` (git remote 없음 → `git push https://github.com/purnpado/kkomi_ipsi.git main`)
 - 실행 파일: `꼬미입시.exe`(PRODUCT_FILENAME), 기술용 영문 이름 `kkomi-ipsi`(APP_NAME, 맥 앱 내부·GitHub 릴리즈 파일)
-- 릴리즈 절차(v1.6.5에서 맥으로 수행): `build/config.yml`·`build/windows/info.json`·`wails.exe.manifest`·`build/darwin/Info*.plist`·`internal/sync/manager.go`(AppVersion)·`server-data/version.json` 버전/노트 갱신 → `wails3 build GOOS=windows` → zip(`kkomi-ipsi_v<버전>.zip`, 안에 `꼬미입시.exe`. **맥 `zip` 명령은 한글 이름에 UTF-8 표시를 넣지 않아 윈도우에서 깨지므로 Python `zipfile`로 만든다**) → `SHA256SUMS.txt`(exe·zip 지문값, 자동 업데이트 검증용) → 커밋·태그 → Gitea 먼저 푸시 → GitHub 푸시 → GitHub 릴리즈(`kkomi-ipsi.exe`, zip, SHA256SUMS.txt — GitHub는 첨부 파일 이름의 한글을 바꾸므로 exe는 영문 이름에 표시 이름 "꼬미입시.exe"를 붙임) → Gitea 릴리즈 API(`꼬미입시.exe`, zip, SHA256SUMS.txt; 인증은 `git credential fill`). 사용자 승인 후에만.
+- 릴리즈 절차(v1.6.5에서 맥으로 수행): `build/config.yml`·`build/windows/info.json`·`wails.exe.manifest`·`build/darwin/Info*.plist`·`internal/sync/manager.go`(AppVersion)·`server-data/version.json` 버전/노트 갱신 → `wails3 build GOOS=windows` → zip(`kkomi-ipsi_v<버전>.zip`, 안에 `꼬미입시.exe`. **맥 `zip` 명령은 한글 이름에 UTF-8 표시를 넣지 않아 윈도우에서 깨지므로 Python `zipfile`로 만든다**) → `SHA256SUMS.txt`(exe·zip 지문값, 자동 업데이트 검증용) → 커밋·태그 → Gitea 먼저 푸시 → GitHub 푸시 → GitHub 릴리즈(`kkomi-ipsi.exe`, zip, SHA256SUMS.txt — GitHub는 첨부 파일 이름의 한글을 바꾸므로 exe는 영문 이름으로 올리고, 표시 이름은 "kkomi-ipsi.exe (꼬미입시 실행 파일 · 처음 실행하면 꼬미입시.exe로 이름이 바뀜)". 내려받으면 kkomi-ipsi.exe로 저장되지만 v1.6.7부터는 처음 실행할 때 스스로 꼬미입시.exe로 이름을 바꾼다(`NormalizeExecutableName`)) → Gitea 릴리즈 API(`꼬미입시.exe`, zip, SHA256SUMS.txt; 인증은 `git credential fill`). 사용자 승인 후에만.
 
 ## v1.6.5 이후 변경 (v1.6.6에 포함)
 
@@ -22,6 +22,11 @@
 - **인수인계 파일**(`.kkomihandover`, 개인정보 없음·누적) / **지난 학년도 입시 자료 가져오기**(이전 버전 `.kkomiarchive`도 입시 자료만 익명으로 꺼냄). 학생 개인정보가 담긴 **최종 보관본 만들기·복원은 제거**
 - 결과 확정 때 그해 원서 결과를 이름·학번 없이 `config.db`의 `admission_history`에 보관(분석·관내 공유가 해마다 이어짐), 관내 공유 파일에 우리 학교 전 학년도 결과 포함
 - 속도: 성적 올리기·관내 공유 파일 만들기 개선, 권한 확인 보강(가산점 저장·새 학년 시작·학급 수 변경)
+
+## 자동 업데이트 주의 (2026-11-12 확인)
+
+- 프로그램 안 [지금 업데이트]는 v1.6.6 **다음** 버전부터 들어 있다. v1.6.6 이하에서는 업데이트 버튼이 GitHub 릴리즈 페이지를 연다(옛 프로그램이라 바꿀 수 없음). 그래서 v1.6.7로는 **한 번만 직접** 받아 바꾸고, 그 뒤부터 자동으로 바뀐다. 릴리즈 노트에 이 점을 적는다.
+- 자동 업데이트는 GitHub `kkomi-ipsi.exe`(없으면 Gitea `꼬미입시.exe`)를 받아 SHA256SUMS.txt로 확인한 뒤 실행 파일을 `꼬미입시.exe`로 바꿔 넣는다.
 
 ## 상담 일지 권한 (사용자 결정 2026-11-12)
 

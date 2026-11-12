@@ -126,3 +126,31 @@ func TestBackupEncryptedDataSkipsPlainDB(t *testing.T) {
 		t.Fatal("이전 백업 폴더까지 복사됨")
 	}
 }
+
+func TestNormalizeExecutableName(t *testing.T) {
+	dir := t.TempDir()
+	write := func(name string) string {
+		p := filepath.Join(dir, name)
+		if err := os.WriteFile(p, []byte("exe"), 0o755); err != nil {
+			t.Fatal(err)
+		}
+		return p
+	}
+	// GitHub에서 받은 이름은 꼬미입시.exe 로 바뀐다(브라우저가 붙인 "(1)"도 포함).
+	got := NormalizeExecutableName(write("kkomi-ipsi (1).exe"))
+	if filepath.Base(got) != UpdateExecutableName {
+		t.Fatalf("이름이 바뀌지 않았습니다: %q", got)
+	}
+	// 꼬미입시.exe 가 이미 있으면 건드리지 않는다.
+	other := write("kkomi-ipsi.exe")
+	if got := NormalizeExecutableName(other); got != "" {
+		t.Fatalf("이미 꼬미입시.exe 가 있는데 이름을 바꿨습니다: %q", got)
+	}
+	if _, err := os.Stat(other); err != nil {
+		t.Fatal("원래 파일이 사라지면 안 됩니다")
+	}
+	// 예전 이름과 다른 프로그램은 바꾸지 않는다.
+	if got := NormalizeExecutableName(write("PHGC.exe")); got != "" {
+		t.Fatalf("PHGC.exe 는 바꾸지 않아야 합니다: %q", got)
+	}
+}

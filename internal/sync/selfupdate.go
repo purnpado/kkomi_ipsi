@@ -233,3 +233,22 @@ func CleanupOldExecutables(exePath string) {
 		}
 	}
 }
+
+// NormalizeExecutableName GitHub에서 받은 실행 파일(kkomi-ipsi.exe, "kkomi-ipsi (1).exe" 등)을
+// 처음 실행할 때 꼬미입시.exe로 이름을 바꾼다. GitHub는 첨부 파일 이름의 한글을 영문으로 바꿔 버리기 때문이다.
+// 윈도우는 실행 중인 파일의 이름 바꾸기를 허용한다. 같은 폴더에 꼬미입시.exe가 이미 있으면 건드리지 않는다.
+// 예전 이름(PHGC.exe)은 바탕화면 바로가기가 깨지지 않도록 바꾸지 않는다. 바꾼 경로(또는 빈 문자열)를 돌려준다.
+func NormalizeExecutableName(exePath string) string {
+	base := strings.ToLower(filepath.Base(exePath))
+	if !strings.HasPrefix(base, "kkomi-ipsi") || !strings.HasSuffix(base, ".exe") {
+		return ""
+	}
+	target := filepath.Join(filepath.Dir(exePath), UpdateExecutableName)
+	if _, err := os.Stat(target); err == nil {
+		return ""
+	}
+	if err := os.Rename(exePath, target); err != nil {
+		return ""
+	}
+	return target
+}
