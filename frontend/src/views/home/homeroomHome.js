@@ -1,6 +1,7 @@
 // ===== 담임 대시보드: "우리 반" 한눈에 =====
 // 상담이 필요한 학생, 반 판정 분포, 원서·상담 진행, 할 일·바로가기. 수정 기능은 없고 각 화면·창으로 보낸다.
 import { escapeAttr, escapeHtml } from '../../core/utils.js';
+import { transferBadge } from '../../core/transferBadges.js';
 import { admissionLongLabel } from '../../core/admissionYear.js';
 import { countByLevel, counselReasons, wishLabel } from './homeData.js';
 import { distributionBars, levelPill, pageHeader, reasonChip, section, shortcutGrid, statCards } from './homeWidgets.js';
@@ -21,7 +22,7 @@ function needTable(students) {
         <tr class="border-t border-slate-700/50 hover:bg-slate-800/60 cursor-pointer home-student-row"
             data-class="${s.classNum}" data-num="${escapeAttr(s.studentNum)}" data-name="${escapeAttr(s.name)}" title="눌러서 상담 창 열기">
             <td class="py-2.5 px-2 text-slate-400 font-mono">${escapeHtml(s.studentNum)}</td>
-            <td class="py-2.5 px-2 font-bold text-white whitespace-nowrap">${escapeHtml(s.name)}</td>
+            <td class="py-2.5 px-2 font-bold text-white whitespace-nowrap">${escapeHtml(s.name)}${transferBadge(s.classNum, s.studentNum, s.name)}</td>
             <td class="py-2.5 px-2 text-slate-300">${escapeHtml(wishLabel(s.wish) || '-')}</td>
             <td class="py-2.5 px-2">${levelPill(s.judgment.level, s.judgment.label)}</td>
             <td class="py-2.5 px-2"><div class="flex flex-wrap gap-1">${reasons.map(reasonChip).join('')}</div></td>

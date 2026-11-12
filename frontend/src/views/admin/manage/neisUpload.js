@@ -1,6 +1,7 @@
 // ===== 나이스 엑셀 올리기 (교과 성적·출결·봉사) =====
 // 세 단계가 같은 흐름(파일 여러 개 고르기 → 분석·저장 → 결과 표시 → 화면 다시 그리기)이라 하나로 묶었다.
 import { showModalAlert } from '../../../core/dialogs.js';
+import { loadTransferStudents } from '../../../core/transferBadges.js';
 
 export const NEIS_STEPS = [
     {
@@ -57,6 +58,8 @@ export function bindNeisUploads({ totalStudents, rerender }) {
                 const classes = Object.keys(result || {}).length;
                 const students = Object.values(result || {}).reduce((a, b) => a + b, 0);
                 showStatus(step.done(paths.length, classes, students), 'ok');
+                // 교과 성적을 새로 올리면 비고의 전입 표시도 다시 읽는다.
+                if (step.key === 'grades') await loadTransferStudents();
                 setTimeout(rerender, 1200);
             } catch (err) {
                 showStatus(`${step.label} 올리기 오류: ${err}`, 'error');

@@ -2,6 +2,7 @@
 // 이름·번호(예: 3, 2반 7번 → "2-7")로 찾아 학생 상담 창을 연다.
 // 담임은 우리 반만, 학년부장·진로부장은 전 학급을 찾는다. 명단은 처음 검색할 때 한 번 읽어 둔다.
 import { navigate } from './navigation.js';
+import { transferBadge } from './transferBadges.js';
 import { state } from './store.js';
 import { escapeAttr, escapeHtml } from './utils.js';
 
@@ -63,7 +64,7 @@ function renderResults(box, list, query) {
         ? found.map((s, i) => `
             <button type="button" class="shell-search-item ${i === 0 ? 'is-focus' : ''}" role="option"
                 data-class="${s.classNum}" data-num="${escapeAttr(s.studentNum)}" data-name="${escapeAttr(s.name)}">
-                <span class="shell-search-name">${escapeHtml(s.name)}</span>
+                <span class="shell-search-name">${escapeHtml(s.name)}${transferBadge(s.classNum, s.studentNum, s.name)}</span>
                 <span class="shell-search-meta">${s.classNum}반 ${escapeHtml(s.studentNum)}번</span>
             </button>`).join('')
         : '<div class="shell-search-empty">찾는 학생이 없습니다.</div>';

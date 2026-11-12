@@ -1,4 +1,5 @@
 import { escapeHtml } from '../../../core/utils.js';
+import { transferBadge } from '../../../core/transferBadges.js';
 import { state } from '../../../core/store.js';
 import { judgmentModeToggleHTML, judgeGeneralPercentile } from '../../../core/admissionJudgment.js';
 
@@ -10,7 +11,7 @@ export function renderStudentModalLayout(ctx) {
             <div class="sticky -top-6 md:-top-8 -mx-6 md:-mx-8 px-6 md:px-8 py-3.5 bg-slate-900/95 backdrop-blur-md z-40 border-b border-slate-700/80 flex items-center justify-between gap-4 flex-wrap sm:flex-nowrap shadow-lg">
                 <div class="min-w-0">
                     <h2 class="text-2xl font-black text-white flex items-center gap-2 truncate">
-                        👨‍🎓 ${escapeHtml(ctx.name)} <span class="text-base text-slate-400 font-normal">(${escapeHtml(ctx.classNum)}반 ${escapeHtml(ctx.studentNum)}번)</span>
+                        👨‍🎓 ${escapeHtml(ctx.name)}${transferBadge(ctx.classNum, ctx.studentNum, ctx.name)} <span class="text-base text-slate-400 font-normal">(${escapeHtml(ctx.classNum)}반 ${escapeHtml(ctx.studentNum)}번)</span>
                     </h2>
                     <p class="text-xs text-text-muted mt-0.5">울산 특목·마이스터·특성화고 진학 상담 분석표 (3-1 누적)</p>
                 </div>

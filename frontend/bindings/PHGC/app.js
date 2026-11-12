@@ -542,6 +542,14 @@ export function GetStudentTranscript(classNum, studentNum, name) {
 }
 
 /**
+ * GetTransferStudents 전입생 목록. 담임은 본인 학급만, 학년부장·진로부장은 전 학급을 본다.
+ * @returns {$CancellablePromise<$models.TransferStudent[] | null>}
+ */
+export function GetTransferStudents() {
+    return $Call.ByID(396553588);
+}
+
+/**
  * GetUsers 사용자 목록 조회
  * @returns {$CancellablePromise<database$0.User[] | null>}
  */

@@ -61,6 +61,17 @@ async function masterScenario(page, accounts) {
         const docked = await page.$('#panelScreenMount #studentDetailModal');
         if (!docked) throw new Error('상담 화면이 열리지 않았습니다');
     });
+    for (const theme of THEMES) {
+        await setLook(page, theme);
+        try {
+            await page.evaluate(() => document.getElementById('shellGuideBtn')?.click());
+            await wait(800);
+            shots.push(await shot(page, OUT, `07b-학년부장-사용설명서-${theme}`, { fullPage: false }));
+            await closeModals(page);
+        } catch (err) {
+            problems.push(`사용 설명서-${theme}: ${err.message}`);
+        }
+    }
     // 메뉴에서 화면으로 여는 기능(원래 창)
     const panels = [['08', '매트릭스', 'matrix'], ['09', '입시분석', 'analysis'], ['10', '지원현황', 'app-summary'], ['10b', '원서대장', 'register'], ['10c', '관내공유', 'shared']];
     for (const [no, label, item] of panels) {

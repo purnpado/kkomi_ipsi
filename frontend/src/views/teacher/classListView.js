@@ -1,5 +1,4 @@
 import { GetSchoolConfig } from '../../core/backend.js';
-import logoUniversal from '../../assets/images/logo-universal.png';
 import { updateAppWindowTitle } from '../../core/utils.js';
 import { ScreenLockManager } from '../../core/screenLock.js';
 import { showModalAlert, showModalPrompt } from '../../core/dialogs.js';
@@ -29,13 +28,6 @@ export async function renderTeacherScreen(schoolName, targetClassNum = null) {
         targetClassNum = myClass; // 강제로 타겟 클래스 변경
     }
     let activeClassNum = null;
-
-    let localVer = '0.5.6';
-    try {
-        localVer = await window.go.main.App.GetAppVersion();
-    } catch (e) {
-        console.warn(e);
-    }
 
     app.className = 'wide-layout';
 
@@ -102,15 +94,9 @@ export async function renderTeacherScreen(schoolName, targetClassNum = null) {
     app.innerHTML = `
         <div class="glass-card p-6 md:p-8 w-full max-w-[1700px] mx-auto min-h-[85vh]">
             <div class="flex flex-wrap items-center justify-between mb-6 pb-4 border-b border-slate-700/50 gap-4">
-                <div class="flex items-center gap-3 shrink-0">
-                    <img src="${logoUniversal}" alt="로고" class="w-10 h-10 rounded-xl shadow-md border border-indigo-400/40 object-cover shrink-0" />
-                    <div>
-                        <h1 class="text-2xl font-black text-white flex items-center gap-2.5 whitespace-nowrap">
-                            진학 상담 대시보드
-                            <span class="text-xs bg-slate-800 text-indigo-300 px-2.5 py-0.5 rounded-full border border-indigo-500/30 font-mono font-bold">v${localVer}</span>
-                        </h1>
-                        <p class="text-text-muted text-xs mt-0.5 whitespace-nowrap">${schoolName}</p>
-                    </div>
+                <div class="shrink-0">
+                    <h1 class="text-2xl font-black text-white whitespace-nowrap">${state.currentUser?.Role === 'homeroom' ? `3학년 ${state.currentUser.ClassNum}반 명렬표·상담` : '학급 명렬표·상담'}</h1>
+                    <p class="text-text-muted text-xs mt-0.5 whitespace-nowrap">${schoolName}${state.currentUser?.Role === 'viewer' ? ' · 조회 전용' : ''}</p>
                 </div>
                 <div class="flex items-center gap-3 flex-wrap">
                     <!-- 4단계 판정·후기 일반고 안정선 (학교 설정, 학년부장만 변경) -->
@@ -138,15 +124,9 @@ export async function renderTeacherScreen(schoolName, targetClassNum = null) {
                 </div>
             </div>
 
-            <!-- 필수 사전 검증 권장 안내 배너 -->
-            <div class="mb-6 p-4 rounded-2xl bg-amber-950/40 border border-amber-500/40 flex items-start gap-3.5 shadow-sm break-keep-all select-none">
-                <span class="text-2xl mt-0.5">💡</span>
-                <div class="text-xs sm:text-sm leading-relaxed text-amber-200">
-                    <strong class="text-amber-100 font-bold mb-1 text-sm sm:text-base flex items-center gap-1.5">
-                        <span>[필수 사전 검증 권장]</span> 학생·학부모 상담 전, 지원 희망 고교 공식 산출식과 계산값을 대조해 보세요!
-                    </strong>
-                    고교별 전형 요강(교과/출결/봉사 반영 비율 및 가산점)은 학교별로 상이할 수 있습니다. 1:1 진학 상담 전, 표본 학생의 성적을 <strong>지원 희망 고등학교의 공식 산출 프로그램</strong>에 입력하여 <strong>본 프로그램의 산출값과 일치하는지 반드시 사전 확인</strong> 후 상담에 임해 주시기 바랍니다.
-                </div>
+            <!-- 상담 전 확인 안내(짧게) -->
+            <div class="mb-5 px-4 py-2.5 rounded-xl bg-amber-950/30 border border-amber-500/40 text-xs text-amber-200 break-keep-all">
+                <strong class="text-amber-100">상담 전 꼭 확인하세요.</strong> 표본 학생의 성적을 지원 희망 고교의 공식 산출 프로그램에 넣어 이 프로그램의 계산값과 같은지 대조한 뒤 상담에 쓰세요.
             </div>
 
             <div id="teacherContent">

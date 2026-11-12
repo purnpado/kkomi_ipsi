@@ -1,4 +1,5 @@
 import { normalizeSchoolName } from '../../core/utils.js';
+import { transferBadge } from '../../core/transferBadges.js';
 import { getGeneralGuideBadge } from '../../core/generalGuide.js';
 import { judgeScore, judgmentBadge } from '../../core/admissionJudgment.js';
 
@@ -169,7 +170,7 @@ export function defineMatrixRows(ctx, mx) {
                         <td class="px-1 py-1.5 text-slate-400 font-mono font-bold whitespace-nowrap text-xs">${s.studentNum}</td>
                         <td class="px-1.5 py-1.5 font-bold text-white cursor-pointer hover:text-indigo-300 hover:underline matrix-student-name transition-colors whitespace-nowrap text-xs"
                             data-class="${s.classNum}" data-num="${s.studentNum}" data-name="${s.name}" title="클릭하여 1:1 진학 상담 열기">
-                            ${s.name}
+                            ${s.name}${transferBadge(s.classNum, s.studentNum, s.name)}
                         </td>
                         <td class="px-1 py-1.5 text-indigo-300 font-bold font-mono text-xs whitespace-nowrap">${avgStr}</td>
                         ${mx.schoolKeywords.map(sch => `<td class="px-1 py-1.5 whitespace-nowrap text-center">${getBadge(sch)}</td>`).join('')}

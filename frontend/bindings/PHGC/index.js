@@ -10,6 +10,11 @@ export {
 import * as $models from "./models.js";
 
 /**
+ * TransferStudent 나이스 교과 성적 비고에 "전입"이 적힌 학생(화면의 이름 옆 [전입] 뱃지용)
+ * @typedef {$models.TransferStudent} TransferStudent
+ */
+
+/**
  * UpdateResult 자동 업데이트 결과(화면 안내용)
  * @typedef {$models.UpdateResult} UpdateResult
  */

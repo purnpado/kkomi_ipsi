@@ -25,9 +25,9 @@ export async function renderUserManagementScreen(schoolName) {
             <div class="flex items-center justify-between mb-8 pb-4 border-b border-slate-700/50">
                 <div>
                     <h1 class="text-2xl font-bold text-white flex items-center gap-3">
-                        👥 스마트 사용자 및 권한 관리
+                        계정·권한
                     </h1>
-                    <p class="text-text-muted text-sm mt-1">${schoolName} — 교사별 권한 및 계정을 자유롭게 추가/삭제/관리합니다.</p>
+                    <p class="text-text-muted text-sm mt-1">${schoolName} — 교사 계정 추가·삭제, 비밀번호 설정, 담임 배포자료·비밀번호 재설정 파일 만들기</p>
                 </div>
                 <div class="flex items-center gap-4">
                     <button id="backToAdminBtn" class="btn-secondary whitespace-nowrap text-xs px-4 py-2.5">

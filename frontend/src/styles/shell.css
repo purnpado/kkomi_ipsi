@@ -202,3 +202,12 @@ body.shell-on .watermark { display: none; }
 @media print {
     body.printing #app:has(#panelScreenMount) { display: block !important; padding: 0 !important; margin: 0 !important; }
 }
+
+/* 전입생 뱃지(core/transferBadges.js) */
+.transfer-badge {
+    display: inline-flex; align-items: center; margin-left: 6px; padding: 1px 7px; border-radius: 999px;
+    font-size: 11px; font-weight: 800; line-height: 1.5; letter-spacing: 0; vertical-align: middle; white-space: nowrap;
+    color: #7dd3fc; background: rgba(14, 165, 233, 0.16); border: 1px solid rgba(56, 189, 248, 0.45);
+}
+html[data-theme="light"] .transfer-badge { color: #0369a1; background: #e0f2fe; border-color: #7dd3fc; }
+@media print { .transfer-badge { color: #0369a1 !important; border-color: #0369a1 !important; background: transparent !important; } }

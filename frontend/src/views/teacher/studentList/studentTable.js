@@ -1,4 +1,5 @@
 import { escapeHtml, escapeAttr } from '../../../core/utils.js';
+import { transferBadge } from '../../../core/transferBadges.js';
 import { showModalAlert, showModalConfirm } from '../../../core/dialogs.js';
 import { renderApplicationSummary } from '../simulation/prediction.js';
 import { navigate, notifyClassUpdated, openModal } from '../../../core/navigation.js';
@@ -139,7 +140,7 @@ export function defineStudentTableRenderer(ctx) {
                         <td class="p-3.5 font-bold text-white text-center text-lg cursor-pointer hover:text-indigo-300 hover:underline text-student-name transition-colors"
                             data-class="${ctx.classNum}" data-num="${s.studentNum}" data-name="${escapeAttr(s.name)}" title="클릭하여 진학 상담 시작">
                             <div class="flex flex-col items-center justify-center">
-                                <span>${escapeHtml(s.name)}</span>
+                                <span class="inline-flex items-center whitespace-nowrap">${escapeHtml(s.name)}${transferBadge(ctx.classNum, s.studentNum, s.name)}</span>
                                 ${ctx.counselSummary && ctx.counselSummary[s.studentNum] ? `
                                     <span class="inline-flex items-center gap-1 text-[10px] px-2.5 py-0.5 rounded-full bg-indigo-600 text-white font-bold mt-1 shadow-sm border border-indigo-400" title="최근 상담일: ${ctx.counselSummary[s.studentNum]} (본인 작성)">
                                         <span>💬</span> ${ctx.counselSummary[s.studentNum]}

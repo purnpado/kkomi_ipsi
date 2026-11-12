@@ -35,6 +35,7 @@ import { openSharedAdmissionModal } from './modals/sharedAdmissionModal.js';
 import { openAdmissionAnalysisModal } from './modals/analysis/admissionAnalysisModal.js';
 import { openJudgmentSettingsModal } from './modals/judgmentSettingsModal.js';
 import { loadAdmissionEvidence } from './core/admissionEvidence.js';
+import { loadTransferStudents, clearTransferStudents } from './core/transferBadges.js';
 import { updateShell } from './core/appShell.js';
 import { renderPanelScreen, leavePanelScreen } from './core/panelScreen.js';
 
@@ -96,7 +97,8 @@ const MODAL_ROUTES = {
 };
 
 // 학교 판정 기준과 판정 근거를 함께 읽는다.
-const loadJudgmentBasis = () => Promise.all([loadJudgmentSettings(), loadAdmissionEvidence()]);
+// 전입생 목록(이름 옆 [전입] 뱃지)도 함께 읽는다.
+const loadJudgmentBasis = () => Promise.all([loadJudgmentSettings(), loadAdmissionEvidence(), loadTransferStudents()]);
 
 // ----- 중앙 이벤트 버스 구독 연결 (이벤트 기반 아키텍처) -----
 eventBus.on(EVENTS.NAVIGATE, (detail) => {
@@ -155,6 +157,7 @@ eventBus.on(EVENTS.APPLICATIONS_CHANGED, reloadEvidenceSoon);
 eventBus.on(EVENTS.STATS_RECALCULATED, reloadEvidenceSoon);
 
 eventBus.on(EVENTS.LOGOUT, () => {
+    clearTransferStudents();
     patchState({ currentUser: null, activeClassNum: null, selectedStudent: null, judgmentSettings: null, judgmentViewMode: null, admissionEvidence: null, competitionRecords: null });
 });
 

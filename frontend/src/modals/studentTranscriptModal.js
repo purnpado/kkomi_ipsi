@@ -1,4 +1,5 @@
 import { escapeHtml } from '../core/utils.js';
+import { transferBadge } from '../core/transferBadges.js';
 import { judgeGeneralPercentile } from '../core/admissionJudgment.js';
 import { printOnly } from '../print/printEngine.js';
 
@@ -205,7 +206,7 @@ export async function openStudentTranscriptModal(classNum, studentNum, name) {
                 <div class="flex items-center justify-between border-b border-slate-700/50 pb-4">
                     <div>
                         <h2 class="text-2xl font-black text-white flex items-center gap-2">
-                            <span>📄</span> ${escapeHtml(classNum)}반 ${escapeHtml(studentNum)}번 <span class="text-primary font-bold">${escapeHtml(name)}</span> 종합 성적표
+                            <span>📄</span> ${escapeHtml(classNum)}반 ${escapeHtml(studentNum)}번 <span class="text-primary font-bold">${escapeHtml(name)}</span>${transferBadge(classNum, studentNum, name)} 종합 성적표
                         </h2>
                         <p class="text-xs text-text-muted mt-1">나이스 생활기록부 교과 성적(전학년) 및 출결·봉사활동 상세 내역</p>
                     </div>
