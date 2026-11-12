@@ -91,22 +91,38 @@ func synthesizeRemaining(raw string, step int) (string, []string) {
 	order := []string{"1_1", "1_2", "2_1", "2_2", "3_1", "3_2"}
 	var added []map[string]string
 	var notes []string
+	var synthesizedBase []gradedRecord // 이번에 만든 3-1의 바탕(바꾸기 전) 성적: 3-2도 같은 바탕에서 한 번만 바꾼다
+	baseLabel := ""
 	for i, target := range order {
 		if i < 4 || len(bySem[target]) > 0 {
 			continue
 		}
-		source := ""
-		for j := i - 1; j >= 0; j-- {
-			if len(bySem[order[j]]) > 0 {
-				source = order[j]
-				break
+		// 3-1은 작년(2학년) 1·2학기 성적 전체에서(학기 초 예상과 같은 기준), 3-2는 바로 앞 학기에서 바꾼다.
+		var sourceRecs []gradedRecord
+		sourceLabel := ""
+		if target == "3_1" {
+			sourceRecs = append(append([]gradedRecord{}, bySem["2_1"]...), bySem["2_2"]...)
+			sourceLabel = "작년(2학년)"
+		} else if target == "3_2" && len(synthesizedBase) > 0 {
+			sourceRecs, sourceLabel = synthesizedBase, baseLabel
+		}
+		if len(sourceRecs) == 0 {
+			for j := i - 1; j >= 0; j-- {
+				if len(bySem[order[j]]) > 0 {
+					sourceRecs = bySem[order[j]]
+					sourceLabel = strings.ReplaceAll(order[j], "_", "-")
+					break
+				}
 			}
 		}
-		if source == "" {
+		if len(sourceRecs) == 0 {
 			continue
 		}
+		if target == "3_1" {
+			synthesizedBase, baseLabel = sourceRecs, sourceLabel
+		}
 		parts := strings.Split(target, "_")
-		for _, r := range bySem[source] {
+		for _, r := range sourceRecs {
 			score := r.score + step
 			lo, hi := 1, 5
 			if isArtsSubject(r.subject) {
@@ -126,7 +142,7 @@ func synthesizeRemaining(raw string, step int) (string, []string) {
 		if step < 0 {
 			direction = "내려"
 		}
-		notes = append(notes, fmt.Sprintf("%s 성적이 없어 %s 성적을 %d단계 %s 가정했습니다.", strings.ReplaceAll(target, "_", "-"), strings.ReplaceAll(source, "_", "-"), abs(step), direction))
+		notes = append(notes, fmt.Sprintf("%s 성적이 없어 %s 성적을 %d단계 %s 가정했습니다.", strings.ReplaceAll(target, "_", "-"), sourceLabel, abs(step), direction))
 	}
 	if len(added) == 0 {
 		return raw, []string{"성적이 없는 반영 학기(3-1·3-2)가 없어 남은 학기 성적 변화는 반영하지 않았습니다."}

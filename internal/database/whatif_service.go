@@ -153,6 +153,9 @@ func (dm *DBManager) WhatIfStudent(classNum int, studentNum, name string, in cal
 	if err != nil {
 		return res, nil
 	}
+	// 학기 초(전교생 3학년 성적 없음)였다면, 이 학생에게 남은 학기 가정 성적이 들어가 학기 초 판별이 풀리더라도
+	// 다른 학생은 화면과 같은 예상치(3-1 = 작년 2학년 성적)로 채워 같은 기준으로 비교한다.
+	earlyYear := len(baseResults) > 0 && baseResults[0].ThirdYearProjected
 	replaced := map[int][]parser.StudentExcelData{}
 	for c, list := range all {
 		copied := make([]parser.StudentExcelData, len(list))
@@ -160,8 +163,13 @@ func (dm *DBManager) WhatIfStudent(classNum int, studentNum, name string, in cal
 		for i := range copied {
 			if copied[i].ClassNum == student.ClassNum && copied[i].StudentNum == student.StudentNum && copied[i].Name == student.Name {
 				copied[i] = modified
-			} else if in.RemainingStep != 0 {
-				copied[i].RawData = calc.FillThirdYearFinal(copied[i].RawData)
+			} else {
+				if earlyYear {
+					copied[i].RawData = calc.FillEarlyThirdYear(copied[i].RawData)
+				}
+				if in.RemainingStep != 0 {
+					copied[i].RawData = calc.FillThirdYearFinal(copied[i].RawData)
+				}
 			}
 		}
 		replaced[c] = copied

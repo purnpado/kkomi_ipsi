@@ -133,3 +133,41 @@ func TestEstimateRankInterpolatesAndExtends(t *testing.T) {
 		t.Errorf("최저점 아래는 전체 인원을 넘지 않음 %d", got)
 	}
 }
+
+// 학기 초(전교생 3학년 성적 없음): 남은 학기 0단계는 화면 예상치와 같고, 올리면 석차가 나아진다.
+func TestWhatIfEarlyYearConsistent(t *testing.T) {
+	dm := &DBManager{DataDir: t.TempDir()}
+	dm.SetDataKey(make([]byte, 32))
+	if err := dm.InitConfigDB(); err != nil {
+		t.Fatal(err)
+	}
+	if err := dm.SaveSchoolConfig("가람중학교", 1, "x", false, 2027); err != nil {
+		t.Fatal(err)
+	}
+	sems := []string{"1_2", "2_1", "2_2"} // 학기 초: 3학년 성적 없음
+	students := []parser.StudentExcelData{}
+	for i, a := range []string{"AAAAA", "AAAAB", "AAABB", "AABBB", "ABBBB", "BBBBB", "BBBBC", "BBBCC"} {
+		num := string(rune('1' + i))
+		students = append(students, parser.StudentExcelData{ClassNum: 1, StudentNum: num, Name: "가상" + num, RawData: whatIfRaw(sems, a)})
+	}
+	if err := dm.SaveClassStudents(1, students); err != nil {
+		t.Fatal(err)
+	}
+	same, err := dm.WhatIfStudent(1, "6", "가상6", calc.WhatIfInput{LeadershipTerms: -1})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if same.GeneralAfter != same.GeneralBefore {
+		t.Fatalf("가정값 없음인데 달라짐: %+v → %+v", same.GeneralBefore, same.GeneralAfter)
+	}
+	up, _ := dm.WhatIfStudent(1, "6", "가상6", calc.WhatIfInput{RemainingStep: 1, LeadershipTerms: -1})
+	if !(up.GeneralAfter.Rank < up.GeneralBefore.Rank) {
+		t.Fatalf("학기 초 남은 학기(3-1·3-2) 한 단계 올림인데 석차가 나아지지 않음: %d → %d (%v)", up.GeneralBefore.Rank, up.GeneralAfter.Rank, up.Notes)
+	}
+	// 다른 학생은 3학년 결손 공식이 아니라 예상치로 비교되므로, 바로 위 학생(5번)과의 차이는 남은 두 학기 몫만큼만 줄어든다.
+	for _, n := range up.Notes {
+		if strings.Contains(n, "반영하지 못했습니다") {
+			t.Fatalf("학기 초 비교가 막힘: %v", up.Notes)
+		}
+	}
+}

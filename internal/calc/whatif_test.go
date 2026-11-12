@@ -58,7 +58,7 @@ func TestWhatIfRemainingSemesterAndNonAcademic(t *testing.T) {
 	base := schoolScore(t, s, "울산마이스터고", "일반")
 
 	up, notes := ApplyWhatIf(s, WhatIfInput{RemainingStep: 1, LeadershipTerms: -1})
-	if len(notes) == 0 || !strings.Contains(notes[0], "3-1 성적이 없어 2-2 성적을 1단계 올려") {
+	if len(notes) == 0 || !strings.Contains(notes[0], "3-1 성적이 없어 작년(2학년) 성적을 1단계 올려") {
 		t.Fatalf("안내: %v", notes)
 	}
 	if got := schoolScore(t, up, "울산마이스터고", "일반"); got <= base {
@@ -113,5 +113,16 @@ func TestWhatIfNoRemainingSemester(t *testing.T) {
 	out, notes := ApplyWhatIf(s, WhatIfInput{RemainingStep: 2, LeadershipTerms: -1})
 	if out.RawData != s.RawData || len(notes) != 1 || !strings.Contains(notes[0], "없어 남은 학기") {
 		t.Fatalf("남은 학기가 없을 때: %v", notes)
+	}
+}
+
+// 3-1·3-2가 모두 없으면 둘 다 작년 성적에서 한 번만 바꾼다(겹쳐 두 번 오르지 않음).
+func TestWhatIfBothRemainingShiftOnce(t *testing.T) {
+	s := whatIfStudent([]string{"1_2", "2_1", "2_2"}, "C")
+	out, _ := ApplyWhatIf(s, WhatIfInput{RemainingStep: 1, LeadershipTerms: -1})
+	for _, r := range gradedRecords(out.RawData) {
+		if r.grade == "3" && r.subject != "체육" && r.score != 4 {
+			t.Fatalf("%s-%s %s: %d (기대 4=B)", r.grade, r.sem, r.subject, r.score)
+		}
 	}
 }

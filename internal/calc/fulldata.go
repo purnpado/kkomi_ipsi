@@ -70,15 +70,16 @@ type StudentFullData struct {
 	GeneralHSDataComplete     bool    `json:"generalHSDataComplete"`
 	GeneralHSProjected        bool    `json:"generalHSProjected"`
 	// 후기 일반고 비교과 항목별 점수와 범위(관내 비교·상담용)
-	GeneralHSAttendanceScore float64 `json:"generalHSAttendanceScore"` // 출석(16)
-	GeneralHSVolunteerScore  float64 `json:"generalHSVolunteerScore"`  // 봉사(8)
-	GeneralHSBehaviorScore   float64 `json:"generalHSBehaviorScore"`   // 행발(8)
-	GeneralHSCreativeScore   float64 `json:"generalHSCreativeScore"`   // 창체(8)
-	GeneralHSBaseScore       float64 `json:"generalHSBaseScore"`       // 기본 지표: 교과+출석+봉사+기본 10점
-	GeneralHSTotalHigh       float64 `json:"generalHSTotalHigh"`       // 가산점 미정분까지 받을 때 상한
-	GeneralHSBonusEntered    bool    `json:"generalHSBonusEntered"`    // 창체·행발 가산점 입력 완료
-	GeneralHSThirdYearFinal  bool    `json:"generalHSThirdYearFinal"`  // 3-2 성적 반영(아니면 3-1 복사 예상)
-	GeneralHSPerGradeExact   bool    `json:"generalHSPerGradeExact"`   // 출결·봉사 학년별 실제 값 사용
+	GeneralHSAttendanceScore    float64 `json:"generalHSAttendanceScore"`    // 출석(16)
+	GeneralHSVolunteerScore     float64 `json:"generalHSVolunteerScore"`     // 봉사(8)
+	GeneralHSBehaviorScore      float64 `json:"generalHSBehaviorScore"`      // 행발(8)
+	GeneralHSCreativeScore      float64 `json:"generalHSCreativeScore"`      // 창체(8)
+	GeneralHSBaseScore          float64 `json:"generalHSBaseScore"`          // 기본 지표: 교과+출석+봉사+기본 10점
+	GeneralHSTotalHigh          float64 `json:"generalHSTotalHigh"`          // 가산점 미정분까지 받을 때 상한
+	GeneralHSBonusEntered       bool    `json:"generalHSBonusEntered"`       // 창체·행발 가산점 입력 완료
+	GeneralHSThirdYearFinal     bool    `json:"generalHSThirdYearFinal"`     // 3-2 성적 반영(아니면 3-1 복사 예상)
+	GeneralHSThirdYearProjected bool    `json:"generalHSThirdYearProjected"` // 학기 초: 3학년을 2학년 성적으로 대신한 예상치
+	GeneralHSPerGradeExact      bool    `json:"generalHSPerGradeExact"`      // 출결·봉사 학년별 실제 값 사용
 
 	// 학교별 산출 결과
 	SchoolResults []SchoolCalcResult `json:"schoolResults"`

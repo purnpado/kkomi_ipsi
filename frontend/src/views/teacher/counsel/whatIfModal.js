@@ -5,6 +5,7 @@
 import { escapeHtml } from '../../../core/utils.js';
 import { judgeScore, judgeRange, judgmentBadge } from '../../../core/admissionJudgment.js';
 import { currentAdmissionYear, admissionLabel } from '../../../core/admissionYear.js';
+import { renderRemainingStepTable } from './whatIfSteps.js';
 
 const MODAL_ID = 'whatIfModal';
 
@@ -167,7 +168,10 @@ export function openWhatIfModal(ctx) {
                 <button id="closeWhatIfBtn" class="text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-slate-800 text-lg cursor-pointer">✕</button>
             </div>
             ${formHTML(ctx)}
-            <div class="flex justify-end"><button id="runWhatIfBtn" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-5 py-2 rounded-xl cursor-pointer">계산하기</button></div>
+            <div class="flex justify-end gap-2">
+                <button id="runStepTableBtn" class="bg-slate-700 hover:bg-slate-600 text-white font-bold px-4 py-2 rounded-xl cursor-pointer" title="남은 학기 성적을 두 단계 내려감~두 단계 오름으로 바꿔 가며 한 표로 비교합니다">📊 남은 학기 성적별 비교</button>
+                <button id="runWhatIfBtn" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-5 py-2 rounded-xl cursor-pointer">계산하기</button>
+            </div>
             <div id="whatIfResult" class="flex-1 overflow-y-auto custom-scrollbar space-y-3"></div>
         </div>`;
     document.body.appendChild(modal);
@@ -185,4 +189,9 @@ export function openWhatIfModal(ctx) {
     modal.querySelector('#closeWhatIfBtn').addEventListener('click', close);
     modal.addEventListener('click', (e) => { if (e.target === modal) close(); });
     modal.querySelector('#runWhatIfBtn').addEventListener('click', () => runWhatIf(ctx, modal));
+    modal.querySelector('#runStepTableBtn').addEventListener('click', () => {
+        const out = modal.querySelector('#whatIfResult');
+        out.innerHTML = '<div class="rounded-xl border border-slate-700/60 bg-slate-900/60 p-3"><h4 class="font-bold text-slate-200 mb-2">📊 남은 학기 성적별 비교</h4><div id="whatIfStepTable"></div></div>';
+        renderRemainingStepTable(ctx, out.querySelector('#whatIfStepTable'), readInput(modal), cardBaselines(ctx));
+    });
 }

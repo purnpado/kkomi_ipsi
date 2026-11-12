@@ -49,6 +49,7 @@ type StudentCalcResult struct {
 	GeneralDataComplete  bool    // 학년별 비교과 입력 완료 여부
 	GeneralProjected     bool    // 11/30 마감 전 누적자료 기준 예상치
 	ThirdYearFinalUsed   bool    // S22에 실제 3학년 2학기 성적을 반영했는지(false면 3-1 성적으로 대신한 예상치)
+	ThirdYearProjected   bool    // 학기 초라 3학년(3-1·3-2)을 2학년 성적으로 대신한 예상치인지
 	hasThirdYearFinal    bool
 	s22Projected         float64
 	gradePresent         [3]bool    // 학년별 성적 기록 유무(중도 입국·유학 등 학년 결손 판단)
@@ -58,6 +59,9 @@ type StudentCalcResult struct {
 // CalculateGrades 전체 학생들의 내신 성적을 계산하여 석차 및 최종 점수를 반환
 func CalculateGrades(allStudents map[int][]parser.StudentExcelData, isSmallSchool bool) ([]StudentCalcResult, error) {
 	var results []StudentCalcResult
+
+	// 0. 학기 초(전교생 3학년 성적 없음)에는 3학년을 2학년 성적으로 대신한 예상치로 계산한다(early_year.go).
+	allStudents, thirdYearProjected := earlyYearProjection(allStudents)
 
 	// 1. 개별 학생의 교과 성적 산출 (S11 ~ S22)
 	for _, students := range allStudents {
@@ -88,6 +92,7 @@ func CalculateGrades(allStudents map[int][]parser.StudentExcelData, isSmallSchoo
 			results[i].tieKeys[0] = results[i].tieKeys[1]
 		}
 		results[i].ThirdYearFinalUsed = allHaveFinal
+		results[i].ThirdYearProjected = thirdYearProjected
 		results[i].TotalSubjectScore = roundToTwoDecimals(results[i].S11 + results[i].S12 + results[i].S13 + results[i].S21 + results[i].S22)
 	}
 

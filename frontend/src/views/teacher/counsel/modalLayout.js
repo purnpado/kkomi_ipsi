@@ -58,7 +58,7 @@ export function renderStudentModalLayout(ctx) {
                         const range = high > d.generalHSTotalScore + 0.001 ? `~${high.toFixed(2)}` : '';
                         const status = d.generalHSProjected ? '예상' : '확정';
                         return `<div class="text-xl font-bold ${tone}">${d.generalHSTotalScore.toFixed(2)}${range}점 <span class="text-[10px] font-normal text-amber-300">${status}</span> <span class="text-[11px] font-normal">${g.emoji} ${g.label}</span></div>
-                    <div class="text-[11px] text-slate-400">교과 ${d.generalHSAcademicScore.toFixed(2)}${d.generalHSThirdYearFinal ? '' : '(3-1 복사 예상)'} · 출석 ${Number(d.generalHSAttendanceScore || 0).toFixed(1)} · 봉사 ${Number(d.generalHSVolunteerScore || 0).toFixed(1)} · 행발 ${Number(d.generalHSBehaviorScore || 0)} · 창체 ${Number(d.generalHSCreativeScore || 0)} · ${d.generalHSPercentile.toFixed(2)}%</div>
+                    <div class="text-[11px] text-slate-400">교과 ${d.generalHSAcademicScore.toFixed(2)}${d.generalHSThirdYearProjected ? '(3학년 = 작년 성적 예상)' : (d.generalHSThirdYearFinal ? '' : '(3-1 복사 예상)')} · 출석 ${Number(d.generalHSAttendanceScore || 0).toFixed(1)} · 봉사 ${Number(d.generalHSVolunteerScore || 0).toFixed(1)} · 행발 ${Number(d.generalHSBehaviorScore || 0)} · 창체 ${Number(d.generalHSCreativeScore || 0)} · ${d.generalHSPercentile.toFixed(2)}%</div>
                     <div class="text-[10px] text-slate-500">기본 지표(가산점 제외) ${Number(d.generalHSBaseScore || 0).toFixed(2)}점${range ? ' · 범위는 아직 정해지지 않은 가산점' : ''}${d.generalHSBonusEntered ? '' : ' · 가산점 미입력'}</div>
                     <div id="generalCityCutoff" class="text-[10px] mt-1"></div>`;
                     })()}
