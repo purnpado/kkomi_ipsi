@@ -1,0 +1,8 @@
+/* 꼬미입시 대시보드(views/home) 그림 스타일 */
+.home-bars { width: 100%; max-width: 420px; height: auto; display: block; }
+.home-bar-label { font-size: 12px; fill: #cbd5e1; font-family: var(--app-font); }
+.home-bar-value { font-size: 12px; font-weight: 700; fill: #f1f5f9; font-family: var(--app-font); }
+.home-bar-track { fill: rgba(51, 65, 85, 0.55); }
+html[data-theme="light"] .home-bar-label { fill: #4b5563; }
+html[data-theme="light"] .home-bar-value { fill: #1f2937; }
+html[data-theme="light"] .home-bar-track { fill: #eeebf8; }

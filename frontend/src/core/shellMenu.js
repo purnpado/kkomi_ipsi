@@ -43,7 +43,10 @@ export function buildShellMenu(user) {
     if (role === 'homeroom') {
         return [
             { id: 'dash', label: '대시보드', items: [
-                { id: 'dash', label: '우리 반', hint: `3학년 ${myClass}반 명렬표·상담`, screen: 'teacher', params: { classNum: myClass } }
+                { id: 'dash', label: '우리 반 대시보드', hint: '상담이 필요한 학생·판정 분포', screen: 'home' }
+            ] },
+            { id: 'students', label: '학생·성적', items: [
+                { id: 'classes', label: '우리 반 명렬표·상담', hint: `3학년 ${myClass}반 · 취합자료 제출`, screen: 'teacher', params: { classNum: myClass } }
             ] },
             { id: 'apps', label: '원서·결과', items: [
                 { id: 'class-summary', label: '우리 반 지원현황', modal: 'class-summary', params: { classNum: myClass } },
@@ -60,7 +63,10 @@ export function buildShellMenu(user) {
     if (role === 'viewer') {
         return [
             { id: 'dash', label: '대시보드', items: [
-                { id: 'dash', label: '학급 둘러보기', hint: '조회 전용', screen: 'teacher', params: { classNum: null } }
+                { id: 'dash', label: '진로부장 대시보드', hint: '전교 판정 분포', screen: 'home' }
+            ] },
+            { id: 'students', label: '학생·성적', items: [
+                { id: 'classes', label: '학급 둘러보기', hint: '명렬표·상담 조회 전용', screen: 'teacher', params: { classNum: null } }
             ] },
             { id: 'apps', label: '원서·결과', items: [
                 { id: 'app-summary', label: '우리 학교 지원현황', modal: 'application-summary' },
@@ -76,6 +82,6 @@ export function buildShellMenu(user) {
 }
 
 /** 공통 틀을 보여 줄 화면(로그인 뒤 화면)인지 */
-export const SHELL_SCREENS = new Set(['admin', 'teacher', 'users', 'cutoff']);
+export const SHELL_SCREENS = new Set(['admin', 'home', 'teacher', 'users', 'cutoff']);
 
 export const ROLE_LABELS = { master: '학년부장', homeroom: '담임', viewer: '진로부장' };

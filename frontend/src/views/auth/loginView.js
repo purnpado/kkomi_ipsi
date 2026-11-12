@@ -313,10 +313,10 @@ export async function renderLoginScreen(schoolName) {
                 } else {
                     if (user.Role === 'homeroom') {
                         updateAppWindowTitle('homeroom', user.ClassNum);
-                        navigate('teacher', { schoolName, classNum: user.ClassNum });
+                        navigate('home', { schoolName });
                     } else if (user.Role === 'viewer') {
                         updateAppWindowTitle('viewer');
-                        navigate('teacher', { schoolName, classNum: null });
+                        navigate('home', { schoolName });
                     } else {
                         updateAppWindowTitle('master');
                         navigate('admin', { schoolName });
@@ -383,10 +383,8 @@ export function renderPasswordChangeScreen(username) {
             await window.go.main.App.ChangeUserPassword(username, pw);
             state.currentUser.MustChangePassword = false;
             const config = await window.go.main.App.GetSchoolConfig();
-            if (state.currentUser.Role === 'homeroom') {
-                navigate('teacher', { schoolName: config.schoolName, classNum: state.currentUser.ClassNum });
-            } else if (state.currentUser.Role === 'viewer') {
-                navigate('teacher', { schoolName: config.schoolName, classNum: null });
+            if (state.currentUser.Role === 'homeroom' || state.currentUser.Role === 'viewer') {
+                navigate('home', { schoolName: config.schoolName });
             } else {
                 navigate('admin', { schoolName: config.schoolName });
             }

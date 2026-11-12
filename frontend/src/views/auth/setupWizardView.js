@@ -430,10 +430,10 @@ export function showSyncFailed(container, schoolName, errorMsg) {
     });
     document.getElementById('skipBtn')?.addEventListener('click', () => {
         if (state.currentUser) {
-            if (state.currentUser.Role === 'master' || state.currentUser.Role === 'viewer') {
+            if (state.currentUser.Role === 'master') {
                 navigate('admin', { schoolName });
             } else {
-                navigate('teacher', { schoolName, classNum: state.currentUser.ClassNum });
+                navigate('home', { schoolName });
             }
         } else {
             navigate('login', { schoolName });

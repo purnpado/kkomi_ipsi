@@ -22,6 +22,7 @@ import { renderUserManagementScreen } from './views/admin/userManagementView.js'
 import { renderCutoffScreen } from './views/admin/cutoff/cutoffView.js';
 import { openPatchImportModal } from './views/admin/patchMergeView.js';
 import { renderTeacherScreen } from './views/teacher/classListView.js';
+import { renderHomeScreen } from './views/home/homeView.js';
 import { openStudentModal } from './views/teacher/counsel/studentModal.js';
 import { openPredictionDetailModal } from './views/teacher/simulation/predictionDetailModal.js';
 import { renderGuideModal } from './modals/guideModal.js';
@@ -61,7 +62,8 @@ const SCREEN_ROUTES = {
     'admin': (d) => renderAdminScreen(d.schoolName || ''),
     'users': (d) => renderUserManagementScreen(d.schoolName || ''),
     'cutoff': (d) => renderCutoffScreen(d.schoolName || ''),
-    'teacher': (d) => renderTeacherScreen(d.schoolName || '', d.classNum ?? null)
+    'teacher': (d) => renderTeacherScreen(d.schoolName || '', d.classNum ?? null),
+    'home': (d) => renderHomeScreen(d.schoolName || '')
 };
 
 // ----- 모달 라우팅 표: modal:open 이벤트의 modal 값 → 모달 열기 함수 -----
