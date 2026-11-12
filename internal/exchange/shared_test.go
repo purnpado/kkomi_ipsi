@@ -419,3 +419,29 @@ func TestSharedPackageV1BackwardCompatibility(t *testing.T) {
 		t.Errorf("Unexpected stats from V1: %+v", stats)
 	}
 }
+
+// 학과를 비우면 학교·전형 전체(모든 학과 합계)를 집계한다.
+func TestConsolidatedStatsWholeSchoolWhenDepartmentEmpty(t *testing.T) {
+	dm, tempDir := createTestDBManagerWithSampleData(t)
+	defer os.RemoveAll(tempDir)
+	path := filepath.Join(tempDir, "share.kkomi")
+	if err := ExportSharedPackageV2(dm, 2026, "pw", path); err != nil {
+		t.Fatal(err)
+	}
+	other, otherDir := createTestDBManagerWithSampleData(t)
+	defer os.RemoveAll(otherDir)
+	if err := other.SaveSchoolConfig("다른중학교", 3, "x", false, 2026); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := ImportSharedPackageV2(other, "pw", path); err != nil {
+		t.Fatal(err)
+	}
+	whole, err := other.GetConsolidatedAdmissionStats(2026, "울산마이스터고", "", "일반", 1)
+	if err != nil || whole == nil || whole.TotalApplicants == 0 {
+		t.Fatalf("학교 전체 집계가 비어 있음: %+v %v", whole, err)
+	}
+	dept, _ := other.GetConsolidatedAdmissionStats(2026, "울산마이스터고", "정밀기계과", "일반", 1)
+	if dept != nil && dept.TotalApplicants > whole.TotalApplicants {
+		t.Fatalf("학과 집계(%d)가 전체(%d)보다 큼", dept.TotalApplicants, whole.TotalApplicants)
+	}
+}

@@ -210,7 +210,8 @@ export async function openAdmissionAnalysisModal() {
         const year = parseInt(modal.querySelector('#analysisYearSelect')?.value || admissionYear, 10);
         const yearStats = statsForYear(year).filter(ds => ds.schoolName === sch);
         let optionsHTML = '<option value="" selected>전체 (학교 총괄)</option>';
-        const departments = new Set(yearStats.map(ds => ds.department).filter(Boolean));
+        // "전체"·"공통"은 학과가 아니라 학교 전체 집계이므로 목록 맨 위 "전체 (학교 총괄)"로만 둔다.
+        const departments = new Set(yearStats.map(ds => ds.department).filter(d => d && !['전체', '공통', '학교 전체', '학교전체'].includes(String(d).trim())));
         if (departments.size > 0) {
             departments.forEach(d => {
                 optionsHTML += `<option value="${escapeAttr(d)}">${escapeHtml(d)}</option>`;

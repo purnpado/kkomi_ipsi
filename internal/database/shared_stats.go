@@ -34,9 +34,15 @@ func (dm *DBManager) GetConsolidatedAdmissionStats(admissionYear int, highSchool
 	_ = db.QueryRow("SELECT COUNT(DISTINCT school_name) FROM shared_participating_schools WHERE admission_year = ?", admissionYear).Scan(&totalSchools)
 
 	// 통합 점수 레코드 로드
+	// 학과를 비우면 학교·전형 전체(모든 학과 합계)를 집계한다(분석 화면 "전체(학교 총괄)", 여러 해 추세).
 	query := `SELECT status, score, COALESCE(first_stage_result, '') FROM shared_anonymous_scores 
-		WHERE admission_year = ? AND high_school = ? AND department = ? AND track = ?`
-	rows, err := db.Query(query, admissionYear, highSchool, department, track)
+		WHERE admission_year = ? AND high_school = ? AND track = ?`
+	args := []interface{}{admissionYear, highSchool, track}
+	if department != "" {
+		query += ` AND department = ?`
+		args = append(args, department)
+	}
+	rows, err := db.Query(query, args...)
 	if err != nil {
 		return nil, err
 	}
