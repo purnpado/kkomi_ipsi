@@ -50,6 +50,10 @@ import * as $models from "./models.js";
  */
 
 /**
+ * @typedef {$models.DepartmentPreferenceStat} DepartmentPreferenceStat
+ */
+
+/**
  * GeneralCutoffEstimate 한 잣대(기본 지표 또는 완전 총점)의 관내 합격선 추정.
  * @typedef {$models.GeneralCutoffEstimate} GeneralCutoffEstimate
  */
@@ -73,6 +77,14 @@ import * as $models from "./models.js";
  * LoginIndex contains no student data and no password material. It exists so
  * the login screen can show account choices without opening encrypted SQLite.
  * @typedef {$models.LoginIndex} LoginIndex
+ */
+
+/**
+ * @typedef {$models.PreferenceRankStat} PreferenceRankStat
+ */
+
+/**
+ * @typedef {$models.PreferenceStrategy} PreferenceStrategy
  */
 
 /**
@@ -118,6 +130,11 @@ import * as $models from "./models.js";
 /**
  * StudentTranscriptData 학생의 전학년 교과/비교과 전체 상세 성적표
  * @typedef {$models.StudentTranscriptData} StudentTranscriptData
+ */
+
+/**
+ * TrendPoint 한 학년도의 추세 값. 자료가 없는 항목은 0이다.
+ * @typedef {$models.TrendPoint} TrendPoint
  */
 
 /**

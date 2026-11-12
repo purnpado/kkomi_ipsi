@@ -1,4 +1,4 @@
-// ===== 4단계 합격 가능성 판정(안정·적정·소신·도전)의 단일 기준 =====
+// ===== 4단계 합격 가능성 판정(안정·적정·소신·어려움)의 단일 기준 =====
 // 모든 화면(학급 전체 표, 상담 학교 카드, 합격 예측, 통계 분석, 성적표)은 이 함수로만 판정한다.
 // 화면마다 다른 것은 "어떤 기준선을 쓰느냐"뿐이며, 기준선 출처는 판정과 함께 항상 표시한다.
 //
@@ -22,7 +22,7 @@ export const JUDGMENT_LEVELS = Object.freeze({
     safe: { label: '안정', emoji: '🟢', tone: 'emerald' },
     proper: { label: '적정', emoji: '🟡', tone: 'indigo' },
     hope: { label: '소신', emoji: '🟠', tone: 'amber' },
-    challenge: { label: '도전', emoji: '🔴', tone: 'rose' },
+    challenge: { label: '어려움', emoji: '🔴', tone: 'rose' },
     // 기준선이 "불합격 사례가 없는 합격 최저점"이고 학생 점수가 그보다 낮을 때
     insufficient: { label: '판단 근거 부족', emoji: '❔', tone: 'slate' },
     unknown: { label: '기준 없음', emoji: '⚪', tone: 'slate' }
@@ -161,7 +161,7 @@ export function marginFor(schoolName, track, totalMax) {
  *                   year·department(기준선이 한 학년도의 실제 결과일 때만 넘긴다. 평균선에는 넘기지 않는다)
  *
  * 기준선이 불합격 사례가 없는 합격 최저점이면 그 값은 합격선의 상한일 뿐이다. 그보다 낮은 점수는
- * 소신·도전으로 단정하지 않고 "판단 근거 부족"으로 돌려준다. 미달 여부는 불합격 0명으로 추정하지 않고
+ * 소신·어려움으로 단정하지 않고 "판단 근거 부족"으로 돌려준다. 미달 여부는 불합격 0명으로 추정하지 않고
  * 학년부장이 입력한 공식 경쟁률(result.competition)로만 표시한다.
  */
 export function judgeScore({ score, cutoff, totalMax, schoolName = '', track = '', maxRejected = 0, source = '', year = 0, department = '' }) {
@@ -296,7 +296,7 @@ export function judgmentSummaryText() {
 
 /**
  * 통계 화면용 4단계 구간 경계(기준선 = 합격 최저점).
- * noRejection(불합격 사례 없음)이면 기준선 아래는 소신·도전으로 나누지 않는다(판단 근거 부족).
+ * noRejection(불합격 사례 없음)이면 기준선 아래는 소신·어려움으로 나누지 않는다(판단 근거 부족).
  */
 export function judgmentZones({ cutoff, totalMax, schoolName = '', track = '', maxRejected = 0, noRejection = false }) {
     const c = Number(cutoff);

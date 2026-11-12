@@ -1,6 +1,8 @@
 import { escapeHtml, escapeAttr } from '../../core/utils.js';
 import { renderStatsDashboard } from './statsDashboard.js';
 import { renderGeneralCutoffPanel } from './generalCutoffPanel.js';
+import { renderTrendChart } from './trendChart.js';
+import { renderPreferencePanel } from './preferencePanel.js';
 
 const GENERAL_OPTION = '후기 일반고';
 const generalOptionHTML = selected => `<option value="${GENERAL_OPTION}" ${selected ? 'selected' : ''}>🏫 후기 일반고 (관내 합격선)</option>`;
@@ -30,6 +32,16 @@ export async function openAdmissionAnalysisModal() {
     } catch (e) {
         console.warn('참여 학교 목록 로드 실패:', e);
     }
+
+    // 자료가 있는 모든 학년도(우리 학교 원서·지난 입시 기록·관내 공유·커트라인). 학교 설정 학년도도 넣는다.
+    let analysisYears = [];
+    try {
+        analysisYears = (await window.go.main.App.GetAnalysisYears()) || [];
+    } catch (e) {
+        console.warn('분석 학년도 로드 실패:', e);
+    }
+    if (!analysisYears.includes(admissionYear)) analysisYears.push(admissionYear);
+    analysisYears = [...new Set(analysisYears.map(Number))].sort((a, b) => b - a);
 
     // 우리 학교 학과별 통계 로드
     let ourDeptStats = [];
@@ -101,9 +113,7 @@ export async function openAdmissionAnalysisModal() {
                         <div class="flex items-center gap-2">
                             <span class="text-xs font-bold text-slate-400">고입:</span>
                             <select id="analysisYearSelect" class="bg-slate-900 text-white font-bold text-xs border border-slate-700 rounded-lg px-2.5 py-1.5 outline-none cursor-pointer">
-                                <option value="${admissionYear}" selected>${admissionOptionLabel(admissionYear)}</option>
-                                <option value="${admissionYear - 1}">${admissionOptionLabel(admissionYear - 1)}</option>
-                                <option value="${admissionYear - 2}">${admissionOptionLabel(admissionYear - 2)}</option>
+                                ${analysisYears.map(y => `<option value="${y}" ${y === admissionYear ? 'selected' : ''}>${admissionOptionLabel(y)}</option>`).join('')}
                             </select>
                         </div>
 
@@ -151,12 +161,18 @@ export async function openAdmissionAnalysisModal() {
                     </div>
                 </div>
 
+                <!-- 여러 해 추세(학년도 선택과 무관) -->
+                <div id="analysisTrendContainer"></div>
+
                 <!-- 분석 결과 영역 컨테이너 -->
                 <div id="analysisContentContainer" class="space-y-6">
                     <div class="py-16 text-center text-slate-500">
                         <span class="spinner"></span> 통계 데이터를 분석하는 중...
                     </div>
                 </div>
+
+                <!-- 학과 지망 전략(선택 학년도) -->
+                <div id="analysisPreferenceContainer"></div>
             </div>
 
             <!-- Footer -->
@@ -206,6 +222,7 @@ export async function openAdmissionAnalysisModal() {
     updateDeptDropdown();
 
     let currentSourceMode = 'consolidated'; // 'consolidated' or 'our'
+    let lastTrendKey = ''; // 추세 그래프는 학교·학과·전형이 바뀔 때만 다시 그린다
 
     // 데이터 조회 및 렌더링 함수
     const loadAndRenderAnalysis = async () => {
@@ -219,6 +236,12 @@ export async function openAdmissionAnalysisModal() {
         // 후기 일반고는 학과·전형 구분 없이 관내 공유 자료로 합격선을 추정한다.
         const isGeneral = school === GENERAL_OPTION;
         ['#analysisDeptSelect', '#analysisTrackSelect'].forEach(id => { const el = modal.querySelector(id); if (el) el.disabled = isGeneral; });
+        const trendKey = `${school}|${dept}|${track}`;
+        if (trendKey !== lastTrendKey) {
+            lastTrendKey = trendKey;
+            renderTrendChart(modal.querySelector('#analysisTrendContainer'), { school, dept, track, isGeneral });
+        }
+        renderPreferencePanel(modal.querySelector('#analysisPreferenceContainer'), { year, school, track, isGeneral });
         if (isGeneral) {
             container.innerHTML = '<div class="py-16 text-center text-slate-500"><span class="spinner"></span> 후기 일반고 관내 합격선을 계산하는 중...</div>';
             await renderGeneralCutoffPanel(container, year);

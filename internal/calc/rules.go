@@ -31,6 +31,10 @@ type SchoolRule struct {
 	FinalTermArtsPenaltyOnly bool               // 특성화고: 3-1 예체능 감점만 한 번 차감
 }
 
+// RuleYear 이 산출 규칙이 대조한 입학전형요강의 고교 입학 학년도. 새 요강을 반영할 때 함께 올린다.
+// 원서 점수 스냅샷의 산출식 버전에 들어가, 여러 해 추세에서 산출식이 바뀐 해를 표시하는 데 쓴다.
+const RuleYear = 2027
+
 // 전체 학교 규칙 등록부
 var AllSchoolRules []SchoolRule
 

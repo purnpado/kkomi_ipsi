@@ -41,6 +41,18 @@ type HighSchool struct {
 	Area        string   `json:"area"`
 	Note        string   `json:"note"`
 	Departments []string `json:"departments"`
+	// Quotas 입학전형요강의 모집정원(운영자가 요강을 확인해 수동 등록, 자동 수집 없음).
+	// 학년도별로 둔다. 학교·전형 전체만 알면 학과는 비워도 된다.
+	Quotas []AdmissionQuota `json:"quotas,omitempty"`
+}
+
+// AdmissionQuota 한 학년도·전형·학과의 요강 모집정원. Department가 빈 값이면 학교·전형 전체.
+type AdmissionQuota struct {
+	AdmissionYear int    `json:"admissionYear"`
+	Track         string `json:"track"`
+	Department    string `json:"department,omitempty"`
+	Quota         int    `json:"quota"`
+	Source        string `json:"source,omitempty"` // 근거(예: "2027학년도 입학전형요강 p.3")
 }
 
 // OfficialAdmissionData 공식 고입 전형자료 구조체
@@ -70,6 +82,37 @@ type SyncStepResult struct {
 // SyncManager 로컬 데이터 관리자 (오프라인 전용: 네트워크 I/O 전무)
 type SyncManager struct {
 	DataDir string
+}
+
+// EmbeddedHighSchoolsJSON 실행 파일에 넣은 server-data/highschools.json(main 패키지가 설정).
+// 학교·학과·요강 모집정원의 기본값이며, data 폴더에 highschools.json이 없을 때 쓴다.
+var EmbeddedHighSchoolsJSON []byte
+
+func embeddedHighSchools() *HighSchoolData {
+	if len(EmbeddedHighSchoolsJSON) == 0 {
+		return nil
+	}
+	var d HighSchoolData
+	if json.Unmarshal(bytes.TrimPrefix(EmbeddedHighSchoolsJSON, []byte("\xef\xbb\xbf")), &d) != nil || len(d.Schools) == 0 {
+		return nil
+	}
+	return &d
+}
+
+// fillQuotas 예전 버전에서 받은 data/highschools.json에는 모집정원이 없으므로, 같은 학교의 모집정원을 내장 자료에서 채운다.
+func fillQuotas(local *HighSchoolData, base *HighSchoolData) {
+	if local == nil || base == nil {
+		return
+	}
+	byName := map[string][]AdmissionQuota{}
+	for _, s := range base.Schools {
+		byName[s.Name] = s.Quotas
+	}
+	for i := range local.Schools {
+		if len(local.Schools[i].Quotas) == 0 {
+			local.Schools[i].Quotas = byName[local.Schools[i].Name]
+		}
+	}
 }
 
 // NewSyncManager 동기화 관리자 생성
@@ -272,11 +315,15 @@ func (sm *SyncManager) GetHighSchools() (*HighSchoolData, error) {
 		data = bytes.TrimPrefix(data, []byte("\xef\xbb\xbf"))
 		var schoolData HighSchoolData
 		if err := json.Unmarshal(data, &schoolData); err == nil {
+			fillQuotas(&schoolData, embeddedHighSchools())
 			return &schoolData, nil
 		}
 	}
 
-	// 기본 내장 고등학교 목록 데이터
+	// 실행 파일에 넣은 고교 목록(server-data/highschools.json), 없으면 코드 기본 목록
+	if d := embeddedHighSchools(); d != nil {
+		return d, nil
+	}
 	return sm.getDefaultHighSchools(), nil
 }
 

@@ -50,7 +50,11 @@ func main() {
 	if err := os.WriteFile(path, []byte(report), 0o600); err != nil {
 		fail(err)
 	}
+	if err := sm.exportViewable(); err != nil {
+		fail(err)
+	}
 	fmt.Printf("보고서: %s (전체 %.0f초)\n", path, time.Since(start).Seconds())
+	fmt.Printf("앱에서 열어 볼 자료: %s\n", filepath.Join(*out, "열람용", "안내.txt"))
 }
 
 func studentsOf(yr *yearResult) []*student {

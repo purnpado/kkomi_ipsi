@@ -325,7 +325,7 @@ export async function openPredictionDetailModal(classNum, studentNum, studentNam
                         </button>
                     </div>
                     <div class="text-xs text-text-muted flex items-center gap-3">
-                        <span>🟢 안정 · 🟡 적정 · 🟠 소신 · 🔴 도전</span>
+                        <span>🟢 안정 · 🟡 적정 · 🟠 소신 · 🔴 어려움</span>
                         <span class="text-slate-500">${judgmentSummaryText()}</span>
                     </div>
                 </div>

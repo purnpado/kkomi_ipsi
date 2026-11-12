@@ -244,6 +244,25 @@ export function GetAdmissionEvidence() {
 }
 
 /**
+ * GetAdmissionTrend 학교·학과·전형별 학년도 추세(관내 통합·우리 학교 합격선, 지원·합격 인원, 만점·산출식 변경).
+ * @param {string} highSchool
+ * @param {string} department
+ * @param {string} track
+ * @returns {$CancellablePromise<database$0.TrendPoint[] | null>}
+ */
+export function GetAdmissionTrend(highSchool, department, track) {
+    return $Call.ByID(3707979659, highSchool, department, track);
+}
+
+/**
+ * GetAnalysisYears 입시 자료가 있는 학년도 목록(최근부터). 입시 분석 화면의 연도 선택에 쓴다.
+ * @returns {$CancellablePromise<number[] | null>}
+ */
+export function GetAnalysisYears() {
+    return $Call.ByID(4286487241);
+}
+
+/**
  * GetAppVersion 현재 앱 버전 반환
  * @returns {$CancellablePromise<string>}
  */
@@ -408,6 +427,17 @@ export function GetOfficialAdmissionData() {
  */
 export function GetParticipatingSchools(admissionYear) {
     return $Call.ByID(3160885755, admissionYear);
+}
+
+/**
+ * GetPreferenceStrategy 학과 지망 전략: 학년도·고교·전형의 학과별 지망 순위별 배정 인원·최저점(우리 학교 + 관내 공유).
+ * @param {number} admissionYear
+ * @param {string} highSchool
+ * @param {string} track
+ * @returns {$CancellablePromise<database$0.PreferenceStrategy | null>}
+ */
+export function GetPreferenceStrategy(admissionYear, highSchool, track) {
+    return $Call.ByID(3152193867, admissionYear, highSchool, track);
 }
 
 /**

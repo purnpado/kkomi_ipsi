@@ -12,14 +12,14 @@ export function renderStatsDashboard(container, stats, sourceMode) {
     // 안정: 불합격 최고점보다 높음 (불합격자 없으면 Q3 이상)
     // 적정: 합격자 하위 25%(Q1) 이상 ~ 불합격 최고점 이하
     // 소신: 합격 최저점 이상 ~ 합격자 하위 25%(Q1) 미만
-    // 도전: 합격 최저점 미만
+    // 어려움: 합격 최저점 미만
     // 4단계 구간: core/admissionJudgment.js 단일 기준(기준선 = 합격 최저점, 학교 설정 여유폭)
     const zones = judgmentZones({
         cutoff: stats.acceptedMin, totalMax: totalMaxFor(stats.highSchool, stats.track),
         schoolName: stats.highSchool, track: stats.track, maxRejected: stats.rejectedCount > 0 ? stats.rejectedMax : 0,
         noRejection: stats.acceptedCount > 0 && !(stats.rejectedCount > 0)
     });
-    // 불합격 사례가 없으면 합격 최저점은 합격선의 상한일 뿐이므로 그 아래를 소신·도전으로 나누지 않는다.
+    // 불합격 사례가 없으면 합격 최저점은 합격선의 상한일 뿐이므로 그 아래를 소신·어려움으로 나누지 않는다.
     const noRejection = !!zones?.noRejection;
     const safeCutoff = zones ? zones.safeFrom : 0;
     const properCutoff = zones ? zones.properFrom : 0;
@@ -145,10 +145,10 @@ export function renderStatsDashboard(container, stats, sourceMode) {
                     <p class="text-[11px] text-slate-300">합격 최저점 − 여유폭 ~ 합격 최저점 미만</p>
                 </div>
 
-                <!-- 도전 -->
+                <!-- 어려움 -->
                 <div class="p-3 rounded-lg bg-rose-950/40 border border-rose-500/30 space-y-1">
                     <div class="flex items-center justify-between font-bold text-rose-300">
-                        <span>🔴 도전권</span>
+                        <span>🔴 어려움</span>
                         <span class="font-mono">${challengeCutoff > 0 ? `<${challengeCutoff.toFixed(2)}점` : '-'}</span>
                     </div>
                     <p class="text-[11px] text-slate-300">소신 구간 미만</p>

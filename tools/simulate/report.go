@@ -32,7 +32,7 @@ func judge(score, cutoff, max, maxRejected float64, noRejection bool) string {
 	case score >= cutoff-m:
 		return "소신"
 	}
-	return "도전"
+	return "어려움"
 }
 
 func (sm *sim) viewer() *middleSchool {
@@ -238,7 +238,7 @@ func (sm *sim) report() string {
 	w("| 구분 | 판정 | 학생 | 실제 합격 | 합격률 |")
 	w("|---|---|---:|---:|---:|")
 	for _, kind := range []string{"전기", "후기"} {
-		for _, level := range []string{"안정", "적정", "소신", "도전", "판단 근거 부족·작년 미달", "판단 근거 부족·작년 경쟁 있음", "판단 근거 부족·경쟁률 미입력", "기준 없음"} {
+		for _, level := range []string{"안정", "적정", "소신", "어려움", "판단 근거 부족·작년 미달", "판단 근거 부족·작년 경쟁 있음", "판단 근거 부족·경쟁률 미입력", "기준 없음"} {
 			n, ok := 0, 0
 			for _, yr := range sm.years {
 				for _, p := range yr.predictions {

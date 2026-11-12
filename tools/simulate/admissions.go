@@ -183,7 +183,14 @@ func runVocationalJob(rng *rand.Rand, apps []*application, seats map[string]int,
 	for _, a := range apps {
 		byDept[a.prefs[0]] = append(byDept[a.prefs[0]], a)
 	}
-	for dept, list := range byDept {
+	// 학과 순서를 고정한다(맵 순회 순서는 실행마다 달라 면접 점수 난수가 다른 학생에게 돌아가는 문제가 있었다).
+	depts := make([]string, 0, len(byDept))
+	for dept := range byDept {
+		depts = append(depts, dept)
+	}
+	sort.Strings(depts)
+	for _, dept := range depts {
+		list := byDept[dept]
 		q := seats[seatKey(school, "취업희망자", dept)]
 		byScore(list)
 		if stage.Multiplier == 0 { // 울산기술공업고: 면접 점수 미반영, 단일 단계

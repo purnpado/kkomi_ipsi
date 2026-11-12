@@ -12,6 +12,20 @@ import { notifyStatsRecalculated } from '../../../core/navigation.js';
 
 const MODAL_ID = 'competitionModal';
 
+/** 고교 목록 자료(highschools.json)에 등록된 요강 모집정원: 경쟁률 키 → { quota, source } */
+async function loadGuideQuotas() {
+    const map = new Map();
+    try {
+        const data = await window.go.main.App.GetHighSchoolsData();
+        (data?.schools || []).forEach(school => {
+            (school.quotas || []).forEach(q => {
+                if (Number(q.quota) > 0) map.set(evidenceKey(q.admissionYear, school.name, q.department, q.track), { quota: Number(q.quota), source: q.source || '' });
+            });
+        });
+    } catch (_) {}
+    return map;
+}
+
 /** 학교별로 "학교 전체" 행과 학과 행을 전형마다 만든다. */
 function buildRows(ctx) {
     const rows = [];
@@ -42,11 +56,16 @@ function evidenceCell(year, row) {
     return `<span class="text-slate-300">합격 ${ev.acceptedCount} · 불합격 ${ev.rejectedCount}${stage2}</span>${warn}`;
 }
 
-function renderBody(modal, ctx, year) {
+function renderBody(modal, ctx, year, guideQuotas) {
     const rows = buildRows(ctx);
+    let prefilled = 0;
     const rowsHTML = rows.map((row, idx) => {
-        const saved = state.competitionRecords?.get?.(evidenceKey(year, row.school, row.dept, row.track));
-        const quota = Number(saved?.quota) || 0;
+        const key = evidenceKey(year, row.school, row.dept, row.track);
+        const saved = state.competitionRecords?.get?.(key);
+        const guide = guideQuotas.get(key);
+        // 저장한 값이 없으면 요강 모집정원을 미리 채운다(저장해야 반영됨).
+        const quota = Number(saved?.quota) || guide?.quota || 0;
+        if (!saved && guide) prefilled++;
         const applicants = Number(saved?.applicants) || 0;
         const firstOfSchool = idx === 0 || rows[idx - 1].school !== row.school;
         return `
@@ -55,7 +74,7 @@ function renderBody(modal, ctx, year) {
                 <td class="p-2 font-bold text-white whitespace-nowrap">${firstOfSchool ? escapeHtml(row.school) : ''}</td>
                 <td class="p-2 text-slate-300">${row.dept ? escapeHtml(row.dept) : '<span class="text-indigo-300 font-bold">학교 전체</span>'}</td>
                 <td class="p-2 text-slate-300 whitespace-nowrap">${escapeHtml(row.track)}</td>
-                <td class="p-2 text-center"><input type="text" inputmode="numeric" class="competition-quota input-field py-1 px-2 text-xs text-right w-20" value="${quota || ''}" placeholder="정원"></td>
+                <td class="p-2 text-center"><input type="text" inputmode="numeric" class="competition-quota input-field py-1 px-2 text-xs text-right w-20 ${!saved && guide ? 'border-sky-500/60' : ''}" value="${quota || ''}" placeholder="정원" ${guide ? `title="요강 모집정원 ${guide.quota}명${guide.source ? ` (${escapeAttr(guide.source)})` : ''}"` : ''}></td>
                 <td class="p-2 text-center"><input type="text" inputmode="numeric" class="competition-applicants input-field py-1 px-2 text-xs text-right w-20" value="${applicants || ''}" placeholder="지원자"></td>
                 <td class="p-2 text-center competition-ratio whitespace-nowrap">${ratioCell(quota, applicants)}</td>
                 <td class="p-2 text-[11px] whitespace-nowrap">${evidenceCell(year, row)}</td>
@@ -73,6 +92,11 @@ function renderBody(modal, ctx, year) {
             </thead>
             <tbody>${rowsHTML}</tbody>
         </table>` : '<p class="p-8 text-center text-slate-400">고교 목록을 불러오지 못했습니다.</p>';
+    const guideYears = [...new Set([...guideQuotas.keys()].map(k => Number(k.split('|')[0])))].sort();
+    const hasYear = guideYears.includes(Number(year));
+    modal.querySelector('#competitionGuideInfo').textContent = !hasYear
+        ? `이 학년도 요강 모집정원은 등록되어 있지 않습니다${guideYears.length ? `(등록된 학년도: ${guideYears.join(', ')})` : ''}. 정원을 직접 입력해 주세요.`
+        : (prefilled > 0 ? `요강 모집정원 ${prefilled}건을 미리 채웠습니다(파란 테두리). 지원자 수를 넣고 저장해 주세요.` : '요강 모집정원이 모두 저장되어 있습니다.');
 
     modal.querySelectorAll('.competition-row').forEach(tr => {
         const update = () => {
@@ -106,7 +130,7 @@ function collectRecords(modal, year) {
 
 export async function openCompetitionModal(ctx) {
     document.getElementById(MODAL_ID)?.remove();
-    await loadAdmissionEvidence();
+    const [, guideQuotas] = await Promise.all([loadAdmissionEvidence(), loadGuideQuotas()]);
     let year = Number(ctx.currentAdmissionYear);
 
     const modal = document.createElement('div');
@@ -118,7 +142,7 @@ export async function openCompetitionModal(ctx) {
                 <div>
                     <h3 class="text-lg font-black text-white flex items-center gap-2"><span>📊</span> 공식 경쟁률 입력 (모집정원·지원자 수)</h3>
                     <p class="text-[11px] text-slate-400 mt-1 leading-relaxed">
-                        고교가 발표한 값만 입력합니다. 상담 화면은 이 값으로만 <strong class="text-sky-300">미달</strong>과 경쟁률을 표시합니다.<br>
+                        모집정원은 요강, 지원자 수는 고교의 원서 접수 결과 발표값을 입력합니다. 상담 화면은 이 값으로만 <strong class="text-sky-300">미달</strong>과 경쟁률을 표시합니다.<br>
                         우리 자료에 불합격자가 없다는 것만으로는 미달인지, 지원자 점수가 높아 모두 합격한 것인지 알 수 없습니다(⚠ 표시).
                     </p>
                 </div>
@@ -131,6 +155,7 @@ export async function openCompetitionModal(ctx) {
                 </select>
                 <span class="text-[11px] text-slate-400">학과별 값을 모르면 "학교 전체" 행만 입력해도 됩니다. 칸을 비우고 저장하면 지워집니다.</span>
             </div>
+            <p id="competitionGuideInfo" class="text-[11px] text-sky-300"></p>
             <div id="competitionBody" class="flex-1 overflow-y-auto custom-scrollbar rounded-xl border border-slate-700/60 bg-slate-900/60"></div>
             <div class="flex justify-end gap-2 pt-2 border-t border-slate-700/60">
                 <button id="cancelCompetitionBtn" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 font-bold px-4 py-2 rounded-xl cursor-pointer">닫기</button>
@@ -138,14 +163,14 @@ export async function openCompetitionModal(ctx) {
             </div>
         </div>`;
     document.body.appendChild(modal);
-    renderBody(modal, ctx, year);
+    renderBody(modal, ctx, year, guideQuotas);
 
     const close = () => modal.remove();
     modal.querySelector('#closeCompetitionBtn').addEventListener('click', close);
     modal.querySelector('#cancelCompetitionBtn').addEventListener('click', close);
     modal.querySelector('#competitionYearSelect').addEventListener('change', (e) => {
         year = Number(e.target.value);
-        renderBody(modal, ctx, year);
+        renderBody(modal, ctx, year, guideQuotas);
     });
     modal.querySelector('#saveCompetitionBtn').addEventListener('click', async () => {
         const { records, invalid } = collectRecords(modal, year);
@@ -157,7 +182,7 @@ export async function openCompetitionModal(ctx) {
             const saved = await window.go.main.App.SaveCompetitionRecords(records);
             await loadAdmissionEvidence();
             notifyStatsRecalculated({ reason: 'competition' });
-            renderBody(modal, ctx, year);
+            renderBody(modal, ctx, year, guideQuotas);
             await showModalAlert(`${admissionOptionLabel(year)} 공식 경쟁률 ${saved}건을 저장했습니다.`, '저장 완료', 'success');
         } catch (err) {
             await showModalAlert(`경쟁률 저장 실패: ${err}`, '오류', 'error');

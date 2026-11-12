@@ -42,14 +42,14 @@ export async function openJudgmentSettingsModal({ onSaved } = {}) {
             <div class="flex justify-between items-start">
                 <div>
                     <h2 class="text-xl font-bold text-white">🎯 4단계 판정 기준 설정</h2>
-                    <p class="text-xs text-text-muted mt-1">기준선(합격 최저점 또는 학교 예상선)과 학생 점수의 차이를 여유폭과 비교해 안정·적정·소신·도전을 정합니다.
+                    <p class="text-xs text-text-muted mt-1">기준선(합격 최저점 또는 학교 예상선)과 학생 점수의 차이를 여유폭과 비교해 안정·적정·소신·어려움을 정합니다.
                     저장하면 배포자료를 통해 모든 담임 PC에 같은 기준이 적용됩니다.</p>
                 </div>
                 <button id="closeJudgmentSettings" class="text-3xl text-text-muted cursor-pointer">×</button>
             </div>
             <div class="rounded-xl border border-slate-700 p-4 bg-slate-900/40 text-xs text-slate-300 space-y-1">
                 <p>🟢 안정: 기준선 + 여유폭 이상 (불합격 최고점이 있으면 그보다 높아도 안정) · 🟡 적정: 기준선 이상(동점 포함)</p>
-                <p>🟠 소신: 기준선 − 여유폭 이상 · 🔴 도전: 그 미만</p>
+                <p>🟠 소신: 기준선 − 여유폭 이상 · 🔴 어려움: 그 미만</p>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
                 <label class="text-sm font-bold">학교 기본 방식

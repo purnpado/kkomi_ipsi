@@ -28,6 +28,7 @@ type middleSchool struct {
 	baseClasses   int
 	handover      string // 지난 학년도에 만든 인수인계 파일
 	classHistory  []int  // 학년도별 학급 수
+	key           []byte // 그해 data 폴더의 데이터 열쇠(열람용 폴더 만들 때 사용)
 }
 
 type student struct {
@@ -88,6 +89,7 @@ func (m *middleSchool) openSchool(year int, rng *rand.Rand) error {
 	key := make([]byte, 32)
 	rng.Read(key)
 	m.dm.SetDataKey(key)
+	m.key = key
 	if err := m.dm.InitConfigDB(); err != nil {
 		return err
 	}

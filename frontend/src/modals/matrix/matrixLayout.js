@@ -135,7 +135,7 @@ export function renderMatrixLayout(ctx, mx) {
                 <div class="flex justify-between items-center text-xs text-text-muted flex-wrap gap-3 pt-1">
                     <div class="flex items-center gap-3 flex-wrap">
                         <span><strong>신호등 범례:</strong></span>
-                        <span class="text-emerald-300 font-bold">🟢 안정</span><span class="text-indigo-300 font-bold">🟡 적정</span><span class="text-amber-300 font-bold">🟠 소신</span><span class="text-rose-300 font-bold">🔴 도전</span>
+                        <span class="text-emerald-300 font-bold">🟢 안정</span><span class="text-indigo-300 font-bold">🟡 적정</span><span class="text-amber-300 font-bold">🟠 소신</span><span class="text-rose-300 font-bold">🔴 어려움</span>
                         <span class="text-slate-400">(${judgmentSummaryText()} · 점수에 마우스를 올리면 기준선·차이가 보입니다)</span>
                         <span class="no-print" id="matrixJudgmentToggle">${judgmentModeToggleHTML()}</span>
                         <span class="text-slate-400 font-medium">※ 학생 이름을 클릭하면 해당 학생의 1:1 세부 상담 화면으로 즉시 이동합니다.</span>

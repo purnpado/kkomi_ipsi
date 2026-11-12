@@ -148,6 +148,17 @@
  */
 
 /**
+ * @typedef {Object} DepartmentPreferenceStat
+ * @property {string} department
+ * @property {number} assignedTotal
+ * @property {PreferenceRankStat[] | null} byRank - 지망 순위별 배정
+ * @property {number} rejectedFirst - 이 학과를 1지망으로 쓰고 불합격(관내 표본)
+ * @property {boolean} seatsLeftOver - 2지망 이하 배정자가 있음
+ * @property {number} firstRankMin - 1지망 배정 최저점
+ * @property {number} lowestAssigned - 어떤 지망으로든 배정된 최저점
+ */
+
+/**
  * GeneralCutoffEstimate 한 잣대(기본 지표 또는 완전 총점)의 관내 합격선 추정.
  * @typedef {Object} GeneralCutoffEstimate
  * @property {string} basis - "base"(기본 지표) | "total"(완전 총점)
@@ -198,6 +209,24 @@
  * @typedef {Object} LoginIndex
  * @property {string} schoolName
  * @property {LoginAccount[] | null} accounts
+ */
+
+/**
+ * @typedef {Object} PreferenceRankStat
+ * @property {number} rank
+ * @property {number} count
+ * @property {number} minScore
+ * @property {number} maxScore
+ */
+
+/**
+ * @typedef {Object} PreferenceStrategy
+ * @property {number} admissionYear
+ * @property {string} highSchool
+ * @property {string} track
+ * @property {number} schoolMin - 학교·전형 합격 최저점
+ * @property {number} records - 쓴 기록 수
+ * @property {DepartmentPreferenceStat[] | null} departments
  */
 
 /**
@@ -304,6 +333,25 @@
  * @property {number} percentile
  * @property {number} rank
  * @property {number} totalStudents
+ */
+
+/**
+ * TrendPoint 한 학년도의 추세 값. 자료가 없는 항목은 0이다.
+ * @typedef {Object} TrendPoint
+ * @property {number} admissionYear
+ * @property {number} regionSchools - 관내 공유 참여 학교 수
+ * @property {number} regionApplicants - 관내 지원 인원
+ * @property {number} regionAccepted - 관내 합격 인원
+ * @property {number} regionAcceptedMin - 관내 합격 최저점
+ * @property {number} regionAcceptedAvg
+ * @property {number} regionStage1Min - 관내 1차 합격 최저점(1·2차 전형)
+ * @property {number} regionRejectedMax
+ * @property {number} ourApplicants
+ * @property {number} ourAccepted
+ * @property {number} ourAcceptedMin
+ * @property {number} totalMax - 그해 점수 만점(점수 상세 기록에서, 없으면 0)
+ * @property {string} formulaVersion - 그해 가장 많이 쓴 산출식 버전
+ * @property {boolean} formulaChanged - 앞 학년도와 만점 또는 산출식 버전이 다름
  */
 
 /**

@@ -5,6 +5,11 @@
 import * as $models from "./models.js";
 
 /**
+ * AdmissionQuota 한 학년도·전형·학과의 요강 모집정원. Department가 빈 값이면 학교·전형 전체.
+ * @typedef {$models.AdmissionQuota} AdmissionQuota
+ */
+
+/**
  * HighSchool 고등학교 정보
  * @typedef {$models.HighSchool} HighSchool
  */

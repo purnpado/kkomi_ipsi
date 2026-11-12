@@ -80,7 +80,7 @@ func (dm *DBManager) GenerateApplicationScoreDetails(classNum int, studentNum, s
 				details.NonAcademicMax = result.TotalMax - details.AcademicMax
 				details.TotalScore = result.TotalScore
 				details.TotalMax = result.TotalMax
-				details.FormulaVersion = fmt.Sprintf("%s-%s", result.SchoolName, result.TrackName)
+				details.FormulaVersion = fmt.Sprintf("%s-%s/%d요강", result.SchoolName, result.TrackName, calc.RuleYear)
 				break
 			}
 		}

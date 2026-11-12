@@ -8,12 +8,18 @@ import (
 	"path/filepath"
 	"strings"
 
+	"PHGC/internal/sync"
 	"github.com/wailsapp/wails/v3/pkg/application"
 	"github.com/wailsapp/wails/v3/pkg/events"
 )
 
 //go:embed all:frontend/dist
 var assets embed.FS
+
+// 학교·학과·요강 모집정원 기본 자료(운영자가 요강을 확인해 갱신)
+//
+//go:embed server-data/highschools.json
+var defaultHighSchoolsJSON []byte
 
 // cleanupLegacyWebViewData AppData\Roaming 내의 과거 버전(PHGC_v*.exe 등) 임시 캐시 폴더 자동 청소
 // (PHGC_WebviewData 는 현재 꼬미입시.exe 도 쓰는 화면 저장소이므로 보존한다)
@@ -50,6 +56,7 @@ func legacyWebviewDataPath() string {
 }
 
 func main() {
+	sync.EmbeddedHighSchoolsJSON = defaultHighSchoolsJSON
 	// 1. 과거 버전 실행 잔여 임시 캐시 폴더 자동 청소
 	cleanupLegacyWebViewData()
 
