@@ -179,7 +179,7 @@ export async function renderLoginScreen(schoolName) {
                     <h1 class="text-2xl font-black text-white tracking-tight mb-1">꼬미입시</h1>
                     <div class="flex items-center justify-center gap-1.5 mt-2 flex-wrap">
                         <span class="px-2.5 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-400/30 text-[11px] font-bold">🏫 ${schoolName}</span>
-                        <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 text-[11px] font-bold">🔒 100% 오프라인</span>
+                        <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 text-[11px] font-bold">🔒 학생 자료 외부 전송 없음</span>
                     </div>
                 </div>
                 <form id="loginForm" class="space-y-4">

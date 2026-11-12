@@ -2,7 +2,7 @@ import { SyncWithServer } from '../../core/backend.js';
 import middleSchools from '../../assets/middleschools.json';
 import logoUniversal from '../../assets/images/logo-universal.png';
 import { showModalAlert, showModalPrompt } from '../../core/dialogs.js';
-import { FEEDBACK_BOARD_URL, GITHUB_RELEASE_URL, openExternalUrlSafe, quitAppSafe, delay } from '../../core/updater.js';
+import { GITHUB_RELEASE_URL, openExternalUrlSafe, openFeedbackPage, quitAppSafe, delay } from '../../core/updater.js';
 import { getAppRoot } from './authRoot.js';
 import { navigate } from '../../core/navigation.js';
 import { state } from '../../core/store.js';
@@ -20,7 +20,7 @@ export function renderFirstRunScreen() {
                 <img src="${logoUniversal}" alt="로고" class="w-20 h-20 mx-auto mb-3 rounded-2xl shadow-xl border border-indigo-500/30 object-cover" style="animation: float 3s ease-in-out infinite;" />
                 <h1 class="text-2xl font-black text-white tracking-tight mb-2">꼬미입시</h1>
                 <div class="flex items-center justify-center gap-1.5 flex-wrap">
-                    <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 text-[11px] font-bold">🔒 100% 오프라인</span>
+                    <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 text-[11px] font-bold">🔒 학생 자료 외부 전송 없음</span>
                     <span class="px-2.5 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-400/30 text-[11px] font-bold">울산 고입 진학상담</span>
                 </div>
                 <p class="text-text-muted text-xs mt-2">처음 실행 방법을 선택하세요</p>
@@ -398,7 +398,7 @@ export function showSyncComplete(container, schoolName, result) {
     });
 
     document.getElementById('goToFeedbackInSyncBtn')?.addEventListener('click', () => {
-        openExternalUrlSafe(FEEDBACK_BOARD_URL);
+        openFeedbackPage();
     });
 
     document.getElementById('continueBtn')?.addEventListener('click', () => {

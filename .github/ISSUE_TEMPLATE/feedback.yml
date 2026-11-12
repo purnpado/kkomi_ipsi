@@ -1,0 +1,55 @@
+name: 질문·피드백
+description: 꼬미입시 사용 중 오류 신고, 기능 제안, 사용 방법 질문
+title: "[질문·피드백] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## ⚠️ 학생 개인정보를 올리지 마세요
+        이 게시판은 **누구나 볼 수 있습니다.** 학생 이름·학번·성적·상담 내용, 학교 암호를 쓰지 마시고,
+        화면을 캡처해 올릴 때는 학생 정보가 보이지 않게 가려 주세요.
+  - type: dropdown
+    id: kind
+    attributes:
+      label: 종류
+      options:
+        - 오류 신고
+        - 기능 제안
+        - 사용 방법 질문
+        - 기타
+    validations:
+      required: true
+  - type: dropdown
+    id: role
+    attributes:
+      label: 사용 계정
+      options:
+        - 학년부장
+        - 담임
+        - 진로부장
+        - 기타
+  - type: input
+    id: version
+    attributes:
+      label: 프로그램 버전
+      description: 프로그램의 [질문·피드백] 버튼으로 열면 자동으로 채워집니다.
+      placeholder: 예) 1.6.6
+  - type: input
+    id: os
+    attributes:
+      label: 운영체제
+      placeholder: 예) Windows 11
+  - type: textarea
+    id: content
+    attributes:
+      label: 내용
+      description: 어떤 화면에서 무엇을 했을 때 어떤 일이 있었는지 적어 주세요(오류 메시지 문구 포함).
+    validations:
+      required: true
+  - type: checkboxes
+    id: privacy
+    attributes:
+      label: 개인정보 확인
+      options:
+        - label: 학생 이름·학번·성적·상담 내용과 학교 암호를 넣지 않았습니다.
+          required: true

@@ -10,7 +10,7 @@ import { eventBus, EVENTS } from './core/eventBus.js';
 import { state, patchState } from './core/store.js';
 import { ScreenLockManager } from './core/screenLock.js';
 import { initGlobalEscapeHandler } from './core/dialogs.js';
-import { checkUpdateOnStartup, openExternalUrlSafe, FEEDBACK_BOARD_URL } from './core/updater.js';
+import { checkUpdateOnStartup, openFeedbackPage } from './core/updater.js';
 import { getGeneralGuideCutoff, getGeneralGuideBadge } from './core/generalGuide.js';
 import { loadJudgmentSettings } from './core/admissionJudgment.js';
 import { renderFirstRunScreen, renderSetupScreen, renderSyncScreen } from './views/auth/setupWizardView.js';
@@ -207,7 +207,7 @@ function bindGlobalFeedbackListener() {
     if (btn && !btn.dataset.bound) {
         btn.dataset.bound = 'true';
         btn.addEventListener('click', () => {
-            openExternalUrlSafe(FEEDBACK_BOARD_URL);
+            openFeedbackPage();
         });
     }
 }

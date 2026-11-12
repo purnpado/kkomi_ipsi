@@ -17,14 +17,14 @@ export function renderAgreementModal(onAcceptCallback) {
                         <span>🏫</span> 꼬미입시
                     </span>
                     <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 text-xs font-bold shadow-inner">
-                        <span>🔒</span> 100% 오프라인 안전 모드
+                        <span>🔒</span> 학생 자료 외부 전송 없음
                     </span>
                 </div>
                 <h2 class="text-2xl sm:text-3xl font-black text-white tracking-tight leading-snug">
                     프로그램 이용 및 학생 개인정보 보호 서약서
                 </h2>
                 <p class="text-xs sm:text-sm text-slate-300 mt-2.5 leading-relaxed max-w-3xl mx-auto opacity-90 break-keep-all text-balance">
-                    본 프로그램은 중학교 3학년 고입 진학 상담 및 내신 산출을 돕는 <strong>교원 전용 오프라인 업무 지원 도구</strong>입니다.<br>
+                    본 프로그램은 중학교 3학년 고입 진학 상담 및 내신 산출을 돕는 <strong>교원 전용 업무 지원 도구</strong>이며, 학생 자료는 사용자 PC 안에서만 처리합니다.<br>
                     안전한 학생 정보 보호와 책임 있는 진학 지도를 위해 아래 사항을 숙지하고 서약해 주시기 바랍니다.
                 </p>
             </div>
@@ -34,22 +34,22 @@ export function renderAgreementModal(onAcceptCallback) {
                 <div class="p-4 rounded-xl bg-indigo-950/40 border border-indigo-500/25 shadow-xs">
                     <div class="flex items-center gap-2 mb-2">
                         <span class="px-2.5 py-0.5 rounded-full text-xs font-black bg-indigo-500/30 text-indigo-300 border border-indigo-400/40">제1조</span>
-                        <h3 class="font-bold text-indigo-200 text-sm sm:text-base">100% 오프라인 구동 및 외부 전송 원천 차단</h3>
+                        <h3 class="font-bold text-indigo-200 text-sm sm:text-base">학생 자료 외부 전송 원천 차단</h3>
                     </div>
                     <ul class="list-disc list-inside space-y-1.5 text-slate-300 leading-relaxed">
-                        <li>본 프로그램은 교육청 보안 지침을 준수하여 <strong class="text-white">외부 인터넷 서버와의 자동 통신을 일절 수행하지 않는 100% 오프라인 독립형 소프트웨어</strong>입니다.</li>
-                        <li>나이스(NEIS) 엑셀에서 연동된 학생 성명, 학번, 성적 등 <strong class="text-white">모든 학생 정보는 사용자 로컬 PC에만 군사등급 AES-256-GCM 알고리즘으로 강력 암호화되어 안전하게 보관</strong>되며 외부로 전송되지 않습니다.</li>
+                        <li>나이스(NEIS) 엑셀에서 가져온 학생 성명, 학번, 성적, 출결·봉사, 상담 기록 등 <strong class="text-white">모든 학생 정보는 사용자 PC에만 AES-256-GCM 방식으로 암호화되어 보관되며, 어떤 경우에도 인터넷으로 전송되지 않습니다.</strong></li>
+                        <li>프로그램이 인터넷에 연결하는 경우는 <strong class="text-white">① 시작할 때 새 버전이 있는지 확인, ② 사용자가 승인한 업데이트 파일 내려받기, ③ 사용자가 [질문·피드백]을 눌러 GitHub 페이지를 열 때</strong>뿐입니다. 이때도 학생 자료·학교 자료·계정 정보는 보내지 않으며, 인터넷이 없어도 모든 기능을 쓸 수 있습니다.</li>
                     </ul>
                 </div>
 
                 <div class="p-4 rounded-xl bg-emerald-950/40 border border-emerald-500/25 shadow-xs">
                     <div class="flex items-center gap-2 mb-2">
                         <span class="px-2.5 py-0.5 rounded-full text-xs font-black bg-emerald-500/30 text-emerald-300 border border-emerald-400/40">제2조</span>
-                        <h3 class="font-bold text-emerald-200 text-sm sm:text-base">교내 안전 배포 및 파일 기반 오프라인 취합 체계</h3>
+                        <h3 class="font-bold text-emerald-200 text-sm sm:text-base">파일로만 주고받는 교내 배포·취합 체계</h3>
                     </div>
                     <ul class="list-disc list-inside space-y-1.5 text-slate-300 leading-relaxed">
-                        <li>학년부장과 담임교사 간의 데이터 전달은 암호화된 학급별 배포 패키지(<span class="px-1.5 py-0.5 rounded bg-slate-800 text-emerald-300 font-mono text-xs border border-emerald-500/30">.kkomipkg</span>)와 변경분 취합 파일(<span class="px-1.5 py-0.5 rounded bg-slate-800 text-emerald-300 font-mono text-xs border border-emerald-500/30">.kkomipatch</span>)을 통해서만 안전하게 오프라인으로 교환됩니다.</li>
-                        <li>관내 타 학교와의 커트라인 공유 파일(<span class="px-1.5 py-0.5 rounded bg-slate-800 text-indigo-300 font-mono text-xs border border-indigo-500/30">.kkomidata</span>) 내보내기 시 <strong class="text-white">학생 개인 식별 정보(성명, 학번, 개별 성적 등)는 100% 원천 배제</strong>되며, 고교별 합격선 및 학교 단위 단순 통계 수치만 안전하게 포함됩니다.</li>
+                        <li>학년부장과 담임교사 간의 데이터 전달은 암호화된 학급별 배포 패키지(<span class="px-1.5 py-0.5 rounded bg-slate-800 text-emerald-300 font-mono text-xs border border-emerald-500/30">.kkomipkg</span>)와 변경분 취합 파일(<span class="px-1.5 py-0.5 rounded bg-slate-800 text-emerald-300 font-mono text-xs border border-emerald-500/30">.kkomipatch</span>)을 통해서만 교환되며, 두 파일 모두 학교 공용 데이터 암호로 암호화됩니다.</li>
+                        <li>관내 타 학교와 주고받는 공유 파일(<span class="px-1.5 py-0.5 rounded bg-slate-800 text-indigo-300 font-mono text-xs border border-indigo-500/30">.kkomi</span>)과 다음 학년도 인수인계 파일(<span class="px-1.5 py-0.5 rounded bg-slate-800 text-indigo-300 font-mono text-xs border border-indigo-500/30">.kkomihandover</span>)에는 <strong class="text-white">학생 성명·학번·학급·교사 정보가 빠지고</strong>, 고교·학과·전형별 점수와 합격 여부만 이름 없는 기록으로 들어갑니다. 공유 파일은 관내 공유 암호로 암호화됩니다.</li>
                     </ul>
                 </div>
 
@@ -60,7 +60,7 @@ export function renderAgreementModal(onAcceptCallback) {
                     </div>
                     <ul class="list-disc list-inside space-y-1.5 text-slate-300 leading-relaxed">
                         <li class="text-rose-200 font-semibold">
-                            ⚠️ <strong class="text-white">개인정보 관리 책임의 사용자 전적 귀속:</strong> 본 프로그램은 네트워크 통신이 없는 로컬 오프라인 도구에 불과하며, 프로그램에 입력되는 나이스(NEIS) 엑셀 원본 파일, 학생 인적사항, 성적 및 산출 데이터의 <strong class="text-white underline underline-offset-2">취급·보관·관리·폐기 및 유출 방지에 대한 모든 법적·행정적 책임은 전적으로 사용자(이용 교원 및 소속 학교)에게 있습니다.</strong>
+                            ⚠️ <strong class="text-white">개인정보 관리 책임의 사용자 전적 귀속:</strong> 본 프로그램은 학생 자료를 외부로 보내지 않는 사용자 PC 전용 도구이며, 프로그램에 입력되는 나이스(NEIS) 엑셀 원본 파일, 학생 인적사항, 성적 및 산출 데이터의 <strong class="text-white underline underline-offset-2">취급·보관·관리·폐기 및 유출 방지에 대한 모든 법적·행정적 책임은 전적으로 사용자(이용 교원 및 소속 학교)에게 있습니다.</strong>
                         </li>
                         <li>비밀번호 분실, 학교 공용 데이터 암호 유출, PC 보안 관리 소홀(분실, 도난, 악성코드 감염 등)로 인하여 발생하는 일체의 개인정보 사고 및 데이터 유실에 대해 개발자는 어떠한 민·형사상 책임도 지지 않습니다.</li>
                         <li>사용자는 상담 완료 후 교실·교무실 이석 시 반드시 화면 잠금(<span class="px-1.5 py-0.5 rounded bg-slate-800 text-slate-200 font-mono text-xs border border-slate-600">Win + L</span>) 및 프로그램 로그아웃을 실천해야 합니다.</li>

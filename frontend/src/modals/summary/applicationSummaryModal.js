@@ -294,7 +294,7 @@ export async function openApplicationSummaryModal() {
                     <p class="text-xs text-text-muted">* 지망 뱃지(예: 1지망: 3명)를 누르면 해당 지원자들의 점수와 상태가 팝업으로 나타납니다.</p>
                     <div class="flex flex-wrap items-center gap-2">
                         <button id="closeApplicationSummaryBottom" class="btn-secondary w-auto px-4 py-2 text-sm font-bold flex items-center gap-1.5 hover:bg-slate-700 cursor-pointer">← 닫기 (목록으로)</button>
-                        <span class="px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-950/80 text-emerald-300 border border-emerald-500/40 flex items-center gap-1.5 shadow-sm">🔒 100% 오프라인 안전 모드 (외부 유출 원천 차단)</span>
+                        <span class="px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-950/80 text-emerald-300 border border-emerald-500/40 flex items-center gap-1.5 shadow-sm">🔒 학생 자료 외부 전송 없음</span>
                         ${canApplyCutoffs ? '<button id="applyApplicationCutoffs" class="btn-secondary w-auto px-4 py-2 text-sm cursor-pointer">📈 합격 결과를 우리 학교 커트라인에 반영</button>' : ''}
                         ${closeControls}
                     </div>

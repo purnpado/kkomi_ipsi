@@ -82,7 +82,7 @@ func (a *App) AcceptAgreement() error {
 	rec := AgreementRecord{
 		Accepted:   true,
 		AcceptedAt: time.Now().Format(time.RFC3339),
-		Version:    "1.0",
+		Version:    "2.0", // 2.0: 인터넷 사용 범위(버전 확인·업데이트·피드백)와 공유 파일 내용 문구 정정(2026-11-12)
 	}
 	b, err := json.MarshalIndent(rec, "", "  ")
 	if err != nil {

@@ -1,10 +1,33 @@
 import { showModalAlert } from './dialogs.js';
 
-export const FEEDBACK_BOARD_URL = "https://gguk.link/boards/phgc";
+// 질문·피드백: GitHub 이슈 작성 양식(.github/ISSUE_TEMPLATE/feedback.yml). 공개 게시판이므로 양식 맨 위에 개인정보 주의를 둔다.
+export const FEEDBACK_BOARD_URL = "https://github.com/purnpado/kkomi_ipsi/issues/new?template=feedback.yml";
 export const GITHUB_RELEASE_URL = "https://github.com/purnpado/kkomi_ipsi/releases/latest";
 
 export function delay(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function detectOS() {
+    const ua = navigator.userAgent || '';
+    if (/Windows NT 10/.test(ua)) return 'Windows 10/11';
+    if (/Windows/.test(ua)) return 'Windows';
+    if (/Mac OS X/.test(ua)) return 'macOS';
+    return '';
+}
+
+/** 질문·피드백 양식을 연다. 프로그램 버전과 운영체제만 미리 채우고 학교·학생 정보는 넣지 않는다. */
+export async function openFeedbackPage() {
+    let version = '';
+    try {
+        version = (await window.go?.main?.App?.GetAppVersion?.()) || '';
+    } catch (_) {}
+    const params = new URLSearchParams();
+    if (version) params.set('version', version);
+    const os = detectOS();
+    if (os) params.set('os', os);
+    const query = params.toString();
+    openExternalUrlSafe(query ? `${FEEDBACK_BOARD_URL}&${query}` : FEEDBACK_BOARD_URL);
 }
 
 export function openExternalUrlSafe(url) {
@@ -108,7 +131,7 @@ ${releaseNotes}
                     <button id="openFeedbackInUpdateBtn" 
                             type="button"
                             class="text-[11px] text-slate-400 hover:text-emerald-300 inline-flex items-center gap-1 transition-colors cursor-pointer underline underline-offset-2">
-                        <span>💬</span> 질문이나 의견이 있으신가요? 꾹링크 피드백 게시판 바로가기
+                        <span>💬</span> 질문이나 의견이 있으신가요? 질문·피드백 남기기(GitHub)
                     </button>
                 </div>
             </div>
@@ -117,7 +140,7 @@ ${releaseNotes}
     document.body.appendChild(modal);
 
     document.getElementById('openFeedbackInUpdateBtn')?.addEventListener('click', () => {
-        openExternalUrlSafe(FEEDBACK_BOARD_URL);
+        openFeedbackPage();
     });
 
     document.getElementById('skipStartupUpdateBtn')?.addEventListener('click', () => {
