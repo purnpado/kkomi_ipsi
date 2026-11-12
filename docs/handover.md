@@ -37,6 +37,8 @@
 
 ## 점검 도구
 
+- 화면 자동 캡처: `zsh tools/capture/run.sh` (역할별 주요 화면 라이트·다크, 결과 `test-data/capture/latest/`). 화면을 고친 뒤 찍어서 직접 확인한다.
+
 - 가상 학생 자료: `python3 -I tools/testdata/gen_students.py` → `test-data/가상학생/`(10개 반 255명, v1·v2), 점검 `go run ./tools/testdata/verify <폴더> <유형목록>`
 - 여러 학교·여러 해 입시 시뮬레이터: `go run ./tools/simulate -years 5`(약 25분) → `test-data/시뮬레이션/보고서.md`. 2026-11-12 결과는 `docs/simulation-report-2026-11-12.md`
 - 앱 자동 검증(맥): `tools/autopilot/README.md`

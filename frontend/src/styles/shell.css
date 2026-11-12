@@ -168,3 +168,7 @@ body.shell-on #backToAdminBtn { display: none !important; }
 /* Tailwind 의 hidden 은 레이어 안에 있어 위 규칙보다 약하므로 직접 감춘다 */
 .shell-view-panel.hidden,
 .shell-search-results.hidden { display: none; }
+
+/* 오른쪽 아래 고정 문구는 화면 내용과 겹치므로 공통 틀에서는 왼쪽 메뉴 아래에 둔다 */
+body.shell-on .watermark { display: none; }
+.shell-privacy { padding: 0 12px 4px; font-size: 11px; line-height: 1.4; color: var(--shell-muted); }

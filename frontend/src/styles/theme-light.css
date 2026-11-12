@@ -103,3 +103,10 @@ html[data-theme="light"] .shell-role-chip { color: #6d5cf0; }
 html[data-theme="light"] .shell-nav-item,
 html[data-theme="light"] .shell-btn,
 html[data-theme="light"] .shell-search-field { border-radius: 12px; }
+
+/* 그래프(SVG)에 직접 적힌 다크용 색을 밝은 바탕에 맞게 바꾼다(추세 그래프 등) */
+html[data-theme="light"] svg [stroke="#334155"] { stroke: #e7e4f3; }
+html[data-theme="light"] svg [stroke="#475569"] { stroke: #cfcae6; }
+html[data-theme="light"] svg [fill="#cbd5e1"] { fill: #4b5563; }
+html[data-theme="light"] svg [fill="#94a3b8"] { fill: #6b7280; }
+html[data-theme="light"] svg [fill="#f9a8d4"] { fill: #db2777; }

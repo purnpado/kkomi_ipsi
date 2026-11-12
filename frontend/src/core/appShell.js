@@ -127,6 +127,7 @@ function renderNav() {
         <div class="shell-nav-foot">
             <button type="button" id="shellGuideBtn" class="shell-nav-item">${icon('<path d="M4 5a2 2 0 012-2h13v16H6a2 2 0 00-2 2z"/><path d="M4 19V5"/>', 16)}<span class="shell-nav-label">사용 설명서</span></button>
             <button type="button" id="shellFeedbackBtn" class="shell-nav-item">${icon('<path d="M4 5h16v11H8l-4 4z"/>', 16)}<span class="shell-nav-label">질문·피드백 (GitHub)</span></button>
+            <span class="shell-privacy">학생 자료 외부 전송 없음 · Made by 푸른파도소리</span>
             <span class="shell-version">${shellInfo.version ? `v${escapeHtml(shellInfo.version)}` : ''}</span>
         </div>
     `;

@@ -1,0 +1,9 @@
+{
+  "name": "kkomi-capture",
+  "private": true,
+  "type": "module",
+  "description": "꼬미입시 화면 자동 캡처(개발용, 가상 자료만)",
+  "devDependencies": {
+    "puppeteer-core": "24.10.0"
+  }
+}

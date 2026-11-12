@@ -34,9 +34,9 @@ function needTable(students) {
             <div class="overflow-x-auto">
                 <table class="w-full text-sm text-left">
                     <thead><tr class="text-xs text-slate-400">
-                        <th class="py-2 px-2 font-semibold">번호</th><th class="py-2 px-2 font-semibold">이름</th>
-                        <th class="py-2 px-2 font-semibold">희망 학교</th><th class="py-2 px-2 font-semibold">판정</th>
-                        <th class="py-2 px-2 font-semibold">살펴볼 점</th><th class="py-2 px-2 font-semibold">내 마지막 상담</th>
+                        <th class="py-2 px-2 font-semibold whitespace-nowrap">번호</th><th class="py-2 px-2 font-semibold whitespace-nowrap">이름</th>
+                        <th class="py-2 px-2 font-semibold whitespace-nowrap">희망 학교</th><th class="py-2 px-2 font-semibold whitespace-nowrap">판정</th>
+                        <th class="py-2 px-2 font-semibold whitespace-nowrap">살펴볼 점</th><th class="py-2 px-2 font-semibold whitespace-nowrap">내 마지막 상담</th>
                     </tr></thead>
                     <tbody>${body}</tbody>
                 </table>
