@@ -1,8 +1,12 @@
 /* 꼬미입시 앱 스타일 진입점. 실제 규칙은 styles/ 아래 파일에 책임별로 나뉘어 있다.
-   뒤에 오는 파일이 우선하므로 순서를 바꾸지 않는다(화면 → 모달 → 인쇄). */
+   뒤에 오는 파일이 우선하므로 순서를 바꾸지 않는다(글꼴 → 화면 → 모달 → 공통 틀 → 라이트 모드 → 인쇄). */
+@import "./styles/fonts.css";
 @import "./styles/base.css";
 @import "./styles/layout.css";
 @import "./styles/views.css";
 @import "./styles/modals.css";
+@import "./styles/shell.css";
+@import "./styles/theme-light-colors.css";
+@import "./styles/theme-light.css";
 @import "./styles/print.css";
 @import "./styles/print-reports.css";

@@ -1,0 +1,170 @@
+/* 꼬미입시 공통 틀: 위쪽 막대·왼쪽 메뉴 (로그인 뒤 화면, body.shell-on) */
+
+:root {
+    --shell-bg: #0b1220;
+    --shell-panel: #111a2e;
+    --shell-sub: #0e1628;
+    --shell-line: #22304d;
+    --shell-line2: #2c3b5c;
+    --shell-text: #e2e8f0;
+    --shell-strong: #ffffff;
+    --shell-muted: #9fb0cc;
+    --shell-sel: #1e2a4a;
+    --shell-sel-line: #3b4f7d;
+    --shell-top-h: 64px;
+}
+html[data-theme="light"] {
+    --shell-bg: #f5f7fc;
+    --shell-panel: #ffffff;
+    --shell-sub: #f3f5fb;
+    --shell-line: #e6eaf3;
+    --shell-line2: #d8dfec;
+    --shell-text: #1f2937;
+    --shell-strong: #111827;
+    --shell-muted: #6b7280;
+    --shell-sel: #eef0ff;
+    --shell-sel-line: #c7cdfb;
+}
+
+.sr-only {
+    position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+    overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+}
+
+#shellTop[hidden], #shellNav[hidden] { display: none !important; }
+
+body.shell-on { background: var(--shell-bg); }
+body.shell-on .bg-glow,
+body.shell-on #globalFeedbackContainer { display: none; }
+
+/* 위쪽 막대 */
+#shellTop {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 45;
+    min-height: var(--shell-top-h);
+    display: flex; align-items: center; flex-wrap: wrap; gap: 12px;
+    padding: 10px 20px;
+    background: var(--shell-panel);
+    border-bottom: 1px solid var(--shell-line);
+    box-shadow: 0 1px 8px rgba(79, 70, 229, 0.06);
+    color: var(--shell-text);
+}
+.shell-brand { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.shell-logo { width: 36px; height: 36px; border-radius: 10px; object-fit: cover; flex: 0 0 auto; }
+.shell-brand-text { display: flex; flex-direction: column; min-width: 0; }
+.shell-brand-text strong { font-size: 16px; font-weight: 800; color: var(--shell-strong); line-height: 1.2; }
+.shell-brand-text span { font-size: 12px; color: var(--shell-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.shell-role-chip {
+    font-size: 12px; font-weight: 700; padding: 3px 10px; border-radius: 999px;
+    background: var(--shell-sel); color: #4f46e5; border: 1px solid var(--shell-sel-line);
+}
+html[data-theme="dark"] .shell-role-chip { color: #c7d2fe; }
+
+.shell-search { position: relative; flex: 1 1 220px; max-width: 360px; margin-left: auto; }
+.shell-search-field {
+    display: flex; align-items: center; gap: 8px; height: 38px; padding: 0 12px;
+    border-radius: 10px; background: var(--shell-sub); border: 1px solid var(--shell-line2);
+    color: var(--shell-muted);
+}
+.shell-search-field:focus-within { border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15); }
+.shell-search-field input {
+    flex: 1; min-width: 0; background: transparent; border: 0; outline: none;
+    color: var(--shell-text); font-size: 13px; font-family: inherit;
+}
+.shell-search-results {
+    position: absolute; top: calc(100% + 6px); left: 0; right: 0; z-index: 60;
+    max-height: 320px; overflow-y: auto; padding: 6px;
+    background: var(--shell-panel); border: 1px solid var(--shell-line2); border-radius: 12px;
+    box-shadow: 0 12px 30px rgba(15, 23, 42, 0.18);
+}
+.shell-search-item {
+    width: 100%; display: flex; justify-content: space-between; align-items: center; gap: 8px;
+    padding: 8px 10px; border-radius: 8px; border: 0; background: transparent;
+    color: var(--shell-text); font-size: 13px; cursor: pointer; text-align: left; font-family: inherit;
+}
+.shell-search-item:hover, .shell-search-item.is-focus { background: var(--shell-sel); }
+.shell-search-name { font-weight: 700; color: var(--shell-strong); }
+.shell-search-meta { font-size: 12px; color: var(--shell-muted); }
+.shell-search-empty { padding: 10px; font-size: 13px; color: var(--shell-muted); }
+
+.shell-actions { display: flex; align-items: center; gap: 8px; }
+.shell-btn {
+    display: inline-flex; align-items: center; gap: 6px; height: 38px; padding: 0 12px;
+    border-radius: 10px; border: 1px solid var(--shell-line2); background: var(--shell-sub);
+    color: var(--shell-text); font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit;
+}
+.shell-btn:hover { border-color: #818cf8; }
+.shell-btn-danger { color: #be123c; border-color: #fecdd3; background: #fff1f2; }
+html[data-theme="dark"] .shell-btn-danger { color: #fecdd3; border-color: #5b2333; background: #2a1420; }
+
+.shell-view-menu { position: relative; }
+.shell-view-panel {
+    position: absolute; top: calc(100% + 6px); right: 0; z-index: 60; min-width: 280px;
+    padding: 12px; display: flex; flex-direction: column; gap: 10px;
+    background: var(--shell-panel); border: 1px solid var(--shell-line2); border-radius: 12px;
+    box-shadow: 0 12px 30px rgba(15, 23, 42, 0.18);
+}
+.shell-view-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; font-size: 12px; color: var(--shell-muted); }
+.shell-seg { display: inline-flex; gap: 4px; padding: 3px; border-radius: 10px; background: var(--shell-sub); border: 1px solid var(--shell-line2); }
+.shell-seg-btn {
+    height: 28px; padding: 0 10px; border-radius: 8px; border: 0; background: transparent;
+    color: var(--shell-text); font-size: 12px; font-weight: 700; cursor: pointer; font-family: inherit;
+}
+.shell-seg-btn.is-on { background: #4f46e5; color: #ffffff; }
+
+/* 왼쪽 메뉴 */
+#shellNav {
+    position: fixed; top: var(--shell-top-h); left: 0; bottom: 0; z-index: 44; width: 232px;
+    display: flex; flex-direction: column; justify-content: space-between; gap: 12px;
+    padding: 14px 10px; overflow-y: auto;
+    background: var(--shell-panel); border-right: 1px solid var(--shell-line);
+    color: var(--shell-text);
+}
+.shell-nav-groups { display: flex; flex-direction: column; gap: 12px; }
+.shell-nav-group { display: flex; flex-direction: column; gap: 2px; }
+.shell-nav-title {
+    display: flex; align-items: center; gap: 6px; padding: 4px 10px;
+    font-size: 12px; font-weight: 700; color: var(--shell-muted);
+}
+.shell-nav-item {
+    position: relative; width: 100%; display: flex; flex-direction: column; align-items: flex-start; gap: 1px;
+    padding: 8px 12px 8px 32px; border-radius: 10px; border: 1px solid transparent; background: transparent;
+    color: var(--shell-text); font-size: 14px; cursor: pointer; text-align: left; font-family: inherit;
+}
+.shell-nav-foot .shell-nav-item { flex-direction: row; align-items: center; gap: 8px; padding-left: 12px; font-size: 13px; }
+.shell-nav-item:hover { background: var(--shell-sub); }
+.shell-nav-item.is-active { background: var(--shell-sel); border-color: var(--shell-sel-line); color: var(--shell-strong); }
+.shell-nav-label { font-weight: 600; }
+.shell-nav-hint { font-size: 11px; color: var(--shell-muted); }
+.shell-nav-badge {
+    position: absolute; right: 8px; top: 9px; font-size: 10px; padding: 0 6px; border-radius: 999px;
+    color: var(--shell-muted); border: 1px solid var(--shell-line2);
+}
+.shell-nav-foot { display: flex; flex-direction: column; gap: 2px; padding-top: 10px; border-top: 1px solid var(--shell-line); }
+.shell-version { padding: 6px 12px; font-size: 11px; color: var(--shell-muted); }
+
+/* 화면 내용 자리: 위쪽 막대와 왼쪽 메뉴만큼 비운다 */
+body.shell-on #app.wide-layout {
+    padding: calc(var(--shell-top-h) + 1.25rem) 1.5rem 1.5rem calc(232px + 1.5rem) !important;
+}
+/* 공통 틀에 같은 기능이 있으므로 각 화면 머리글의 중복 버튼은 감춘다 */
+body.shell-on #lockScreenAdminBtn,
+body.shell-on #openAdminGuideBtn,
+body.shell-on #goToTeacherBtn,
+body.shell-on #lockScreenTeacherBtn,
+body.shell-on #openTeacherGuideBtn,
+body.shell-on #backBtn,
+body.shell-on #backToAdminBtn { display: none !important; }
+
+@media (max-width: 900px) {
+    #shellNav { width: 200px; }
+    body.shell-on #app.wide-layout { padding-left: calc(200px + 1rem) !important; }
+}
+
+@media print {
+    #shellTop, #shellNav { display: none !important; }
+    body.shell-on #app.wide-layout { padding: 0 !important; }
+}
+
+/* Tailwind 의 hidden 은 레이어 안에 있어 위 규칙보다 약하므로 직접 감춘다 */
+.shell-view-panel.hidden,
+.shell-search-results.hidden { display: none; }

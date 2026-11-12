@@ -2,6 +2,7 @@
 // 앱 부트스트랩과 최상위 이벤트 라우팅만 담당한다. 화면·모달 모듈은 서로를 직접 호출하지 않고
 // core/navigation.js 의 발행 함수(navigate, openModal 등)로 요청하며, 실제 연결은 이 파일의 구독자가 수행한다.
 import './core/wailsBridge.js';
+import './core/preferences.js';
 import './style.css';
 import './app.css';
 import { CheckSetupComplete } from './core/backend.js';
@@ -33,6 +34,7 @@ import { openSharedAdmissionModal } from './modals/sharedAdmissionModal.js';
 import { openAdmissionAnalysisModal } from './modals/analysis/admissionAnalysisModal.js';
 import { openJudgmentSettingsModal } from './modals/judgmentSettingsModal.js';
 import { loadAdmissionEvidence } from './core/admissionEvidence.js';
+import { updateShell } from './core/appShell.js';
 
 // 화면 잠금 및 전역 ESC 핸들러 초기화
 ScreenLockManager.init();
@@ -94,11 +96,13 @@ eventBus.on(EVENTS.NAVIGATE, (detail) => {
         currentScreen: detail.screen,
         schoolName: typeof detail.schoolName === 'string' ? detail.schoolName : state.schoolName
     });
+    // 공통 틀(위쪽 막대·왼쪽 메뉴)은 화면을 그린 뒤 맞춘다. 로그인 뒤 화면에서만 보인다.
+    const render = () => Promise.resolve(route(detail)).finally(() => updateShell(detail));
     // 로그인 뒤 첫 화면은 학교 판정 기준을 읽은 다음 그린다(기본값으로 잠깐 판정되지 않도록).
     if (state.currentUser && !state.judgmentSettings) {
-        return loadJudgmentBasis().then(() => route(detail));
+        return loadJudgmentBasis().then(render);
     }
-    return route(detail);
+    return render();
 });
 
 eventBus.on(EVENTS.OPEN_MODAL, (detail) => {

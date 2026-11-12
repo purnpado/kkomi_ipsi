@@ -1,0 +1,29 @@
+/* 꼬미입시 글꼴: Pretendard·SUIT (둘 다 SIL OFL 1.1, 프로그램 안에 포함되어 인터넷 없이 쓴다)
+   html[data-font] 값은 core/preferences.js 가 정한다. */
+@font-face {
+    font-family: "Pretendard Variable";
+    font-weight: 45 920;
+    font-style: normal;
+    font-display: swap;
+    src: url("../../node_modules/pretendard/dist/web/variable/woff2/PretendardVariable.woff2") format("woff2-variations");
+}
+@font-face {
+    font-family: "SUIT Variable";
+    font-weight: 100 900;
+    font-style: normal;
+    font-display: swap;
+    src: url("../../node_modules/@sun-typeface/suit/fonts/variable/woff2/SUIT-Variable.woff2") format("woff2-variations");
+}
+
+:root {
+    --app-font: "Pretendard Variable", "Noto Sans KR", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif;
+}
+html[data-font="suit"] {
+    --app-font: "SUIT Variable", "Pretendard Variable", "Noto Sans KR", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif;
+}
+html, body, button, input, select, textarea {
+    font-family: var(--app-font);
+}
+body {
+    letter-spacing: -0.01em;
+}
