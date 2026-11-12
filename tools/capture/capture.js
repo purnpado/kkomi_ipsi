@@ -34,7 +34,8 @@ async function each(page, name, fn) {
 }
 
 async function openStudentBySearch(page) {
-    await page.click('#shellSearchInput');
+    await page.click('#shellSearchInput', { clickCount: 3 });
+    await page.keyboard.press('Backspace');
     await page.keyboard.type('1-1');
     await wait(2500);
     await page.keyboard.press('Enter');
@@ -54,18 +55,12 @@ async function masterScenario(page, accounts) {
     });
     await each(page, '05-학년부장-커트라인', () => clickMenu(page, 'cutoff'));
     await each(page, '06-학년부장-계정', () => clickMenu(page, 'users'));
-    for (const theme of THEMES) {
-        await setLook(page, theme);
-        try {
-            await clickMenu(page, 'dash');
-            await openStudentBySearch(page);
-            shots.push(await shot(page, OUT, `07-학년부장-상담창-${theme}`, { fullPage: false }));
-            await closeModals(page);
-        } catch (err) {
-            problems.push(`상담 창-${theme}: ${err.message}`);
-            await closeModals(page);
-        }
-    }
+    await each(page, '07-학년부장-상담화면', async () => {
+        await clickMenu(page, 'dash');
+        await openStudentBySearch(page);
+        const docked = await page.$('#panelScreenMount #studentDetailModal');
+        if (!docked) throw new Error('상담 화면이 열리지 않았습니다');
+    });
     // 메뉴에서 화면으로 여는 기능(원래 창)
     const panels = [['08', '매트릭스', 'matrix'], ['09', '입시분석', 'analysis'], ['10', '지원현황', 'app-summary'], ['10b', '원서대장', 'register'], ['10c', '관내공유', 'shared']];
     for (const [no, label, item] of panels) {

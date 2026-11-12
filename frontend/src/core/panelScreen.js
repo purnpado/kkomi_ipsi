@@ -8,6 +8,7 @@ import { state } from './store.js';
 import { navigate } from './navigation.js';
 
 let active = null; // { elementId, screen, observer, onKey }
+let backRoute = null; // 화면을 닫으면 돌아갈 곳 { screen, classNum }
 
 function release() {
     if (!active) return;
@@ -65,7 +66,8 @@ export async function renderPanelScreen({ screen, elementId, open, title }) {
             return;
         }
         release();
-        navigate('home', { schoolName: state.schoolName });
+        const back = backRoute && backRoute.screen !== screen ? backRoute : { screen: 'home' };
+        navigate(back.screen, { schoolName: state.schoolName, classNum: back.classNum ?? null });
     });
     observer.observe(mount, { childList: true });
 
@@ -79,7 +81,17 @@ export async function renderPanelScreen({ screen, elementId, open, title }) {
     active = { elementId, screen, observer, onKey };
 }
 
-/** 다른 화면으로 옮길 때 정리한다(main.js 라우터가 부른다). */
-export function leavePanelScreen(nextScreen) {
+/**
+ * 다른 화면으로 옮길 때 정리하고, 창-화면을 닫으면 돌아갈 곳을 기억한다(main.js 라우터가 부른다).
+ * @param {string} nextScreen 옮겨 갈 화면
+ * @param {Set<string>} panelScreens 창-화면 이름들
+ */
+export function leavePanelScreen(nextScreen, panelScreens) {
     if (active && active.screen !== nextScreen) release();
+    const current = state.currentScreen;
+    if (panelScreens.has(nextScreen) && current && current !== nextScreen && !panelScreens.has(current)) {
+        backRoute = { screen: current, classNum: current === 'teacher' ? state.activeClassNum : null };
+    } else if (!panelScreens.has(nextScreen)) {
+        backRoute = null;
+    }
 }

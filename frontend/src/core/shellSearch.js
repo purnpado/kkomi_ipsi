@@ -1,7 +1,7 @@
 // ===== 위쪽 막대 학생 검색 =====
 // 이름·번호(예: 3, 2반 7번 → "2-7")로 찾아 학생 상담 창을 연다.
 // 담임은 우리 반만, 학년부장·진로부장은 전 학급을 찾는다. 명단은 처음 검색할 때 한 번 읽어 둔다.
-import { openModal } from './navigation.js';
+import { navigate } from './navigation.js';
 import { state } from './store.js';
 import { escapeAttr, escapeHtml } from './utils.js';
 
@@ -72,7 +72,11 @@ function renderResults(box, list, query) {
 
 function openStudent(button) {
     if (!button) return;
-    openModal('student', {
+    // 상담 화면을 연 뒤에는 검색칸을 비운다(다음 검색을 바로 할 수 있게).
+    const input = document.getElementById('shellSearchInput');
+    if (input) input.value = '';
+    navigate('counsel', {
+        schoolName: state.schoolName,
         classNum: parseInt(button.dataset.class, 10),
         studentNum: button.dataset.num,
         name: button.dataset.name

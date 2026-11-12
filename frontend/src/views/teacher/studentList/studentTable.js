@@ -1,7 +1,8 @@
 import { escapeHtml, escapeAttr } from '../../../core/utils.js';
 import { showModalAlert, showModalConfirm } from '../../../core/dialogs.js';
 import { renderApplicationSummary } from '../simulation/prediction.js';
-import { notifyClassUpdated, openModal } from '../../../core/navigation.js';
+import { navigate, notifyClassUpdated, openModal } from '../../../core/navigation.js';
+import { state } from '../../../core/store.js';
 
 // 학급 명렬표: 검색·정렬이 반영된 표 렌더러 정의
 export function defineStudentTableRenderer(ctx) {
@@ -229,7 +230,8 @@ export function defineStudentTableEvents(ctx) {
         document.querySelectorAll('.btn-student-counsel').forEach(el => {
             el.addEventListener('click', (e) => {
                 const target = e.currentTarget;
-                openModal('student', { classNum: parseInt(target.dataset.class), studentNum: target.dataset.num, name: target.dataset.name });
+                // 명렬표의 [진학 상담]은 상담 화면으로 연다(닫으면 이 학급 명렬표로 돌아온다).
+                navigate('counsel', { schoolName: state.schoolName, classNum: parseInt(target.dataset.class), studentNum: target.dataset.num, name: target.dataset.name });
             });
         });
 

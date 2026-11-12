@@ -83,6 +83,6 @@ export function buildShellMenu(user) {
 }
 
 /** 공통 틀을 보여 줄 화면(로그인 뒤 화면)인지 */
-export const SHELL_SCREENS = new Set(['admin', 'home', 'teacher', 'users', 'cutoff', 'analysis', 'matrix', 'school-summary', 'class-summary', 'register', 'shared']);
+export const SHELL_SCREENS = new Set(['admin', 'home', 'teacher', 'users', 'cutoff', 'analysis', 'matrix', 'school-summary', 'class-summary', 'register', 'shared', 'counsel']);
 
 export const ROLE_LABELS = { master: '학년부장', homeroom: '담임', viewer: '진로부장' };

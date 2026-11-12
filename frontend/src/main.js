@@ -71,8 +71,12 @@ const SCREEN_ROUTES = {
     'school-summary': () => renderPanelScreen({ screen: 'school-summary', elementId: 'applicationSummaryModal', open: openApplicationSummaryModal, title: '우리 학교 지원현황' }),
     'class-summary': (d) => renderPanelScreen({ screen: 'class-summary', elementId: 'classApplicationSummaryModal', open: () => openClassApplicationSummaryModal(d.classNum), title: '우리 반 지원현황' }),
     'register': () => renderPanelScreen({ screen: 'register', elementId: 'applicationRegisterModal', open: openApplicationRegisterModal, title: '원서대장' }),
-    'shared': () => renderPanelScreen({ screen: 'shared', elementId: 'sharedAdmissionModal', open: openSharedAdmissionModal, title: '관내 공유 결과' })
+    'shared': () => renderPanelScreen({ screen: 'shared', elementId: 'sharedAdmissionModal', open: openSharedAdmissionModal, title: '관내 공유 결과' }),
+    'counsel': (d) => renderPanelScreen({ screen: 'counsel', elementId: 'studentDetailModal', open: () => openStudentModal(d.classNum, d.studentNum, d.name), title: '학생 상담' })
 };
+
+// 창을 화면 안에 띄우는 화면들(닫으면 들어오기 전 화면으로 돌아간다)
+const PANEL_SCREENS = new Set(['analysis', 'matrix', 'school-summary', 'class-summary', 'register', 'shared', 'counsel']);
 
 // ----- 모달 라우팅 표: modal:open 이벤트의 modal 값 → 모달 열기 함수 -----
 const MODAL_ROUTES = {
@@ -102,7 +106,7 @@ eventBus.on(EVENTS.NAVIGATE, (detail) => {
         console.warn('[라우터] 알 수 없는 화면:', detail.screen);
         return undefined;
     }
-    leavePanelScreen(detail.screen);
+    leavePanelScreen(detail.screen, PANEL_SCREENS);
     patchState({
         currentScreen: detail.screen,
         schoolName: typeof detail.schoolName === 'string' ? detail.schoolName : state.schoolName

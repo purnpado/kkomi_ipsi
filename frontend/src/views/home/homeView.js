@@ -52,7 +52,8 @@ function bind(root, schoolName) {
         btn.addEventListener('click', () => runAction(btn.dataset.homeAction, schoolName));
     });
     root.querySelectorAll('.home-student-row').forEach((row) => {
-        row.addEventListener('click', () => openModal('student', {
+        row.addEventListener('click', () => navigate('counsel', {
+            schoolName,
             classNum: parseInt(row.dataset.class, 10),
             studentNum: row.dataset.num,
             name: row.dataset.name
