@@ -9,7 +9,7 @@
 - 꼬미입시 원본 저장소는 Gitea `purnpadosori/PHGC-OFFLINE`입니다.
 - GitHub `purnpado/kkomi_ipsi`(옛 이름 `purnpado/PHGC`, 옛 주소는 자동 연결됨)는 원본을 보관하는 백업 미러이자 공개 릴리즈 저장소입니다. GitHub에 `PHGC`라는 새 저장소를 만들면 옛 주소 연결이 끊기므로 만들지 않습니다.
 - `proxmox`(`purnpadosori/proxmox`)는 NAS·Proxmox 관제용 별도 저장소이며 꼬미입시 소스가 아닙니다.
-- 현재 안정 릴리즈는 `v1.6.6`(2026-11-12)입니다. 현재 상태·다음 작업은 `docs/handover.md`를 먼저 봅니다.
+- 현재 안정 릴리즈는 `v1.7.0`(2026-11-13)입니다. 현재 상태·다음 작업은 `docs/handover.md`를 먼저 봅니다.
 
 ## 작업 전 필수 확인
 

@@ -99,7 +99,9 @@ function scoreText(ctx, app) {
     if (!(score > 0)) return '-';
     const formatted = score.toFixed(2);
     // 만점은 산출 규칙(요강)의 1차 전형 만점을 쓰고, 산출 결과가 없을 때만 학교별 기본값을 쓴다.
-    const maxVal = Number(result?.totalMax) > 0 ? String(Number(result.totalMax)) : ctx.getSchoolTotalMaxString(app.schoolName, app.category, app.track);
+    // 후기 일반고 내신은 교과 160 + 출결 16 + 봉사 8 + 행동발달 8 + 창의적 체험활동 8 = 200점 만점.
+    const maxVal = app.category === 'general' ? '200'
+        : Number(result?.totalMax) > 0 ? String(Number(result.totalMax)) : ctx.getSchoolTotalMaxString(app.schoolName, app.category, app.track);
     if (maxVal === '%') return `${formatted}%`;
     return maxVal ? `${formatted}/${maxVal}` : formatted;
 }
