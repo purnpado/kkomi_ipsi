@@ -35,6 +35,13 @@ async function prepareRegisterModal(ctx) {
         console.error('원서대장 데이터 로드 실패:', e);
     }
 
+    // 원서에 점수가 저장되지 않은 경우(입력 전 기록 등) 학생의 학교별 1차 전형 산출 점수·만점으로 채운다.
+    ctx.studentResults = new Map();
+    const classesInRecords = [...new Set(ctx.records.map(r => r.classNum).filter(Boolean))];
+    await Promise.all(classesInRecords.map(classNum => window.go.main.App.GetClassFullGrades(classNum)
+        .then(list => (list || []).forEach(s => ctx.studentResults.set(`${classNum}|${s.studentNum}|${s.name}`, s.schoolResults || [])))
+        .catch(() => {})));
+
     ctx.isHomeroom = state.currentUser && state.currentUser.Role === 'homeroom';
     ctx.homeroomClass = ctx.isHomeroom ? state.currentUser.ClassNum : null;
 

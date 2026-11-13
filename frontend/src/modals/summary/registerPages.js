@@ -96,7 +96,7 @@ export function buildRegisterPages(ctx, reg) {
                         <td class="border border-black ${scoreClass} whitespace-nowrap" style="${cellPaddingStyle}">${escapeHtml(entry.scoreText)}</td>
                         <td class="border border-black font-semibold text-left pl-2.5" style="${cellPaddingStyle}">${escapeHtml(entry.schoolText)}</td>
                         <td class="border border-black text-left pl-2.5" style="${cellPaddingStyle} min-width: 190px;">${deptDisplayHTML}</td>
-                        <td class="border border-black" style="${cellPaddingStyle}"><span class="${resultClass}">${escapeHtml(entry.resultText)}</span></td>
+                        <td class="border border-black" style="${cellPaddingStyle}"><span class="${resultClass} whitespace-nowrap">${escapeHtml(entry.resultText).replace('(', '<br>(')}</span></td>
                         ${approvalCellsHTML}
                         <td class="border border-black text-left pl-2 text-[10.5px] text-slate-700" style="${cellPaddingStyle}">${escapeHtml(entry.noteText)}</td>
                     </tr>
@@ -141,14 +141,14 @@ export function buildRegisterPages(ctx, reg) {
                                         <th rowspan="2" class="border border-black w-10" style="${tableHeaderPadding}">연번</th>
                                         <th rowspan="2" class="border border-black w-16" style="${tableHeaderPadding}">학번</th>
                                         <th rowspan="2" class="border border-black w-20" style="${tableHeaderPadding}">이름</th>
-                                        <th rowspan="2" class="border border-black w-28" style="${tableHeaderPadding}">내신총점<br><span class="text-[10px] font-normal">(취득점/만점)</span></th>
+                                        <th rowspan="2" class="border border-black w-28" style="${tableHeaderPadding}">내신·1차 점수<br><span class="text-[10px] font-normal">(취득점/만점)</span></th>
                                         <th rowspan="2" class="border border-black w-48" style="${tableHeaderPadding}">지원고등학교</th>
                                         <th rowspan="2" class="border border-black text-center" style="${tableHeaderPadding} min-width: 190px;">
                                             지원학과(전기: 1지망·배정학과)<br>
                                              또는 배정학교(후기고)
                                         </th>
-                                        <th rowspan="2" class="border border-black p-2 w-16">
-                                            합격여부
+                                        <th rowspan="2" class="border border-black p-2 w-16 whitespace-nowrap">
+                                            합격<br>여부
                                         </th>
                                         <th colspan="${Math.max(1, ctx.activeApprovals.length)}" class="border border-black p-1 text-center font-bold">
                                             결재

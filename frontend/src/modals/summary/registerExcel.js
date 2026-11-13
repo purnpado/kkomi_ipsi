@@ -75,7 +75,7 @@ export function bindRegisterExcelExport(ctx, reg) {
                         <th style="width:45px;">연번</th>
                         <th style="width:80px;">학번</th>
                         <th style="width:85px;">성명</th>
-                        <th style="width:90px;">산출점수</th>
+                        <th style="width:110px;">내신·1차 점수(취득점/만점)</th>
                         <th style="width:130px;">지원학교</th>
                         <th style="width:160px;">지원(배정)학과</th>
                         <th style="width:70px;">합격여부</th>

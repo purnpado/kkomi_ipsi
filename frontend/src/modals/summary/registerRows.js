@@ -1,6 +1,7 @@
 // 원서대장: 학급의 지원 기록을 대장 행으로 변환한다(화면 출력과 엑셀 내보내기가 함께 쓴다).
 // 원서대장은 누적 기록이므로 최종 진학 학교 하나만 남기지 않고, 학생이 지원한 학교마다
 // 한 줄씩(불합격 학교·합격 학교를 각각) 전형 진행 순서대로 기입한다.
+import { isSameTrack, normalizeSchoolName } from '../../core/utils.js';
 
 const ACCEPTED = ['합격', '최종 진학', '최종진학'];
 
@@ -81,12 +82,24 @@ function resultText(app) {
     return app.status || '-';
 }
 
+/** 학생의 그 학교·전형 1차(서류) 산출 결과(점수·만점). 후기 일반고는 해당 없음. */
+function firstStageResult(ctx, app) {
+    if (app.category === 'general') return null;
+    const results = ctx.studentResults?.get(`${app.classNum}|${app.studentNum}|${app.studentName}`) || [];
+    const school = normalizeSchoolName(app.schoolName);
+    return results.find(r => normalizeSchoolName(r.schoolName) === school && isSameTrack(r.trackName, app.track)) || null;
+}
+
 function scoreText(ctx, app) {
     // 자사고·외고·과학고·예술고 등 별도 전형 학교는 점수를 기록하지 않는다.
     if (['self_foreign', 'other', 'none'].includes(app.category)) return app.category === 'none' ? '-' : '별도전형';
-    if (!(app.score > 0)) return '-';
-    const formatted = app.score.toFixed(2);
-    const maxVal = ctx.getSchoolTotalMaxString(app.schoolName, app.category, app.track);
+    // 원서에 저장된 점수(지원할 때의 확정값)를 먼저 쓰고, 없으면 지금 산출한 1차 전형 점수로 채운다.
+    const result = firstStageResult(ctx, app);
+    const score = app.score > 0 ? app.score : Number(result?.totalScore) || 0;
+    if (!(score > 0)) return '-';
+    const formatted = score.toFixed(2);
+    // 만점은 산출 규칙(요강)의 1차 전형 만점을 쓰고, 산출 결과가 없을 때만 학교별 기본값을 쓴다.
+    const maxVal = Number(result?.totalMax) > 0 ? String(Number(result.totalMax)) : ctx.getSchoolTotalMaxString(app.schoolName, app.category, app.track);
     if (maxVal === '%') return `${formatted}%`;
     return maxVal ? `${formatted}/${maxVal}` : formatted;
 }
