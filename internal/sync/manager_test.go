@@ -21,3 +21,12 @@ func TestPickDownloadAssetPrefersKkomiNames(t *testing.T) {
 		}
 	}
 }
+
+func TestReleaseVersionComparison(t *testing.T) {
+	if !IsNewerVersion("v1.7.01", "1.7.0") {
+		t.Fatal("v1.7.01은 v1.7.0보다 새 버전이어야 합니다")
+	}
+	if IsNewerVersion("1.7.01", "1.7.1") {
+		t.Fatal("1.7.01과 1.7.1은 같은 버전입니다")
+	}
+}

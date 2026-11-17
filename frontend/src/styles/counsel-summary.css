@@ -1,0 +1,50 @@
+/* 상담 화면의 요약 지표와 일반고 산출 근거 */
+.counsel-overview { display: grid; gap: 14px; }
+.counsel-metrics { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.counsel-metric, .counsel-general { color: var(--color-slate-100); background: var(--color-slate-900); border: 1px solid var(--color-slate-700); border-radius: 18px; }
+.counsel-metric { padding: 16px 18px; min-width: 0; }
+.counsel-metric > span, .counsel-total > span, .counsel-percentile > span:first-child { display: block; color: var(--color-slate-400); font-size: 13px; font-weight: 700; }
+.counsel-metric > strong { display: block; margin-top: 8px; font-size: 25px; line-height: 1.2; font-weight: 800; font-variant-numeric: tabular-nums; }
+.counsel-metric small, .counsel-total small, .counsel-percentile small { color: var(--color-slate-400); font-size: 13px; font-weight: 500; }
+.counsel-metric p, .counsel-total p, .counsel-percentile p, .counsel-summary-note { color: var(--color-slate-400); font-size: 12px; line-height: 1.6; margin: 6px 0 0; }
+.counsel-general { padding: 20px; background: var(--color-slate-950); }
+.counsel-general-heading { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; }
+.counsel-eyebrow { color: var(--color-indigo-300); font-size: 11px; font-weight: 800; letter-spacing: .02em; }
+.counsel-general-heading h3 { margin: 2px 0 0; font-size: 17px; font-weight: 800; }
+.counsel-status { padding: 4px 10px; border: 1px solid var(--color-indigo-500); border-radius: 999px; color: var(--color-indigo-300); font-size: 12px; font-weight: 700; }
+.counsel-general-main { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 24px; margin-top: 18px; }
+.counsel-total > strong, .counsel-percentile > strong { display: block; margin-top: 5px; font-size: clamp(23px, 3vw, 30px); line-height: 1.25; font-weight: 800; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.counsel-range { font-weight: 600; }
+.counsel-percentile { border-inline-start: 1px solid var(--color-slate-700); padding-inline-start: 24px; min-width: 0; }
+.counsel-judgment { display: inline-block; margin-top: 8px; padding: 5px 9px; border-radius: 8px; font-size: 12px; font-weight: 700; }
+.counsel-judgment--safe { background: var(--color-emerald-950); color: var(--color-emerald-300); }
+.counsel-judgment--proper { background: var(--color-amber-950); color: var(--color-amber-300); }
+.counsel-judgment--challenge { background: var(--color-rose-950); color: var(--color-rose-300); }
+.counsel-judgment--unknown { background: var(--color-slate-800); color: var(--color-slate-300); }
+.counsel-score-parts { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; margin-top: 18px; }
+.counsel-score-part { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px; padding: 9px 10px; border-radius: 9px; background: var(--color-slate-800); font-size: 12px; }
+.counsel-score-part span { color: var(--color-slate-400); }
+.counsel-score-part strong { color: var(--color-slate-100); font-variant-numeric: tabular-nums; }
+.counsel-city { margin-top: 14px; color: var(--color-slate-300); font-size: 12px; line-height: 1.6; }
+.counsel-details { margin-top: 14px; border-top: 1px solid var(--color-slate-700); }
+.counsel-details summary { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 13px 0 0; color: var(--color-indigo-300); font-size: 13px; font-weight: 700; cursor: pointer; list-style: none; }
+.counsel-details summary::-webkit-details-marker { display: none; }
+.counsel-details[open] summary span { transform: rotate(180deg); }
+.counsel-details-body { padding-top: 8px; }
+.counsel-terms { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; margin-top: 10px; }
+.counsel-term { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 4px; background: var(--color-slate-800); border-radius: 8px; padding: 8px 10px; font-size: 12px; }
+.counsel-term span { color: var(--color-slate-400); }
+.counsel-term strong { font-variant-numeric: tabular-nums; }
+@media (max-width: 640px) {
+    .counsel-metrics { grid-template-columns: 1fr; }
+    .counsel-general-main { grid-template-columns: 1fr; gap: 16px; }
+    .counsel-percentile { border-inline-start: 0; border-top: 1px solid var(--color-slate-700); padding: 16px 0 0; }
+    .counsel-score-parts, .counsel-terms { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media print {
+    .counsel-metric, .counsel-general { color: #111827; background: #fff; border-color: #cbd5e1; break-inside: avoid; }
+    .counsel-metric > span, .counsel-total > span, .counsel-percentile > span:first-child, .counsel-metric p, .counsel-total p, .counsel-percentile p, .counsel-city, .counsel-score-part span { color: #334155; }
+    .counsel-score-part, .counsel-judgment { background: #f1f5f9; color: #111827; }
+    .counsel-score-part strong { color: #111827; }
+    .counsel-details:not([open]) { display: none; }
+}

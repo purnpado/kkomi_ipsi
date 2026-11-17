@@ -14,14 +14,19 @@ export async function fillGeneralCityCutoff(ctx) {
     }
     const year = currentAdmissionYear() - 1;
     let result = null;
+    let failed = false;
     try {
         result = await window.go?.main?.App?.GetConsolidatedGeneralCutoff?.(year);
     } catch (_) {
-        result = null;
+        failed = true;
+    }
+    if (failed || !result) {
+        holder.textContent = '관내 추정 합격선 자료를 불러오지 못했습니다. 다시 확인해 주세요.';
+        return;
     }
     const e = result?.base;
     if (!e || !(e.acceptedMin > 0)) {
-        holder.innerHTML = `<span class="text-slate-500">관내 추정 합격선: ${admissionLabel(year)} 공유 자료 없음</span>`;
+        holder.innerHTML = `<span>관내 합격선 비교: ${admissionLabel(year)} 공유 자료 없음 · 위 구간은 학교 내 석차 기준입니다.</span>`;
         return;
     }
     const judged = judgeRange({
@@ -29,5 +34,5 @@ export async function fillGeneralCityCutoff(ctx) {
         totalMax: 200, schoolName: '후기 일반고', track: '후기 일반계고',
         source: `${admissionLabel(year)} 관내 ${result.participatingSchool}개교 배정 최저(기본 지표)`
     });
-    holder.innerHTML = `${judgmentBadge(judged, { compact: true })} <span class="text-slate-400">관내 추정선 ${e.acceptedMin.toFixed(2)}점 대비 ${describeDiff(judged)}${e.smallSample ? ' · 표본 부족(참고)' : ''}</span>`;
+    holder.innerHTML = `관내 합격선 비교: ${judgmentBadge(judged, { compact: true })} <span>관내 추정선 ${e.acceptedMin.toFixed(2)}점 대비 ${describeDiff(judged)}${e.smallSample ? ' · 표본 부족(참고)' : ''}</span>`;
 }

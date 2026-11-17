@@ -1,21 +1,22 @@
 import { escapeHtml } from '../../../core/utils.js';
 import { transferBadge } from '../../../core/transferBadges.js';
 import { state } from '../../../core/store.js';
-import { judgmentModeToggleHTML, judgeGeneralPercentile } from '../../../core/admissionJudgment.js';
+import { judgmentModeToggleHTML } from '../../../core/admissionJudgment.js';
+import { renderGeneralSummary } from './generalSummary.js';
 
 // 상담 모달: 전체 레이아웃 렌더링
 export function renderStudentModalLayout(ctx) {
     ctx.modalEl.innerHTML = `
         <div class="glass-card print-document p-6 md:p-8 w-full max-w-6xl max-h-[92vh] overflow-y-auto space-y-6 print-modal relative" id="printReportArea">
             <!-- 모달 헤더 (스크롤 시에도 우측 상단에 고정되어 창 닫기 버튼이 항상 보임) -->
-            <div class="sticky -top-6 md:-top-8 -mx-6 md:-mx-8 px-6 md:px-8 py-3.5 bg-slate-900/95 backdrop-blur-md z-40 border-b border-slate-700/80 flex items-center justify-between gap-4 flex-wrap sm:flex-nowrap shadow-lg">
+            <div class="sticky -top-6 md:-top-8 -mx-6 md:-mx-8 px-6 md:px-8 py-3.5 bg-slate-900/95 backdrop-blur-md z-40 border-b border-slate-700/80 flex items-center justify-between gap-4 flex-wrap shadow-lg">
                 <div class="min-w-0">
-                    <h2 class="text-2xl font-black text-white flex items-center gap-2 truncate">
+                    <h2 class="text-2xl font-black text-white flex items-center gap-2 flex-wrap">
                         👨‍🎓 ${escapeHtml(ctx.name)}${transferBadge(ctx.classNum, ctx.studentNum, ctx.name)} <span class="text-base text-slate-400 font-normal">(${escapeHtml(ctx.classNum)}반 ${escapeHtml(ctx.studentNum)}번)</span>
                     </h2>
-                    <p class="text-xs text-text-muted mt-0.5">울산 특목·마이스터·특성화고 진학 상담 분석표 (3-1 누적)</p>
+                    <p class="text-xs text-text-muted mt-0.5">학생 진학 상담 분석표 · 현재 누적 자료 기준</p>
                 </div>
-                <div class="flex items-center gap-2.5 no-print shrink-0 flex-nowrap">
+                <div class="flex items-center gap-2.5 no-print flex-wrap">
                     <label class="flex items-center gap-1.5 text-xs text-slate-300 cursor-pointer bg-slate-800 hover:bg-slate-700 px-3 py-2 rounded-xl border border-slate-700 select-none transition-all h-9 whitespace-nowrap" title="체크 시 상담 일지 메모 내용도 함께 인쇄됩니다">
                         <input type="checkbox" id="printIncludeCounselCheck" class="rounded accent-indigo-500 cursor-pointer w-4 h-4" />
                         <span class="font-medium">상담 메모 포함</span>
@@ -32,38 +33,14 @@ export function renderStudentModalLayout(ctx) {
                 </div>
             </div>
 
-            <!-- 1. 기본 성적 요약 카드 -->
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                <div class="p-3.5 rounded-xl bg-slate-800/50 border border-slate-700/50 text-center">
-                    <div class="text-xs text-text-muted mb-1">전과목 평균 성취도</div>
-                    <div class="text-xl font-bold text-primary">${ctx.data.allAverage.toFixed(2)} <span class="text-xs text-slate-400 font-normal">/ 5.0</span></div>
+            <!-- 1. 학생 요약과 일반고 산출 -->
+            <div class="counsel-overview">
+                <div class="counsel-metrics">
+                    <div class="counsel-metric"><span>전과목 평균 성취도</span><strong>${ctx.data.allAverage.toFixed(2)} <small>/ 5.0</small></strong><p>전체 과목 단순 평균</p></div>
+                    <div class="counsel-metric"><span>미인정 출결 (누적)</span><strong>${ctx.data.absenceDays}<small>일</small></strong><p>결석 ${ctx.data.rawAbsenceDays || 0}일 · 기타 ${(ctx.data.rawLateCount || 0) + (ctx.data.rawEarlyCount || 0) + (ctx.data.rawResultCount || 0)}회</p></div>
+                    <div class="counsel-metric"><span>인정 봉사시간</span><strong>${ctx.data.totalVolunteerHours}<small>시간</small></strong><p>기본 ${ctx.data.volunteerHours} + 추가 ${ctx.data.addVolunteerHours}</p></div>
                 </div>
-                <div class="p-3.5 rounded-xl bg-slate-800/50 border border-slate-700/50 text-center">
-                    <div class="text-xs text-text-muted mb-1">미인정 출결 (1학기)</div>
-                    <div class="text-xl font-bold ${ctx.data.absenceDays > 0 ? 'text-danger' : 'text-success'}">
-                        ${ctx.data.absenceDays}일 <span class="text-[11px] text-slate-400 font-normal">(결석${ctx.data.rawAbsenceDays || 0}일, 기타${(ctx.data.rawLateCount || 0) + (ctx.data.rawEarlyCount || 0) + (ctx.data.rawResultCount || 0)}회)</span>
-                    </div>
-                </div>
-                <div class="p-3.5 rounded-xl bg-slate-800/50 border border-slate-700/50 text-center">
-                    <div class="text-xs text-text-muted mb-1">인정 봉사시간</div>
-                    <div class="text-xl font-bold text-white">${ctx.data.totalVolunteerHours}시간 <span class="text-[11px] text-slate-400 font-normal">(기본${ctx.data.volunteerHours}+추가${ctx.data.addVolunteerHours})</span></div>
-                </div>
-                <div class="p-3.5 rounded-xl bg-slate-800/50 border border-slate-700/50 text-center">
-                    <div class="text-xs text-text-muted mb-1">후기 일반고 내신 / 석차백분율</div>
-                    ${(() => {
-                        // 후기 일반고: 학교 내 석차백분율 판정(학교 설정 안정·경계선) + 총점 범위(가산점 미정분)
-                        const d = ctx.data;
-                        const g = judgeGeneralPercentile(d.generalHSPercentile);
-                        const tone = { safe: 'text-success', proper: 'text-warning', challenge: 'text-danger' }[g.level] || 'text-slate-300';
-                        const high = Number(d.generalHSTotalHigh || 0);
-                        const range = high > d.generalHSTotalScore + 0.001 ? `~${high.toFixed(2)}` : '';
-                        const status = d.generalHSProjected ? '예상' : '확정';
-                        return `<div class="text-xl font-bold ${tone}">${d.generalHSTotalScore.toFixed(2)}${range}점 <span class="text-[10px] font-normal text-amber-300">${status}</span> <span class="text-[11px] font-normal">${g.emoji} ${g.label}</span></div>
-                    <div class="text-[11px] text-slate-400">교과 ${d.generalHSAcademicScore.toFixed(2)}${d.generalHSThirdYearProjected ? '(3학년 = 작년 성적 예상)' : (d.generalHSThirdYearFinal ? '' : '(3-1 복사 예상)')} · 출석 ${Number(d.generalHSAttendanceScore || 0).toFixed(1)} · 봉사 ${Number(d.generalHSVolunteerScore || 0).toFixed(1)} · 행발 ${Number(d.generalHSBehaviorScore || 0)} · 창체 ${Number(d.generalHSCreativeScore || 0)} · ${d.generalHSPercentile.toFixed(2)}%</div>
-                    <div class="text-[10px] text-slate-500">기본 지표(가산점 제외) ${Number(d.generalHSBaseScore || 0).toFixed(2)}점${range ? ' · 범위는 아직 정해지지 않은 가산점' : ''}${d.generalHSBonusEntered ? '' : ' · 가산점 미입력'}</div>
-                    <div id="generalCityCutoff" class="text-[10px] mt-1"></div>`;
-                    })()}
-                </div>
+                ${renderGeneralSummary(ctx.data)}
             </div>
 
             <!-- 2. 수기 입력 가산점 및 리더십 영역 (출결·봉사는 나이스 자동 산출) -->
@@ -80,7 +57,7 @@ export function renderStudentModalLayout(ctx) {
                                     전형별 가산점 및 리더십 수기 입력
                                     ${isViewer ? '<span class="text-[11px] text-warning font-normal">※ 진로부장은 조회 전용 모드입니다.</span>' : ''}
                                 </h3>
-                                <p class="text-[11px] text-slate-400 mt-0.5">출결 및 봉사점수는 <strong>나이스 공식 데이터에서 100% 자동 산출</strong>되므로 별도 입력이 필요 없습니다.</p>
+                                <p class="text-[11px] text-slate-400 mt-0.5">출결·봉사는 나이스 자료로 계산합니다. 학년별 자료가 없으면 누적 자료로 예상하며, 아래에서 직접 입력할 수 있습니다.</p>
                             </div>
                         </div>
                         ${!isViewer ? `

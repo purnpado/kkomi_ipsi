@@ -14,7 +14,7 @@
     !define INFO_PRODUCTNAME "꼬미입시"
 !endif
 !ifndef INFO_PRODUCTVERSION
-    !define INFO_PRODUCTVERSION "1.6.4"
+    !define INFO_PRODUCTVERSION "1.7.01"
 !endif
 !ifndef INFO_COPYRIGHT
     !define INFO_COPYRIGHT "(c) 2026, 푸른파도소리"
