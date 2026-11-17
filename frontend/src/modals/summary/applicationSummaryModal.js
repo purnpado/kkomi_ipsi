@@ -1,4 +1,4 @@
-import { escapeHtml } from '../../core/utils.js';
+import { escapeHtml, displayTrack } from '../../core/utils.js';
 import { printOnly } from '../../print/printEngine.js';
 import { showModalAlert, showModalConfirm } from '../../core/dialogs.js';
 import { openApplicantDetailModal, buildSmartApplicationGroups } from './smartGroups.js';
@@ -41,7 +41,7 @@ export async function openClassApplicationSummaryModal(classNum) {
                 const schoolCells = g.isFirstGroup ? `
                     <td class="p-3 border-r border-slate-700/50 text-center font-bold text-slate-300" rowspan="${g.rowSpanSchool}">${admissionLabel(g.admissionYear)}</td>
                     <td class="p-3 border-r border-slate-700/50 text-center font-semibold text-slate-300" rowspan="${g.rowSpanSchool}">${g.categoryLabel}</td>
-                    <td class="p-3 border-r border-slate-700/50 font-bold text-white" rowspan="${g.rowSpanSchool}">${g.schoolName}</td>
+                    <td class="p-3 border-r border-slate-700/50 font-bold text-white" rowspan="${g.rowSpanSchool}">${escapeHtml(g.schoolName)}</td>
                 ` : '';
 
                 const rankBadges = Object.keys(g.ranks).sort((a, b) => a - b).map(rank => `
@@ -61,7 +61,7 @@ export async function openClassApplicationSummaryModal(classNum) {
                 return `
                     <tr class="border-b border-slate-700/60 hover:bg-slate-800/40 transition-colors text-xs">
                         ${schoolCells}
-                        <td class="p-3 font-semibold ${g.track.includes('특별') || g.track.includes('취업') ? 'text-amber-300' : 'text-sky-200'}">${g.track}</td>
+                        <td class="p-3 font-semibold ${g.track.includes('특별') || g.track.includes('취업') ? 'text-amber-300' : 'text-sky-200'}">${escapeHtml(displayTrack(g.track))}</td>
                         <td class="p-3 font-bold text-white">${g.department}</td>
                         <td class="p-3">
                             <div class="flex flex-wrap items-center gap-1.5">${rankBadges} ${totalBadge}</div>
@@ -205,7 +205,7 @@ export async function openApplicationSummaryModal() {
                 const schoolCells = g.isFirstGroup ? `
                     <td class="p-3 border-r border-slate-700/50 text-center font-bold text-slate-300" rowspan="${g.rowSpanSchool}">${admissionLabel(g.admissionYear)}</td>
                     <td class="p-3 border-r border-slate-700/50 text-center font-semibold text-slate-300" rowspan="${g.rowSpanSchool}">${g.categoryLabel}</td>
-                    <td class="p-3 border-r border-slate-700/50 font-bold text-white" rowspan="${g.rowSpanSchool}">${g.schoolName}</td>
+                    <td class="p-3 border-r border-slate-700/50 font-bold text-white" rowspan="${g.rowSpanSchool}">${escapeHtml(g.schoolName)}</td>
                 ` : '';
 
                 const rankBadges = Object.keys(g.ranks).sort((a, b) => a - b).map(rank => `
@@ -231,7 +231,7 @@ export async function openApplicationSummaryModal() {
                 return `
                     <tr class="border-b border-slate-700/60 hover:bg-slate-800/40 transition-colors text-xs">
                         ${schoolCells}
-                        <td class="p-3 font-semibold ${g.track.includes('특별') || g.track.includes('취업') ? 'text-amber-300' : 'text-sky-200'}">${g.track}</td>
+                        <td class="p-3 font-semibold ${g.track.includes('특별') || g.track.includes('취업') ? 'text-amber-300' : 'text-sky-200'}">${escapeHtml(displayTrack(g.track))}</td>
                         <td class="p-3 font-bold text-white">${g.department}</td>
                         <td class="p-3">
                             <div class="flex flex-wrap items-center gap-1.5">${rankBadges} ${totalBadge}</div>

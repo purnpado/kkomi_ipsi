@@ -2,7 +2,7 @@
 // 남은 학기 성적 변화·앞으로의 결석·추가 봉사·리더십·후기고 가산점을 넣으면 학교별 점수와 판정 변화를
 // 보여 준다. 계산은 백엔드(WhatIfStudent)가 실제 산출 규칙으로 하고, 아무것도 저장하지 않는다.
 // 판정 기준선은 상담 화면 학교 카드가 지금 쓰는 직전 1개년 기준선을 그대로 쓴다.
-import { escapeHtml } from '../../../core/utils.js';
+import { escapeHtml, displayTrack } from '../../../core/utils.js';
 import { judgeScore, judgeRange, judgmentBadge } from '../../../core/admissionJudgment.js';
 import { currentAdmissionYear, admissionLabel } from '../../../core/admissionYear.js';
 import { renderRemainingStepTable } from './whatIfSteps.js';
@@ -79,7 +79,7 @@ function schoolRowsHTML(ctx, result) {
         const judge = (score) => base ? judgmentBadge(judgeScore({ score, cutoff: base.cutoff, totalMax: s.totalMax, schoolName: s.schoolName, track: s.trackName, source: `${base.year || ''} 기준선`, year: base.year, department: base.department }), { compact: true }) : '<span class="text-slate-600">기준선 없음</span>';
         return `
             <tr class="border-b border-slate-800 ${Math.abs(diff) >= 0.005 ? 'bg-indigo-950/30' : ''}">
-                <td class="p-2 text-slate-200 whitespace-nowrap">${escapeHtml(s.schoolName)} <span class="text-slate-400">${escapeHtml(s.trackName)}</span></td>
+                <td class="p-2 text-slate-200 whitespace-nowrap">${escapeHtml(s.schoolName)} <span class="text-slate-400">${escapeHtml(displayTrack(s.trackName))}</span></td>
                 <td class="p-2 text-right font-mono text-slate-300">${s.before.toFixed(2)}</td>
                 <td class="p-2 text-right font-mono font-bold text-white">${s.after.toFixed(2)} <span class="text-[10px] ${diff > 0 ? 'text-emerald-300' : diff < 0 ? 'text-rose-300' : 'text-slate-500'}">${Math.abs(diff) >= 0.005 ? signed(diff) : '변화 없음'}</span></td>
                 <td class="p-2 text-[10px] text-slate-500 text-right">/${s.totalMax}</td>

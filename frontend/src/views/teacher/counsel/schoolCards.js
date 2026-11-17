@@ -1,4 +1,4 @@
-import { escapeAttr } from '../../../core/utils.js';
+import { escapeAttr, escapeHtml, displayTrack } from '../../../core/utils.js';
 import { judgeScore, judgmentBadge, describeDiff, describeEvidence } from '../../../core/admissionJudgment.js';
 import { admissionLabel } from '../../../core/admissionYear.js';
 
@@ -134,7 +134,7 @@ export function buildSchoolResultCards(ctx) {
                 <div class="flex items-center justify-between flex-wrap gap-2">
                     <div class="flex items-center gap-2">
                         <span class="font-bold text-white text-base">${r.schoolName}</span>
-                        <span class="text-xs px-2 py-0.5 rounded bg-slate-700 text-slate-300 font-semibold">${r.trackName}전형</span>
+                        <span class="text-xs px-2 py-0.5 rounded bg-slate-700 text-slate-300 font-semibold">${escapeHtml(displayTrack(r.trackName))}</span>
                     </div>
                     <div class="flex items-center gap-1.5 flex-wrap">
                         <button type="button" class="btn-toggle-wishlist px-2.5 py-1 text-xs font-bold rounded-lg border transition-all flex items-center gap-1 cursor-pointer ${isAlreadyWish ? 'bg-amber-500/20 text-amber-300 border-amber-500/50 shadow-sm' : 'bg-slate-800 text-slate-300 border-slate-600 hover:text-white hover:border-slate-500'}"

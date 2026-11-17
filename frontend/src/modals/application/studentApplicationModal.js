@@ -1,4 +1,4 @@
-import { escapeHtml, escapeAttr } from '../../core/utils.js';
+import { escapeHtml, escapeAttr, displayTrack } from '../../core/utils.js';
 import { defineApplicationRenderer } from './applicationForm.js';
 import { state } from '../../core/store.js';
 import { resolveAdmissionYear } from '../../core/admissionYear.js';
@@ -69,12 +69,7 @@ async function prepareApplicationModal(ctx) {
         return multiplier > 0 ? { multiplier, rounding: rule.firstStageRounding || '', note: rule.secondStageNote || '' } : null;
     };
     ctx.normalizedSchoolName = value => String(value || '').replace(/등학교$/, '').replace(/\s/g, '');
-    const trackLabel = track => ({
-        '일반': '일반전형',
-        '특별': '특별전형',
-        '취업희망자': '취업자 특별전형',
-        '후기 일반계고': '후기 일반계고',
-    }[track] || track);
+    const trackLabel = displayTrack;
     const calculatedTracks = (schoolName, category) => {
         const raw = [...new Set((studentDetail?.schoolResults || [])
             .filter(result => ctx.normalizedSchoolName(result.schoolName) === ctx.normalizedSchoolName(schoolName))
@@ -129,8 +124,9 @@ async function prepareApplicationModal(ctx) {
             return `<option value="">학교 선택</option>${schools.map(name => `<option value="${escapeAttr(name)}" ${name === selected ? 'selected' : ''}>${escapeHtml(name)}</option>`).join('')}`;
         }
         if (category === 'other') {
-            const schools = ['울산예술고등학교', '울산스포츠과학고등학교', '울산고운고등학교', '울산애니원고등학교', '울산과학고등학교', '타시도 고등학교', '기타'];
-            return `<option value="">선택 안 함</option>${schools.map(name => `<option value="${escapeAttr(name)}" ${name === selected ? 'selected' : ''}>${escapeHtml(name)}</option>`).join('')}`;
+            const schools = ['울산예술고등학교', '울산스포츠과학고등학교', '울산고운고등학교', '울산애니원고등학교', '울산과학고등학교'];
+            const custom = selected && !schools.includes(selected);
+            return `<option value="">학교 선택</option>${schools.map(name => `<option value="${escapeAttr(name)}" ${name === selected ? 'selected' : ''}>${escapeHtml(name)}</option>`).join('')}<option value="__custom_school__" ${custom ? 'selected' : ''}>타시도·기타 학교 직접 입력</option>`;
         }
         if (category === 'none') {
             return `<option value="미진학" selected>미진학</option>`;

@@ -434,6 +434,19 @@ export function GetOfficialAdmissionData() {
 }
 
 /**
+ * GetOurSchoolAnalysisStats returns one accurate aggregate for the selected school and track.
+ * @param {number} year
+ * @param {string} school
+ * @param {string} department
+ * @param {string} track
+ * @param {number} bucketStep
+ * @returns {$CancellablePromise<calc$0.DepartmentAdmissionStats | null>}
+ */
+export function GetOurSchoolAnalysisStats(year, school, department, track, bucketStep) {
+    return $Call.ByID(2981471132, year, school, department, track, bucketStep);
+}
+
+/**
  * GetParticipatingSchools 취합된 참여 중학교 목록 반환
  * @param {number} admissionYear
  * @returns {$CancellablePromise<database$0.SharedParticipatingSchool[] | null>}

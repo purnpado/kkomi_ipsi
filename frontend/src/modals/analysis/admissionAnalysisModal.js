@@ -1,4 +1,5 @@
-import { escapeHtml, escapeAttr } from '../../core/utils.js';
+import { escapeHtml, escapeAttr, normalizeSchoolName, normalizeTrack } from '../../core/utils.js';
+import { tracksForSchool, trackLabel } from './analysisFilters.js';
 import { renderStatsDashboard } from './statsDashboard.js';
 import { renderGeneralCutoffPanel } from './generalCutoffPanel.js';
 import { renderTrendChart } from './trendChart.js';
@@ -51,27 +52,38 @@ export async function openAdmissionAnalysisModal() {
         console.warn('학과별 통계 로드 실패:', e);
     }
 
+    // 기록이 아직 없어도 전형 규칙과 고교 목록으로 분석 조건을 고를 수 있다.
+    let rules = [];
+    let catalog = [];
+    try { rules = (await window.go.main.App.GetSchoolRuleList()) || []; } catch (e) { console.warn('고교 산출 규칙 로드 실패:', e); }
+    try { catalog = (await window.go.main.App.GetHighSchoolsData())?.schools || []; } catch (e) { console.warn('고교 목록 로드 실패:', e); }
+
     // 초기 학년도의 우리 학교 통계만으로 필터 목록을 구성한다. 이전·다음
     // 학년도 기록이 현재 연도 분석에 섞이는 것을 막기 위함이다.
     const statsForYear = (year) => ourDeptStats.filter(ds => Number(ds.admissionYear) === Number(year));
 
-    // 고교 목록 및 학과 목록 추출
-    const schoolMap = new Map();
-    statsForYear(admissionYear).forEach(ds => {
-        if (!schoolMap.has(ds.schoolName)) {
-            schoolMap.set(ds.schoolName, {
-                category: ds.category,
-                departments: new Set(),
-                tracks: new Set(),
-            });
+    const knownSchools = () => {
+        const byName = new Map();
+        for (const rule of rules) {
+            const name = rule.schoolName;
+            if (name) byName.set(normalizeSchoolName(name), name);
         }
-        const sInfo = schoolMap.get(ds.schoolName);
-        if (ds.department) sInfo.departments.add(ds.department);
-        if (ds.track) sInfo.tracks.add(ds.track);
-    });
-
-    const schoolNames = Array.from(schoolMap.keys()).filter(Boolean);
-    const initialSchool = schoolNames.length > 0 ? schoolNames[0] : '울산마이스터고';
+        for (const school of catalog) {
+            const type = String(school.type || school.Type || '').toLowerCase();
+            const name = school.name || school.Name;
+            if (name && ['meister', 'special', '마이스터고', '특성화고'].includes(type) && !byName.has(normalizeSchoolName(name))) {
+                byName.set(normalizeSchoolName(name), name);
+            }
+        }
+        for (const stat of ourDeptStats) {
+            if (stat.schoolName && ['meister', 'special'].includes(stat.category) && !byName.has(normalizeSchoolName(stat.schoolName))) {
+                byName.set(normalizeSchoolName(stat.schoolName), stat.schoolName);
+            }
+        }
+        return [...byName.values()];
+    };
+    const schoolNames = knownSchools();
+    const initialSchool = schoolNames[0] || '울산마이스터고';
 
     const modal = document.createElement('div');
     modal.id = 'admissionAnalysisModal';
@@ -144,8 +156,7 @@ export async function openAdmissionAnalysisModal() {
                         <div class="flex items-center gap-2">
                             <span class="text-xs font-bold text-slate-400">전형:</span>
                             <select id="analysisTrackSelect" class="bg-slate-900 text-white font-bold text-xs border border-slate-700 rounded-lg px-2.5 py-1.5 outline-none cursor-pointer">
-                                <option value="일반전형" selected>일반전형</option>
-                                <option value="특별전형">특별전형</option>
+                                <option value="일반" selected>일반전형</option>
                             </select>
                         </div>
                     </div>
@@ -191,36 +202,29 @@ export async function openAdmissionAnalysisModal() {
     modal.querySelector('#closeAnalysisModalBtn')?.addEventListener('click', closeModal);
     modal.querySelector('#closeAnalysisFooterBtn')?.addEventListener('click', closeModal);
 
-    // 학과 드롭다운 갱신 함수
-    const rebuildSchoolOptions = () => {
-        const year = parseInt(modal.querySelector('#analysisYearSelect')?.value || admissionYear, 10);
-        const schoolSelect = modal.querySelector('#analysisSchoolSelect');
-        if (!schoolSelect) return;
-        const schools = Array.from(new Set(statsForYear(year).map(ds => ds.schoolName))).filter(Boolean);
-        const previous = schoolSelect.value;
-        schoolSelect.innerHTML = schools.map(s => `<option value="${escapeAttr(s)}">${escapeHtml(s)}</option>`).join('') + generalOptionHTML(false);
-        schoolSelect.value = [...schools, GENERAL_OPTION].includes(previous) ? previous : (schools[0] || GENERAL_OPTION);
-    };
-
-    const updateDeptDropdown = () => {
+    // 학년도와 무관하게 학교 목록을 유지하고, 선택 학교의 규칙으로 전형을 만든다.
+    const updateSchoolFilters = () => {
         const sch = modal.querySelector('#analysisSchoolSelect')?.value || '';
         const deptSelect = modal.querySelector('#analysisDeptSelect');
-        if (!deptSelect) return;
-
+        const trackSelect = modal.querySelector('#analysisTrackSelect');
+        if (!deptSelect || !trackSelect) return;
         const year = parseInt(modal.querySelector('#analysisYearSelect')?.value || admissionYear, 10);
-        const yearStats = statsForYear(year).filter(ds => ds.schoolName === sch);
-        let optionsHTML = '<option value="" selected>전체 (학교 총괄)</option>';
-        // "전체"·"공통"은 학과가 아니라 학교 전체 집계이므로 목록 맨 위 "전체 (학교 총괄)"로만 둔다.
-        const departments = new Set(yearStats.map(ds => ds.department).filter(d => d && !['전체', '공통', '학교 전체', '학교전체'].includes(String(d).trim())));
-        if (departments.size > 0) {
-            departments.forEach(d => {
-                optionsHTML += `<option value="${escapeAttr(d)}">${escapeHtml(d)}</option>`;
-            });
-        }
-        deptSelect.innerHTML = optionsHTML;
+        const matchSchool = name => normalizeSchoolName(name) === normalizeSchoolName(sch);
+        const yearStats = statsForYear(year).filter(ds => matchSchool(ds.schoolName));
+        const school = catalog.find(item => matchSchool(item.name || item.Name));
+        const departments = new Set([...(school?.departments || school?.Departments || []), ...yearStats.map(ds => ds.department)]
+            .filter(d => d && !['전체', '공통', '학교 전체', '학교전체'].includes(String(d).trim())));
+        const oldDept = deptSelect.value;
+        deptSelect.innerHTML = '<option value="">전체 (학교 총괄)</option>' + [...departments].map(d => `<option value="${escapeAttr(d)}">${escapeHtml(d)}</option>`).join('');
+        deptSelect.value = departments.has(oldDept) ? oldDept : '';
+        const category = yearStats[0]?.category || school?.type || school?.Type || '';
+        const tracks = tracksForSchool(sch, rules, category, yearStats.map(ds => ds.track));
+        const previous = normalizeTrack(trackSelect.value);
+        trackSelect.innerHTML = tracks.map(t => `<option value="${escapeAttr(t)}">${escapeHtml(trackLabel(t))}</option>`).join('');
+        trackSelect.value = tracks.includes(previous) ? previous : (tracks[0] || '');
     };
 
-    updateDeptDropdown();
+    updateSchoolFilters();
 
     let currentSourceMode = 'consolidated'; // 'consolidated' or 'our'
     let lastTrendKey = ''; // 추세 그래프는 학교·학과·전형이 바뀔 때만 다시 그린다
@@ -233,7 +237,7 @@ export async function openAdmissionAnalysisModal() {
         const year = parseInt(modal.querySelector('#analysisYearSelect')?.value || admissionYear, 10);
         const school = modal.querySelector('#analysisSchoolSelect')?.value || '';
         const dept = modal.querySelector('#analysisDeptSelect')?.value || '';
-        const track = modal.querySelector('#analysisTrackSelect')?.value || '일반전형';
+        const track = modal.querySelector('#analysisTrackSelect')?.value || '';
         // 후기 일반고는 학과·전형 구분 없이 관내 공유 자료로 합격선을 추정한다.
         const isGeneral = school === GENERAL_OPTION;
         ['#analysisDeptSelect', '#analysisTrackSelect'].forEach(id => { const el = modal.querySelector(id); if (el) el.disabled = isGeneral; });
@@ -260,12 +264,8 @@ export async function openAdmissionAnalysisModal() {
             if (currentSourceMode === 'consolidated') {
                 stats = await window.go.main.App.GetConsolidatedAdmissionStats(year, school, dept, track, 1.0);
             } else {
-                // 우리 학교 학과별 통계에서 필터링
-                const found = statsForYear(year).find(x =>
-                    x.schoolName === school &&
-                    (!dept || x.department === dept) &&
-                    (x.track === track || !track)
-                );
+                // 학과·지망 순위별 요약을 합산하지 않고 원서별로 한 번씩 집계한다.
+                const found = await window.go.main.App.GetOurSchoolAnalysisStats(year, school, dept, track, 1.0);
                 if (found) {
                     stats = {
                         admissionYear: found.admissionYear,
@@ -283,6 +283,7 @@ export async function openAdmissionAnalysisModal() {
                         acceptedQ3: found.acceptedQ3,
                         acceptedStdDev: found.acceptedStdDev,
                         rejectedCount: found.rejectedCount,
+                        stage2FailCount: found.stage2FailCount,
                         rejectedMax: found.rejectedMax,
                         rejectedAvg: found.rejectedAvg,
                         hasOverlap: found.hasOverlap,
@@ -310,8 +311,7 @@ export async function openAdmissionAnalysisModal() {
                         <div class="text-4xl">📭</div>
                         <h3 class="text-base font-bold text-slate-300">해당 조건의 분석 데이터가 없습니다</h3>
                         <p class="text-xs text-slate-500 max-w-md mx-auto">
-                            선택하신 [${escapeHtml(school)} · ${dept || '전체'} · ${track}] 조건으로 집계된 원서 자료가 없거나,
-                            아직 관내 공유 파일이 취합되지 않았습니다.
+                            선택하신 [${escapeHtml(school)} · ${escapeHtml(dept || '전체')} · ${escapeHtml(trackLabel(track))}] 조건의 ${currentSourceMode === 'consolidated' ? '관내 공유 자료가 없습니다. 관내 공유 파일을 가져왔는지 확인해 주세요.' : '우리 학교 원서 자료가 없습니다. 지원 현황과 고입 연도를 확인해 주세요.'}
                         </p>
                     </div>
                 `;
@@ -346,12 +346,11 @@ export async function openAdmissionAnalysisModal() {
     });
 
     modal.querySelector('#analysisSchoolSelect')?.addEventListener('change', () => {
-        updateDeptDropdown();
+        updateSchoolFilters();
         loadAndRenderAnalysis();
     });
     modal.querySelector('#analysisYearSelect')?.addEventListener('change', () => {
-        rebuildSchoolOptions();
-        updateDeptDropdown();
+        updateSchoolFilters();
         loadAndRenderAnalysis();
     });
     modal.querySelector('#analysisDeptSelect')?.addEventListener('change', loadAndRenderAnalysis);

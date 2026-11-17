@@ -1,4 +1,4 @@
-import { escapeHtml, normalizeSchoolName, normalizeTrack } from '../../../core/utils.js';
+import { escapeHtml, normalizeSchoolName, normalizeTrack, displayTrack } from '../../../core/utils.js';
 import { judgmentSummaryText } from '../../../core/admissionJudgment.js';
 import { printOnly } from '../../../print/printEngine.js';
 import { getPredictionAnalysisList } from './prediction.js';
@@ -181,7 +181,7 @@ export async function openPredictionDetailModal(classNum, studentNum, studentNam
                                 <span class="text-[10px] text-indigo-400 opacity-0 group-hover:opacity-100 transition-opacity">🔍</span>
                                 ${badgeHTML}
                             </div>
-                            <span class="text-[11px] text-indigo-300 font-semibold truncate mt-0.5">${r.trackName}${r.trackName.endsWith('전형') ? '' : '전형'}</span>
+                            <span class="text-[11px] text-indigo-300 font-semibold truncate mt-0.5">${escapeHtml(displayTrack(r.trackName))}</span>
                         </div>
                         <div class="text-right shrink-0">
                             <div class="text-sm font-black text-amber-300">${Number(r.totalScore).toFixed(2)}점</div>

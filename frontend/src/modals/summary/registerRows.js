@@ -1,7 +1,7 @@
 // 원서대장: 학급의 지원 기록을 대장 행으로 변환한다(화면 출력과 엑셀 내보내기가 함께 쓴다).
 // 원서대장은 누적 기록이므로 최종 진학 학교 하나만 남기지 않고, 학생이 지원한 학교마다
 // 한 줄씩(불합격 학교·합격 학교를 각각) 전형 진행 순서대로 기입한다.
-import { isSameTrack, normalizeSchoolName } from '../../core/utils.js';
+import { isSameTrack, normalizeSchoolName, displayTrack } from '../../core/utils.js';
 
 const ACCEPTED = ['합격', '최종 진학', '최종진학'];
 
@@ -109,7 +109,7 @@ function scoreText(ctx, app) {
 function noteText(app) {
     const parts = [];
     if (app.track && !['해당 없음', '해당없음', '후기 일반계고'].includes(app.track) && app.category !== 'none') {
-        const track = app.track === '취업희망자' ? '취업자 특별' : app.track;
+        const track = displayTrack(app.track);
         parts.push(track.includes('전형') ? track : `${track}전형`);
     }
     if (app.category === 'none' && app.track) parts.push(app.track);

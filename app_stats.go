@@ -49,3 +49,11 @@ func (a *App) GetPreferenceStrategy(admissionYear int, highSchool, track string)
 	}
 	return a.db.GetPreferenceStrategy(admissionYear, highSchool, track)
 }
+
+// GetOurSchoolAnalysisStats returns one accurate aggregate for the selected school and track.
+func (a *App) GetOurSchoolAnalysisStats(year int, school, department, track string, bucketStep float64) (*calc.DepartmentAdmissionStats, error) {
+	if a.user == nil {
+		return nil, fmt.Errorf("로그인이 필요합니다")
+	}
+	return a.db.GetOurSchoolAnalysisStats(year, school, department, track, bucketStep)
+}

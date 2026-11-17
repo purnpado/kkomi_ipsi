@@ -84,7 +84,7 @@ func normalizeCutoffTrack(track string) string {
 	if t == "특별" || t == "특별전형" {
 		return "특별"
 	}
-	if t == "취업" || t == "취업희망자" || t == "취업희망자전형" {
+	if t == "취업" || t == "취업희망자" || t == "취업희망자전형" || t == "취업희망자 특별전형" || t == "취업자 특별전형" || t == "취업자전형" {
 		return "취업희망자"
 	}
 	return strings.TrimSuffix(t, "전형")

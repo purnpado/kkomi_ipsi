@@ -79,6 +79,25 @@ func (dm *DBManager) SaveApplication(record model.ApplicationRecord) error {
 		return err
 	}
 	defer db.Close()
+	if record.ID > 0 && record.Category == "other" {
+		// 기존 기타 지원의 학교명을 수정할 때 새 원서를 추가하지 않는다.
+		var oldYear int
+		if err := db.QueryRow(`SELECT admission_year FROM student_applications WHERE id=? AND student_num=? AND student_name=? AND category='other'`, record.ID, record.StudentNum, record.StudentName).Scan(&oldYear); err != nil {
+			return fmt.Errorf("수정할 기타 지원 기록을 찾을 수 없습니다: %w", err)
+		}
+		if oldYear != record.AdmissionYear {
+			closed, err := dm.IsAdmissionYearClosed(oldYear)
+			if err != nil {
+				return err
+			}
+			if closed {
+				return fmt.Errorf("%d 고입 결과가 확정되어 지원현황을 수정할 수 없습니다", oldYear)
+			}
+		}
+		_, err = db.Exec(`UPDATE student_applications SET admission_year=?, school_name=?, track=?, status=?, score=?, score_basis=?, preferences_json=?, assigned_department=?, assigned_school=?, first_stage_result=?, updated_at=CURRENT_TIMESTAMP WHERE id=? AND student_num=? AND student_name=? AND category='other'`,
+			record.AdmissionYear, record.SchoolName, record.Track, record.Status, record.Score, record.ScoreBasis, string(prefs), record.AssignedDepartment, record.AssignedSchool, record.FirstStageResult, record.ID, record.StudentNum, record.StudentName)
+		return err
+	}
 	_, err = db.Exec(`INSERT INTO student_applications (student_num,student_name,admission_year,category,school_name,track,status,score,score_basis,preferences_json,assigned_department,assigned_school,score_details_json,first_stage_result,updated_at)
 	VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,CURRENT_TIMESTAMP)
 	ON CONFLICT(student_num,student_name,admission_year,category,school_name,track) DO UPDATE SET 

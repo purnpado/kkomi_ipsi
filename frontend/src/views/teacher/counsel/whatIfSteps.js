@@ -2,7 +2,7 @@
 // 성적이 아직 없는 학기(학기 초면 3-1·3-2, 2학기면 3-2)를 두 단계 내려감 ~ 두 단계 오름으로 바꿔 가며
 // 학교별 점수와 판정을 한 표로 보여 준다. "작년 기준으로 이 학교는 남은 학기에 한 단계 올려야 적정" 같은 상담용.
 // 결석·봉사 등 다른 가정값은 위 입력칸 값을 그대로 쓴다. 아무것도 저장하지 않는다.
-import { escapeHtml } from '../../../core/utils.js';
+import { escapeHtml, displayTrack } from '../../../core/utils.js';
 import { judgeScore, judgmentBadge } from '../../../core/admissionJudgment.js';
 
 const STEPS = [[-2, '두 단계↓'], [-1, '한 단계↓'], [0, '지금과 같음'], [1, '한 단계↑'], [2, '두 단계↑']];
@@ -37,7 +37,7 @@ export async function renderRemainingStepTable(ctx, container, baseInput, baseli
             const judged = judgeScore({ score, cutoff: base.cutoff, totalMax: s.totalMax, schoolName: s.schoolName, track: s.trackName, source: `${base.year || ''} 기준선`, year: base.year, department: base.department });
             return `<td class="p-2 text-center whitespace-nowrap"><div class="font-mono text-slate-200">${score.toFixed(2)}</div>${judgmentBadge(judged, { compact: true })}</td>`;
         }).join('');
-        return `<tr class="border-b border-slate-800"><td class="p-2 text-slate-200 whitespace-nowrap">${escapeHtml(s.schoolName)} <span class="text-slate-400">${escapeHtml(s.trackName)}</span><div class="text-[10px] text-slate-500">기준선 ${base.cutoff.toFixed(2)}</div></td>${cells}</tr>`;
+        return `<tr class="border-b border-slate-800"><td class="p-2 text-slate-200 whitespace-nowrap">${escapeHtml(s.schoolName)} <span class="text-slate-400">${escapeHtml(displayTrack(s.trackName))}</span><div class="text-[10px] text-slate-500">기준선 ${base.cutoff.toFixed(2)}</div></td>${cells}</tr>`;
     }).join('');
     container.innerHTML = `
         <div class="overflow-x-auto">

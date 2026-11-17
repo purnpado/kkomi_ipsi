@@ -2,10 +2,11 @@
 
 ## 공식 배포물
 
-GitHub와 Gitea의 동일 태그 릴리즈에는 다음 두 파일만 첨부합니다(v1.6.4부터).
+GitHub와 Gitea의 동일 태그 릴리즈에는 다음 세 파일을 첨부합니다.
 
 - 실행 파일: GitHub `kkomi-ipsi.exe`, Gitea `꼬미입시.exe` (GitHub는 릴리즈 파일 이름의 한글을 바꾸므로 영문 이름 사용)
 - `kkomi-ipsi_v<버전>.zip` (압축을 풀면 `꼬미입시.exe`)
+- `SHA256SUMS.txt` (프로그램 내 자동 업데이트의 무결성 검증에 필수)
 
 자동 업데이트는 GitHub Releases(`purnpado/kkomi_ipsi`)의 `kkomi-ipsi.exe`를 기준으로 안내합니다. `server-data/version.json`의 버전·다운로드 주소는 릴리즈 태그와 일치해야 합니다.
 

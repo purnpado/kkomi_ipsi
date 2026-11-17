@@ -1,7 +1,7 @@
 // ===== 입시 분석: 여러 해 추세 그래프(SVG) =====
 // 학교·학과·전형별로 학년도마다 관내 통합·우리 학교 합격 최저점, 관내 1차 합격선과 지원·합격 인원을 그린다.
 // 산출식(만점·요강)이 바뀐 해는 점선으로 표시하고, 만점이 다른 해끼리 비교할 수 있게 "만점 대비 %" 보기를 둔다.
-import { escapeHtml } from '../../core/utils.js';
+import { escapeHtml, displayTrack } from '../../core/utils.js';
 import { totalMaxFor } from '../../core/admissionJudgment.js';
 import { admissionLabel } from '../../core/admissionYear.js';
 
@@ -159,7 +159,7 @@ function render(container, points, ctx) {
     container.innerHTML = `
         <div class="p-5 rounded-xl bg-slate-800/40 border border-slate-700/60 space-y-3">
             <div class="flex flex-wrap items-center justify-between gap-2">
-                <h4 class="text-sm font-bold text-white">📈 학년도 추세 · ${escapeHtml(ctx.school)} ${ctx.dept ? escapeHtml(ctx.dept) : '(학교 전체)'} · ${escapeHtml(ctx.track)}</h4>
+                <h4 class="text-sm font-bold text-white">📈 학년도 추세 · ${escapeHtml(ctx.school)} ${ctx.dept ? escapeHtml(ctx.dept) : '(학교 전체)'} · ${escapeHtml(displayTrack(ctx.track))}</h4>
                 <span class="inline-flex gap-0.5 rounded-lg border border-slate-600 bg-slate-900/70 p-0.5">${btn('score', '점수')}${btn('pct', '만점 대비 %')}</span>
             </div>
             <div class="flex flex-wrap gap-3 text-[11px] text-slate-300">${legendHTML()}</div>

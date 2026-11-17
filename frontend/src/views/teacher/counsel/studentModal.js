@@ -1,4 +1,4 @@
-import { escapeHtml, escapeAttr } from '../../../core/utils.js';
+import { escapeHtml, escapeAttr, displayTrack } from '../../../core/utils.js';
 import { buildSchoolResultCards } from './schoolCards.js';
 import { renderStudentModalLayout } from './modalLayout.js';
 import { bindBaselineControls } from './baselineControls.js';
@@ -139,7 +139,7 @@ function defineWishlistRenderer(ctx) {
                             <span class="text-amber-300">⭐</span> ${escapeHtml(item.schoolName)}
                         </span>
                         <span class="text-[10px] px-1.5 py-0.5 rounded bg-indigo-950 text-indigo-300 border border-indigo-500/40 font-semibold">
-                            ${escapeHtml(item.trackName)}전형
+                            ${escapeHtml(displayTrack(item.trackName))}
                         </span>
                         <span class="text-xs">${item.badgeHTML || ''}</span>
                     </div>

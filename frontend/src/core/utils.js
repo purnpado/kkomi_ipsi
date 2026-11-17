@@ -63,10 +63,19 @@ export function normalizeTrack(track) {
     if (t === '특별' || t === '특별전형') {
         return '특별';
     }
-    if (t === '취업' || t === '취업희망자' || t === '취업희망자전형') {
+    if (['취업', '취업희망자', '취업희망자전형', '취업희망자 특별전형', '취업자 특별전형', '취업자전형'].includes(t)) {
         return '취업희망자';
     }
     return t.replace(/전형$/u, '');
+}
+
+// 내부 식별자는 유지하고 화면에 보여 주는 전형명만 통일한다.
+export function displayTrack(track) {
+    const original = String(track || '').trim();
+    if (normalizeTrack(original) === '취업희망자') return '취업희망자 특별전형';
+    if (normalizeTrack(original) === '일반') return '일반전형';
+    if (normalizeTrack(original) === '특별') return '특별전형';
+    return original;
 }
 
 export function isSameTrack(left, right) {

@@ -2,7 +2,6 @@ package database
 
 import (
 	"database/sql"
-	"fmt"
 	"math"
 	"sort"
 	"strings"
@@ -192,11 +191,11 @@ func (dm *DBManager) getConsolidatedFromSummaryStats(db *sql.DB, admissionYear i
 	var appCount, accCount, rejCount int
 	var accSum, accSumSq, accMin, accMax, rejSum, rejMax float64
 	err := row.Scan(&appCount, &accCount, &accSum, &accSumSq, &accMin, &accMax, &rejCount, &rejSum, &rejMax)
-	if err != nil || appCount == 0 {
-		var totalInTable int
-		_ = db.QueryRow("SELECT COUNT(*) FROM shared_summary_stats").Scan(&totalInTable)
-		return nil, fmt.Errorf("해당 조건의 취합 통계 자료가 없습니다: year=%d, school=%q, dept=%q, track=%q (전체 summary_stats 행수: %d, scanErr: %v)",
-			admissionYear, highSchool, department, track, totalInTable, err)
+	if err != nil {
+		return nil, err
+	}
+	if appCount == 0 {
+		return nil, nil // 자료 없음은 정상 상태다. 실제 DB 오류만 오류로 전달한다.
 	}
 
 	var accAvg, accStdDev float64
