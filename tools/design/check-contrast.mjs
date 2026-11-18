@@ -1,6 +1,6 @@
 // 디자인 기준 변수(frontend/src/styles/tokens.css)의 글자/바탕 대비 검사.
 // 실행: node tools/design/check-contrast.mjs   (기준 미달이 하나라도 있으면 종료 코드 1)
-// 기준: WCAG 2.2 일반 글자 4.5:1. 라이트·다크 두 벌을 모두 본다.
+// 기준: WCAG 2.2 일반 글자 4.5:1, 입력칸 경계·포커스 테두리 3:1(1.4.11). 라이트·다크 두 벌을 모두 본다.
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
@@ -39,14 +39,15 @@ for (const [name, v] of Object.entries(themes)) {
     for (const t of TEXTS) for (const bg of BACKS) pairs.push([t, bg]);
     for (const j of JUDGES) pairs.push([`judge-${j}`, `judge-${j}-bg`], [`judge-${j}`, 'surface']);
     pairs.push(['on-fill', 'accent-fill']);
-    for (const [fg, bg] of pairs) {
+    for (const ui of ['control', 'focus']) for (const bg of BACKS) pairs.push([ui, bg, 3]);
+    for (const [fg, bg, min = 4.5] of pairs) {
         const r = ratio(v[`kk-${fg}`], v[`kk-${bg}`]);
-        const ok = r >= 4.5;
+        const ok = r >= min;
         if (!ok) fails++;
-        rows.push(`| ${name} | ${fg} | ${bg} | ${r.toFixed(2)} | ${ok ? '통과' : '미달'} |`);
+        rows.push(`| ${name} | ${fg} | ${bg} | ${r.toFixed(2)} (기준 ${min}) | ${ok ? '통과' : '미달'} |`);
     }
 }
 console.log('| 모드 | 글자 | 바탕 | 대비 | 결과 |\n|---|---|---|---|---|');
 console.log(rows.join('\n'));
-console.log(fails ? `\n기준 미달 ${fails}건` : '\n모두 4.5:1 이상');
+console.log(fails ? `\n기준 미달 ${fails}건` : `\n${rows.length}쌍 모두 기준 이상`);
 process.exit(fails ? 1 : 0);

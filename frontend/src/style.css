@@ -52,7 +52,7 @@ body {
 }
 
 /* ===== 디자인 기준 변수(styles/tokens.css)를 Tailwind 이름으로 =====
-   예: bg-kk-surface, text-kk-text-2, border-kk-line, text-kk-judge-safe, text-kk-3(13px).
+   예: bg-kk-surface, text-kk-text-2, border-kk-line, text-kk-judge-safe, text-kk-2(13px).
    inline 이라 라이트·다크 전환 때 변수 값이 그대로 따라간다. 쓰지 않은 이름은 CSS 에 들어가지 않는다. */
 @theme inline {
     --color-kk-bg: var(--kk-bg);
@@ -60,6 +60,7 @@ body {
     --color-kk-sunken: var(--kk-sunken);
     --color-kk-line: var(--kk-line);
     --color-kk-line-strong: var(--kk-line-strong);
+    --color-kk-control: var(--kk-control);
     --color-kk-text-strong: var(--kk-text-strong);
     --color-kk-text-1: var(--kk-text-1);
     --color-kk-text-2: var(--kk-text-2);
@@ -87,6 +88,14 @@ body {
     --text-kk-5: var(--kk-fs-5);
     --text-kk-6: var(--kk-fs-6);
     --text-kk-display: var(--kk-fs-display);
+    /* text-* 는 줄 간격도 함께 정하므로 짝 변수를 둔다(없으면 줄 간격이 비게 됨) */
+    --text-kk-1--line-height: var(--kk-lh-body);
+    --text-kk-2--line-height: var(--kk-lh-body);
+    --text-kk-3--line-height: var(--kk-lh-body);
+    --text-kk-4--line-height: var(--kk-lh-body);
+    --text-kk-5--line-height: var(--kk-lh-tight);
+    --text-kk-6--line-height: var(--kk-lh-tight);
+    --text-kk-display--line-height: var(--kk-lh-tight);
 }
 
 /* ===== 플레이스홀더 색상 클래스 (LSP 린터 동일 CSS 속성 충돌 방지) ===== */
