@@ -124,6 +124,17 @@ async function masterScenario(page, accounts) {
             await page.waitForFunction(() => /1명/.test(document.querySelector('#statExclusionListBody')?.textContent || ''), { timeout: 10000 })
                 .catch(() => { throw new Error('상담 화면에서 체크한 학생이 확인 목록에 나오지 않습니다'); });
         }],
+        ['04b-학년부장-특성화고-나이스대조', async () => {
+            await clickMenu(page, 'classes');
+            await page.click('.class-card-btn[data-class="1"]');
+            await settle(page, 1200);
+            await page.click('.btn-prediction-detail[data-category="special"]');
+            await page.waitForSelector('#predictionDetailModal .prediction-score-item', { timeout: 15000 });
+            await page.click('#predictionDetailModal .prediction-score-item');
+            await page.waitForSelector('#schoolScoreDetailModal .nice-form', { timeout: 15000 })
+                .catch(() => { throw new Error('특성화고 산출 상세 창에 나이스 대조표가 없습니다'); });
+            await wait(500);
+        }],
         ['05b-학년부장-공식경쟁률', async () => {
             await clickMenu(page, 'cutoff');
             await page.click('#openCompetitionBtn');

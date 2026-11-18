@@ -135,3 +135,19 @@ func (a *App) WhatIfStudent(classNum int, studentNum, name string, input calc.Wh
 	}
 	return a.db.WhatIfStudent(classNum, studentNum, name, input)
 }
+
+// GetSchoolScoreBasis 학교별 산출 상세 창: 산출식이 실제로 쓴 원자료(학기별 성취점수 합·과목수·마감일 기준 출결·봉사)와
+// 나이스 원서등록 화면과 같은 배치의 대조표(지금은 특성화고만, 다른 전형은 niceForm 이 비어 있음).
+func (a *App) GetSchoolScoreBasis(classNum int, studentNum, name, schoolName, track string) (*calc.SchoolBasisView, error) {
+	if a.user == nil {
+		return nil, fmt.Errorf("로그인이 필요합니다")
+	}
+	if a.user.Role == "homeroom" && a.user.ClassNum != classNum {
+		return nil, fmt.Errorf("담당 학급(%d반) 학생만 볼 수 있습니다", a.user.ClassNum)
+	}
+	full, err := a.db.GetStudentFullDetail(classNum, studentNum, name, a.isMaster())
+	if err != nil {
+		return nil, err
+	}
+	return calc.SchoolBasisFor(full, schoolName, track), nil
+}

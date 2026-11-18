@@ -41,6 +41,31 @@ import * as model$0 from "../model/models.js";
  */
 
 /**
+ * NiceForm 나이스 원서등록 화면과 같은 배치의 대조표.
+ * @typedef {Object} NiceForm
+ * @property {string} type
+ * @property {string} title
+ * @property {string[] | null} notes - 나이스 화면 위 안내 문구
+ * @property {(NiceFormCell[] | null)[] | null} rows - 나이스 화면과 같은 줄·순서
+ * @property {string[] | null} warnings - 나이스 화면과 다를 수 있는 이유
+ */
+
+/**
+ * NiceFormCell 대조표 한 칸. Kind: head(학기 이름)·label(항목 이름)·accent(강조 항목 이름)·value(값)
+ * @typedef {Object} NiceFormCell
+ * @property {string} kind
+ * @property {string} text
+ * @property {string} [note] - 값 옆 작은 설명(예: "1-1 대체")
+ */
+
+/**
+ * SchoolBasisView 학교별 산출 상세 창이 받는 값: 산출에 쓴 원자료와 나이스 대조표(배치가 없는 전형은 nil).
+ * @typedef {Object} SchoolBasisView
+ * @property {ScoreBasis | null} basis
+ * @property {NiceForm | null} niceForm
+ */
+
+/**
  * SchoolCalcResult 학교별 산출 결과
  * @typedef {Object} SchoolCalcResult
  * @property {string} schoolName
@@ -62,6 +87,19 @@ import * as model$0 from "../model/models.js";
  */
 
 /**
+ * ScoreBasis 학교별 산출에 실제로 쓴 원자료(나이스 대조용).
+ * @typedef {Object} ScoreBasis
+ * @property {boolean} excludeArts
+ * @property {SemesterBasis[] | null} semesters
+ * @property {string} attendanceCutoff - "9/30"·"10/31"
+ * @property {boolean} cutoffEntered - 마감일 기준 출결을 수기로 입력했는지
+ * @property {number} absenceDays - 미인정 결석(일)
+ * @property {number} lateEtcCount - 미인정 지각·조퇴·결과 합(회)
+ * @property {number} finalAbsenceDays - 최종결석 = 결석 + (지각+조퇴+결과)÷3, 소수점 절사
+ * @property {number} volunteerHours
+ */
+
+/**
  * ScoreDistributionBucket represents one interval in a score histogram.
  * @typedef {Object} ScoreDistributionBucket
  * @property {string} rangeLabel
@@ -69,6 +107,15 @@ import * as model$0 from "../model/models.js";
  * @property {number} maxScore
  * @property {number} acceptedCount
  * @property {number} rejectedCount
+ */
+
+/**
+ * SemesterBasis 한 학기 교과 성적에서 산출식이 쓴 값.
+ * @typedef {Object} SemesterBasis
+ * @property {string} semester - 반영 학기("2_1")
+ * @property {string} source - 실제로 성적을 가져온 학기(대체 인정이면 다름, 성적이 없으면 "")
+ * @property {number} sum - 교과성취점수 합(A=5…E=1, 예체능 제외 전형은 예체능 제외)
+ * @property {number} count - 과목수
  */
 
 /**

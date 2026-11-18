@@ -29,6 +29,7 @@ type SchoolRule struct {
 	LeadershipMax            float64            // 리더십 배점(한 학기 2.5점)
 	AttendanceCutoff         string             // "9/30" 또는 "10/31" (비어 있으면 기존값)
 	FinalTermArtsPenaltyOnly bool               // 특성화고: 3-1 예체능 감점만 한 번 차감
+	NiceForm                 string             // 나이스 원서등록 화면 배치 종류(nice_form.go). 비어 있으면 대조표 없음
 }
 
 // RuleYear 이 산출 규칙이 대조한 입학전형요강의 고교 입학 학년도. 새 요강을 반영할 때 함께 올린다.
@@ -39,7 +40,11 @@ const RuleYear = 2027
 var AllSchoolRules []SchoolRule
 
 func init() {
-	AllSchoolRules = append(meisterRules(), vocationalRules()...)
+	vocational := vocationalRules()
+	for i := range vocational {
+		vocational[i].NiceForm = NiceFormVocational
+	}
+	AllSchoolRules = append(meisterRules(), vocational...)
 }
 
 // GetAllSchoolRules 프론트엔드에서 학교 목록 조회용

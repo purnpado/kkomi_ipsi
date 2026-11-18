@@ -529,6 +529,20 @@ export function GetSchoolRuleList() {
 }
 
 /**
+ * GetSchoolScoreBasis 학교별 산출 상세 창: 산출식이 실제로 쓴 원자료(학기별 성취점수 합·과목수·마감일 기준 출결·봉사)와
+ * 나이스 원서등록 화면과 같은 배치의 대조표(지금은 특성화고만, 다른 전형은 niceForm 이 비어 있음).
+ * @param {number} classNum
+ * @param {string} studentNum
+ * @param {string} name
+ * @param {string} schoolName
+ * @param {string} track
+ * @returns {$CancellablePromise<calc$0.SchoolBasisView | null>}
+ */
+export function GetSchoolScoreBasis(classNum, studentNum, name, schoolName, track) {
+    return $Call.ByID(2967754207, classNum, studentNum, name, schoolName, track);
+}
+
+/**
  * GetServerNotices 운영센터 공지사항 목록 반환
  * @returns {$CancellablePromise<sync$0.NoticeItem[] | null>}
  */

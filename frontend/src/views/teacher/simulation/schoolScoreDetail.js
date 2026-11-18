@@ -1,4 +1,5 @@
 import { normalizeSchoolName, normalizeTrack } from '../../../core/utils.js';
+import { renderNiceFormTable, attendanceBasisText } from './niceFormTable.js';
 
 // ===== 학교별 산출 규칙 안내 =====
 // 안내 문구는 백엔드 산출 규칙(internal/calc)에서 만들어 GetSchoolRuleList로 내려온다.
@@ -39,7 +40,14 @@ export async function showSchoolScoreDetailModal(studentName, classNum, studentN
 
     const sName = r.schoolName || '';
     const tName = r.trackName || '';
-    const sRule = findRuleGuide(await loadSchoolRuleList(), sName, tName);
+    const [ruleList, basisView] = await Promise.all([
+        loadSchoolRuleList(),
+        // 산출식이 실제로 쓴 값(학기별 성취점수 합·과목수·마감일 기준 출결)과 나이스 원서 화면 대조표
+        window.go?.main?.App?.GetSchoolScoreBasis
+            ? window.go.main.App.GetSchoolScoreBasis(Number(classNum), String(studentNum), studentName, sName, tName).catch(() => null)
+            : Promise.resolve(null)
+    ]);
+    const sRule = findRuleGuide(ruleList, sName, tName);
     // 그사이 다른 상세 창이 열렸으면 그 창을 닫고 이 창을 띄운다.
     document.getElementById('schoolScoreDetailModal')?.remove();
     const totalMax = r.totalMax || r.TotalMax || sRule.totalMax || 0;
@@ -63,7 +71,7 @@ export async function showSchoolScoreDetailModal(studentName, classNum, studentN
     modal.id = 'schoolScoreDetailModal';
     modal.className = 'fixed inset-0 bg-black/80 backdrop-blur-md z-[60] flex items-center justify-center p-3 md:p-6 overflow-y-auto animate-fade-in';
     modal.innerHTML = `
-        <div class="glass-card w-full max-w-2xl p-6 md:p-7 rounded-2xl bg-slate-900/98 border border-slate-700/90 shadow-2xl space-y-4 animate-scale-up text-xs">
+        <div class="glass-card w-full ${basisView?.niceForm ? 'max-w-4xl' : 'max-w-2xl'} p-6 md:p-7 rounded-2xl bg-slate-900/98 border border-slate-700/90 shadow-2xl space-y-4 animate-scale-up text-xs">
             <!-- 헤더 -->
             <div class="flex items-center justify-between border-b border-slate-700/60 pb-3.5">
                 <div class="flex items-center gap-2.5">
@@ -95,6 +103,7 @@ export async function showSchoolScoreDetailModal(studentName, classNum, studentN
 
             <!-- 세부 점수 카드 영역 -->
             <div class="space-y-3 max-h-[60vh] overflow-y-auto custom-scrollbar pr-1">
+                ${renderNiceFormTable(basisView?.niceForm)}
                 <!-- 1. 교과 성적 영역 -->
                 <div class="bg-slate-800/60 p-3.5 rounded-xl border border-slate-700/60 space-y-2">
                     <div class="flex items-center justify-between border-b border-slate-700/40 pb-1.5">
@@ -148,8 +157,7 @@ export async function showSchoolScoreDetailModal(studentName, classNum, studentN
                         <div>
                             <div class="font-bold text-slate-200">출결 점수</div>
                             <div class="text-[11px] text-slate-400 mt-0.5">
-                                미인정 결석 환산 <strong>${fullStudent?.absenceDays ?? 0}일</strong> 
-                                <span class="text-[10px] text-slate-500">(결석 ${fullStudent?.rawAbsenceDays ?? 0}일, 지각·조퇴·결과 ${(fullStudent?.rawLateCount ?? 0) + (fullStudent?.rawEarlyCount ?? 0) + (fullStudent?.rawResultCount ?? 0)}회)</span>
+                                ${attendanceBasisText(basisView?.basis, fullStudent)}
                                 ${sRule.attendanceRule ? ` • ${sRule.attendanceRule}` : ''}
                             </div>
                         </div>

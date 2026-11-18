@@ -11,13 +11,38 @@ import * as $models from "./models.js";
  */
 
 /**
+ * NiceForm 나이스 원서등록 화면과 같은 배치의 대조표.
+ * @typedef {$models.NiceForm} NiceForm
+ */
+
+/**
+ * NiceFormCell 대조표 한 칸. Kind: head(학기 이름)·label(항목 이름)·accent(강조 항목 이름)·value(값)
+ * @typedef {$models.NiceFormCell} NiceFormCell
+ */
+
+/**
+ * SchoolBasisView 학교별 산출 상세 창이 받는 값: 산출에 쓴 원자료와 나이스 대조표(배치가 없는 전형은 nil).
+ * @typedef {$models.SchoolBasisView} SchoolBasisView
+ */
+
+/**
  * SchoolCalcResult 학교별 산출 결과
  * @typedef {$models.SchoolCalcResult} SchoolCalcResult
  */
 
 /**
+ * ScoreBasis 학교별 산출에 실제로 쓴 원자료(나이스 대조용).
+ * @typedef {$models.ScoreBasis} ScoreBasis
+ */
+
+/**
  * ScoreDistributionBucket represents one interval in a score histogram.
  * @typedef {$models.ScoreDistributionBucket} ScoreDistributionBucket
+ */
+
+/**
+ * SemesterBasis 한 학기 교과 성적에서 산출식이 쓴 값.
+ * @typedef {$models.SemesterBasis} SemesterBasis
  */
 
 /**
