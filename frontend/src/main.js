@@ -3,6 +3,7 @@
 // core/navigation.js 의 발행 함수(navigate, openModal 등)로 요청하며, 실제 연결은 이 파일의 구독자가 수행한다.
 import './core/wailsBridge.js';
 import './core/preferences.js';
+import './core/a11y.js';
 import './style.css';
 import './app.css';
 import { CheckSetupComplete } from './core/backend.js';

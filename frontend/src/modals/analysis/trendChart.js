@@ -181,7 +181,7 @@ export async function renderTrendChart(container, { school, dept, track, isGener
         container.innerHTML = '';
         return;
     }
-    container.innerHTML = '<div class="py-6 text-center text-xs text-slate-500"><span class="spinner"></span> 학년도 추세를 불러오는 중...</div>';
+    container.innerHTML = '<div class="py-6 text-center text-xs text-slate-500"><span class="spinner"></span> 학년도 추세를 불러오는 중…</div>';
     let points = [];
     try {
         points = (await window.go.main.App.GetAdmissionTrend(school, dept, track)) || [];

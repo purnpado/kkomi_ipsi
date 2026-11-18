@@ -130,7 +130,7 @@ export function renderApplicationSummary(applications, classNum, studentNum, stu
                 <span class="truncate max-w-28 font-bold" title="${escapeAttr(school)}">${escapeHtml(school)}</span>
                 <div class="inline-flex items-center gap-1 shrink-0">
                     <span class="text-[10px] px-2 py-0.5 rounded-full ${theme.badge} whitespace-nowrap">${escapeHtml(a.status)}</span>
-                    <button type="button" class="btn-delete-app-item inline-flex items-center justify-center w-4 h-4 rounded-full text-slate-400 hover:text-white hover:bg-rose-600 transition-all cursor-pointer font-black text-[11px] ml-0.5 active:scale-90"
+                    <button aria-label="닫기" type="button" class="btn-delete-app-item inline-flex items-center justify-center w-4 h-4 rounded-full text-slate-400 hover:text-white hover:bg-rose-600 transition-all cursor-pointer font-black text-[11px] ml-0.5 active:scale-90"
                             data-class="${classNum || ''}" data-num="${studentNum || ''}" data-name="${escapeAttr(studentName || '')}"
                             data-cat="${escapeAttr(a.category || '')}" data-school="${escapeAttr(a.schoolName || '')}" data-track="${escapeAttr(a.track || '')}"
                             title="${escapeAttr(school)} 진로희망 삭제">

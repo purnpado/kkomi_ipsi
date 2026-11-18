@@ -26,12 +26,12 @@ export function openPatchImportModal(schoolName) {
                         각 학급 담임선생님이 제출한 취합 파일(<strong>.kkomipatch</strong>)을 학년부장 시스템에 반영합니다.
                     </p>
                 </div>
-                <button id="closePatchImportModeModal" class="text-2xl text-slate-400 hover:text-white transition-colors">×</button>
+                <button aria-label="닫기" id="closePatchImportModeModal" class="text-2xl text-slate-400 hover:text-white transition-colors">×</button>
             </div>
 
             <div class="space-y-3.5">
                 <!-- 옵션 1: 여러 반 일괄 병합 (다중 선택) -->
-                <div id="btnBatchPatchMerge" class="p-4 rounded-2xl bg-indigo-950/40 border border-indigo-500/50 hover:bg-indigo-900/50 hover:border-indigo-400 cursor-pointer transition-all flex items-start gap-3.5 group shadow-md">
+                <div role="button" tabindex="0" id="btnBatchPatchMerge" class="p-4 rounded-2xl bg-indigo-950/40 border border-indigo-500/50 hover:bg-indigo-900/50 hover:border-indigo-400 cursor-pointer transition-all flex items-start gap-3.5 group shadow-md">
                     <div class="w-10 h-10 rounded-xl bg-indigo-600/30 border border-indigo-400/40 flex items-center justify-center text-xl shrink-0 group-hover:scale-110 transition-transform">
                         ⚡
                     </div>
@@ -47,7 +47,7 @@ export function openPatchImportModal(schoolName) {
                 </div>
 
                 <!-- 옵션 2: 1개 반 상세 검토 병합 -->
-                <div id="btnSinglePatchMerge" class="p-4 rounded-2xl bg-slate-800/60 border border-slate-700/60 hover:bg-slate-700/60 hover:border-slate-500 cursor-pointer transition-all flex items-start gap-3.5 group shadow-sm">
+                <div role="button" tabindex="0" id="btnSinglePatchMerge" class="p-4 rounded-2xl bg-slate-800/60 border border-slate-700/60 hover:bg-slate-700/60 hover:border-slate-500 cursor-pointer transition-all flex items-start gap-3.5 group shadow-sm">
                     <div class="w-10 h-10 rounded-xl bg-slate-700/50 border border-slate-600/50 flex items-center justify-center text-xl shrink-0 group-hover:scale-110 transition-transform">
                         🔍
                     </div>
@@ -160,7 +160,7 @@ function openPatchMergeSelection(preview, password, schoolName) {
         ].filter(([, , available]) => available).map(([field, label]) => `<label class="inline-flex items-center gap-1 rounded bg-slate-800 px-2 py-1 text-xs"><input type="checkbox" class="patch-choice" data-index="${index}" data-field="${field}" checked> ${label}</label>`).join('');
         return `<tr class="border-b border-slate-700/60"><td class="p-3 text-center font-mono">${item.studentNum}</td><td class="p-3 font-bold">${item.studentName}</td><td class="p-3"><div class="flex flex-wrap gap-2">${checks || '<span class="text-text-muted">변경 항목 없음</span>'}</div></td></tr>`;
     }).join('') : '<tr><td colspan="3" class="p-8 text-center text-text-muted">확인할 변경 항목이 없습니다.</td></tr>';
-    modal.innerHTML = `<div class="glass-card p-7 w-full max-w-4xl"><div class="flex justify-between items-start gap-4 mb-4"><div><h2 class="text-2xl font-bold text-white">📥 취합자료 선택 병합(학년부장)</h2><p class="text-sm text-text-muted mt-1">담임 계정 ${preview.sourceUsername} · ${preview.classNum}반 · 변경 학생 ${preview.changeCount}명</p></div><button id="closePatchMergeSelection" class="text-3xl text-text-muted">×</button></div>${conflict}<p class="text-xs text-text-muted mb-3">학생별로 가져올 항목만 선택합니다. 원본 수치와 학생 개인정보는 이 화면에 표시하지 않습니다.</p>${preview.skippedApplications ? `<p class="text-sm text-amber-300 mb-3">기존 원서가 더 최신이거나 수정 시각을 비교할 수 없어 최대 ${Number(preview.skippedApplications)}건을 건너뜁니다. 선택한 학생에 따라 실제 건수는 달라집니다.</p>` : ''}<div class="overflow-auto max-h-[55vh] border border-slate-700 rounded-xl"><table class="w-full text-sm"><thead class="sticky top-0 bg-slate-800"><tr><th class="p-3 w-16 text-center">번호</th><th class="p-3 w-28 text-left">학생</th><th class="p-3 text-left">가져올 항목</th></tr></thead><tbody>${rows}</tbody></table></div><div class="flex justify-end items-center gap-3 mt-6 pt-4 border-t border-slate-700/60"><button id="closePatchMergeSelection2" type="button" class="btn-secondary w-auto! px-5 py-2.5 rounded-xl font-bold text-xs whitespace-nowrap cursor-pointer hover:bg-slate-700 transition-all">취소</button><button id="applyPatchMergeSelection" type="button" class="btn-primary w-auto! px-6 py-2.5 rounded-xl font-bold text-xs whitespace-nowrap cursor-pointer flex items-center justify-center gap-2 shadow-lg shadow-indigo-500/30 hover:scale-[1.02] transition-all"><span>📥</span> 선택 항목 병합</button></div></div>`;
+    modal.innerHTML = `<div class="glass-card p-7 w-full max-w-4xl"><div class="flex justify-between items-start gap-4 mb-4"><div><h2 class="text-2xl font-bold text-white">📥 취합자료 선택 병합(학년부장)</h2><p class="text-sm text-text-muted mt-1">담임 계정 ${preview.sourceUsername} · ${preview.classNum}반 · 변경 학생 ${preview.changeCount}명</p></div><button aria-label="닫기" id="closePatchMergeSelection" class="text-3xl text-text-muted">×</button></div>${conflict}<p class="text-xs text-text-muted mb-3">학생별로 가져올 항목만 선택합니다. 원본 수치와 학생 개인정보는 이 화면에 표시하지 않습니다.</p>${preview.skippedApplications ? `<p class="text-sm text-amber-300 mb-3">기존 원서가 더 최신이거나 수정 시각을 비교할 수 없어 최대 ${Number(preview.skippedApplications)}건을 건너뜁니다. 선택한 학생에 따라 실제 건수는 달라집니다.</p>` : ''}<div class="overflow-auto max-h-[55vh] border border-slate-700 rounded-xl"><table class="w-full text-sm"><thead class="sticky top-0 bg-slate-800"><tr><th class="p-3 w-16 text-center">번호</th><th class="p-3 w-28 text-left">학생</th><th class="p-3 text-left">가져올 항목</th></tr></thead><tbody>${rows}</tbody></table></div><div class="flex justify-end items-center gap-3 mt-6 pt-4 border-t border-slate-700/60"><button id="closePatchMergeSelection2" type="button" class="btn-secondary w-auto! px-5 py-2.5 rounded-xl font-bold text-xs whitespace-nowrap cursor-pointer hover:bg-slate-700 transition-all">취소</button><button id="applyPatchMergeSelection" type="button" class="btn-primary w-auto! px-6 py-2.5 rounded-xl font-bold text-xs whitespace-nowrap cursor-pointer flex items-center justify-center gap-2 shadow-lg shadow-indigo-500/30 hover:scale-[1.02] transition-all"><span>📥</span> 선택 항목 병합</button></div></div>`;
     document.body.appendChild(modal);
     const close = () => modal.remove();
     document.getElementById('closePatchMergeSelection').onclick = close;
@@ -182,7 +182,7 @@ function openPatchMergeSelection(preview, password, schoolName) {
         }
         const button = document.getElementById('applyPatchMergeSelection');
         button.disabled = true;
-        button.innerHTML = '<span class="spinner"></span> 병합 중...';
+        button.innerHTML = '<span class="spinner"></span> 병합 중…';
         try {
             const count = await window.go.main.App.ImportTeacherPatchSelected(password, preview.path, selections);
             close();

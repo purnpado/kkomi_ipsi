@@ -9,7 +9,7 @@ export function bindExtraSaveAndPrint(ctx) {
     if (saveBtn) {
         saveBtn.addEventListener('click', async () => {
             saveBtn.disabled = true;
-            saveBtn.textContent = '저장 중...';
+            saveBtn.textContent = '저장 중…';
 
             const leadershipTerms = Math.min(4, Math.max(0, parseInt(document.getElementById('inputLeadershipTerms')?.value) || 0));
             // 이미 저장된 다른 항목(징계 제외 표시 등)은 지우지 않고 합친다.

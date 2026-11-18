@@ -166,7 +166,7 @@ ${releaseNotes}
         const buttons = modal.querySelectorAll('button');
         buttons.forEach(b => { b.disabled = true; });
         area.classList.remove('hidden');
-        area.innerHTML = '<span class="spinner" style="width:12px;height:12px;border-width:2px;"></span> 새 버전을 내려받고 지문값을 확인하는 중입니다. 창을 닫지 마세요...';
+        area.innerHTML = '<span class="spinner" style="width:12px;height:12px;border-width:2px;"></span> 새 버전을 내려받고 지문값을 확인하는 중입니다. 창을 닫지 마세요…';
         try {
             const r = await window.go.main.App.ApplyUpdate();
             area.innerHTML = `✅ v${r.version}으로 바꿨습니다. 새 프로그램이 곧 실행됩니다.<br><span class="text-slate-400">자료 백업: ${r.backupPath}</span>`;
@@ -180,7 +180,7 @@ ${releaseNotes}
 export async function checkUpdateOnStartup(localVer, isManual = false) {
     const statusEl = document.getElementById('startupUpdateStatus');
     if (statusEl) {
-        statusEl.innerHTML = '<span class="spinner" style="width:10px;height:10px;border-width:1.5px;"></span> 서버 확인 중...';
+        statusEl.innerHTML = '<span class="spinner" style="width:10px;height:10px;border-width:1.5px;"></span> 서버 확인 중…';
     }
 
     // Wails 바인딩 주입 대기 (최대 3초)

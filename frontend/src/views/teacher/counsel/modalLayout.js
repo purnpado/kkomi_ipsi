@@ -268,7 +268,7 @@ export function renderStudentModalLayout(ctx) {
                         </div>
                         <div id="counselRecordsList" class="space-y-2.5 max-h-80 overflow-y-auto pr-1">
                             <div class="text-center py-6 text-slate-500 text-xs">
-                                <span class="spinner" style="width:14px;height:14px;border-width:2px;"></span> 상담 일지를 불러오는 중...
+                                <span class="spinner" style="width:14px;height:14px;border-width:2px;"></span> 상담 일지를 불러오는 중…
                             </div>
                         </div>
                     </div>

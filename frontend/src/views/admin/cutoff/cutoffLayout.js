@@ -106,8 +106,8 @@ export function renderCutoffLayout(ctx, view) {
                     </div>
 
                     <div class="relative w-64">
-                        <input id="cutoffSchoolSearch" type="text" value="${ctx.searchKeyword}" placeholder="🔍 고교명·학과·전형 검색..." class="input-field py-1.5 pl-3 pr-8 text-xs w-full bg-slate-900/80 border border-slate-700/60 rounded-xl" />
-                        ${ctx.searchKeyword ? `<button id="clearCutoffSearch" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-slate-400 hover:text-white">✕</button>` : ''}
+                        <input id="cutoffSchoolSearch" type="text" value="${ctx.searchKeyword}" placeholder="🔍 고교명·학과·전형 검색…" class="input-field py-1.5 pl-3 pr-8 text-xs w-full bg-slate-900/80 border border-slate-700/60 rounded-xl" />
+                        ${ctx.searchKeyword ? `<button aria-label="닫기" id="clearCutoffSearch" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-slate-400 hover:text-white">✕</button>` : ''}
                     </div>
                 </div>
 

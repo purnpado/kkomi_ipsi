@@ -72,7 +72,7 @@ export async function renderUserManagementScreen(schoolName) {
                             </button>
                         </div>
                     </form>
-                    <div id="addUserError" class="mt-2 text-xs text-danger hidden font-bold"></div>
+                    <div id="addUserError" role="alert" class="mt-2 text-xs text-danger hidden font-bold"></div>
                 </div>
 
                 <!-- 담임 계정 일괄 비밀번호 설정 -->
@@ -89,7 +89,7 @@ export async function renderUserManagementScreen(schoolName) {
                             <button type="submit" id="bulkPwBtn" class="btn-primary py-2 px-4 rounded-lg font-bold shadow whitespace-nowrap text-xs" style="width: auto;">일괄 적용</button>
                         </div>
                     </form>
-                    <div id="bulkPwError" class="mt-2 text-xs text-danger hidden font-bold"></div>
+                    <div id="bulkPwError" role="alert" class="mt-2 text-xs text-danger hidden font-bold"></div>
                 </div>
 
                 <!-- 계정 목록 -->
@@ -108,7 +108,7 @@ export async function renderUserManagementScreen(schoolName) {
                                 </tr>
                             </thead>
                             <tbody id="userListBody" class="divide-y divide-slate-700/50">
-                                <tr><td colspan="6" class="p-8 text-center text-text-muted">불러오는 중...</td></tr>
+                                <tr><td colspan="6" class="p-8 text-center text-text-muted">불러오는 중…</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -145,7 +145,7 @@ export async function renderUserManagementScreen(schoolName) {
         const err = document.getElementById('addUserError');
 
         btn.disabled = true;
-        btn.innerHTML = '<span class="spinner"></span> 생성 중...';
+        btn.innerHTML = '<span class="spinner"></span> 생성 중…';
         err.classList.add('hidden');
 
         try {

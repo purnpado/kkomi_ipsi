@@ -92,6 +92,6 @@ export function shortcutGrid(items) {
         </div>`;
 }
 
-export function loadingHTML(text = '대시보드 자료를 모으는 중...') {
+export function loadingHTML(text = '대시보드 자료를 모으는 중…') {
     return `<div class="py-24 text-center text-slate-400"><span class="spinner"></span>${escapeHtml(text)}</div>`;
 }

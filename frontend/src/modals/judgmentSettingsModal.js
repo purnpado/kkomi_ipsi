@@ -45,7 +45,7 @@ export async function openJudgmentSettingsModal({ onSaved } = {}) {
                     <p class="text-xs text-text-muted mt-1">기준선(합격 최저점 또는 학교 예상선)과 학생 점수의 차이를 여유폭과 비교해 안정·적정·소신·어려움을 정합니다.
                     저장하면 배포자료를 통해 모든 담임 PC에 같은 기준이 적용됩니다.</p>
                 </div>
-                <button id="closeJudgmentSettings" class="text-3xl text-text-muted cursor-pointer">×</button>
+                <button aria-label="닫기" id="closeJudgmentSettings" class="text-3xl text-text-muted cursor-pointer">×</button>
             </div>
             <div class="rounded-xl border border-slate-700 p-4 bg-slate-900/40 text-xs text-slate-300 space-y-1">
                 <p>🟢 안정: 기준선 + 여유폭 이상 (불합격 최고점이 있으면 그보다 높아도 안정) · 🟡 적정: 기준선 이상(동점 포함)</p>

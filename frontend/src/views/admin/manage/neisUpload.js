@@ -52,8 +52,8 @@ export function bindNeisUploads({ totalStudents, rerender }) {
                 const paths = await window.go.main.App.OpenMultipleExcelFiles(step.dialogTitle);
                 if (!paths || paths.length === 0) return;
                 button.disabled = true;
-                if (stateEl) stateEl.innerHTML = `<span class="spinner"></span>${paths.length}개 반 분석 중...`;
-                showStatus(`고른 ${paths.length}개 파일의 ${step.label} 자료를 분석·저장하는 중입니다...`, 'busy');
+                if (stateEl) stateEl.innerHTML = `<span class="spinner"></span>${paths.length}개 반 분석 중…`;
+                showStatus(`고른 ${paths.length}개 파일의 ${step.label} 자료를 분석·저장하는 중입니다…`, 'busy');
                 const result = await step.process(paths);
                 const classes = Object.keys(result || {}).length;
                 const students = Object.values(result || {}).reduce((a, b) => a + b, 0);

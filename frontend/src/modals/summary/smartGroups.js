@@ -36,7 +36,7 @@ export function openApplicantDetailModal(title, students) {
                     <span class="text-xl">👥</span>
                     <h3 class="font-bold text-white text-base">${title}</h3>
                 </div>
-                <button id="closeApplicantDetailBtn" class="text-slate-400 hover:text-white p-1 rounded-lg text-lg cursor-pointer transition-colors">✕</button>
+                <button aria-label="닫기" id="closeApplicantDetailBtn" class="text-slate-400 hover:text-white p-1 rounded-lg text-lg cursor-pointer transition-colors">✕</button>
             </div>
             <div class="overflow-auto max-h-[60vh] border border-slate-700/70 rounded-xl bg-slate-900/50">
                 <table class="w-full text-left border-collapse">

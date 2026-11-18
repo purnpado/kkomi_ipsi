@@ -118,8 +118,8 @@ function renderStudentListLayout(ctx) {
                     </span>
                     <input id="dashboardStudentSearchInput" type="text"
                            class="w-full pl-9 pr-7 py-1.5 rounded-xl bg-slate-900/90 border border-slate-700 text-xs text-white ph-subtle focus:outline-none focus:ring-1 focus:ring-indigo-500 transition-all font-semibold"
-                           placeholder="번호(1, 15) 또는 이름 검색..." />
-                    <button id="clearDashboardSearchBtn" class="absolute inset-y-0 right-0 items-center pr-2.5 text-slate-400 hover:text-white cursor-pointer text-xs font-bold hidden" title="검색 지우기">✕</button>
+                           placeholder="번호(1, 15) 또는 이름 검색…" />
+                    <button aria-label="닫기" id="clearDashboardSearchBtn" class="absolute inset-y-0 right-0 items-center pr-2.5 text-slate-400 hover:text-white cursor-pointer text-xs font-bold hidden" title="검색 지우기">✕</button>
                 </div>
 
                 <!-- 정렬 드롭다운 -->

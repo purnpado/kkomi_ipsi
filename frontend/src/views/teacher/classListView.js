@@ -41,7 +41,7 @@ export async function renderTeacherScreen(schoolName, targetClassNum = null) {
             const isAccessible = !isHomeroom || (i === myClass);
             if (isAccessible) {
                 cards += `
-                    <div class="class-card-btn bg-slate-800/70 hover:bg-indigo-950/40 border-2 border-slate-700/60 hover:border-primary/80 rounded-2xl p-6 text-center cursor-pointer transition-all duration-200 group flex flex-col items-center justify-center gap-3 shadow-md"
+                    <div role="button" tabindex="0" class="class-card-btn bg-slate-800/70 hover:bg-indigo-950/40 border-2 border-slate-700/60 hover:border-primary/80 rounded-2xl p-6 text-center cursor-pointer transition-all duration-200 group flex flex-col items-center justify-center gap-3 shadow-md"
                          data-class="${i}">
                         <div class="w-14 h-14 rounded-2xl bg-slate-700/60 text-indigo-300 group-hover:bg-primary group-hover:text-white flex items-center justify-center text-2xl font-black transition-all">
                             ${i}
@@ -181,7 +181,7 @@ export async function renderTeacherScreen(schoolName, targetClassNum = null) {
         if (exportPatchBtn) {
             exportPatchBtn.style.display = (state.currentUser?.Role === 'homeroom') ? 'inline-flex' : 'none';
         }
-        document.getElementById('teacherContent').innerHTML = '<div class="text-center py-20"><span class="spinner"></span> 데이터를 불러오는 중...</div>';
+        document.getElementById('teacherContent').innerHTML = '<div class="text-center py-20"><span class="spinner"></span> 데이터를 불러오는 중…</div>';
 
         try {
             const students = await window.go.main.App.GetClassGrades(classNum);

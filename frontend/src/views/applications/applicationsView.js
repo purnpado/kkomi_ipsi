@@ -177,7 +177,7 @@ function bindRowButtons() {
 
 export async function renderApplicationsScreen() {
     app.className = 'wide-layout';
-    app.innerHTML = '<div class="py-24 text-center text-slate-400"><span class="spinner"></span>원서 자료를 읽는 중...</div>';
+    app.innerHTML = '<div class="py-24 text-center text-slate-400"><span class="spinner"></span>원서 자료를 읽는 중…</div>';
     ScreenLockManager.resetTimer();
     data = await loadApplicationsData(who());
     if (state.currentScreen !== 'applications') return;

@@ -21,7 +21,7 @@ export async function openStudentModal(classNum, studentNum, name) {
     modalEl.className = 'fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto';
     modalEl.innerHTML = `
         <div class="glass-card p-8 w-full max-w-4xl text-center">
-            <span class="spinner"></span> <span class="text-white ml-2">${escapeHtml(name)} 학생의 고교별 산출 데이터를 분석하는 중...</span>
+            <span class="spinner"></span> <span class="text-white ml-2">${escapeHtml(name)} 학생의 고교별 산출 데이터를 분석하는 중…</span>
         </div>
     `;
     document.body.appendChild(modalEl);
@@ -136,7 +136,7 @@ function defineWishlistRenderer(ctx) {
                             data-school="${escapeAttr(item.schoolName)}" data-track="${escapeAttr(item.trackName)}" data-cat="${escapeAttr(item.category || 'meister')}" data-score="${item.totalScore}" data-max="${item.totalMax}" title="해당 학교 정보로 희망원서 자동 등록창 열기">
                         <span>📝</span> 희망학교 입력
                     </button>
-                    <button type="button" class="p-1.5 text-xs text-slate-400 hover:text-danger rounded hover:bg-slate-700/50 transition-colors btn-wishlist-remove cursor-pointer"
+                    <button aria-label="닫기" type="button" class="p-1.5 text-xs text-slate-400 hover:text-danger rounded hover:bg-slate-700/50 transition-colors btn-wishlist-remove cursor-pointer"
                             data-school="${escapeAttr(item.schoolName)}" data-track="${escapeAttr(item.trackName)}" title="관심학교에서 제거">
                         ✕
                     </button>

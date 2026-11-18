@@ -21,7 +21,7 @@ export function renderMatrixLayout(ctx, mx) {
                             📊 관내 고교별 진학 신호등 종합 매트릭스
                         </h2>
                     </div>
-                    <button id="closeMatrixBtn" class="no-print text-slate-400 hover:text-white p-2 text-2xl font-bold bg-transparent border-none cursor-pointer leading-none">✕</button>
+                    <button aria-label="닫기" id="closeMatrixBtn" class="no-print text-slate-400 hover:text-white p-2 text-2xl font-bold bg-transparent border-none cursor-pointer leading-none">✕</button>
                 </div>
 
                 <!-- 1열: 6개 원클릭 탭 바 & 실시간 설명 바 -->
@@ -78,7 +78,7 @@ export function renderMatrixLayout(ctx, mx) {
                             <span class="text-slate-400">🔍</span>
                             <input type="text" id="matrixSearchInput" placeholder="학생 성명 또는 학번 검색 (예: 강감찬, 1, 101)" 
                                    class="bg-transparent text-white ph-muted font-medium text-xs outline-none w-44 sm:w-64" />
-                            <button id="clearMatrixSearchBtn" class="text-slate-400 hover:text-white text-xs cursor-pointer hidden">✕</button>
+                            <button aria-label="닫기" id="clearMatrixSearchBtn" class="text-slate-400 hover:text-white text-xs cursor-pointer hidden">✕</button>
                         </div>
 
                         <!-- 정렬 드롭다운 -->

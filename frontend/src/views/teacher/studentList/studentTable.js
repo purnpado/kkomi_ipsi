@@ -137,8 +137,8 @@ export function defineStudentTableRenderer(ctx) {
                                 ${s.studentNum || '-'}
                             </span>
                         </td>
-                        <td class="p-3.5 font-bold text-white text-center text-lg cursor-pointer hover:text-indigo-300 hover:underline text-student-name transition-colors"
-                            data-class="${ctx.classNum}" data-num="${s.studentNum}" data-name="${escapeAttr(s.name)}" title="클릭하여 진학 상담 시작">
+                        <td role="button" tabindex="0" class="p-3.5 font-bold text-white text-center text-lg cursor-pointer hover:text-indigo-300 hover:underline text-student-name transition-colors"
+                            data-class="${ctx.classNum}" data-num="${s.studentNum}" data-name="${escapeAttr(s.name)}" title="클릭하여 종합 성적표 보기">
                             <div class="flex flex-col items-center justify-center">
                                 <span class="inline-flex items-center whitespace-nowrap">${escapeHtml(s.name)}${transferBadge(ctx.classNum, s.studentNum, s.name)}</span>
                                 ${ctx.counselSummary && ctx.counselSummary[s.studentNum] ? `

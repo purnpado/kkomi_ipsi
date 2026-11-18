@@ -32,7 +32,7 @@ export function renderGuideModal(role = 'homeroom') {
                     <button id="printGuideBtn" class="btn-secondary text-xs px-3.5 py-2 font-bold inline-flex items-center gap-1.5 shadow-sm hover:scale-105 transition-all">
                         <span>🖨️</span> 설명서 인쇄 (A4)
                     </button>
-                    <button id="closeGuideBtn" class="text-2xl text-slate-400 hover:text-white px-2 cursor-pointer transition-colors">&times;</button>
+                    <button aria-label="닫기" id="closeGuideBtn" class="text-2xl text-slate-400 hover:text-white px-2 cursor-pointer transition-colors">&times;</button>
                 </div>
             </div>
 

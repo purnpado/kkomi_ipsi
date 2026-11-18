@@ -146,7 +146,7 @@ export async function openCompetitionModal(ctx) {
                         우리 자료에 불합격자가 없다는 것만으로는 미달인지, 지원자 점수가 높아 모두 합격한 것인지 알 수 없습니다(⚠ 표시).
                     </p>
                 </div>
-                <button id="closeCompetitionBtn" class="text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-slate-800 text-lg cursor-pointer">✕</button>
+                <button aria-label="닫기" id="closeCompetitionBtn" class="text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-slate-800 text-lg cursor-pointer">✕</button>
             </div>
             <div class="flex items-center gap-2">
                 <label class="font-bold text-indigo-300">📅 고입 연도:</label>

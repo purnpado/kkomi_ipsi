@@ -151,7 +151,7 @@ export const ScreenLockManager = {
             }
 
             submitBtn.disabled = true;
-            submitBtn.innerHTML = '<span class="spinner"></span> 확인 중...';
+            submitBtn.innerHTML = '<span class="spinner"></span> 확인 중…';
             if (errEl) errEl.classList.add('hidden');
 
             try {

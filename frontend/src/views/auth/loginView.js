@@ -31,13 +31,13 @@ export function renderModeSelectScreen(schoolName) {
             </div>
 
             <div class="grid grid-cols-2 gap-4 mb-6">
-                <div class="mode-card" id="adminMode">
+                <div role="button" tabindex="0" class="mode-card" id="adminMode">
                     <span class="icon">👔</span>
                     <div class="title">관리자 모드</div>
                     <div class="desc">학년부장용<br/>엑셀 Import · 커트라인 관리</div>
                     <div class="mt-2 text-xs text-text-muted">🔒 비밀번호 필요</div>
                 </div>
-                <div class="mode-card" id="teacherMode">
+                <div role="button" tabindex="0" class="mode-card" id="teacherMode">
                     <span class="icon">📋</span>
                     <div class="title">담임 모드</div>
                     <div class="desc">담임교사용<br/>내신 조회 · 합격 예측</div>
@@ -96,7 +96,7 @@ export function renderAdminLoginScreen(schoolName, nextAction = 'adminDashboard'
                 <div>
                     <input type="password" id="loginPassword" class="input-field"
                         placeholder="비밀번호" autocomplete="off" required />
-                    <div id="loginError" class="error-msg">비밀번호가 올바르지 않습니다.</div>
+                    <div id="loginError" role="alert" class="error-msg">비밀번호가 올바르지 않습니다.</div>
                 </div>
                 <button type="submit" id="loginBtn" class="btn-primary">확인</button>
             </form>
@@ -119,7 +119,7 @@ export function renderAdminLoginScreen(schoolName, nextAction = 'adminDashboard'
 
         loginError.classList.remove('show');
         loginBtn.disabled = true;
-        loginBtn.innerHTML = '<span class="spinner"></span>확인 중...';
+        loginBtn.innerHTML = '<span class="spinner"></span>확인 중…';
 
         try {
             const result = await VerifyAdminPassword(passwordInput.value);
@@ -203,7 +203,7 @@ export async function renderLoginScreen(schoolName) {
                     <div class="pt-2">
                         <button type="submit" id="loginBtn" class="btn-primary py-2 text-xs font-bold">로그인</button>
                     </div>
-                    <div id="loginError" class="error-msg text-center text-xs"></div>
+                    <div id="loginError" role="alert" class="error-msg text-center text-xs"></div>
                     <div class="space-y-2.5 mt-5 pt-4 border-t border-slate-700/60">
                         <button type="button" id="distributionPackageImportBtn" 
                                 class="group w-full py-2.5 px-4 rounded-xl border border-emerald-500/40 bg-emerald-950/25 hover:bg-emerald-900/40 hover:border-emerald-400/70 transition-all duration-200 flex items-center justify-center gap-2 shadow-sm cursor-pointer active:scale-[0.99]">
@@ -223,7 +223,7 @@ export async function renderLoginScreen(schoolName) {
                     <div>
                         <span>현재 버전: <strong class="text-indigo-300 font-mono font-bold">v${localVer}</strong></span>
                     </div>
-                    <div id="startupUpdateStatus" class="text-[11px] text-slate-400"></div>
+                    <div id="startupUpdateStatus" role="status" aria-live="polite" class="text-[11px] text-slate-400"></div>
                 </div>
             </div>
         `;
@@ -241,7 +241,7 @@ export async function renderLoginScreen(schoolName) {
             const button = document.getElementById('distributionPackageImportBtn');
             try {
                 button.disabled = true;
-                button.innerHTML = '<span class="spinner" style="width:12px;height:12px;border-width:1.5px;"></span> <span class="text-xs font-bold text-emerald-200">배포 자료 적용 중...</span>';
+                button.innerHTML = '<span class="spinner" style="width:12px;height:12px;border-width:1.5px;"></span> <span class="text-xs font-bold text-emerald-200">배포 자료 적용 중…</span>';
                 const imported = await importDistributionWithPreservation();
                 if (!imported) return;
                 const { username, summary } = imported;
@@ -266,7 +266,7 @@ export async function renderLoginScreen(schoolName) {
             const button = document.getElementById('passwordResetImportBtn');
             try {
                 button.disabled = true;
-                button.innerHTML = '<span class="spinner" style="width:12px;height:12px;border-width:1.5px;"></span> <span class="text-xs font-bold text-sky-200">재설정 파일 확인 중...</span>';
+                button.innerHTML = '<span class="spinner" style="width:12px;height:12px;border-width:1.5px;"></span> <span class="text-xs font-bold text-sky-200">재설정 파일 확인 중…</span>';
                 const username = await window.go.main.App.OpenPasswordResetPackage();
                 if (!username) return;
                 await showModalAlert(`'${username}' 계정의 비밀번호 재설정 파일이 성공적으로 적용되었습니다.\n기존 학급 상담 데이터는 안전하게 보존되며, 학년부장이 설정한 새 비밀번호로 로그인해 주세요.`, '비밀번호 재설정 완료', 'success');
@@ -297,7 +297,7 @@ export async function renderLoginScreen(schoolName) {
             }
 
             btn.disabled = true;
-            btn.innerHTML = '<span class="spinner"></span>확인 중...';
+            btn.innerHTML = '<span class="spinner"></span>확인 중…';
             errorDiv.classList.remove('show');
 
             try {
@@ -357,7 +357,7 @@ export function renderPasswordChangeScreen(username) {
                 <div class="pt-3">
                     <button type="submit" id="pwChangeBtn" class="btn-primary">변경 완료 및 시작</button>
                 </div>
-                <div id="pwChangeError" class="error-msg text-center"></div>
+                <div id="pwChangeError" role="alert" class="error-msg text-center"></div>
             </form>
         </div>
     `;
@@ -377,7 +377,7 @@ export function renderPasswordChangeScreen(username) {
         }
 
         btn.disabled = true;
-        btn.innerHTML = '<span class="spinner"></span>변경 중...';
+        btn.innerHTML = '<span class="spinner"></span>변경 중…';
 
         try {
             await window.go.main.App.ChangeUserPassword(username, pw);

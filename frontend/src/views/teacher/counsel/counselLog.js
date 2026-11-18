@@ -22,7 +22,7 @@ export function bindCounselRecords(ctx) {
         if (!counselRecordsList) return;
         try {
             if (!window.go?.main?.App?.GetStudentCounselingRecords) {
-                counselRecordsList.innerHTML = `<div class="text-center py-4 text-slate-500 text-xs">상담 일지 기능 준비 중...</div>`;
+                counselRecordsList.innerHTML = `<div class="text-center py-4 text-slate-500 text-xs">상담 일지 기능 준비 중…</div>`;
                 return;
             }
             currentRecords = await window.go.main.App.GetStudentCounselingRecords(ctx.classNum, ctx.studentNum, ctx.name) || [];
@@ -155,7 +155,7 @@ export function bindCounselRecords(ctx) {
         }
 
         saveCounselBtn.disabled = true;
-        saveCounselBtn.innerHTML = '<span class="spinner" style="width:12px;height:12px;border-width:1.5px;"></span> 저장 중...';
+        saveCounselBtn.innerHTML = '<span class="spinner" style="width:12px;height:12px;border-width:1.5px;"></span> 저장 중…';
 
         try {
             const record = {

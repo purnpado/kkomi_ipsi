@@ -19,7 +19,7 @@ function needTable(students) {
         return { count: 0, html: '<div class="py-8 text-center text-sm text-slate-400">지금은 따로 살펴볼 학생이 없습니다.</div>' };
     }
     const body = rows.slice(0, MAX_ROWS).map(({ s, reasons }) => `
-        <tr class="border-t border-slate-700/50 hover:bg-slate-800/60 cursor-pointer home-student-row"
+        <tr role="button" tabindex="0" class="border-t border-slate-700/50 hover:bg-slate-800/60 cursor-pointer home-student-row"
             data-class="${s.classNum}" data-num="${escapeAttr(s.studentNum)}" data-name="${escapeAttr(s.name)}" title="눌러서 상담 창 열기">
             <td class="py-2.5 px-2 text-slate-400 font-mono">${escapeHtml(s.studentNum)}</td>
             <td class="py-2.5 px-2 font-bold text-white whitespace-nowrap">${escapeHtml(s.name)}${transferBadge(s.classNum, s.studentNum, s.name)}</td>

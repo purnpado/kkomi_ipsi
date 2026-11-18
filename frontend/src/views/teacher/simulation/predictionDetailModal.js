@@ -269,7 +269,7 @@ export async function openPredictionDetailModal(classNum, studentNum, studentNam
                         <button id="printPredictionModalBtn" class="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-xs print:hidden" title="학부모 상담용 분석표 인쇄">
                             <span>🖨️</span> 인쇄
                         </button>
-                        <button id="closePredictionModalBtn" class="text-slate-400 hover:text-white p-2 rounded-xl hover:bg-slate-800 text-xl transition-all cursor-pointer print:hidden">
+                        <button aria-label="닫기" id="closePredictionModalBtn" class="text-slate-400 hover:text-white p-2 rounded-xl hover:bg-slate-800 text-xl transition-all cursor-pointer print:hidden">
                             ✕
                         </button>
                     </div>

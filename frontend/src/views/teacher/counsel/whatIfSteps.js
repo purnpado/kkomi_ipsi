@@ -9,7 +9,7 @@ const STEPS = [[-2, '두 단계↓'], [-1, '한 단계↓'], [0, '지금과 같�
 
 /** @param baselines 학교·전형 → { cutoff, year, department } (상담 화면 학교 카드 기준선) */
 export async function renderRemainingStepTable(ctx, container, baseInput, baselines) {
-    container.innerHTML = '<div class="p-4 text-center text-slate-300"><span class="spinner"></span> 남은 학기 성적별로 계산하는 중...</div>';
+    container.innerHTML = '<div class="p-4 text-center text-slate-300"><span class="spinner"></span> 남은 학기 성적별로 계산하는 중…</div>';
     let results;
     try {
         results = await Promise.all(STEPS.map(([step]) => window.go.main.App.WhatIfStudent(ctx.classNum, String(ctx.studentNum), ctx.name, { ...baseInput, remainingStep: step })));

@@ -1,0 +1,39 @@
+/* 꼬미입시 접근성 보완(UI/UX 진단 A 묶음, docs/ui-diagnosis-2026-11-18.md)
+   화면 코드를 하나하나 고치지 않고 공통으로 맞추는 규칙. 인쇄에는 적용하지 않는다. */
+
+/* 키보드로 이동할 때 포커스가 늘 보이게(마우스 클릭에는 나타나지 않음).
+   outline-none 을 붙인 입력·선택 상자도 키보드 포커스는 보인다. */
+:focus-visible {
+    outline: 2px solid #818cf8 !important;
+    outline-offset: 2px;
+}
+html[data-theme="light"] :focus-visible { outline-color: #5b4ae0 !important; }
+
+/* 클릭되는 칸(role="button")에 키보드 포커스·손가락 모양 */
+[role="button"]:not(button) { cursor: pointer; }
+
+@media screen {
+    /* 12px 보다 작은 글씨는 읽기 어렵다: 10·11px 지정을 12px 로 올린다(인쇄물은 그대로) */
+    .text-\[9px\], .text-\[10px\], .text-\[11px\] { font-size: 12px; line-height: 1.45; }
+
+    /* 라이트 모드에서 대비가 모자라던 글자: 강조색 글자, 흐린 회색(다크용 slate-600) */
+    html[data-theme="light"] .text-primary:not(.bg-white *) { color: #4f46e5; }
+    html[data-theme="light"] .text-slate-600:not(.bg-white *) { color: #5d6a80; }
+
+    /* 다크 모드에서 대비가 모자라던 글자(흰 종이 bg-white 안은 원래 색 유지) */
+    html[data-theme="dark"] .text-slate-500:not(.bg-white *) { color: #9aa8bd; }
+    html[data-theme="dark"] .text-slate-600:not(.bg-white *) { color: #8e9cb2; }
+    html[data-theme="dark"] .text-primary:not(.bg-white *) { color: #9ea6fa; }
+    html[data-theme="dark"] .text-danger:not(.bg-white *) { color: #f87171; }
+    html[data-theme="dark"] .text-rose-400:not(.bg-white *) { color: #fb8a9c; }
+}
+
+/* 움직임 줄이기를 켠 컴퓨터에서는 애니메이션·전환을 거의 없앤다 */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}

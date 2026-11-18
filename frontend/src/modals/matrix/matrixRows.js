@@ -168,7 +168,7 @@ export function defineMatrixRows(ctx, mx) {
                             <span class="px-1.5 py-0.5 rounded bg-indigo-950 border border-indigo-500/40">${s.classNum}반</span>
                         </td>
                         <td class="px-1 py-1.5 text-slate-400 font-mono font-bold whitespace-nowrap text-xs">${s.studentNum}</td>
-                        <td class="px-1.5 py-1.5 font-bold text-white cursor-pointer hover:text-indigo-300 hover:underline matrix-student-name transition-colors whitespace-nowrap text-xs"
+                        <td role="button" tabindex="0" class="px-1.5 py-1.5 font-bold text-white cursor-pointer hover:text-indigo-300 hover:underline matrix-student-name transition-colors whitespace-nowrap text-xs"
                             data-class="${s.classNum}" data-num="${s.studentNum}" data-name="${s.name}" title="클릭하여 1:1 진학 상담 열기">
                             ${s.name}${transferBadge(s.classNum, s.studentNum, s.name)}
                         </td>

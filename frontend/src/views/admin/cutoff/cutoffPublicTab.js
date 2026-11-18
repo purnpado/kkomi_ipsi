@@ -182,7 +182,7 @@ export function bindCutoffShareAndBack(ctx, ui) {
     document.getElementById('exportJointDataBtn')?.addEventListener('click', async () => {
         const btn = document.getElementById('exportJointDataBtn');
         btn.disabled = true;
-        btn.innerHTML = '<span class="spinner"></span> 내보내는 중...';
+        btn.innerHTML = '<span class="spinner"></span> 내보내는 중…';
         try {
             // 현재 수정 중인 커트라인 우선 자동 저장
             await ui.saveAllCutoffs(true);
@@ -206,7 +206,7 @@ export function bindCutoffShareAndBack(ctx, ui) {
     document.getElementById('importJointDataBtn')?.addEventListener('click', async () => {
         const btn = document.getElementById('importJointDataBtn');
         btn.disabled = true;
-        btn.innerHTML = '<span class="spinner"></span> 병합 중...';
+        btn.innerHTML = '<span class="spinner"></span> 병합 중…';
         try {
             const res = await window.go.main.App.ImportJointShareData(ctx.currentAdmissionYear);
             if (res) {

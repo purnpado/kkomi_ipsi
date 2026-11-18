@@ -92,7 +92,7 @@ export function bindShellSearch() {
     const update = async () => {
         const query = input.value;
         if (query.trim() && !roster) {
-            box.innerHTML = '<div class="shell-search-empty">명단을 읽는 중...</div>';
+            box.innerHTML = '<div class="shell-search-empty">명단을 읽는 중…</div>';
             box.classList.remove('hidden');
         }
         const list = await loadRoster();

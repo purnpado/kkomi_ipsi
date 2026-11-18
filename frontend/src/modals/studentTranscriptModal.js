@@ -12,7 +12,7 @@ export async function openStudentTranscriptModal(classNum, studentNum, name) {
     modalEl.className = 'fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto';
     modalEl.innerHTML = `
         <div class="glass-card p-8 w-full max-w-4xl text-center">
-            <span class="spinner"></span> <span class="text-white ml-2">${escapeHtml(name)} 학생의 전학년 종합 성적표를 조회하는 중...</span>
+            <span class="spinner"></span> <span class="text-white ml-2">${escapeHtml(name)} 학생의 전학년 종합 성적표를 조회하는 중…</span>
         </div>
     `;
     document.body.appendChild(modalEl);
@@ -214,7 +214,7 @@ export async function openStudentTranscriptModal(classNum, studentNum, name) {
                         <button id="printTranscriptBtn" class="btn-secondary text-xs px-3 py-1.5 font-bold flex items-center gap-1 cursor-pointer">
                             <span>🖨️</span> 성적표 인쇄
                         </button>
-                        <button id="closeTranscriptBtn" class="text-slate-400 hover:text-white p-2 text-xl font-bold bg-transparent border-none cursor-pointer">✕</button>
+                        <button aria-label="닫기" id="closeTranscriptBtn" class="text-slate-400 hover:text-white p-2 text-xl font-bold bg-transparent border-none cursor-pointer">✕</button>
                     </div>
                 </div>
 

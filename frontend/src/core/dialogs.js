@@ -29,6 +29,8 @@ export function showModalAlert(optionsOrMessage, defaultTitle = '알림', defaul
         document.getElementById('phgcCustomAlertModal')?.remove();
         const modal = document.createElement('div');
         modal.id = 'phgcCustomAlertModal';
+        modal.setAttribute('role', 'alertdialog');
+        modal.setAttribute('aria-modal', 'true');
         modal.className = 'fixed inset-0 bg-black/80 backdrop-blur-md z-[999999] flex items-center justify-center p-4 animate-in fade-in duration-200';
 
         const iconConfig = {
@@ -122,6 +124,8 @@ export function showModalConfirm(optionsOrMessage, defaultTitle = '확인', defa
         document.getElementById('phgcCustomConfirmModal')?.remove();
         const modal = document.createElement('div');
         modal.id = 'phgcCustomConfirmModal';
+        modal.setAttribute('role', 'alertdialog');
+        modal.setAttribute('aria-modal', 'true');
         modal.className = 'fixed inset-0 bg-black/80 backdrop-blur-md z-[999999] flex items-center justify-center p-4 animate-in fade-in duration-200';
 
         const iconConfig = {
@@ -228,6 +232,8 @@ export function showModalPrompt(optionsOrMessage, defaultVal = '', titleText = '
         document.getElementById('phgcCustomPromptModal')?.remove();
         const modal = document.createElement('div');
         modal.id = 'phgcCustomPromptModal';
+        modal.setAttribute('role', 'alertdialog');
+        modal.setAttribute('aria-modal', 'true');
         modal.className = 'fixed inset-0 bg-black/80 backdrop-blur-md z-[999999] flex items-center justify-center p-4 animate-in fade-in duration-200';
 
         modal.innerHTML = `

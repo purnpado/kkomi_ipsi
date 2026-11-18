@@ -22,7 +22,7 @@ function createMatrixModalShell(ctx) {
     ctx.modalEl.innerHTML = `
         <div class="glass-card p-8 w-full max-w-[1850px] text-center">
             <span class="spinner"></span> 
-            <span class="text-white ml-2">${ctx.classNum ? `${ctx.classNum}반 학생들의 신호등 매트릭스를 구성하는 중...` : '3학년 전교생의 5개년 신호등 매트릭스를 구성하는 중...'}</span>
+            <span class="text-white ml-2">${ctx.classNum ? `${ctx.classNum}반 학생들의 신호등 매트릭스를 구성하는 중…` : '3학년 전교생의 5개년 신호등 매트릭스를 구성하는 중…'}</span>
         </div>
     `;
     document.body.appendChild(ctx.modalEl);

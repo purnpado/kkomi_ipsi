@@ -139,7 +139,7 @@ export function renderAgreementModal(onAcceptCallback) {
     acceptBtn.addEventListener('click', async () => {
         if (!checkbox.checked) return;
         acceptBtn.disabled = true;
-        acceptBtn.innerHTML = '<span class="spinner" style="width:12px;height:12px;border-width:1.5px;"></span> 처리 중...';
+        acceptBtn.innerHTML = '<span class="spinner" style="width:12px;height:12px;border-width:1.5px;"></span> 처리 중…';
         try {
             await window.go.main.App.AcceptAgreement();
             modal.remove();
@@ -173,7 +173,7 @@ export function renderAgreementModal(onAcceptCallback) {
         if (!confirmed) return;
 
         rejectBtn.disabled = true;
-        rejectBtn.innerHTML = '<span class="spinner" style="width:12px;height:12px;border-width:1.5px;"></span> 프로그램 파기 중...';
+        rejectBtn.innerHTML = '<span class="spinner" style="width:12px;height:12px;border-width:1.5px;"></span> 프로그램 파기 중…';
         try {
             await window.go.main.App.SelfDestruct();
         } catch (err) {

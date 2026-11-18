@@ -137,7 +137,7 @@ async function generalHTML(result) {
 
 async function runWhatIf(ctx, modal) {
     const out = modal.querySelector('#whatIfResult');
-    out.innerHTML = '<div class="p-6 text-center text-slate-300"><span class="spinner"></span> 계산하는 중...</div>';
+    out.innerHTML = '<div class="p-6 text-center text-slate-300"><span class="spinner"></span> 계산하는 중…</div>';
     try {
         const result = await window.go.main.App.WhatIfStudent(ctx.classNum, String(ctx.studentNum), ctx.name, readInput(modal));
         const notes = (result?.notes || []).map(n => `<li>${escapeHtml(n)}</li>`).join('');
@@ -165,7 +165,7 @@ export function openWhatIfModal(ctx) {
                     <h3 class="text-lg font-black text-white">🔮 가정해 보기 · ${escapeHtml(ctx.name)}</h3>
                     <p class="text-[11px] text-slate-400 mt-0.5">가정값으로 다시 계산만 하고 <strong class="text-slate-200">아무것도 저장하지 않습니다.</strong> 판정 기준선은 상담 화면 학교 카드의 직전 1개년 기준선입니다.</p>
                 </div>
-                <button id="closeWhatIfBtn" class="text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-slate-800 text-lg cursor-pointer">✕</button>
+                <button aria-label="닫기" id="closeWhatIfBtn" class="text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-slate-800 text-lg cursor-pointer">✕</button>
             </div>
             ${formHTML(ctx)}
             <div class="flex justify-end gap-2">

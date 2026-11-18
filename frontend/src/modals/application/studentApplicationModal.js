@@ -18,7 +18,7 @@ async function prepareApplicationModal(ctx) {
     ctx.modal = document.createElement('div');
     ctx.modal.id = 'studentApplicationModal';
     ctx.modal.className = 'fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto';
-    ctx.modal.innerHTML = `<div class="glass-card p-7 w-full max-w-3xl"><span class="spinner"></span> 지원 현황을 불러오는 중...</div>`;
+    ctx.modal.innerHTML = `<div class="glass-card p-7 w-full max-w-3xl"><span class="spinner"></span> 지원 현황을 불러오는 중…</div>`;
     document.body.appendChild(ctx.modal);
 
     ctx.closeModal = () => {

@@ -49,7 +49,7 @@ export function renderFirstRunScreen() {
         const button = document.getElementById('firstRunDistributionImportBtn');
         try {
             button.disabled = true;
-            button.textContent = '배포자료 적용 중...';
+            button.textContent = '배포자료 적용 중…';
             const imported = await importDistributionWithPreservation();
             if (!imported) return;
             const { username, summary } = imported;
@@ -66,7 +66,7 @@ export function renderFirstRunScreen() {
         const button = document.getElementById('firstRunPasswordResetBtn');
         try {
             button.disabled = true;
-            button.textContent = '재설정 파일 적용 중...';
+            button.textContent = '재설정 파일 적용 중…';
             const username = await window.go.main.App.OpenPasswordResetPackage();
             if (!username) return;
             await showModalAlert(`'${username}' 계정의 비밀번호 재설정 파일을 적용했습니다.\n기존 학급 상담 데이터는 안전하게 보존되며, 새 비밀번호로 로그인하세요.`, '비밀번호 재설정 완료', 'success');
@@ -108,21 +108,21 @@ export function renderSetupScreen(existingConfig = null) {
                     <datalist id="schoolList">
                         ${middleSchools.map(school => `<option value="${school}"></option>`).join('')}
                     </datalist>
-                    <div id="schoolNameError" class="error-msg">학교명을 입력해 주세요.</div>
+                    <div id="schoolNameError" role="alert" class="error-msg">학교명을 입력해 주세요.</div>
                 </div>
 
                 <div>
                     <label class="block text-sm font-semibold text-text-muted mb-2">3학년 학급수</label>
                     <input type="number" id="classCount" class="input-field"
                         placeholder="예: 8" value="${classCount}" min="1" max="30" autocomplete="off" required />
-                    <div id="classCountError" class="error-msg">학급수는 1~30 사이로 입력해 주세요.</div>
+                    <div id="classCountError" role="alert" class="error-msg">학급수는 1~30 사이로 입력해 주세요.</div>
                 </div>
 
                 <div>
                     <label class="block text-sm font-semibold text-text-muted mb-2">고입 학년도 (고교 입학 연도)</label>
                     <input type="text" inputmode="numeric" id="admissionYear" class="input-field" value="${admissionYear}" maxlength="4" required />
                     <p class="text-xs text-text-muted mt-1">${admissionYearHint(currentAdmissionYear())}. 화면에는 "${admissionLabel(currentAdmissionYear())}"처럼 표시됩니다.</p>
-                    <div id="admissionYearError" class="error-msg">고입 학년도는 2000~2100 사이로 입력해 주세요.</div>
+                    <div id="admissionYearError" role="alert" class="error-msg">고입 학년도는 2000~2100 사이로 입력해 주세요.</div>
                 </div>
 
                 <div class="flex items-center gap-2 mt-2">
@@ -134,27 +134,27 @@ export function renderSetupScreen(existingConfig = null) {
                     <label class="block text-sm font-semibold text-text-muted mb-2">마스터(학년부장) 비밀번호</label>
                     <input type="password" id="adminPassword" class="input-field"
                         placeholder="마스터 계정 (admin) 진입 시 사용됩니다" autocomplete="off" required />
-                    <div id="passwordError" class="error-msg">비밀번호를 입력해 주세요.</div>
+                    <div id="passwordError" role="alert" class="error-msg">비밀번호를 입력해 주세요.</div>
                 </div>
 
                 <div>
                     <label class="block text-sm font-semibold text-text-muted mb-2">비밀번호 확인</label>
                     <input type="password" id="adminPasswordConfirm" class="input-field"
                         placeholder="비밀번호를 한 번 더 입력하세요" autocomplete="off" required />
-                    <div id="passwordConfirmError" class="error-msg">비밀번호가 일치하지 않습니다.</div>
+                    <div id="passwordConfirmError" role="alert" class="error-msg">비밀번호가 일치하지 않습니다.</div>
                 </div>
 
                 <div>
                     <label class="block text-sm font-semibold text-text-muted mb-2">공용 데이터 암호</label>
                     <input type="password" id="sharedDataPassword" class="input-field" placeholder="data 폴더 수령 교사가 최초 1회 입력" autocomplete="off" required />
                     <p class="text-xs text-text-muted mt-1">개인 로그인 비밀번호와 별도이며, 전달되는 data 폴더의 AES 잠금을 엽니다.</p>
-                    <div id="sharedDataPasswordError" class="error-msg">공용 데이터 암호를 입력해 주세요.</div>
+                    <div id="sharedDataPasswordError" role="alert" class="error-msg">공용 데이터 암호를 입력해 주세요.</div>
                 </div>
 
                 <div class="pt-3">
                     <button type="submit" id="saveBtn" class="btn-primary">설정 완료</button>
                 </div>
-                <div id="generalError" class="error-msg text-center"></div>
+                <div id="generalError" role="alert" class="error-msg text-center"></div>
             </form>
 
             ${isEdit ? `
@@ -205,7 +205,7 @@ export async function handleSetupSubmit(isEdit = false) {
     if (hasError) return;
 
     saveBtn.disabled = true;
-    saveBtn.innerHTML = '<span class="spinner"></span>저장 중...';
+    saveBtn.innerHTML = '<span class="spinner"></span>저장 중…';
 
     try {
         await window.go.main.App.SetupApp({
@@ -239,7 +239,7 @@ export function renderSyncScreen(schoolName) {
             <div class="text-center mb-8">
                 <div class="text-4xl mb-4 sync-icon">🔄</div>
                 <h1 class="text-xl font-bold text-white mb-2">서버 동기화</h1>
-                <p class="text-text-muted text-sm">Gitea 서버에서 데이터를 받아오는 중입니다...</p>
+                <p class="text-text-muted text-sm">Gitea 서버에서 데이터를 받아오는 중입니다…</p>
             </div>
 
             <!-- 동기화 단계 표시 -->
@@ -268,7 +268,7 @@ export function renderSyncScreen(schoolName) {
             </div>
 
             <!-- 결과 영역 (동기화 완료 후 표시) -->
-            <div id="syncResult" class="hidden mt-6"></div>
+            <div id="syncResult" role="status" aria-live="polite" class="hidden mt-6"></div>
         </div>
     `;
 
@@ -287,7 +287,7 @@ export async function performSync(schoolName) {
         await delay(800);
         updateSyncStep(stepConnect, 'success', '서버 연결 완료', '✅');
 
-        updateSyncStep(stepSchools, 'loading', '다운로드 중...', null);
+        updateSyncStep(stepSchools, 'loading', '다운로드 중…', null);
         await delay(300);
 
         const result = await SyncWithServer();
@@ -296,7 +296,7 @@ export async function performSync(schoolName) {
             updateSyncStep(stepSchools, 'success', `${result.schoolCount}개 고교 정보 저장 완료`, '✅');
             await delay(500);
 
-            updateSyncStep(stepVersion, 'loading', '확인 중...', null);
+            updateSyncStep(stepVersion, 'loading', '확인 중…', null);
             await delay(500);
 
             if (result.hasUpdate) {

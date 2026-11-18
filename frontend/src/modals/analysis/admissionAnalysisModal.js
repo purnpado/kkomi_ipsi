@@ -178,7 +178,7 @@ export async function openAdmissionAnalysisModal() {
                 <!-- 분석 결과 영역 컨테이너 -->
                 <div id="analysisContentContainer" class="space-y-6">
                     <div class="py-16 text-center text-slate-500">
-                        <span class="spinner"></span> 통계 데이터를 분석하는 중...
+                        <span class="spinner"></span> 통계 데이터를 분석하는 중…
                     </div>
                 </div>
 
@@ -248,14 +248,14 @@ export async function openAdmissionAnalysisModal() {
         }
         renderPreferencePanel(modal.querySelector('#analysisPreferenceContainer'), { year, school, track, isGeneral });
         if (isGeneral) {
-            container.innerHTML = '<div class="py-16 text-center text-slate-500"><span class="spinner"></span> 후기 일반고 관내 합격선을 계산하는 중...</div>';
+            container.innerHTML = '<div class="py-16 text-center text-slate-500"><span class="spinner"></span> 후기 일반고 관내 합격선을 계산하는 중…</div>';
             await renderGeneralCutoffPanel(container, year);
             return;
         }
 
         container.innerHTML = `
             <div class="py-16 text-center text-slate-500">
-                <span class="spinner"></span> ${escapeHtml(school)} ${dept ? `(${escapeHtml(dept)})` : ''} 데이터를 분석하는 중...
+                <span class="spinner"></span> ${escapeHtml(school)} ${dept ? `(${escapeHtml(dept)})` : ''} 데이터를 분석하는 중…
             </div>
         `;
 

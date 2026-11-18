@@ -49,7 +49,7 @@ export async function renderAddPublicDataModal(defaultYear, availableYears, onAd
                     <span class="text-xl">📊</span>
                     <h3 class="font-bold text-white text-base">공식 공개 입결자료 추가</h3>
                 </div>
-                <button id="closeAddPublicModalBtn" class="text-slate-400 hover:text-white p-1.5 rounded-lg text-base cursor-pointer transition-colors">✕</button>
+                <button aria-label="닫기" id="closeAddPublicModalBtn" class="text-slate-400 hover:text-white p-1.5 rounded-lg text-base cursor-pointer transition-colors">✕</button>
             </div>
 
             <div class="space-y-3.5 text-xs">
@@ -240,7 +240,7 @@ export async function renderAddPublicDataModal(defaultYear, availableYears, onAd
         depts.forEach(d => {
             deptHTML += `<option value="${d}">${d}</option>`;
         });
-        deptHTML += `<option value="__custom__">✏️ 직접 입력...</option>`;
+        deptHTML += `<option value="__custom__">✏️ 직접 입력…</option>`;
         deptSel.innerHTML = deptHTML;
         deptCustom.classList.add('hidden');
         deptCustom.value = '';

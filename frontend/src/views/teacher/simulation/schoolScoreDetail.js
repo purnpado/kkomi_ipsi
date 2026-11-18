@@ -77,7 +77,7 @@ export async function showSchoolScoreDetailModal(studentName, classNum, studentN
                         </p>
                     </div>
                 </div>
-                <button id="closeSchoolScoreDetailBtn" class="text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-slate-800 text-lg transition-all cursor-pointer">✕</button>
+                <button aria-label="닫기" id="closeSchoolScoreDetailBtn" class="text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-slate-800 text-lg transition-all cursor-pointer">✕</button>
             </div>
 
             <!-- 총점 요약 카드 (그라디언트) -->

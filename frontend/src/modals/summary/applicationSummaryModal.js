@@ -13,7 +13,7 @@ export async function openClassApplicationSummaryModal(classNum) {
     const modal = document.createElement('div');
     modal.id = 'classApplicationSummaryModal';
     modal.className = 'fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto';
-    modal.innerHTML = '<div class="glass-card p-7"><span class="spinner"></span> 우리 반 지원희망을 집계하는 중...</div>';
+    modal.innerHTML = '<div class="glass-card p-7"><span class="spinner"></span> 우리 반 지원희망을 집계하는 중…</div>';
     document.body.appendChild(modal);
 
     try {
@@ -85,7 +85,7 @@ export async function openClassApplicationSummaryModal(classNum) {
                     </div>
                     <div class="no-print flex items-center gap-2">
                         <button id="printClassSummary" class="btn-secondary px-3 py-2 text-sm cursor-pointer">🖨️ 인쇄 / PDF</button>
-                        <button id="closeClassApplicationSummary" class="text-3xl text-text-muted hover:text-white cursor-pointer transition-colors">×</button>
+                        <button aria-label="닫기" id="closeClassApplicationSummary" class="text-3xl text-text-muted hover:text-white cursor-pointer transition-colors">×</button>
                     </div>
                 </div>
                 <div class="overflow-auto max-h-[70vh] border border-slate-700 rounded-xl bg-slate-900/40">
@@ -149,7 +149,7 @@ export async function openApplicationSummaryModal() {
     const modal = document.createElement('div');
     modal.id = 'applicationSummaryModal';
     modal.className = 'fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-start justify-center p-4 sm:p-6 overflow-y-auto';
-    modal.innerHTML = '<div class="glass-card p-7 my-auto"><span class="spinner"></span> 우리 학교 지원현황을 집계하는 중...</div>';
+    modal.innerHTML = '<div class="glass-card p-7 my-auto"><span class="spinner"></span> 우리 학교 지원현황을 집계하는 중…</div>';
     document.body.appendChild(modal);
 
     const closeModal = () => {
@@ -265,7 +265,7 @@ export async function openApplicationSummaryModal() {
                         <p class="text-sm text-text-muted mt-1">학교-전형-학과별 1줄로 통합되어 지원 경향이 한눈에 파악되며, 지망 뱃지 클릭 시 학생 명단이 팝업됩니다.</p>
                     </div>
                     <div class="flex items-center gap-2">
-                        <button id="closeApplicationSummary" class="text-2xl text-slate-400 hover:text-white px-3 py-1 rounded-lg hover:bg-slate-700/50 transition-colors cursor-pointer" title="닫기 (ESC)">✕</button>
+                        <button aria-label="닫기" id="closeApplicationSummary" class="text-2xl text-slate-400 hover:text-white px-3 py-1 rounded-lg hover:bg-slate-700/50 transition-colors cursor-pointer" title="닫기 (ESC)">✕</button>
                     </div>
                 </div>
                 <div class="shrink-0 mb-3">${closeInfo}</div>
