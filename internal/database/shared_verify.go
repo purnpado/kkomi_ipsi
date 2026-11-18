@@ -16,6 +16,9 @@ import (
 // 기준값은 가상 오류를 섞은 검출률 측정(tools/verifysim, docs/shared-data-verification.md)으로 정했다(2026-11-18):
 // K=0.75·학과 최소 5건·학교 전체 최소 3건·IQR 최소폭 만점의 5%, 낮은 합격은 그보다 높은 점수의 1차 불합격(미배정)이
 // 다른 학교에 있을 때만 건다. 학교 8곳 기준 "크게 낮은 불합격자를 합격으로" 98.7% 검출, 정상 자료 확인 필요 0.1%, 오류 0%.
+// 재점검(2026-11-18, 현실형 가상 자료: 학과 정원·1·2지망 배정·미달·관내 50곳 중 일부만 참여): 그 "더 높은 1차 불합격"을
+// 같은 학과에서만 찾고(SharedRejectSameDept), 범위 밖 점수 원서를 비교 기준·근거에서 뺀다(SharedSkipBadRefs).
+// 학교 8곳 현실형 기준 정상 자료 확인 필요 0.7% → 0.0%(2지망 배정 합격 11.9% → 0%), 크게 낮은 뒤바뀜 87.8% → 87.0%.
 
 // SharedOutlierK 튀는 값 판정 폭: 비교 자료 사분위 범위(IQR)의 몇 배 밖이면 튄다고 볼지.
 var SharedOutlierK = 0.75
@@ -31,6 +34,12 @@ var SharedDeptMinRef = 5
 
 // SharedIQRFloor 사분위 범위가 이보다 좁으면(만점 대비) 이 폭으로 본다. 표본이 작고 점수가 촘촘할 때 정상 하위 합격자가 걸리는 것을 막는다.
 var SharedIQRFloor = 0.05
+
+// SharedRejectSameDept 낮은 합격의 근거가 되는 "더 높은 1차 불합격"을 같은 학과에서만 찾을지(학과를 적지 않은 불합격은 학교 전체 근거).
+var SharedRejectSameDept = true
+
+// SharedSkipBadRefs 범위 밖·학교명 오류·너무 낮은 점수 원서를 비교 기준과 근거에서 뺄지.
+var SharedSkipBadRefs = true
 
 // SharedVerifySchool 학교·학년도 파일 한 개의 점검 요약.
 type SharedVerifySchool struct {

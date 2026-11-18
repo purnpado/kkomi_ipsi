@@ -1,6 +1,7 @@
 package database
 
 import (
+	"os"
 	"testing"
 	"time"
 
@@ -194,5 +195,51 @@ func TestSharedVerifySimulationRecall(t *testing.T) {
 	}
 	if cleanErr != 0 || float64(cleanFlag)/float64(clean) > 0.03 {
 		t.Errorf("정상 자료 오탐: 오류 %d건, 전체 %d/%d", cleanErr, cleanFlag, clean)
+	}
+}
+
+// 현실형 가상 자료(학과 정원·1·2지망 배정·미달·관내 일부 학교만 참여): 2지망 배정 합격자를 걸지 않고, 크게 낮은 뒤바뀜은 대부분 잡는다.
+func TestSharedVerifyRealisticSimulation(t *testing.T) {
+	data, err := os.ReadFile("../../server-data/highschools.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	depts, err := LoadSimDepts(data, 2027)
+	if err != nil || len(depts) == 0 {
+		t.Fatalf("학과 정원: %v", err)
+	}
+	inj, det := 0, 0
+	clean, cleanFlag, second, secondFlag := 0, 0, 0, 0
+	for seed := int64(1); seed <= 6; seed++ {
+		dm := verifyTestDB(t)
+		for _, pkg := range BuildSimSharedPackages(SimConfig{Seed: seed, Schools: 8, Year: 2027, ErrorRate: 0.03, Realistic: true, DistrictSchools: 50, Depts: depts}) {
+			p := pkg
+			if _, err := dm.StoreSharedPackage(&p); err != nil {
+				t.Fatal(err)
+			}
+		}
+		report, err := dm.VerifySharedData()
+		if err != nil {
+			t.Fatal(err)
+		}
+		m, err := dm.EvaluateSimVerification(report)
+		if err != nil {
+			t.Fatal(err)
+		}
+		inj, det = inj+m.Injected["flip_far"], det+m.Detected["flip_far"]
+		clean, cleanFlag = clean+m.CleanCount, cleanFlag+m.CleanFlagged
+		second, secondFlag = second+m.CleanByKind["ok_2nd"], secondFlag+m.CleanFlagKind["ok_2nd"]
+		if m.CleanErrorFlag != 0 {
+			t.Errorf("정상 자료가 오류로 걸림: %d건", m.CleanErrorFlag)
+		}
+	}
+	if second == 0 || secondFlag != 0 {
+		t.Errorf("2지망 배정 합격자 %d명 중 %d명이 걸림", second, secondFlag)
+	}
+	if inj == 0 || float64(det)/float64(inj) < 0.75 {
+		t.Errorf("크게 낮은 불합격자를 합격으로: %d/%d만 검출", det, inj)
+	}
+	if float64(cleanFlag)/float64(clean) > 0.005 {
+		t.Errorf("정상 자료 확인 필요 %d/%d", cleanFlag, clean)
 	}
 }

@@ -133,7 +133,7 @@ func outlierIssues(records []verifyRecord, own []ownRef) []outlierHit {
 	}
 	for _, r := range records {
 		// 우리 학교 파일은 학급 자료(own)로 대신 넣어 두 번 세지 않는다.
-		if r.excluded || r.own || r.score <= 0 || !isAcceptedStatus(r.status) {
+		if r.excluded || r.own || r.score <= 0 || !isAcceptedStatus(r.status) || !plausibleScore(r) {
 			continue
 		}
 		addRef(r.year, r.high, r.track, r.dept, refScore{pkg: r.pkg, score: r.score})
@@ -143,17 +143,29 @@ func outlierIssues(records []verifyRecord, own []ownRef) []outlierHit {
 	}
 	// 점수로 떨어진 불합격(1차 불합격, 일반고 미배정): 낮은 합격이 "앞뒤가 맞지 않는지" 보는 데 쓴다.
 	// 미달이라 불합격자가 없으면 낮은 점수로 합격해도 정상이므로 걸지 않는다.
+	// 학과가 있으면 같은 학과(1지망으로 적힌 학과)의 불합격만 근거로 쓴다: 인기 학과 불합격자가 미달·2지망 배정 학과의
+	// 낮은 합격자보다 점수가 높은 것은 정상이다. 학과를 적지 않은 불합격은 학교 전체 근거로 함께 본다.
 	rejected := map[string][]refScore{}
 	for _, r := range records {
-		if r.excluded || r.score <= 0 || strings.TrimSpace(r.status) != "불합격" || (r.firstStage != "불합격" && r.high != GeneralHighSchoolKey) {
+		if r.excluded || r.score <= 0 || strings.TrimSpace(r.status) != "불합격" || (r.firstStage != "불합격" && r.high != GeneralHighSchoolKey) || !plausibleScore(r) {
 			continue
 		}
-		rejected[groupKey(r.year, r.high, r.track, "")] = append(rejected[groupKey(r.year, r.high, r.track, "")], refScore{pkg: r.pkg, score: r.score})
+		dept := r.dept
+		if !SharedRejectSameDept {
+			dept = ""
+		}
+		rejected[groupKey(r.year, r.high, r.track, dept)] = append(rejected[groupKey(r.year, r.high, r.track, dept)], refScore{pkg: r.pkg, score: r.score})
 	}
 	higherRejected := func(r verifyRecord) bool {
-		for _, ref := range rejected[groupKey(r.year, r.high, r.track, "")] {
-			if ref.pkg != r.pkg && ref.score > r.score {
-				return true
+		keys := []string{groupKey(r.year, r.high, r.track, "")}
+		if SharedRejectSameDept && r.dept != "" {
+			keys = append(keys, groupKey(r.year, r.high, r.track, r.dept))
+		}
+		for _, key := range keys {
+			for _, ref := range rejected[key] {
+				if ref.pkg != r.pkg && ref.score > r.score {
+					return true
+				}
 			}
 		}
 		return false
@@ -219,6 +231,15 @@ func outlierIssues(records []verifyRecord, own []ownRef) []outlierHit {
 		}
 	}
 	return hits
+}
+
+// plausibleScore 원서 한 건 점검에서 점수가 범위 밖·학교명 오류가 아닌지. 그런 원서는 비교 기준·근거에 넣지 않는다.
+func plausibleScore(r verifyRecord) bool {
+	if !SharedSkipBadRefs {
+		return true
+	}
+	max := sharedScoreMax(r.high, r.track)
+	return max > 0 && r.score <= max+0.01 && r.score >= SharedTooLowRatio*max
 }
 
 // quartiles 1·3사분위(선형 보간).

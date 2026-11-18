@@ -31,9 +31,14 @@ var SimErrorTypes = []struct{ Code, Name string }{
 // SimConfig 가상 자료 설정.
 type SimConfig struct {
 	Seed      int64
-	Schools   int     // 관내 학교 수
+	Schools   int     // 관내 학교 수(공유에 참여한 학교)
 	Year      int     // 고입 연도
 	ErrorRate float64 // 원서 한 건에 오류를 섞을 확률
+	// Realistic 현실형 생성기(shared_verify_sim_real.go): 학과 정원·1·2지망 배정·미달·일부 학교만 참여·학교별 편차·정원 외 합격.
+	Realistic       bool
+	DistrictSchools int       // 현실형: 관내 중학교 전체 수(이 중 Schools곳만 공유)
+	Depts           []SimDept // 현실형: 학과별 모집정원(LoadSimDepts)
+	RejectDeptAs2nd float64   // 현실형: 1차 불합격자의 학과를 1지망 대신 2지망으로 적는 비율(입력 관행 차이 견딤 시험)
 }
 
 type simTarget struct {
@@ -45,14 +50,19 @@ type simTarget struct {
 
 // BuildSimSharedPackages 학교별 가상 공유 파일을 만든다.
 func BuildSimSharedPackages(cfg SimConfig) []SharedPackageV2 {
+	if cfg.Realistic {
+		return buildRealSimPackages(cfg)
+	}
 	rng := rand.New(rand.NewSource(cfg.Seed))
 	var targets []simTarget
 	for _, rule := range calc.AllSchoolRules {
 		targets = append(targets, simTarget{high: rule.SchoolName, track: rule.TrackName, max: rule.TotalMax})
 	}
 	targets = append(targets, simTarget{high: GeneralHighSchoolKey, track: GeneralTrackKey, max: 200, general: true})
+	truth := map[string]float64{}
 	for i := range targets {
 		targets[i].cutoff = round2((0.55 + 0.3*rng.Float64()) * targets[i].max)
+		truth[simTruthKey(targets[i].high, targets[i].track, "")] = targets[i].cutoff
 	}
 	var pkgs []SharedPackageV2
 	for s := 0; s < cfg.Schools; s++ {
@@ -66,7 +76,7 @@ func BuildSimSharedPackages(cfg SimConfig) []SharedPackageV2 {
 				pkg.AnonymousRecords = append(pkg.AnonymousRecords, simRecord(rng, t, cfg))
 			}
 		}
-		injectSimErrors(rng, &pkg, targets, cfg)
+		injectSimErrorsWith(rng, &pkg, truth, cfg)
 		pkg.Cover.RecordCount = len(pkg.AnonymousRecords)
 		pkgs = append(pkgs, pkg)
 	}
@@ -98,11 +108,8 @@ func simRecord(rng *rand.Rand, t simTarget, cfg SimConfig) AnonymousApplicationR
 	return rec
 }
 
-func injectSimErrors(rng *rand.Rand, pkg *SharedPackageV2, targets []simTarget, cfg SimConfig) {
-	cutoff := map[string]float64{}
-	for _, t := range targets {
-		cutoff[t.high+"|"+t.track] = t.cutoff
-	}
+// injectSimErrorsWith truth: 실제 합격선(simTruthKey, 학과 → 학교 전체 순으로 찾음).
+func injectSimErrorsWith(rng *rand.Rand, pkg *SharedPackageV2, truth map[string]float64, cfg SimConfig) {
 	for i := range pkg.AnonymousRecords {
 		if rng.Float64() >= cfg.ErrorRate {
 			continue
@@ -113,7 +120,7 @@ func injectSimErrors(rng *rand.Rand, pkg *SharedPackageV2, targets []simTarget, 
 		switch kind {
 		case "flip_far", "flip_near":
 			// 조건에 맞는 불합격 원서를 이 학교 파일에서 골라 합격으로 바꾼다(없으면 섞지 않음).
-			j := pickFlipTarget(rng, pkg, cutoff, kind)
+			j := pickFlipTarget(rng, pkg, truth, kind)
 			if j < 0 {
 				continue
 			}
@@ -147,14 +154,18 @@ func injectSimErrors(rng *rand.Rand, pkg *SharedPackageV2, targets []simTarget, 
 }
 
 // pickFlipTarget 아직 오류를 섞지 않은 불합격 원서 중 합격선과의 차이가 조건에 맞는 것 하나.
-func pickFlipTarget(rng *rand.Rand, pkg *SharedPackageV2, cutoff map[string]float64, kind string) int {
+func pickFlipTarget(rng *rand.Rand, pkg *SharedPackageV2, truth map[string]float64, kind string) int {
 	var cands []int
 	for j, r := range pkg.AnonymousRecords {
 		if r.Status != "불합격" || r.ScoreBasis != "sim:ok" {
 			continue
 		}
 		max := sharedScoreMax(r.HighSchool, r.Track)
-		gap := cutoff[r.HighSchool+"|"+r.Track] - r.Score
+		line, ok := truth[simTruthKey(r.HighSchool, r.Track, r.Department)]
+		if !ok {
+			line = truth[simTruthKey(r.HighSchool, r.Track, "")]
+		}
+		gap := line - r.Score
 		if (kind == "flip_far" && gap >= 0.1*max) || (kind == "flip_near" && gap > 0 && gap <= 0.04*max) {
 			cands = append(cands, j)
 		}
@@ -174,11 +185,17 @@ type SimMetrics struct {
 	CleanCount     int            `json:"cleanCount"`
 	CleanFlagged   int            `json:"cleanFlagged"`   // 정상인데 무엇이든 걸린 수
 	CleanErrorFlag int            `json:"cleanErrorFlag"` // 정상인데 "오류"로 걸린 수
+	// 정상 원서 종류별(ok, ok_2nd = 2지망 배정 합격) 수와 걸린 수
+	CleanByKind   map[string]int `json:"cleanByKind"`
+	CleanFlagKind map[string]int `json:"cleanFlagKind"`
 }
+
+// simCleanKind 정상 자료 표시(sim:ok, sim:ok_*)인지.
+func simCleanKind(kind string) bool { return kind == "ok" || strings.HasPrefix(kind, "ok_") }
 
 // EvaluateSimVerification 점검 결과를 섞은 오류와 맞춰 본다.
 func (dm *DBManager) EvaluateSimVerification(report *SharedVerifyReport) (SimMetrics, error) {
-	m := SimMetrics{Injected: map[string]int{}, Detected: map[string]int{}}
+	m := SimMetrics{Injected: map[string]int{}, Detected: map[string]int{}, CleanByKind: map[string]int{}, CleanFlagKind: map[string]int{}}
 	flagged := map[int64]string{}
 	for _, is := range report.Issues {
 		if flagged[is.RecordID] != "error" {
@@ -199,10 +216,12 @@ func (dm *DBManager) EvaluateSimVerification(report *SharedVerifyReport) (SimMet
 			}
 			kind := strings.TrimPrefix(basis, "sim:")
 			level, hit := flagged[id]
-			if kind == "ok" {
+			if simCleanKind(kind) {
 				m.CleanCount++
+				m.CleanByKind[kind]++
 				if hit {
 					m.CleanFlagged++
+					m.CleanFlagKind[kind]++
 				}
 				if level == "error" {
 					m.CleanErrorFlag++
@@ -219,11 +238,15 @@ func (dm *DBManager) EvaluateSimVerification(report *SharedVerifyReport) (SimMet
 	return m, err
 }
 
-// SimErrorCodes 측정 표에 쓰는 오류 종류 순서.
+// SimErrorCodes 측정 표에 쓰는 오류 종류 순서(현실형 생성기의 정원 외 미표시 포함).
 func SimErrorCodes() []string {
-	codes := make([]string, 0, len(SimErrorTypes))
+	codes := make([]string, 0, len(SimErrorTypes)+1)
 	for _, t := range SimErrorTypes {
 		codes = append(codes, t.Code)
 	}
-	return codes
+	return append(codes, SimExtraUnmarked)
 }
+
+// SimExtraUnmarked 현실형 생성기: 정원 외 합격(특수교육대상자 등)을 통계 제외로 표시하지 않고 보낸 원서.
+// 실제 합격이지만 합격선 통계를 끌어내리므로 "확인 필요"로 걸리는 것이 바람직하다.
+const SimExtraUnmarked = "extra_unmarked"
