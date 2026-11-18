@@ -49,12 +49,12 @@ func (a *App) OpenPasswordResetPackage() (string, error) {
 // package. It is intentionally separate from password-reset packages.
 func (a *App) SaveDistributionPackage(username string) (string, error) {
 	if a.user == nil || a.user.Role != "master" {
-		return "", fmt.Errorf("교사용 배포 자료 생성은 학년부장 계정만 할 수 있습니다")
+		return "", fmt.Errorf("교사용 배포자료 생성은 학년부장 계정만 할 수 있습니다")
 	}
 	path, err := a.saveFileDialog(
-		"교사용 배포 자료 저장",
+		"교사용 배포자료 저장",
 		fmt.Sprintf("꼬미입시-%s-배포자료.kkomipkg", username),
-		"꼬미입시 교사용 배포 자료 (*.kkomipkg)",
+		"꼬미입시 교사용 배포자료 (*.kkomipkg)",
 		"*.kkomipkg",
 	)
 	if err != nil || path == "" {
@@ -70,8 +70,8 @@ func (a *App) SaveDistributionPackage(username string) (string, error) {
 // program. The recipient still supplies the shared password once on login.
 func (a *App) OpenDistributionPackage() (string, error) {
 	path, err := a.openFileDialog(
-		"교사용 배포 자료 선택",
-		"꼬미입시 교사용 배포 자료 (*.kkomipkg · 이전 버전 파일 포함)",
+		"교사용 배포자료 선택",
+		"꼬미입시 교사용 배포자료 (*.kkomipkg · 이전 버전 파일 포함)",
 		"*.kkomipkg;*.phgcpkg",
 	)
 	if err != nil || path == "" {
@@ -89,8 +89,8 @@ func (a *App) OpenDistributionPackageWithPassword(password string) (*exchange.Di
 		}
 	}
 	path, err := a.openFileDialog(
-		"교사용 배포 자료 선택",
-		"꼬미입시 교사용 배포 자료 (*.kkomipkg · 이전 버전 파일 포함)",
+		"교사용 배포자료 선택",
+		"꼬미입시 교사용 배포자료 (*.kkomipkg · 이전 버전 파일 포함)",
 		"*.kkomipkg;*.phgcpkg",
 	)
 	if err != nil || path == "" {

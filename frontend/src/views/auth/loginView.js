@@ -33,8 +33,8 @@ export function renderModeSelectScreen(schoolName) {
             <div class="grid grid-cols-2 gap-4 mb-6">
                 <div role="button" tabindex="0" class="mode-card" id="adminMode">
                     <span class="icon">👔</span>
-                    <div class="title">관리자 모드</div>
-                    <div class="desc">학년부장용<br/>엑셀 Import · 커트라인 관리</div>
+                    <div class="title">학년부장 모드</div>
+                    <div class="desc">학년부장용<br/>나이스 엑셀 올리기 · 커트라인 관리</div>
                     <div class="mt-2 text-xs text-text-muted">🔒 비밀번호 필요</div>
                 </div>
                 <div role="button" tabindex="0" class="mode-card" id="teacherMode">
@@ -88,8 +88,8 @@ export function renderAdminLoginScreen(schoolName, nextAction = 'adminDashboard'
         <div class="glass-card p-10 w-full max-w-sm fade-in" style="margin: 2rem;">
             <div class="text-center mb-8">
                 <div class="text-4xl mb-4">🔐</div>
-                <h1 class="text-xl font-bold text-white mb-2">관리자 인증</h1>
-                <p class="text-text-muted text-sm">관리자 비밀번호를 입력하세요</p>
+                <h1 class="text-xl font-bold text-white mb-2">학년부장 로그인</h1>
+                <p class="text-text-muted text-sm">학년부장 비밀번호를 입력하세요</p>
             </div>
 
             <form id="loginForm" class="space-y-5">
@@ -208,7 +208,7 @@ export async function renderLoginScreen(schoolName) {
                         <button type="button" id="distributionPackageImportBtn" 
                                 class="group w-full py-2.5 px-4 rounded-xl border border-emerald-500/40 bg-emerald-950/25 hover:bg-emerald-900/40 hover:border-emerald-400/70 transition-all duration-200 flex items-center justify-center gap-2 shadow-sm cursor-pointer active:scale-[0.99]">
                             <span class="text-base group-hover:scale-110 transition-transform">📦</span>
-                            <span class="font-bold text-emerald-300 text-xs tracking-wide">학년부장 배포 자료 가져오기 (.kkomipkg)</span>
+                            <span class="font-bold text-emerald-300 text-xs tracking-wide">학년부장 배포자료 가져오기 (.kkomipkg)</span>
                         </button>
                         <button type="button" id="passwordResetImportBtn" 
                                 class="group w-full py-2.5 px-4 rounded-xl border border-sky-500/40 bg-sky-950/25 hover:bg-sky-900/40 hover:border-sky-400/70 transition-all duration-200 flex items-center justify-center gap-2 shadow-sm cursor-pointer active:scale-[0.99]">
@@ -221,7 +221,7 @@ export async function renderLoginScreen(schoolName) {
                 <!-- 현재 설치된 버전 -->
                 <div class="mt-6 flex flex-col items-center justify-center text-xs text-text-muted gap-1.5">
                     <div>
-                        <span>현재 버전: <strong class="text-indigo-300 font-mono font-bold">v${localVer}</strong></span>
+                        <span>현재 버전: <strong class="text-indigo-300 num font-bold">v${localVer}</strong></span>
                     </div>
                     <div id="startupUpdateStatus" role="status" aria-live="polite" class="text-[11px] text-slate-400"></div>
                 </div>
@@ -241,7 +241,7 @@ export async function renderLoginScreen(schoolName) {
             const button = document.getElementById('distributionPackageImportBtn');
             try {
                 button.disabled = true;
-                button.innerHTML = '<span class="spinner" style="width:12px;height:12px;border-width:1.5px;"></span> <span class="text-xs font-bold text-emerald-200">배포 자료 적용 중…</span>';
+                button.innerHTML = '<span class="spinner" style="width:12px;height:12px;border-width:1.5px;"></span> <span class="text-xs font-bold text-emerald-200">배포자료 적용 중…</span>';
                 const imported = await importDistributionWithPreservation();
                 if (!imported) return;
                 const { username, summary } = imported;
@@ -253,12 +253,12 @@ export async function renderLoginScreen(schoolName) {
                 accountSelect.value = username;
                 await refreshSharedPasswordRequirement();
                 document.getElementById('loginPassword').focus();
-                await showModalAlert(`'${username}' 계정의 배포 자료를 적용했습니다.${summary ? '\n\n' + summary : ''}\n\n학년부장에게 받은 공용 데이터 암호와 초기 비밀번호로 처음 로그인하세요.`, '배포 자료 적용 완료', 'success');
+                await showModalAlert(`'${username}' 계정의 배포자료를 적용했습니다.${summary ? '\n\n' + summary : ''}\n\n학년부장에게 받은 공용 데이터 암호와 초기 비밀번호로 처음 로그인하세요.`, '배포자료 적용 완료', 'success');
             } catch (err) {
-                await showModalAlert('배포 자료 가져오기 실패: ' + err, '오류', 'error');
+                await showModalAlert('배포자료 가져오기 실패: ' + err, '오류', 'error');
             } finally {
                 button.disabled = false;
-                button.innerHTML = '<span class="text-base group-hover:scale-110 transition-transform">📦</span><span class="font-bold text-emerald-300 text-xs tracking-wide">학년부장 배포 자료 가져오기 (.kkomipkg)</span>';
+                button.innerHTML = '<span class="text-base group-hover:scale-110 transition-transform">📦</span><span class="font-bold text-emerald-300 text-xs tracking-wide">학년부장 배포자료 가져오기 (.kkomipkg)</span>';
             }
         });
 

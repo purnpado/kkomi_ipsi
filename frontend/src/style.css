@@ -51,6 +51,44 @@ body {
     --color-text-muted: #94a3b8;
 }
 
+/* ===== 디자인 기준 변수(styles/tokens.css)를 Tailwind 이름으로 =====
+   예: bg-kk-surface, text-kk-text-2, border-kk-line, text-kk-judge-safe, text-kk-3(13px).
+   inline 이라 라이트·다크 전환 때 변수 값이 그대로 따라간다. 쓰지 않은 이름은 CSS 에 들어가지 않는다. */
+@theme inline {
+    --color-kk-bg: var(--kk-bg);
+    --color-kk-surface: var(--kk-surface);
+    --color-kk-sunken: var(--kk-sunken);
+    --color-kk-line: var(--kk-line);
+    --color-kk-line-strong: var(--kk-line-strong);
+    --color-kk-text-strong: var(--kk-text-strong);
+    --color-kk-text-1: var(--kk-text-1);
+    --color-kk-text-2: var(--kk-text-2);
+    --color-kk-text-3: var(--kk-text-3);
+    --color-kk-accent: var(--kk-accent);
+    --color-kk-accent-fill: var(--kk-accent-fill);
+    --color-kk-on-fill: var(--kk-on-fill);
+    --color-kk-success: var(--kk-success);
+    --color-kk-warning: var(--kk-warning);
+    --color-kk-danger: var(--kk-danger);
+    --color-kk-judge-safe: var(--kk-judge-safe);
+    --color-kk-judge-safe-bg: var(--kk-judge-safe-bg);
+    --color-kk-judge-proper: var(--kk-judge-proper);
+    --color-kk-judge-proper-bg: var(--kk-judge-proper-bg);
+    --color-kk-judge-hope: var(--kk-judge-hope);
+    --color-kk-judge-hope-bg: var(--kk-judge-hope-bg);
+    --color-kk-judge-challenge: var(--kk-judge-challenge);
+    --color-kk-judge-challenge-bg: var(--kk-judge-challenge-bg);
+    --color-kk-judge-none: var(--kk-judge-none);
+    --color-kk-judge-none-bg: var(--kk-judge-none-bg);
+    --text-kk-1: var(--kk-fs-1);
+    --text-kk-2: var(--kk-fs-2);
+    --text-kk-3: var(--kk-fs-3);
+    --text-kk-4: var(--kk-fs-4);
+    --text-kk-5: var(--kk-fs-5);
+    --text-kk-6: var(--kk-fs-6);
+    --text-kk-display: var(--kk-fs-display);
+}
+
 /* ===== 플레이스홀더 색상 클래스 (LSP 린터 동일 CSS 속성 충돌 방지) ===== */
 .ph-subtle::placeholder {
     color: #94a3b8;

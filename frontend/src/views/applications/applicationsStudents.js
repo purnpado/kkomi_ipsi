@@ -41,7 +41,7 @@ export function studentsTableHTML(students, { showClass, canEdit }) {
     const rows = students.map((s) => `
         <tr class="border-t border-slate-700/50 hover:bg-slate-800/50">
             ${showClass ? `<td class="py-2 px-2 text-slate-400 whitespace-nowrap">${s.classNum}반</td>` : ''}
-            <td class="py-2 px-2 text-slate-400 font-mono">${escapeHtml(s.studentNum)}</td>
+            <td class="py-2 px-2 text-slate-400 num">${escapeHtml(s.studentNum)}</td>
             <td class="py-2 px-2 font-bold text-white whitespace-nowrap">${escapeHtml(s.name)}${transferBadge(s.classNum, s.studentNum, s.name)}</td>
             <td class="py-2 px-2"><div class="flex flex-wrap gap-1.5">${appChips(s.apps)}</div></td>
             <td class="py-2 px-2 text-right">

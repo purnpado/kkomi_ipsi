@@ -24,15 +24,15 @@ func (a *App) ImportPasswordResetPackage(inputPath string) (string, error) {
 	return exchange.ImportPasswordResetPackage(a.db, inputPath)
 }
 
-// ExportDistributionPackage 대상 교사의 학급 DB만 담은 배포 자료 생성
+// ExportDistributionPackage 대상 교사의 학급 DB만 담은 배포자료 생성
 func (a *App) ExportDistributionPackage(username, outputPath string) error {
 	if !a.isMaster() {
-		return fmt.Errorf("학년부장으로 로그인한 뒤에만 배포 자료를 만들 수 있습니다")
+		return fmt.Errorf("학년부장으로 로그인한 뒤에만 배포자료를 만들 수 있습니다")
 	}
 	return exchange.ExportDistributionPackage(a.db, a.dataKey, username, outputPath)
 }
 
-// ImportDistributionPackage 배포 자료를 현재 data 폴더에 가져오기
+// ImportDistributionPackage 배포자료를 현재 data 폴더에 가져오기
 func (a *App) ImportDistributionPackage(inputPath string) (string, error) {
 	return exchange.ImportDistributionPackage(a.db, inputPath)
 }

@@ -40,7 +40,7 @@ export async function renderUserManagementScreen(schoolName) {
                 <!-- 새 사용자 계정 추가 폼 -->
                 <div class="p-6 rounded-xl bg-slate-800/50 border border-slate-700/50">
                     <h3 class="font-bold mb-4 flex items-center gap-2 text-white text-base">
-                        <span>➕</span> 새 교사/관리자 계정 등록
+                        <span>➕</span> 새 계정 등록
                     </h3>
                     <form id="addUserForm" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3 items-end">
                         <div>
@@ -56,7 +56,7 @@ export async function renderUserManagementScreen(schoolName) {
                             <select id="newUserRole" class="input-field py-2 text-xs">
                                 <option value="viewer">진학/학년부장 (전체 조회)</option>
                                 <option value="homeroom">담임교사 (학급 담당)</option>
-                                <option value="master">관리자 (전체 관리)</option>
+                                <option value="master">학년부장 (전체 관리)</option>
                             </select>
                         </div>
                         <div>
@@ -94,7 +94,7 @@ export async function renderUserManagementScreen(schoolName) {
 
                 <!-- 계정 목록 -->
                 <div>
-                    <h3 class="font-bold mb-3 flex items-center gap-2 text-white text-base"><span>📋</span> 등록된 교사/관리자 계정 목록</h3>
+                    <h3 class="font-bold mb-3 flex items-center gap-2 text-white text-base"><span>📋</span> 등록된 계정 목록</h3>
                     <div class="bg-slate-900/50 rounded-xl border border-slate-700/50 overflow-hidden">
                         <table class="w-full text-left text-xs sm:text-sm">
                             <thead class="bg-slate-800/80 text-text-muted">
@@ -103,7 +103,7 @@ export async function renderUserManagementScreen(schoolName) {
                                     <th class="p-3.5 font-semibold">사용자 아이디</th>
                                     <th class="p-3.5 font-semibold">비번 상태</th>
                                     <th class="p-3.5 font-semibold text-center">비밀번호 재발급</th>
-                                    <th class="p-3.5 font-semibold text-center">교사용 배포 자료</th>
+                                    <th class="p-3.5 font-semibold text-center">교사용 배포자료</th>
                                     <th class="p-3.5 font-semibold text-center w-24">계정 삭제</th>
                                 </tr>
                             </thead>
@@ -209,7 +209,7 @@ export async function renderUserManagementScreen(schoolName) {
 
             users.forEach(u => {
                 const isInitial = u.MustChangePassword;
-                let roleLabel = '학년부장 (관리자)';
+                let roleLabel = '학년부장';
                 if (u.Role === 'homeroom') roleLabel = `${u.ClassNum}반 담임`;
                 else if (u.Role === 'viewer') roleLabel = '진로부장 (조회전용)';
 
@@ -236,7 +236,7 @@ export async function renderUserManagementScreen(schoolName) {
                     <td class="p-3.5 text-center">
                         ${isMasterAdmin
                         ? '<span class="text-xs text-slate-600 font-bold">해당 없음</span>'
-                        : `<button type="button" class="text-xs text-indigo-200 hover:text-white font-bold px-2 py-1 rounded bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-400/30 transition-colors btn-dist-pkg">배포 자료 만들기</button>`
+                        : `<button type="button" class="text-xs text-indigo-200 hover:text-white font-bold px-2 py-1 rounded bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-400/30 transition-colors btn-dist-pkg">배포자료 만들기</button>`
                     }
                     </td>
                     <td class="p-3.5 text-center">
@@ -307,7 +307,7 @@ export async function renderUserManagementScreen(schoolName) {
                     }
                     await showModalAlert(`비밀번호가 설정되고 재설정 파일이 만들어졌습니다.\n담임에게 프로그램과 함께 다음 파일을 전달하세요.\n\n${resetPath}`, '재설정 파일 생성 완료', 'success');
                 } else {
-                    await showModalAlert('관리자 비밀번호가 변경되었습니다. 다음 로그인부터 새 비밀번호를 사용하세요.', '비밀번호 변경 완료', 'success');
+                    await showModalAlert('학년부장 비밀번호가 변경되었습니다. 다음 로그인부터 새 비밀번호를 사용하세요.', '비밀번호 변경 완료', 'success');
                 }
                 if (inputEl) inputEl.value = '';
                 loadUserList();
@@ -337,8 +337,8 @@ export async function renderUserManagementScreen(schoolName) {
 
     window.createDistributionPackage = async (username) => {
         const confirmed = await showModalConfirm({
-            title: '배포 자료 생성',
-            message: `'${username}' 계정용 교사용 배포 자료를 만들까요?\n\n담임용 자료에는 해당 반 DB만, 진로부장용 자료에는 조회용 전체 학급 DB가 포함됩니다. 관리자 계정과 다른 담임 계정은 포함되지 않습니다.`,
+            title: '배포자료 생성',
+            message: `'${username}' 계정용 교사용 배포자료를 만들까요?\n\n담임용 자료에는 해당 반 DB만, 진로부장용 자료에는 조회용 전체 학급 DB가 포함됩니다. 학년부장 계정과 다른 담임 계정은 포함되지 않습니다.`,
             confirmText: '생성하기',
             type: 'info'
         });
@@ -346,9 +346,9 @@ export async function renderUserManagementScreen(schoolName) {
         try {
             const path = await window.go.main.App.SaveDistributionPackage(username);
             if (!path) return;
-            await showModalAlert(`'${username}' 계정용 배포 자료 생성이 완료되었습니다!\n\n📂 저장 위치:\n${path}\n\n💡 [안내 사항]\n• 담임 선생님께 프로그램 실행 파일과 위 배포 자료(.kkomipkg), 그리고 학년부장의 [공용 데이터 암호]를 함께 전달해 주세요.\n• 담임 선생님은 로그인 화면에서 ‘배포 자료 가져오기’를 누른 후, 공용 데이터 암호를 입력하여 안전하게 최초 로그인하실 수 있습니다.`, '배포 자료 준비 완료', 'success');
+            await showModalAlert(`'${username}' 계정용 배포자료 생성이 완료되었습니다!\n\n📂 저장 위치:\n${path}\n\n💡 [안내 사항]\n• 담임 선생님께 프로그램 실행 파일과 위 배포자료(.kkomipkg), 그리고 학년부장의 [공용 데이터 암호]를 함께 전달해 주세요.\n• 담임 선생님은 로그인 화면에서 ‘배포자료 가져오기’를 누른 후, 공용 데이터 암호를 입력하여 안전하게 최초 로그인하실 수 있습니다.`, '배포자료 준비 완료', 'success');
         } catch (err) {
-            await showModalAlert('배포 자료 생성 실패: ' + err, '오류', 'error');
+            await showModalAlert('배포자료 생성 실패: ' + err, '오류', 'error');
         }
     };
 

@@ -311,7 +311,7 @@ export async function openAdmissionAnalysisModal() {
                         <div class="text-4xl">📭</div>
                         <h3 class="text-base font-bold text-slate-300">해당 조건의 분석 데이터가 없습니다</h3>
                         <p class="text-xs text-slate-500 max-w-md mx-auto">
-                            선택하신 [${escapeHtml(school)} · ${escapeHtml(dept || '전체')} · ${escapeHtml(trackLabel(track))}] 조건의 ${currentSourceMode === 'consolidated' ? '관내 공유 자료가 없습니다. 관내 공유 파일을 가져왔는지 확인해 주세요.' : '우리 학교 원서 자료가 없습니다. 지원 현황과 고입 연도를 확인해 주세요.'}
+                            선택하신 [${escapeHtml(school)} · ${escapeHtml(dept || '전체')} · ${escapeHtml(trackLabel(track))}] 조건의 ${currentSourceMode === 'consolidated' ? '관내 공유 자료가 없습니다. 관내 공유 파일을 가져왔는지 확인해 주세요.' : '우리 학교 원서 자료가 없습니다. 지원현황과 고입 연도를 확인해 주세요.'}
                         </p>
                     </div>
                 `;

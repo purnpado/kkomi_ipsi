@@ -211,7 +211,7 @@ export async function openPredictionDetailModal(classNum, studentNum, studentNam
                 return `
                     <tr class="border-b border-slate-700/40 hover:bg-slate-800/50 transition-colors text-center text-xs">
                         ${yearSpans[idx] > 0 ? `
-                            <td rowspan="${yearSpans[idx]}" class="p-3 text-center font-bold text-amber-300/90 font-mono bg-slate-900/40 border-r border-slate-700/60 align-middle whitespace-nowrap">
+                            <td rowspan="${yearSpans[idx]}" class="p-3 text-center font-bold text-amber-300/90 num bg-slate-900/40 border-r border-slate-700/60 align-middle whitespace-nowrap">
                                 ${admissionLabel(item.year)}
                             </td>
                         ` : ''}
@@ -285,7 +285,7 @@ export async function openPredictionDetailModal(classNum, studentNum, studentNam
                         </div>
                         <div class="grid grid-cols-3 gap-2 text-center pt-1">
                             <div class="bg-slate-900/70 p-2.5 rounded-lg border border-slate-700/50">
-                                <div class="text-[11px] text-slate-400 font-medium">석차 백분율</div>
+                                <div class="text-[11px] text-slate-400 font-medium">석차백분율</div>
                                 <div class="text-base font-black text-emerald-400 mt-0.5">${displayPercentile}</div>
                             </div>
                             <div class="bg-slate-900/70 p-2.5 rounded-lg border border-slate-700/50">
@@ -325,7 +325,7 @@ export async function openPredictionDetailModal(classNum, studentNum, studentNam
                         </button>
                     </div>
                     <div class="text-xs text-text-muted flex items-center gap-3">
-                        <span>🟢 안정 · 🟡 적정 · 🟠 소신 · 🔴 어려움</span>
+                        <span>🟢 안정 · 🔵 적정 · 🟠 소신 · 🔴 어려움</span>
                         <span class="text-slate-500">${judgmentSummaryText()}</span>
                     </div>
                 </div>

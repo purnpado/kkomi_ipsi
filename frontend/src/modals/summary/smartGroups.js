@@ -23,7 +23,7 @@ export function openApplicantDetailModal(title, students) {
                 <td class="p-2.5 text-center font-bold text-white">${escapeHtml(s.classNum)}반 ${escapeHtml(s.studentNum)}번</td>
                 <td class="p-2.5 text-left font-black text-indigo-200 pl-4">${escapeHtml(s.studentName)}</td>
                 <td class="p-2.5 text-center font-semibold text-sky-300">${s.prefRank ? `${s.prefRank}지망` : (s.assignedDepartment ? `배정 (${escapeHtml(s.assignedDepartment)})` : '-')}</td>
-                <td class="p-2.5 text-right font-mono font-bold text-amber-300 pr-4">${s.score ? s.score.toFixed(2) : '-'}</td>
+                <td class="p-2.5 text-right num font-bold text-amber-300 pr-4">${s.score ? s.score.toFixed(2) : '-'}</td>
                 <td class="p-2.5 text-center">${statusBadge}</td>
             </tr>
         `;

@@ -63,6 +63,7 @@ Gitea 원본을 복제한 뒤 다음 개발 도구를 설치해야 합니다.
 - `frontend/src/core/`: `eventBus.js`(이벤트 버스), `navigation.js`(navigate·openModal·변경 알림 발행 함수), `store.js`(중앙 상태 저장소), `wailsBridge.js`(Wails v3에서 `window.go.main.App.*` 호환), `dialogs.js`, `screenLock.js`, `updater.js`
 - `frontend/src/views/auth/`, `views/admin/`(나이스 자료·학년도 관리 `dashboardView.js`+`manage/`, 계정·취합 병합·`cutoff/` 커트라인), `views/teacher/`(학급 명렬표·`studentList/`·`counsel/` 1:1 상담·`simulation/` 합격 예측), `views/home/`(역할별 대시보드: 학년부장·담임·진로부장): 메뉴별 화면
 - 공통 틀(v1.7.0 화면 개편, 설계 `docs/ui-redesign-plan.md`): `core/appShell.js`(위쪽 막대)·`core/shellMenu.js`(역할별 왼쪽 메뉴)·`core/shellSearch.js`(학생 검색)·`core/preferences.js`(라이트/다크·글꼴)·`core/panelScreen.js`(창 모듈을 화면 안에 띄움: 입시 분석·매트릭스·지원현황·원서대장·관내 공유·상담), `core/transferBadges.js`(전입생 뱃지). 라이트 모드는 `styles/theme-light-colors.css`가 Tailwind 색 이름을 바꿔 적용하므로 화면 코드의 색 이름은 다크 기준으로 둔다. 사용 설명서 본문은 `modals/guide/`.
+- 화면 기준: `docs/design-standards.md`(색 이름표·글자 크기 단계·숫자 `.num`·선 아이콘·용어표)와 변수 `frontend/src/styles/tokens.css`. 새 화면은 이 변수(`kk-*`)와 용어표를 쓰고, 색 값을 바꾸면 `node tools/design/check-contrast.mjs`로 대비를 확인한다.
 - 화면 확인: `zsh tools/capture/run.sh`(서버 모드 + 설치된 Chrome으로 역할별 주요 화면을 라이트·다크로 찍음, 가상 시뮬레이션 자료 사본만 사용, 결과 `test-data/capture/latest/`). 화면을 고친 뒤 찍어서 직접 확인한다.
 - `frontend/src/modals/`(`summary/`, `application/`, `analysis/`, `matrix/`), `frontend/src/styles/`(`app.css`가 `@import`): 모달과 스타일
 - 화면·모달 모듈끼리는 서로 직접 import 하지 않고 `core/navigation.js`의 발행 함수로 요청합니다. 새 화면·모달은 `main.js`의 라우팅 표에 등록합니다.

@@ -9,8 +9,8 @@ import { state } from '../../core/store.js';
 import { admissionLabel, admissionYearHint, currentAdmissionYear } from '../../core/admissionYear.js';
 import { importDistributionWithPreservation } from './distributionImport.js';
 
-// 새 프로그램 폴더의 첫 화면. 새 학교 설정과 학년부장 배포 자료 적용을
-// 명확히 분리해, data 폴더가 없는 담임 PC에서도 배포 자료를 가져올 수 있다.
+// 새 프로그램 폴더의 첫 화면. 새 학교 설정과 학년부장 배포자료 적용을
+// 명확히 분리해, data 폴더가 없는 담임 PC에서도 배포자료를 가져올 수 있다.
 export function renderFirstRunScreen() {
     const app = getAppRoot();
     app.className = '';
@@ -96,7 +96,7 @@ export function renderSetupScreen(existingConfig = null) {
             <div class="text-center mb-8">
                 <div class="text-5xl mb-4" style="animation: float 3s ease-in-out infinite;">🏫</div>
                 <h1 class="text-2xl font-bold text-white mb-2">꼬미입시 🏫 초기 설정</h1>
-                <p class="text-text-muted text-sm">관리자(학년부장)가 최초 1회 설정합니다</p>
+                <p class="text-text-muted text-sm">학년부장이 처음 한 번 설정합니다</p>
             </div>
 
             <!-- 설정 폼 -->

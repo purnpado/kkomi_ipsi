@@ -134,7 +134,7 @@ export function defineMatrixRows(ctx, mx) {
         let rowsHTML = '';
         filtered.forEach(s => {
             const getBadge = (schoolItem) => {
-                if (!s || !s.schoolResults) return '<span class="text-slate-600 font-mono text-xs">-</span>';
+                if (!s || !s.schoolResults) return '<span class="text-slate-600 num text-xs">-</span>';
                 const targetNorm = normalizeSchoolName(schoolItem.fullName);
                 let r = null;
                 if (trackMode === 'special') {
@@ -143,7 +143,7 @@ export function defineMatrixRows(ctx, mx) {
                 if (!r) {
                     r = s.schoolResults.find(x => normalizeSchoolName(x.schoolName) === targetNorm && x.trackName.includes('일반'));
                 }
-                if (!r) return '<span class="text-slate-600 font-mono text-xs">-</span>';
+                if (!r) return '<span class="text-slate-600 num text-xs">-</span>';
 
                 const cutoffVal = mx.getSchoolCutoffVal(schoolItem.fullName, trackMode, yearMode);
                 const score = Number(r.totalScore || 0);
@@ -156,7 +156,7 @@ export function defineMatrixRows(ctx, mx) {
                     const result = judgeScore({ score, cutoff: cutoffVal, totalMax: r.totalMax, schoolName: r.schoolName, track: r.trackName, source, year: basis?.year, department: basis?.department });
                     return judgmentBadge(result, { text: `${result.emoji} ${scoreStr}`, compact: true });
                 }
-                return `<span class="text-slate-300 font-mono font-medium text-[11px] whitespace-nowrap">${scoreStr}</span>`;
+                return `<span class="text-slate-300 num font-medium text-[11px] whitespace-nowrap">${scoreStr}</span>`;
             };
 
             const generalBadge = getGeneralGuideBadge(s.generalHSPercentile);
@@ -164,15 +164,15 @@ export function defineMatrixRows(ctx, mx) {
 
             rowsHTML += `
                     <tr class="hover:bg-slate-800/70 border-b border-slate-700/50 text-center transition-colors">
-                        <td class="px-1 py-1.5 text-indigo-300 font-bold font-mono text-xs whitespace-nowrap">
+                        <td class="px-1 py-1.5 text-indigo-300 font-bold num text-xs whitespace-nowrap">
                             <span class="px-1.5 py-0.5 rounded bg-indigo-950 border border-indigo-500/40">${s.classNum}반</span>
                         </td>
-                        <td class="px-1 py-1.5 text-slate-400 font-mono font-bold whitespace-nowrap text-xs">${s.studentNum}</td>
+                        <td class="px-1 py-1.5 text-slate-400 num font-bold whitespace-nowrap text-xs">${s.studentNum}</td>
                         <td role="button" tabindex="0" class="px-1.5 py-1.5 font-bold text-white cursor-pointer hover:text-indigo-300 hover:underline matrix-student-name transition-colors whitespace-nowrap text-xs"
                             data-class="${s.classNum}" data-num="${s.studentNum}" data-name="${s.name}" title="클릭하여 1:1 진학 상담 열기">
                             ${s.name}${transferBadge(s.classNum, s.studentNum, s.name)}
                         </td>
-                        <td class="px-1 py-1.5 text-indigo-300 font-bold font-mono text-xs whitespace-nowrap">${avgStr}</td>
+                        <td class="px-1 py-1.5 text-indigo-300 font-bold num text-xs whitespace-nowrap">${avgStr}</td>
                         ${mx.schoolKeywords.map(sch => `<td class="px-1 py-1.5 whitespace-nowrap text-center">${getBadge(sch)}</td>`).join('')}
                         <td class="px-2 py-1.5 font-bold whitespace-nowrap text-center">${generalBadge}</td>
                     </tr>

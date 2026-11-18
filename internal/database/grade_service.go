@@ -45,7 +45,7 @@ func (dm *DBManager) GetClassGrades(classNum int, isMaster bool) ([]calc.Student
 		return nil, fmt.Errorf("학생 데이터를 불러오는 중 오류 발생: %w", err)
 	}
 
-	// 2. 성적 산출 및 석차 백분율 계산
+	// 2. 성적 산출 및 석차백분율 계산
 	calcResults, err := calc.CalculateGrades(allStudents, config.IsSmallSchool)
 	if err != nil {
 		return nil, fmt.Errorf("성적 산출 중 오류 발생: %w", err)
@@ -155,7 +155,7 @@ func (dm *DBManager) GetStudentFullDetail(classNum int, studentNum, name string,
 		return nil, err
 	}
 
-	// 대시보드와 동일한 정확한 전교 석차 백분율 동기화
+	// 대시보드와 동일한 정확한 전교 석차백분율 동기화
 	classGrades, _ := dm.GetClassGrades(classNum, isMaster)
 	for _, cg := range classGrades {
 		if matchStudent(cg.StudentNum, cg.Name, studentNum, name) {
@@ -327,7 +327,7 @@ func (dm *DBManager) GetClassFullGrades(classNum int, isMaster bool) ([]calc.Stu
 	for _, s := range students {
 		full, err := calc.ParseStudentFullData(s)
 		if err == nil {
-			// 대시보드 표와 동일한 정확한 전교 석차 백분율 동기화
+			// 대시보드 표와 동일한 정확한 전교 석차백분율 동기화
 			for _, cg := range classGrades {
 				if matchStudent(cg.StudentNum, cg.Name, full.StudentNum, full.Name) {
 					full.GeneralHSPercentile = cg.Percentile

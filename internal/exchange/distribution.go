@@ -33,7 +33,7 @@ type DistributionPackageManifest struct {
 // other staff accounts are omitted.
 func ExportDistributionPackage(dm *database.DBManager, dataKey []byte, username, outputPath string) error {
 	if len(dataKey) != 32 {
-		return fmt.Errorf("학년부장으로 로그인한 뒤에만 배포 자료를 만들 수 있습니다")
+		return fmt.Errorf("학년부장으로 로그인한 뒤에만 배포자료를 만들 수 있습니다")
 	}
 	users, err := dm.GetUsers()
 	if err != nil {
@@ -195,7 +195,7 @@ func ImportDistributionPackageWithPassword(dm *database.DBManager, inputPath, pa
 func importDistributionPackage(dm *database.DBManager, inputPath, password string, merge bool) (*DistributionImportResult, error) {
 	reader, err := zip.OpenReader(inputPath)
 	if err != nil {
-		return nil, fmt.Errorf("배포 자료를 열 수 없습니다: %w", err)
+		return nil, fmt.Errorf("배포자료를 열 수 없습니다: %w", err)
 	}
 	defer reader.Close()
 	entries := map[string]*zip.File{}
@@ -207,7 +207,7 @@ func importDistributionPackage(dm *database.DBManager, inputPath, password strin
 	}
 	pkgFile := entries["package.json"]
 	if pkgFile == nil {
-		return nil, fmt.Errorf("배포 자료 정보가 없습니다")
+		return nil, fmt.Errorf("배포자료 정보가 없습니다")
 	}
 	pkgBytes, err := readZipEntry(pkgFile)
 	if err != nil {
@@ -215,10 +215,10 @@ func importDistributionPackage(dm *database.DBManager, inputPath, password strin
 	}
 	var manifest DistributionPackageManifest
 	if err := json.Unmarshal(pkgBytes, &manifest); err != nil {
-		return nil, fmt.Errorf("배포 자료 정보가 올바르지 않습니다")
+		return nil, fmt.Errorf("배포자료 정보가 올바르지 않습니다")
 	}
 	if (manifest.Format != "KKOMI-DEPLOYMENT-1" && manifest.Format != "PHGC-DEPLOYMENT-1") || manifest.Username == "" || (manifest.Role != "homeroom" && manifest.Role != "viewer") {
-		return nil, fmt.Errorf("지원하지 않는 배포 자료입니다")
+		return nil, fmt.Errorf("지원하지 않는 배포자료입니다")
 	}
 
 	// 안전장치: 현재 프로그램이 학년부장(master) 원본 관리자 데이터인 경우 실수로 덮어쓰는 것 방지
@@ -231,7 +231,7 @@ func importDistributionPackage(dm *database.DBManager, inputPath, password strin
 	for _, name := range manifest.Files {
 		file := entries[name]
 		if file == nil {
-			return nil, fmt.Errorf("배포 자료에 %s 파일이 없습니다", name)
+			return nil, fmt.Errorf("배포자료에 %s 파일이 없습니다", name)
 		}
 		data, err := readZipEntry(file)
 		if err != nil {

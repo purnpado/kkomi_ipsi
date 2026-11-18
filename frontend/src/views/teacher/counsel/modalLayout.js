@@ -84,7 +84,7 @@ export function renderStudentModalLayout(ctx) {
                                            value="${ctx.data.leadershipTerms || 0}" ${isViewer ? 'disabled' : ''}/>
                                     <span class="absolute right-2.5 top-2 text-[11px] text-slate-400 pointer-events-none">학기</span>
                                 </div>
-                                <span class="text-xs text-slate-400">= 가산점 <strong class="text-amber-300 font-mono">${Math.min(10, ((ctx.data.leadershipTerms || 0) * 2.5)).toFixed(1)}</strong>점</span>
+                                <span class="text-xs text-slate-400">= 가산점 <strong class="text-amber-300 num">${Math.min(10, ((ctx.data.leadershipTerms || 0) * 2.5)).toFixed(1)}</strong>점</span>
                             </div>
                             <p class="text-[10px] text-slate-400 mt-1">※ 반장·부반장·전교 학생회장·부회장 활동만 인정 (한 학기당 2.5점, 최대 4학기 10점)</p>
                         </section>
@@ -218,7 +218,7 @@ export function renderStudentModalLayout(ctx) {
                         <div class="grid grid-cols-1 sm:grid-cols-12 gap-3 items-center">
                             <div class="sm:col-span-4">
                                 <label class="block text-xs font-bold text-slate-300 mb-1">상담 날짜</label>
-                                <input type="date" id="counselDateInput" class="input-field w-full text-xs font-mono font-bold text-indigo-200 py-1.5" value="${ctx.todayDate}" required />
+                                <input type="date" id="counselDateInput" class="input-field w-full text-xs num font-bold text-indigo-200 py-1.5" value="${ctx.todayDate}" required />
                             </div>
                             <div class="sm:col-span-8">
                                 <label class="block text-xs font-bold text-slate-300 mb-1">상담 목표/관련 고교 (선택)</label>
@@ -248,7 +248,7 @@ export function renderStudentModalLayout(ctx) {
 
                         <!-- 액션 버튼 -->
                         <div class="flex items-center justify-between pt-1">
-                            <span class="text-[11px] text-slate-500 font-mono">단축키: Ctrl + Enter</span>
+                            <span class="text-[11px] text-slate-500 num">단축키: Ctrl + Enter</span>
                             <div class="flex items-center gap-2">
                                 <button type="button" id="cancelCounselEditBtn" class="btn-secondary text-xs px-3 py-1.5 font-semibold hidden">수정 취소</button>
                                 <button type="button" id="saveCounselBtn" class="btn-primary text-xs px-4 py-1.5 font-bold inline-flex items-center gap-1.5 shadow-md shadow-indigo-600/30 cursor-pointer">

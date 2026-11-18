@@ -21,7 +21,7 @@ async function loadStudentListData(ctx) {
         document.getElementById('teacherContent').innerHTML = `
             <div class="text-center py-20 text-warning">
                 <div class="text-4xl mb-4">📭</div>
-                ${ctx.classNum}반 학생 데이터가 없습니다. 관리자 모드에서 나이스 엑셀 파일을 업로드해 주세요.
+                ${ctx.classNum}반 학생 데이터가 없습니다. 학년부장이 나이스 엑셀 파일을 올리면 표시됩니다.
             </div>
         `;
         return { stop: true };

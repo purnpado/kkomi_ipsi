@@ -83,7 +83,7 @@ export function showStartupUpdateModal(result) {
                         <span class="px-2.5 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 text-[11px] font-bold border border-indigo-500/30">
                             NEW UPDATE
                         </span>
-                        <span class="text-xs text-slate-400 font-mono">
+                        <span class="text-xs text-slate-400 num">
                             v${currentVer} → <strong class="text-amber-300 font-bold">v${latestVer}</strong>
                         </span>
                     </div>

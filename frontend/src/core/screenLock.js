@@ -68,7 +68,7 @@ export const ScreenLockManager = {
         const user = state.currentUser;
         let userTitle = '교직원';
         if (user.Role === 'master') {
-            userTitle = '학년부장 (관리자)';
+            userTitle = '학년부장';
         } else if (user.Role === 'homeroom') {
             userTitle = `3학년 ${user.ClassNum}반 담임교사`;
         } else if (user.Role === 'viewer') {

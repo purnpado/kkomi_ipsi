@@ -132,7 +132,7 @@ export function defineStudentTableRenderer(ctx) {
 
                 tbody += `
                     <tr class="hover:bg-slate-800/70 transition-colors border-b border-slate-700/50">
-                        <td class="p-3.5 text-center font-mono font-bold text-slate-400">
+                        <td class="p-3.5 text-center num font-bold text-slate-400">
                             <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-slate-800 border border-slate-700 text-xs text-slate-300 shadow-inner">
                                 ${s.studentNum || '-'}
                             </span>

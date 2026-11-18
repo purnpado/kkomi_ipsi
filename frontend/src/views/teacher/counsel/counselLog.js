@@ -43,7 +43,7 @@ export function bindCounselRecords(ctx) {
                 <div class="p-3.5 rounded-xl bg-slate-900/80 border border-slate-700/70 hover:border-indigo-500/40 transition-all space-y-2 group shadow-sm">
                     <div class="flex items-center justify-between flex-wrap gap-2 pb-2 border-b border-slate-800/80">
                         <div class="flex items-center gap-2 flex-wrap">
-                            <span class="inline-flex items-center gap-1 text-[11px] px-2.5 py-0.5 rounded-full bg-indigo-950 text-indigo-300 border border-indigo-500/40 font-mono font-bold">
+                            <span class="inline-flex items-center gap-1 text-[11px] px-2.5 py-0.5 rounded-full bg-indigo-950 text-indigo-300 border border-indigo-500/40 num font-bold">
                                 📅 ${escapeHtml(r.counselDate)}
                             </span>
                             ${r.targetSchool ? `

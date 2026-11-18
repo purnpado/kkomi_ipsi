@@ -12,7 +12,7 @@ function rankCell(dept, rank) {
     if (r.length === 0) return '<span class="text-slate-600">-</span>';
     const count = r.reduce((s, x) => s + x.count, 0);
     const min = Math.min(...r.map(x => x.minScore).filter(v => v > 0));
-    return `<span class="text-white font-bold">${count}명</span> <span class="text-slate-400 font-mono">최저 ${fmt(min)}</span>`;
+    return `<span class="text-white font-bold">${count}명</span> <span class="text-slate-400 num">최저 ${fmt(min)}</span>`;
 }
 
 function verdict(dept, score, schoolMin) {

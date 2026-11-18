@@ -158,7 +158,7 @@ export async function renderAddPublicDataModal(defaultYear, availableYears, onAd
         const trk = (trackName || '').trim();
 
         if (sch.includes('일반고') || category === '후기 일반고') {
-            return '석차 백분율 (%) 기준';
+            return '석차백분율 (%) 기준';
         }
 
         if (sch.includes('마이스터') || sch.includes('울산마이스터')) {

@@ -48,7 +48,7 @@ export async function openJudgmentSettingsModal({ onSaved } = {}) {
                 <button aria-label="닫기" id="closeJudgmentSettings" class="text-3xl text-text-muted cursor-pointer">×</button>
             </div>
             <div class="rounded-xl border border-slate-700 p-4 bg-slate-900/40 text-xs text-slate-300 space-y-1">
-                <p>🟢 안정: 기준선 + 여유폭 이상 (불합격 최고점이 있으면 그보다 높아도 안정) · 🟡 적정: 기준선 이상(동점 포함)</p>
+                <p>🟢 안정: 기준선 + 여유폭 이상 (불합격 최고점이 있으면 그보다 높아도 안정) · 🔵 적정: 기준선 이상(동점 포함)</p>
                 <p>🟠 소신: 기준선 − 여유폭 이상 · 🔴 어려움: 그 미만</p>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-3">

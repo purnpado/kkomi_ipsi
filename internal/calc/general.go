@@ -159,7 +159,7 @@ func CalculateGrades(allStudents map[int][]parser.StudentExcelData, isSmallSchoo
 	for i := range results {
 		rank := ranks[i]
 
-		// 석차 백분율 = (개인석차 / 재적수) * 100 (소수 셋째자리 반올림)
+		// 석차백분율 = (개인석차 / 재적수) * 100 (소수 셋째자리 반올림)
 		percentile := (rank / baseCount) * 100
 		percentile = roundToTwoDecimals(percentile)
 

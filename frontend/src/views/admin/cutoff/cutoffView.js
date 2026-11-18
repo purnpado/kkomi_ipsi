@@ -150,7 +150,7 @@ async function loadCutoffScreenData(ctx) {
                 ...catalogSpecs,
                 {
                     name: '울산 후기 일반계고', category: 'general', categoryLabel: '후기 일반고',
-                    totalMax: '석차 백분율', scoreType: 'percentile', unit: '%', placeholder: '예: 85.00',
+                    totalMax: '석차백분율', scoreType: 'percentile', unit: '%', placeholder: '예: 85.00',
                     items: [{ dept: '공통', track: '일반' }],
                 },
             ];

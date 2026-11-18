@@ -20,7 +20,7 @@ export const DEFAULT_JUDGMENT_SETTINGS = Object.freeze({
 
 export const JUDGMENT_LEVELS = Object.freeze({
     safe: { label: '안정', emoji: '🟢', tone: 'emerald' },
-    proper: { label: '적정', emoji: '🟡', tone: 'indigo' },
+    proper: { label: '적정', emoji: '🔵', tone: 'indigo' },
     hope: { label: '소신', emoji: '🟠', tone: 'amber' },
     challenge: { label: '어려움', emoji: '🔴', tone: 'rose' },
     // 기준선이 "불합격 사례가 없는 합격 최저점"이고 학생 점수가 그보다 낮을 때

@@ -139,7 +139,7 @@ export async function openStudentTranscriptModal(classNum, studentNum, name) {
         // 테이블 행(TR) 생성
         let matrixRows = '';
         if (sortedSubjects.length === 0) {
-            matrixRows = `<tr><td colspan="6" class="p-8 text-center text-text-muted">업로드된 교과 성적 데이터가 없거나 성취평가 대상 과목이 없습니다.</td></tr>`;
+            matrixRows = `<tr><td colspan="6" class="p-8 text-center text-text-muted">올린 교과 성적 데이터가 없거나 성취평가 대상 과목이 없습니다.</td></tr>`;
         } else {
             sortedSubjects.forEach((subObj, rowIdx) => {
                 let tds = '';
@@ -159,7 +159,7 @@ export async function openStudentTranscriptModal(classNum, studentNum, name) {
                     const sc = subObj.scores['1-1'];
                     tds += `
                         <td class="p-2 border-l border-slate-700/60 text-center">
-                            ${sc ? `<div>${getAchieveBadge(sc.achieve)}</div>${sc.rawScore ? `<div class="text-[10px] text-slate-400 font-mono mt-0.5">${escapeHtml(sc.rawScore)}</div>` : ''}` : '<span class="text-slate-600">-</span>'}
+                            ${sc ? `<div>${getAchieveBadge(sc.achieve)}</div>${sc.rawScore ? `<div class="text-[10px] text-slate-400 num mt-0.5">${escapeHtml(sc.rawScore)}</div>` : ''}` : '<span class="text-slate-600">-</span>'}
                         </td>
                     `;
                 }
@@ -170,7 +170,7 @@ export async function openStudentTranscriptModal(classNum, studentNum, name) {
                     const sc = subObj.scores[semKey];
                     tds += `
                         <td class="p-2 border-l border-slate-700/60 text-center">
-                            ${sc ? `<div>${getAchieveBadge(sc.achieve)}</div>${sc.rawScore ? `<div class="text-[10px] text-slate-400 font-mono mt-0.5">${escapeHtml(sc.rawScore)}</div>` : ''}` : '<span class="text-slate-600">-</span>'}
+                            ${sc ? `<div>${getAchieveBadge(sc.achieve)}</div>${sc.rawScore ? `<div class="text-[10px] text-slate-400 num mt-0.5">${escapeHtml(sc.rawScore)}</div>` : ''}` : '<span class="text-slate-600">-</span>'}
                         </td>
                     `;
                 });
@@ -229,7 +229,7 @@ export async function openStudentTranscriptModal(classNum, studentNum, name) {
                         <div class="text-xl font-bold text-white">${data.rank}등 <span class="text-xs text-slate-400 font-normal">/ ${data.totalStudents}명</span></div>
                     </div>
                     <div class="p-3.5 rounded-xl bg-slate-800/60 border border-slate-700/50 text-center">
-                        <div class="text-xs text-text-muted mb-1">석차 백분율</div>
+                        <div class="text-xs text-text-muted mb-1">석차백분율</div>
                         <div class="text-xl font-bold text-indigo-300">${data.percentile.toFixed(2)}%</div>
                     </div>
                     <div class="p-3.5 rounded-xl bg-slate-800/60 border border-slate-700/50 text-center">
@@ -246,7 +246,7 @@ export async function openStudentTranscriptModal(classNum, studentNum, name) {
                         <h3 class="text-sm font-bold text-white flex items-center gap-1.5">
                             <span>📚</span> 전학년 학기별 교과 성적 매트릭스
                         </h3>
-                        <span class="text-[11px] text-slate-400 font-mono">성취도(원점수/과목평균)</span>
+                        <span class="text-[11px] text-slate-400 num">성취도(원점수/과목평균)</span>
                     </div>
                     <div class="overflow-x-auto rounded-xl border border-slate-700/50 bg-slate-900/40 custom-scrollbar">
                         <table class="w-full text-left border-collapse text-xs">

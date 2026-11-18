@@ -12,7 +12,7 @@ export function groupOptions(groups, selectedKey) {
 }
 
 function nameCell(s, showClass) {
-    return `${showClass ? `<span class="text-slate-400 mr-1">${s.classNum}반</span>` : ''}<span class="text-slate-400 font-mono mr-1">${escapeHtml(s.studentNum)}</span><strong class="text-white">${escapeHtml(s.name)}</strong>${transferBadge(s.classNum, s.studentNum, s.name)}`;
+    return `${showClass ? `<span class="text-slate-400 mr-1">${s.classNum}반</span>` : ''}<span class="text-slate-400 num mr-1">${escapeHtml(s.studentNum)}</span><strong class="text-white">${escapeHtml(s.name)}</strong>${transferBadge(s.classNum, s.studentNum, s.name)}`;
 }
 
 /** 학교별 결과 입력 영역 HTML */

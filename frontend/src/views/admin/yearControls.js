@@ -66,7 +66,7 @@ export function bindYearControls({ schoolName, classCount, rerender }) {
     document.getElementById('resetDataBtn')?.addEventListener('click', async () => {
         const confirmed = await showModalConfirm({
             title: '전체 데이터 초기화',
-            message: "정말 모든 데이터를 완전 초기화하시겠습니까?\n학교 설정과 업로드된 모든 성적 파일이 삭제되며 되돌릴 수 없습니다.",
+            message: "정말 모든 데이터를 완전 초기화하시겠습니까?\n학교 설정과 올린 모든 성적 파일이 삭제되며 되돌릴 수 없습니다.",
             confirmText: '완전 초기화',
             type: 'error'
         });

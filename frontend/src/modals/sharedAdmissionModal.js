@@ -334,8 +334,8 @@ function renderParticipatingSchoolsRows(schools) {
                 </td>
                 <td class="py-3 px-4 text-center">${admissionLabel(s.admissionYear)}</td>
                 <td class="py-3 px-4 text-center">${formatBadge}</td>
-                <td class="py-3 px-4 text-center font-mono font-medium text-slate-200">${s.recordCount}건</td>
-                <td class="py-3 px-4 text-right text-slate-400 font-mono text-[11px]">${dateStr}</td>
+                <td class="py-3 px-4 text-center num font-medium text-slate-200">${s.recordCount}건</td>
+                <td class="py-3 px-4 text-right text-slate-400 num text-[11px]">${dateStr}</td>
             </tr>
         `;
     }).join('');

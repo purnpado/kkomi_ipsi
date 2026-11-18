@@ -18,7 +18,7 @@ async function prepareApplicationModal(ctx) {
     ctx.modal = document.createElement('div');
     ctx.modal.id = 'studentApplicationModal';
     ctx.modal.className = 'fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto';
-    ctx.modal.innerHTML = `<div class="glass-card p-7 w-full max-w-3xl"><span class="spinner"></span> 지원 현황을 불러오는 중…</div>`;
+    ctx.modal.innerHTML = `<div class="glass-card p-7 w-full max-w-3xl"><span class="spinner"></span> 지원현황을 불러오는 중…</div>`;
     document.body.appendChild(ctx.modal);
 
     ctx.closeModal = () => {
@@ -209,7 +209,7 @@ async function startApplicationModal(ctx) {
     try {
         await ctx.render();
     } catch (err) {
-        ctx.modal.innerHTML = `<div class="glass-card p-7 max-w-lg"><h2 class="text-xl font-bold mb-3">지원 현황을 열 수 없습니다</h2><p class="text-text-muted wrap-break-word">${err?.message || err}</p><button id="closeApplicationModal" class="btn-secondary w-auto px-4 py-2 mt-5 cursor-pointer">닫기</button></div>`;
+        ctx.modal.innerHTML = `<div class="glass-card p-7 max-w-lg"><h2 class="text-xl font-bold mb-3">지원현황을 열 수 없습니다</h2><p class="text-text-muted wrap-break-word">${err?.message || err}</p><button id="closeApplicationModal" class="btn-secondary w-auto px-4 py-2 mt-5 cursor-pointer">닫기</button></div>`;
         document.getElementById('closeApplicationModal').onclick = ctx.closeModal;
     }
 }

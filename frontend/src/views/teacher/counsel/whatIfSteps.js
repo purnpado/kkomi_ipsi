@@ -26,7 +26,7 @@ export async function renderRemainingStepTable(ctx, container, baseInput, baseli
     const generalRow = results[0]?.generalMethod !== 'none' ? `
         <tr class="border-b border-slate-700 bg-slate-800/40">
             <td class="p-2 font-bold text-slate-200 whitespace-nowrap">후기 일반고 <span class="text-slate-400 font-normal">총점·석차</span></td>
-            ${general.map(g => `<td class="p-2 text-center font-mono whitespace-nowrap">${g ? `${g.total.toFixed(2)}<div class="text-[10px] text-slate-400">${g.rank}등/${g.totalStudents}${results[0].generalMethod === 'estimated' ? '(추정)' : ''}</div>` : '-'}</td>`).join('')}
+            ${general.map(g => `<td class="p-2 text-center num whitespace-nowrap">${g ? `${g.total.toFixed(2)}<div class="text-[10px] text-slate-400">${g.rank}등/${g.totalStudents}${results[0].generalMethod === 'estimated' ? '(추정)' : ''}</div>` : '-'}</td>`).join('')}
         </tr>` : '';
     const schoolRows = (results[2]?.schools || []).map((s, idx) => {
         const base = baselines.get(`${s.schoolName}|${s.trackName}`);
@@ -35,7 +35,7 @@ export async function renderRemainingStepTable(ctx, container, baseInput, baseli
             const score = r?.schools?.[idx]?.after;
             if (!(score >= 0)) return '<td class="p-2 text-center">-</td>';
             const judged = judgeScore({ score, cutoff: base.cutoff, totalMax: s.totalMax, schoolName: s.schoolName, track: s.trackName, source: `${base.year || ''} 기준선`, year: base.year, department: base.department });
-            return `<td class="p-2 text-center whitespace-nowrap"><div class="font-mono text-slate-200">${score.toFixed(2)}</div>${judgmentBadge(judged, { compact: true })}</td>`;
+            return `<td class="p-2 text-center whitespace-nowrap"><div class="num text-slate-200">${score.toFixed(2)}</div>${judgmentBadge(judged, { compact: true })}</td>`;
         }).join('');
         return `<tr class="border-b border-slate-800"><td class="p-2 text-slate-200 whitespace-nowrap">${escapeHtml(s.schoolName)} <span class="text-slate-400">${escapeHtml(displayTrack(s.trackName))}</span><div class="text-[10px] text-slate-500">기준선 ${base.cutoff.toFixed(2)}</div></td>${cells}</tr>`;
     }).join('');

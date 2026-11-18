@@ -128,7 +128,7 @@ function defineWishlistRenderer(ctx) {
                         <span class="text-xs">${item.badgeHTML || ''}</span>
                     </div>
                     <div class="text-xs text-slate-300 flex items-center gap-2">
-                        <span>내신 환산점: <strong class="text-emerald-300 font-mono">${Number(item.totalScore).toFixed(2)}</strong> <span class="text-slate-500">/ ${item.totalMax}점</span></span>
+                        <span>내신 환산점: <strong class="text-emerald-300 num">${Number(item.totalScore).toFixed(2)}</strong> <span class="text-slate-500">/ ${item.totalMax}점</span></span>
                     </div>
                 </div>
                 <div class="flex items-center gap-1.5 shrink-0 ml-auto sm:ml-0">

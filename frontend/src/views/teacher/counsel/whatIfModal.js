@@ -80,8 +80,8 @@ function schoolRowsHTML(ctx, result) {
         return `
             <tr class="border-b border-slate-800 ${Math.abs(diff) >= 0.005 ? 'bg-indigo-950/30' : ''}">
                 <td class="p-2 text-slate-200 whitespace-nowrap">${escapeHtml(s.schoolName)} <span class="text-slate-400">${escapeHtml(displayTrack(s.trackName))}</span></td>
-                <td class="p-2 text-right font-mono text-slate-300">${s.before.toFixed(2)}</td>
-                <td class="p-2 text-right font-mono font-bold text-white">${s.after.toFixed(2)} <span class="text-[10px] ${diff > 0 ? 'text-emerald-300' : diff < 0 ? 'text-rose-300' : 'text-slate-500'}">${Math.abs(diff) >= 0.005 ? signed(diff) : '변화 없음'}</span></td>
+                <td class="p-2 text-right num text-slate-300">${s.before.toFixed(2)}</td>
+                <td class="p-2 text-right num font-bold text-white">${s.after.toFixed(2)} <span class="text-[10px] ${diff > 0 ? 'text-emerald-300' : diff < 0 ? 'text-rose-300' : 'text-slate-500'}">${Math.abs(diff) >= 0.005 ? signed(diff) : '변화 없음'}</span></td>
                 <td class="p-2 text-[10px] text-slate-500 text-right">/${s.totalMax}</td>
                 <td class="p-2 whitespace-nowrap">${judge(s.before)} <span class="text-slate-500">→</span> ${judge(s.after)}</td>
             </tr>`;
@@ -112,7 +112,7 @@ async function generalHTML(result) {
     };
     const line = (label, before, after, digits = 2) => {
         const diff = after - before;
-        return `<div class="flex justify-between gap-2"><span class="text-slate-400">${label}</span><span class="font-mono"><span class="text-slate-300">${before.toFixed(digits)}</span> → <strong class="text-white">${after.toFixed(digits)}</strong> ${Math.abs(diff) >= 0.005 ? `<span class="text-[10px] ${diff > 0 ? 'text-emerald-300' : 'text-rose-300'}">${signed(diff)}</span>` : ''}</span></div>`;
+        return `<div class="flex justify-between gap-2"><span class="text-slate-400">${label}</span><span class="num"><span class="text-slate-300">${before.toFixed(digits)}</span> → <strong class="text-white">${after.toFixed(digits)}</strong> ${Math.abs(diff) >= 0.005 ? `<span class="text-[10px] ${diff > 0 ? 'text-emerald-300' : 'text-rose-300'}">${signed(diff)}</span>` : ''}</span></div>`;
     };
     const method = result.generalMethod === 'estimated'
         ? '<span class="text-amber-300">석차는 추정값</span>'
@@ -120,7 +120,7 @@ async function generalHTML(result) {
     return `
         <div class="grid md:grid-cols-2 gap-3">
             <div class="space-y-1">
-                <div class="flex justify-between gap-2"><span class="text-slate-400">전교 석차 (${a.totalStudents}명)</span><span class="font-mono"><span class="text-slate-300">${b.rank}등</span> → <strong class="text-white">${a.rank}등</strong></span></div>
+                <div class="flex justify-between gap-2"><span class="text-slate-400">전교 석차 (${a.totalStudents}명)</span><span class="num"><span class="text-slate-300">${b.rank}등</span> → <strong class="text-white">${a.rank}등</strong></span></div>
                 ${line('석차백분율(%)', b.percentile, a.percentile)}
                 ${line('교과(160)', b.academic, a.academic)}
                 ${line('비교과(40)', b.nonAcademic, a.nonAcademic)}

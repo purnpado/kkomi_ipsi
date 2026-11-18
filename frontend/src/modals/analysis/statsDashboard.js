@@ -53,10 +53,10 @@ export function renderStatsDashboard(container, stats, sourceMode) {
             <div class="p-4 rounded-xl bg-slate-800/50 border border-slate-700/60 space-y-1">
                 <span class="text-[11px] font-semibold text-slate-400">합격 최저점 / 중앙값 (Median)</span>
                 <div class="flex items-baseline gap-2">
-                    <span class="text-2xl font-black text-emerald-400 font-mono">${stats.acceptedMin.toFixed(2)}</span>
-                    <span class="text-xs text-indigo-300 font-mono">중앙 ${stats.acceptedMedian.toFixed(2)}</span>
+                    <span class="text-2xl font-black text-emerald-400 num">${stats.acceptedMin.toFixed(2)}</span>
+                    <span class="text-xs text-indigo-300 num">중앙 ${stats.acceptedMedian.toFixed(2)}</span>
                 </div>
-                <div class="text-[11px] text-slate-400 pt-1 border-t border-slate-700/40 font-mono">
+                <div class="text-[11px] text-slate-400 pt-1 border-t border-slate-700/40 num">
                     합격자 평균: <strong class="text-white">${stats.acceptedAvg.toFixed(2)}점</strong>
                 </div>
             </div>
@@ -65,9 +65,9 @@ export function renderStatsDashboard(container, stats, sourceMode) {
             <div class="p-4 rounded-xl bg-slate-800/50 border border-slate-700/60 space-y-1">
                 <span class="text-[11px] font-semibold text-slate-400">사분위수 (Q1 ~ Q3 구간)</span>
                 <div class="flex items-baseline gap-1.5">
-                    <span class="text-lg font-black text-amber-300 font-mono">${stats.acceptedQ1.toFixed(2)}</span>
+                    <span class="text-lg font-black text-amber-300 num">${stats.acceptedQ1.toFixed(2)}</span>
                     <span class="text-xs text-slate-500">~</span>
-                    <span class="text-lg font-black text-indigo-300 font-mono">${stats.acceptedQ3.toFixed(2)}</span>
+                    <span class="text-lg font-black text-indigo-300 num">${stats.acceptedQ3.toFixed(2)}</span>
                 </div>
                 <div class="text-[11px] text-slate-400 pt-1 border-t border-slate-700/40">
                     표본 표준편차(s): ${stdDevEmphasis}
@@ -77,7 +77,7 @@ export function renderStatsDashboard(container, stats, sourceMode) {
             <!-- 합·불 겹침 구간 (Overlap) -->
             <div class="p-4 rounded-xl ${stats.hasOverlap ? 'bg-amber-950/20 border-amber-500/40' : 'bg-slate-800/50 border-slate-700/60'} space-y-1">
                 <span class="text-[11px] font-semibold ${stats.hasOverlap ? 'text-amber-300' : 'text-slate-400'}">합·불 경합 겹침구간</span>
-                <div class="flex items-baseline gap-1.5 font-mono">
+                <div class="flex items-baseline gap-1.5 num">
                     ${stats.hasOverlap ? `
                         <span class="text-lg font-black text-amber-300">${stats.overlapMin.toFixed(2)}</span>
                         <span class="text-xs text-amber-400/80">~</span>
@@ -113,7 +113,7 @@ export function renderStatsDashboard(container, stats, sourceMode) {
                 <div class="p-3 rounded-lg bg-emerald-950/40 border border-emerald-500/30 space-y-1">
                     <div class="flex items-center justify-between font-bold text-emerald-300">
                         <span>🟢 안정권</span>
-                        <span class="font-mono">${safeCutoff > 0 ? `${safeCutoff.toFixed(2)}점 ~` : '-'}</span>
+                        <span class="num">${safeCutoff > 0 ? `${safeCutoff.toFixed(2)}점 ~` : '-'}</span>
                     </div>
                     <p class="text-[11px] text-slate-300">합격 최저점 + ${zones ? describeMarginText(zones.margin) : '여유폭'} 이상 또는 불합격 최고점 초과</p>
                 </div>
@@ -121,8 +121,8 @@ export function renderStatsDashboard(container, stats, sourceMode) {
                 <!-- 적정 -->
                 <div class="p-3 rounded-lg bg-indigo-950/40 border border-indigo-500/30 space-y-1">
                     <div class="flex items-center justify-between font-bold text-indigo-300">
-                        <span>🟡 적정권</span>
-                        <span class="font-mono">${properCutoff > 0 ? `${properCutoff.toFixed(2)}점 ~` : '-'}</span>
+                        <span>🔵 적정권</span>
+                        <span class="num">${properCutoff > 0 ? `${properCutoff.toFixed(2)}점 ~` : '-'}</span>
                     </div>
                     <p class="text-[11px] text-slate-300">합격 최저점 이상(동점 포함)</p>
                 </div>
@@ -131,7 +131,7 @@ export function renderStatsDashboard(container, stats, sourceMode) {
                 <div class="p-3 rounded-lg bg-slate-800/70 border border-slate-600 space-y-1 col-span-2">
                     <div class="flex items-center justify-between font-bold text-slate-200">
                         <span>❔ 판단 근거 부족</span>
-                        <span class="font-mono">${properCutoff > 0 ? `<${properCutoff.toFixed(2)}점` : '-'}</span>
+                        <span class="num">${properCutoff > 0 ? `<${properCutoff.toFixed(2)}점` : '-'}</span>
                     </div>
                     <p class="text-[11px] text-slate-300">이 자료에는 불합격 사례가 없어 합격 최저점이 합격선의 상한일 뿐입니다. 이보다 낮은 점수의 합격 여부는 판단할 수 없습니다. 미달 여부는 커트라인 관리의 [공식 경쟁률]에 입력한 값으로만 표시합니다.</p>
                 </div>
@@ -140,7 +140,7 @@ export function renderStatsDashboard(container, stats, sourceMode) {
                 <div class="p-3 rounded-lg bg-amber-950/40 border border-amber-500/30 space-y-1">
                     <div class="flex items-center justify-between font-bold text-amber-300">
                         <span>🟠 소신권</span>
-                        <span class="font-mono">${challengeCutoff > 0 ? `${challengeCutoff.toFixed(2)}점 ~` : '-'}</span>
+                        <span class="num">${challengeCutoff > 0 ? `${challengeCutoff.toFixed(2)}점 ~` : '-'}</span>
                     </div>
                     <p class="text-[11px] text-slate-300">합격 최저점 − 여유폭 ~ 합격 최저점 미만</p>
                 </div>
@@ -149,7 +149,7 @@ export function renderStatsDashboard(container, stats, sourceMode) {
                 <div class="p-3 rounded-lg bg-rose-950/40 border border-rose-500/30 space-y-1">
                     <div class="flex items-center justify-between font-bold text-rose-300">
                         <span>🔴 어려움</span>
-                        <span class="font-mono">${challengeCutoff > 0 ? `<${challengeCutoff.toFixed(2)}점` : '-'}</span>
+                        <span class="num">${challengeCutoff > 0 ? `<${challengeCutoff.toFixed(2)}점` : '-'}</span>
                     </div>
                     <p class="text-[11px] text-slate-300">소신 구간 미만</p>
                 </div>
@@ -232,7 +232,7 @@ function renderHistogramChart(histogram, overlapMin, overlapMax, hasOverlap) {
                 return `
                     <div class="flex-1 flex flex-col items-center justify-end h-full group relative cursor-pointer" title="${tooltip}">
                         <!-- 수치 라벨 (호버 시 표시) -->
-                        <span class="text-[10px] font-mono font-bold text-slate-300 mb-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <span class="text-[10px] num font-bold text-slate-300 mb-1 opacity-0 group-hover:opacity-100 transition-opacity">
                             ${total}명
                         </span>
 
@@ -249,14 +249,14 @@ function renderHistogramChart(histogram, overlapMin, overlapMax, hasOverlap) {
                         </div>
 
                         <!-- X축 점수 구간 라벨 -->
-                        <div class="text-[9px] text-slate-400 font-mono mt-1.5 truncate max-w-full text-center">
+                        <div class="text-[9px] text-slate-400 num mt-1.5 truncate max-w-full text-center">
                             ${b.minScore.toFixed(0)}
                         </div>
                     </div>
                 `;
             }).join('')}
         </div>
-        <div class="flex justify-between items-center text-[10px] text-slate-500 font-mono mt-2 px-1">
+        <div class="flex justify-between items-center text-[10px] text-slate-500 num mt-2 px-1">
             <span>최저 ${buckets[0].minScore.toFixed(1)}점</span>
             <span>점수 구간 (1점 단위)</span>
             <span>최고 ${buckets[buckets.length - 1].maxScore.toFixed(1)}점</span>
