@@ -29,7 +29,7 @@
 /**
  * ApplicationScoreDetails 원서 접수 시점의 세부 산출 점수 스냅샷
  * @typedef {Object} ApplicationScoreDetails
- * @property {number} percentile - 전교 석차 백분율 (%)
+ * @property {number} percentile - 전교 석차백분율 (%)
  * @property {number} allAverage - 전과목 평균 성취도 (1~5)
  * @property {number} academicScore - 교과 점수 (1차-B: 직업계고는 전과목+가중과목, 일반고는 교과점수)
  * @property {number} academicMax - 교과 만점

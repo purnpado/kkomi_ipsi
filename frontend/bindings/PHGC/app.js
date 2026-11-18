@@ -207,7 +207,7 @@ export function DistributionImportNeedsPassword() {
 }
 
 /**
- * ExportDistributionPackage 대상 교사의 학급 DB만 담은 배포 자료 생성
+ * ExportDistributionPackage 대상 교사의 학급 DB만 담은 배포자료 생성
  * @param {string} username
  * @param {string} outputPath
  * @returns {$CancellablePromise<void>}
@@ -630,7 +630,7 @@ export function HasUndoableBulk(classNum) {
 }
 
 /**
- * ImportDistributionPackage 배포 자료를 현재 data 폴더에 가져오기
+ * ImportDistributionPackage 배포자료를 현재 data 폴더에 가져오기
  * @param {string} inputPath
  * @returns {$CancellablePromise<string>}
  */
