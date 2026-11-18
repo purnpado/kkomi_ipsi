@@ -255,33 +255,6 @@ function bindRegisterControls(ctx, reg) {
         });
     });
 
-    // 일반고 배정학교 인라인 수정 & DB 즉시 저장 이벤트
-    ctx.modal.querySelectorAll('.register-assigned-school-input').forEach(input => {
-        const saveAssigned = async () => {
-            const cNum = parseInt(input.dataset.class, 10);
-            const sNum = input.dataset.num;
-            const sName = input.dataset.name;
-            const val = input.value.trim();
-
-            try {
-                if (window.go?.main?.App?.UpdateAssignedSchool) {
-                    await window.go.main.App.UpdateAssignedSchool(cNum, sNum, sName, val);
-                }
-                // 메모리 레코드에도 즉시 반영
-                const target = ctx.records.find(r => r.classNum === cNum && r.studentNum === sNum && r.category === 'general');
-                if (target) target.assignedSchool = val;
-            } catch (err) {
-                console.error('배정학교 저장 실패:', err);
-            }
-        };
-
-        input.addEventListener('blur', saveAssigned);
-        input.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') {
-                input.blur();
-            }
-        });
-    });
 }
 
 // 원서대장: 최초 렌더링

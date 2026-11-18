@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"os"
-	"path/filepath"
 
 	"PHGC/internal/calc"
 	"PHGC/internal/database"
@@ -103,13 +102,9 @@ func (a *App) GetCutoffs() ([]database.CutoffInfo, error) {
 func (a *App) ResetAllData() error {
 	// DB 연결이 열려 있을 수 있으므로 GC를 강제로 호출하거나 그냥 폴더 내용물을 지움
 	// 가장 확실한 것은 설정 파일들과 DB 파일들을 지우는 것
-	exePath, err := os.Executable()
-	if err != nil {
-		exePath = "."
-	}
-	dataDir := filepath.Join(filepath.Dir(exePath), "data")
+	dataDir := a.db.DataDir
 
-	err = os.RemoveAll(dataDir)
+	err := os.RemoveAll(dataDir)
 	if err != nil {
 		return fmt.Errorf("데이터 삭제 실패: %w", err)
 	}

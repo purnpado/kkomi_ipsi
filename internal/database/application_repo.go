@@ -12,6 +12,12 @@ import (
 )
 
 func (dm *DBManager) SaveApplication(record model.ApplicationRecord) error {
+	return dm.saveApplication(record, false)
+}
+
+// merge preserves the source timestamp and only overwrites an older matching
+// record. Missing or invalid timestamps never overwrite an existing record.
+func (dm *DBManager) saveApplication(record model.ApplicationRecord, merge bool) error {
 	if record.ClassNum < 1 || record.StudentNum == "" || record.StudentName == "" || record.AdmissionYear < 2000 || record.Category == "" || record.Status == "" {
 		return fmt.Errorf("지원 기록 정보가 올바르지 않습니다")
 	}
@@ -79,7 +85,7 @@ func (dm *DBManager) SaveApplication(record model.ApplicationRecord) error {
 		return err
 	}
 	defer db.Close()
-	if record.ID > 0 && record.Category == "other" {
+	if !merge && record.ID > 0 && record.Category == "other" {
 		// 기존 기타 지원의 학교명을 수정할 때 새 원서를 추가하지 않는다.
 		var oldYear int
 		if err := db.QueryRow(`SELECT admission_year FROM student_applications WHERE id=? AND student_num=? AND student_name=? AND category='other'`, record.ID, record.StudentNum, record.StudentName).Scan(&oldYear); err != nil {
@@ -98,8 +104,16 @@ func (dm *DBManager) SaveApplication(record model.ApplicationRecord) error {
 			record.AdmissionYear, record.SchoolName, record.Track, record.Status, record.Score, record.ScoreBasis, string(prefs), record.AssignedDepartment, record.AssignedSchool, record.FirstStageResult, record.ID, record.StudentNum, record.StudentName)
 		return err
 	}
-	_, err = db.Exec(`INSERT INTO student_applications (student_num,student_name,admission_year,category,school_name,track,status,score,score_basis,preferences_json,assigned_department,assigned_school,score_details_json,first_stage_result,updated_at)
-	VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,CURRENT_TIMESTAMP)
+	timestamp := record.UpdatedAt
+	if !merge || timestamp == "" {
+		timestamp = ""
+	}
+	condition := ""
+	if merge {
+		condition = " WHERE julianday(?) IS NOT NULL AND julianday(student_applications.updated_at) IS NOT NULL AND julianday(?) > julianday(student_applications.updated_at)"
+	}
+	query := `INSERT INTO student_applications (student_num,student_name,admission_year,category,school_name,track,status,score,score_basis,preferences_json,assigned_department,assigned_school,score_details_json,first_stage_result,updated_at)
+	VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,COALESCE(NULLIF(?, ''),CURRENT_TIMESTAMP))
 	ON CONFLICT(student_num,student_name,admission_year,category,school_name,track) DO UPDATE SET 
 		status=excluded.status,
 		score=excluded.score,
@@ -109,22 +123,67 @@ func (dm *DBManager) SaveApplication(record model.ApplicationRecord) error {
 		assigned_school=excluded.assigned_school,
 		first_stage_result=excluded.first_stage_result,
 		score_details_json=CASE WHEN excluded.score_details_json != '' THEN excluded.score_details_json ELSE student_applications.score_details_json END,
-		updated_at=CURRENT_TIMESTAMP`,
-		record.StudentNum, record.StudentName, record.AdmissionYear, record.Category, record.SchoolName, record.Track, record.Status, record.Score, record.ScoreBasis, string(prefs), record.AssignedDepartment, record.AssignedSchool, scoreDetailsJSON, record.FirstStageResult)
+		updated_at=excluded.updated_at` + condition
+	args := []any{record.StudentNum, record.StudentName, record.AdmissionYear, record.Category, record.SchoolName, record.Track, record.Status, record.Score, record.ScoreBasis, string(prefs), record.AssignedDepartment, record.AssignedSchool, scoreDetailsJSON, record.FirstStageResult, timestamp}
+	if merge {
+		args = append(args, record.UpdatedAt, record.UpdatedAt)
+	}
+	_, err = db.Exec(query, args...)
 	return err
 }
 
 // UpdateAssignedSchool 후기 일반고 학생의 최종 배정 고등학교명을 업데이트합니다.
 func (dm *DBManager) UpdateAssignedSchool(classNum int, studentNum, studentName, assignedSchool string) error {
+	config, err := dm.GetSchoolConfig()
+	if err != nil {
+		return err
+	}
+	records, err := dm.GetStudentApplications(classNum, studentNum, studentName)
+	if err != nil {
+		return err
+	}
+	id := 0
+	for _, record := range records {
+		if record.AdmissionYear == config.AdmissionYear && record.Category == "general" {
+			if id != 0 {
+				return fmt.Errorf("해당 학년도의 일반고 원서를 하나로 확인할 수 없습니다")
+			}
+			id = record.ID
+		}
+	}
+	if id == 0 {
+		return fmt.Errorf("수정할 일반고 원서를 찾을 수 없습니다")
+	}
+	return dm.UpdateAssignedSchoolForRecord(classNum, studentNum, studentName, config.AdmissionYear, id, assignedSchool)
+}
+
+func (dm *DBManager) UpdateAssignedSchoolForRecord(classNum int, studentNum, studentName string, year, id int, assignedSchool string) error {
+	closed, err := dm.IsAdmissionYearClosed(year)
+	if err != nil {
+		return err
+	}
+	if closed {
+		return fmt.Errorf("%d 고입 결과가 확정되어 배정학교를 수정할 수 없습니다", year)
+	}
 	db, err := dm.OpenDB(dm.GetClassDBPath(classNum))
 	if err != nil {
 		return err
 	}
 	defer db.Close()
-	_, err = db.Exec(`UPDATE student_applications SET assigned_school=?, updated_at=CURRENT_TIMESTAMP 
-		WHERE student_num=? AND student_name=? AND category='general'`,
-		assignedSchool, studentNum, studentName)
-	return err
+	result, err := db.Exec(`UPDATE student_applications SET assigned_school=?, updated_at=CURRENT_TIMESTAMP
+		WHERE student_num=? AND student_name=? AND category='general' AND admission_year=? AND id=?`,
+		assignedSchool, studentNum, studentName, year, id)
+	if err != nil {
+		return err
+	}
+	count, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if count != 1 {
+		return fmt.Errorf("수정할 해당 학년도의 일반고 원서를 하나로 확인할 수 없습니다")
+	}
+	return nil
 }
 
 func (dm *DBManager) DeleteApplication(classNum int, studentNum, studentName, category, schoolName, track string) error {
@@ -262,7 +321,7 @@ func (dm *DBManager) ApplyPatchChange(change model.PatchChange) error {
 		}
 		record.StudentNum = change.StudentNum
 		record.StudentName = change.StudentName
-		if err := dm.SaveApplication(record); err != nil {
+		if err := dm.saveApplication(record, true); err != nil {
 			return err
 		}
 	}

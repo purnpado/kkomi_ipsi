@@ -134,6 +134,16 @@ func InspectTeacherPatch(dm *database.DBManager, password, inputPath string) (mo
 		if change.ClassNum != patch.ClassNum {
 			return model.PatchPreview{}, fmt.Errorf("변경분에 다른 학급 데이터가 포함되어 있습니다")
 		}
+		for _, record := range change.Applications {
+			record.ClassNum, record.StudentNum, record.StudentName = change.ClassNum, change.StudentNum, change.StudentName
+			skip, err := dm.WouldSkipApplicationPatch(record)
+			if err != nil {
+				return model.PatchPreview{}, err
+			}
+			if skip {
+				preview.SkippedApplications++
+			}
+		}
 		preview.StudentNames = append(preview.StudentNames, change.StudentName)
 		preview.Items = append(preview.Items, model.PatchPreviewItem{
 			StudentNum: change.StudentNum, StudentName: change.StudentName,

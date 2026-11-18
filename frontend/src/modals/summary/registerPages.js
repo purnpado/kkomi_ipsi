@@ -1,4 +1,4 @@
-import { escapeHtml, escapeAttr } from '../../core/utils.js';
+import { escapeHtml } from '../../core/utils.js';
 import { admissionLabel } from '../../core/admissionYear.js';
 import { buildRegisterEntries } from './registerRows.js';
 
@@ -69,18 +69,7 @@ export function buildRegisterPages(ctx, reg) {
 
             let deptDisplayHTML = escapeHtml(entry.departmentText);
             if (app.category === 'general') {
-                deptDisplayHTML = `
-                        <div class="flex items-center justify-center gap-1 w-full">
-                            <input type="text"
-                                   class="register-assigned-school-input font-bold text-indigo-900 border-b border-dashed border-indigo-400 bg-transparent text-left w-full outline-none print:border-none print:text-black print:p-0"
-                                   style="border-bottom-style: dashed; ${cellFontSizeStyle} padding: 1px 2px;"
-                                   value="${escapeAttr(app.assignedSchool || '')}"
-                                   placeholder="배정고 입력(수기)"
-                                   data-class="${escapeAttr(app.classNum || currentClass)}"
-                                   data-num="${escapeAttr(app.studentNum)}"
-                                   data-name="${escapeAttr(app.studentName)}" />
-                        </div>
-                    `;
+                deptDisplayHTML = escapeHtml(entry.departmentText || '-');
             } else if (app.assignedDepartment && entry.departmentText.endsWith('(배정)')) {
                 deptDisplayHTML = `<span class="font-semibold">${escapeHtml(app.assignedDepartment)}</span> <span class="text-[10px] text-slate-500 font-normal">(배정)</span>`;
             }

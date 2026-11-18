@@ -110,7 +110,7 @@ export function defineApplicationRenderer(ctx) {
                     <span class="text-lg">🔒</span>
                     <div>
                         <strong class="font-bold text-emerald-300">[희망학교 비활성화 잠금]</strong>
-                        <span>합격 및 최종 학과(배정고) 입력이 완료되어 희망학교 수정이 비활성화되었습니다.</span>
+                        <span>합격 및 최종 학과 입력이 완료되어 희망학교 수정이 비활성화되었습니다.</span>
                     </div>
                 </div>
                 ${ctx.canEdit ? `<button type="button" id="unlockApplicationBtn" class="px-3 py-1.5 text-xs font-bold rounded-lg bg-slate-800 hover:bg-slate-700 text-amber-300 border border-amber-500/50 transition-all flex items-center gap-1 shadow-sm cursor-pointer">🔓 잠금 해제하여 수정</button>` : ''}
@@ -132,13 +132,7 @@ export function defineApplicationRenderer(ctx) {
             <label class="text-sm font-bold">점수 스냅샷 <span class="text-[11px] text-cyan-300">자동</span><input id="appScore" type="text" inputmode="decimal" value="${displayedScore || ''}" placeholder="${isUnscored && !isNone ? '별도 전형 학교 — 점수 미기록' : '학교·전형 선택 시 자동 산출'}" class="input-field mt-1 w-full" ${isUnscored ? 'disabled' : (autoScore || isLocked ? 'readonly' : (ctx.canEdit ? '' : 'disabled'))}></label>
             <label class="text-sm font-bold md:col-span-2">점수 기준 / 메모<input id="appBasis" value="${escapeAttr(displayedBasis)}" data-auto="${isAutoBasis}" placeholder="${isNone ? '예: 진학포기 사유, 기타 진로 등' : (isUnscored ? '예: 실기·면접 전형, 지원 학과, 메모 등' : '예: 3-1 누적 예상, 1차 서류점수 등')}" class="input-field mt-1 w-full" ${ctx.canEdit && !isLocked ? '' : 'disabled'}></label>
             <div id="appPreferenceArea" class="md:col-span-2 ${needsDepartment ? '' : 'hidden'}">${ctx.departmentControls(record.schoolName, record.preferences || [], record.assignedDepartment || '', ctx.preferenceLimit(record.category, record.track))}</div>
-            <div id="appGeneralAssignedArea" class="md:col-span-2 ${isGeneral ? '' : 'hidden'}">
-                <label class="text-sm font-bold block">배정 고등학교 (수기 입력)
-                    <span class="text-text-muted font-normal text-xs ml-1">- 후기 일반고 합격 후 배정받은 학교명을 입력하세요 (원서대장에 출력됩니다)</span>
-                    <input id="appAssignedSchool" type="text" value="${record.assignedSchool || ''}" placeholder="예: 학성고등학교, 울산여자고등학교, 신정고등학교 등" class="input-field mt-1 w-full text-sm" ${ctx.canEdit && !isLocked ? '' : 'disabled'}>
-                </label>
-            </div>
-            <p id="generalApplicationGuide" class="md:col-span-2 text-xs text-cyan-300 ${isGeneral ? '' : 'hidden'}">후기 일반고는 합격 발표 후 최종 배정받은 고등학교명을 수기로 입력할 수 있으며, 원서대장에 자동 출력됩니다.</p>
+            <p id="generalApplicationGuide" class="md:col-span-2 text-xs text-cyan-300 ${isGeneral ? '' : 'hidden'}">후기 일반고는 배정 고등학교를 입력하지 않아도 됩니다.</p>
             <p id="noneApplicationGuide" class="md:col-span-2 text-xs text-amber-300 ${isNone ? '' : 'hidden'}">미진학(진학포기) 학생은 학교와 점수를 입력하지 않으며, 지원 상태가 자동으로 ‘미진학’으로 처리됩니다.</p>
           </div>
           <div class="flex justify-center gap-3 mt-5 w-full">
@@ -181,8 +175,6 @@ export function defineApplicationRenderer(ctx) {
                 document.getElementById('appScore').readOnly = false;
             }
             document.getElementById('appBasis').disabled = false;
-            const assignedInput = document.getElementById('appAssignedSchool');
-            if (assignedInput) assignedInput.disabled = false;
             ctx.modal.querySelectorAll('#appPreferenceArea select').forEach(el => { el.disabled = false; });
             const saveBtn = document.getElementById('saveApplication');
             if (saveBtn) {
@@ -310,7 +302,6 @@ export function defineApplicationRenderer(ctx) {
 
             document.getElementById('appPreferenceArea').classList.toggle('hidden', !departmentRequired);
             refreshStageArea();
-            document.getElementById('appGeneralAssignedArea')?.classList.toggle('hidden', !general);
             document.getElementById('generalApplicationGuide').classList.toggle('hidden', !general);
             document.getElementById('noneApplicationGuide')?.classList.toggle('hidden', !none);
             const scoreInput = document.getElementById('appScore');
@@ -369,7 +360,7 @@ export function defineApplicationRenderer(ctx) {
             const trackVal = category === 'other' ? '해당 없음' : document.getElementById('appTrack').value.trim();
             const statusVal = category === 'none' ? '미진학' : document.getElementById('appStatus').value;
             const scoreVal = ctx.isUnscoredCategory(category) ? 0 : (parseFloat(document.getElementById('appScore').value) || 0);
-            const assignedSchoolVal = category === 'general' ? (document.getElementById('appAssignedSchool')?.value.trim() || '') : '';
+            const assignedSchoolVal = category === 'general' ? (record.assignedSchool || '') : '';
             const payload = {
                 id: isOther && category === 'other' ? (record.id || 0) : 0,
                 classNum: ctx.classNum,

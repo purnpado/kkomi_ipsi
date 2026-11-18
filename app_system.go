@@ -48,18 +48,13 @@ type AgreementRecord struct {
 	Version    string `json:"version"`
 }
 
-func getAgreementPath() string {
-	exePath, err := os.Executable()
-	if err != nil {
-		return "data/agreement.json"
-	}
-	exePath, _ = filepath.EvalSymlinks(exePath)
-	return filepath.Join(filepath.Dir(exePath), "data", "agreement.json")
+func (a *App) getAgreementPath() string {
+	return filepath.Join(a.db.DataDir, "agreement.json")
 }
 
 // IsAgreementAccepted 프로그램 이용 및 개인정보 보호 서약 동의 여부 확인
 func (a *App) IsAgreementAccepted() bool {
-	p := getAgreementPath()
+	p := a.getAgreementPath()
 	data, err := os.ReadFile(p)
 	if err != nil {
 		return false
@@ -73,7 +68,7 @@ func (a *App) IsAgreementAccepted() bool {
 
 // AcceptAgreement 프로그램 이용 및 개인정보 보호 서약 동의 처리
 func (a *App) AcceptAgreement() error {
-	p := getAgreementPath()
+	p := a.getAgreementPath()
 	dir := filepath.Dir(p)
 	if err := os.MkdirAll(dir, 0755); err != nil {
 		return fmt.Errorf("동의 정보 저장 폴더 생성 실패: %w", err)
@@ -108,8 +103,7 @@ func (a *App) SelfDestruct() error {
 		return fmt.Errorf("실행 파일 경로를 확인할 수 없습니다: %w", err)
 	}
 	currentExe, _ = filepath.EvalSymlinks(currentExe)
-	exeDir := filepath.Dir(currentExe)
-	dataDir := filepath.Join(exeDir, "data")
+	dataDir := a.db.DataDir
 	currentPid := os.Getpid()
 
 	psScript := fmt.Sprintf(`

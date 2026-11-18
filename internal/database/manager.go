@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"time"
 
@@ -151,7 +152,8 @@ func NewDBManager() *DBManager {
 		exePath = "."
 	}
 	baseDir := filepath.Dir(exePath)
-	dataDir := filepath.Join(baseDir, "data")
+	dataDir := resolveDataDir(exePath, runtime.GOOS)
+	baseDir = filepath.Dir(dataDir)
 
 	// 공유폴더(UNC 경로) 또는 부모 경로 쓰기 불가능한 경우
 	// 사용자 로컬 AppData 폴더에 데이터 저장

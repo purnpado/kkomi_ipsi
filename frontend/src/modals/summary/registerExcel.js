@@ -97,7 +97,7 @@ export function bindRegisterExcelExport(ctx, reg) {
                             <td${span} style="mso-number-format:'\\@';">${studentIndex}</td>
                             <td${span} style="mso-number-format:'\\@';">${entry.studentId}</td>
                             <td${span} style="font-weight:bold;">${escapeHtml(app.studentName || '')}</td>` : '';
-                    const deptDisplay = app.category === 'general' ? (entry.departmentText || '배정고 미입력') : entry.departmentText;
+                    const deptDisplay = entry.departmentText || '-';
                     html += `
                         <tr style="height:28px;">
                             ${studentCells}

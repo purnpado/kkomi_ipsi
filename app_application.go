@@ -78,6 +78,9 @@ func (a *App) UpdateAssignedSchool(classNum int, studentNum, studentName, assign
 	if a.user == nil {
 		return fmt.Errorf("로그인이 필요합니다")
 	}
+	if a.user.Role == "viewer" {
+		return fmt.Errorf("진로부장 계정은 배정학교를 수정할 수 없습니다")
+	}
 	if a.user.Role == "homeroom" && a.user.ClassNum != classNum {
 		return fmt.Errorf("본인 담당 학급의 학생만 수정할 수 있습니다")
 	}

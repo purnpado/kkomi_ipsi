@@ -42,6 +42,7 @@ type PatchPreview struct {
 	BaseRevision        int                `json:"baseRevision"`
 	CurrentRevision     int                `json:"currentRevision"`
 	HasRevisionConflict bool               `json:"hasRevisionConflict"`
+	SkippedApplications int                `json:"skippedApplications"`
 	Items               []PatchPreviewItem `json:"items"`
 }
 

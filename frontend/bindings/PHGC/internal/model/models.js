@@ -83,6 +83,7 @@
  * @property {number} baseRevision
  * @property {number} currentRevision
  * @property {boolean} hasRevisionConflict
+ * @property {number} skippedApplications
  * @property {PatchPreviewItem[] | null} items
  */
 
