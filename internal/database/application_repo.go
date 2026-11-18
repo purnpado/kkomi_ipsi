@@ -285,7 +285,8 @@ func (dm *DBManager) GetClassPatchChanges(classNum int) ([]model.PatchChange, er
 		if err != nil {
 			return nil, err
 		}
-		changes = append(changes, model.PatchChange{ClassNum: classNum, StudentNum: student.StudentNum, StudentName: student.Name, Attendance: student.AttendanceData, Volunteer: student.VolunteerData, Extra: student.ExtraData, Applications: applications})
+		mark, _ := dm.GetStudentStatExclusion(classNum, student.StudentNum, student.Name)
+		changes = append(changes, model.PatchChange{ClassNum: classNum, StudentNum: student.StudentNum, StudentName: student.Name, Attendance: student.AttendanceData, Volunteer: student.VolunteerData, Extra: student.ExtraData, Applications: applications, StatExclusion: mark})
 	}
 	return changes, nil
 }
@@ -322,6 +323,12 @@ func (dm *DBManager) ApplyPatchChange(change model.PatchChange) error {
 		record.StudentNum = change.StudentNum
 		record.StudentName = change.StudentName
 		if err := dm.saveApplication(record, true); err != nil {
+			return err
+		}
+	}
+	if change.StatExclusion != nil {
+		// 입시 통계 제외 표시: 학년부장 PC 기록보다 최근에 바꾼 것만 받는다.
+		if err := dm.MergeStudentStatExclusion(change.ClassNum, change.StudentNum, change.StudentName, *change.StatExclusion); err != nil {
 			return err
 		}
 	}

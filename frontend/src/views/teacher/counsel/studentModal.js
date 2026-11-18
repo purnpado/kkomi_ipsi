@@ -9,6 +9,7 @@ import { bindWishlistControls } from './wishlist.js';
 import { notifyClassUpdated, notifyStudentSelected } from '../../../core/navigation.js';
 import { openWhatIfModal } from './whatIfModal.js';
 import { getWishlist, loadWishlist } from './wishlistStore.js';
+import { mountStatExclusion } from './statExclusion.js';
 
 export async function openStudentModal(classNum, studentNum, name) {
     // 기존 모달 제거
@@ -69,6 +70,7 @@ export function renderStudentModalContent(modalEl, classNum, studentNum, name, d
     fillGeneralCityCutoff(ctx);
     bindCounselRecords(ctx);
     bindWishlistControls(ctx);
+    mountStatExclusion(ctx);
     ctx.modalEl.querySelector('#openWhatIfBtn')?.addEventListener('click', () => openWhatIfModal(ctx));
 }
 

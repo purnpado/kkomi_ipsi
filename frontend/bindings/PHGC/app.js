@@ -537,6 +537,24 @@ export function GetServerNotices() {
 }
 
 /**
+ * GetStatExcludedApplicationCount 그 학년도에 통계에서 뺀 원서 수(입시 분석에는 건수만 보인다).
+ * 담임·진로부장 PC에는 자기 반 또는 받은 자료만 있으므로 그 범위의 건수다.
+ * @param {number} admissionYear
+ * @returns {$CancellablePromise<number>}
+ */
+export function GetStatExcludedApplicationCount(admissionYear) {
+    return $Call.ByID(1961502838, admissionYear);
+}
+
+/**
+ * GetStatExclusionList 학년부장 확인 목록(판정 기준 화면 안쪽).
+ * @returns {$CancellablePromise<database$0.StatExclusion[] | null>}
+ */
+export function GetStatExclusionList() {
+    return $Call.ByID(1253297955);
+}
+
+/**
  * GetStudentApplicationScoreSnapshot 선택한 학교·전형의 점수만 산출
  * @param {number} classNum
  * @param {string} studentNum
@@ -580,6 +598,17 @@ export function GetStudentCounselingRecords(classNum, studentNum, studentName) {
  */
 export function GetStudentFullDetail(classNum, studentNum, name) {
     return $Call.ByID(2007808590, classNum, studentNum, name);
+}
+
+/**
+ * GetStudentStatExclusion 학생이 입시 통계 제외인지(상담 화면 관리 칸).
+ * @param {number} classNum
+ * @param {string} studentNum
+ * @param {string} studentName
+ * @returns {$CancellablePromise<boolean>}
+ */
+export function GetStudentStatExclusion(classNum, studentNum, studentName) {
+    return $Call.ByID(2269996496, classNum, studentNum, studentName);
 }
 
 /**
@@ -1111,6 +1140,18 @@ export function SaveTeacherPatch(password, username, classNum, changes) {
  */
 export function SelfDestruct() {
     return $Call.ByID(1955287501);
+}
+
+/**
+ * SetStudentStatExclusion 입시 통계 제외를 켜거나 끈다. 성적 산출·상담 판정은 바뀌지 않는다.
+ * @param {number} classNum
+ * @param {string} studentNum
+ * @param {string} studentName
+ * @param {boolean} excluded
+ * @returns {$CancellablePromise<void>}
+ */
+export function SetStudentStatExclusion(classNum, studentNum, studentName, excluded) {
+    return $Call.ByID(2017956244, classNum, studentNum, studentName, excluded);
 }
 
 /**

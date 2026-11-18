@@ -21,6 +21,15 @@ type PatchChange struct {
 	Volunteer    string              `json:"volunteer,omitempty"`
 	Extra        string              `json:"extra,omitempty"`
 	Applications []ApplicationRecord `json:"applications,omitempty"`
+	// StatExclusion 입시 통계 제외 표시(사유 없음). 한 번도 바꾸지 않은 학생은 비어 있다.
+	StatExclusion *StatExclusionMark `json:"statExclusion,omitempty"`
+}
+
+// StatExclusionMark 입시 통계 제외 여부와 바꾼 시각(UTC "2006-01-02 15:04:05").
+// 병합할 때 더 최근에 바꾼 쪽을 남긴다.
+type StatExclusionMark struct {
+	Excluded  bool   `json:"excluded"`
+	UpdatedAt string `json:"updatedAt"`
 }
 
 type PatchFile struct {

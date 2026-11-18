@@ -96,9 +96,11 @@ func ImportTeacherPatchSelected(dm *database.DBManager, password, inputPath stri
 			filtered.Extra = change.Extra
 		}
 		if choice.Applications {
+			// 원서 항목을 고르면 입시 통계 제외 표시도 함께 받는다(원서 통계에만 쓰이는 표시).
 			filtered.Applications = change.Applications
+			filtered.StatExclusion = change.StatExclusion
 		}
-		if filtered.Attendance == "" && filtered.Volunteer == "" && filtered.Extra == "" && len(filtered.Applications) == 0 {
+		if filtered.Attendance == "" && filtered.Volunteer == "" && filtered.Extra == "" && len(filtered.Applications) == 0 && filtered.StatExclusion == nil {
 			continue
 		}
 		if err := dm.ApplyPatchChange(filtered); err != nil {
@@ -148,7 +150,7 @@ func InspectTeacherPatch(dm *database.DBManager, password, inputPath string) (mo
 		preview.Items = append(preview.Items, model.PatchPreviewItem{
 			StudentNum: change.StudentNum, StudentName: change.StudentName,
 			Attendance: change.Attendance != "", Volunteer: change.Volunteer != "",
-			Extra: change.Extra != "", Applications: len(change.Applications) > 0,
+			Extra: change.Extra != "", Applications: len(change.Applications) > 0 || change.StatExclusion != nil,
 		})
 	}
 	sort.Slice(preview.Items, func(i, j int) bool {

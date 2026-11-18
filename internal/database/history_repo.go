@@ -59,7 +59,7 @@ func (dm *DBManager) initHistoryTable(db *sql.DB) error {
 
 // snapshotAdmissionHistory 결과 확정 때 그해 원서 기록을 익명으로 보관한다(같은 해 우리 학교 기록은 새로 덮어씀).
 func (dm *DBManager) snapshotAdmissionHistory(admissionYear int) (int, error) {
-	records, err := dm.GetSchoolApplicationRecords()
+	records, err := dm.GetStatsApplicationRecords() // 통계 제외 학생은 보관하지 않는다
 	if err != nil {
 		return 0, err
 	}
@@ -256,7 +256,7 @@ func historyToRecord(h HistoryRecord) model.ApplicationRecord {
 
 // schoolRecordsWithHistory 학급 DB 원서 기록 + 학급 DB에 없는 학년도의 보관 기록(학교 전체 분석용)
 func (dm *DBManager) schoolRecordsWithHistory() ([]model.ApplicationRecord, error) {
-	records, err := dm.GetSchoolApplicationRecords()
+	records, err := dm.GetStatsApplicationRecords() // 통계 제외 학생의 원서는 합격선·통계에 넣지 않는다
 	if err != nil {
 		return nil, err
 	}

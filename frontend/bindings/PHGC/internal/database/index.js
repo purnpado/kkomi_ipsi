@@ -128,6 +128,11 @@ import * as $models from "./models.js";
  */
 
 /**
+ * StatExclusion 학년부장 확인 목록 한 줄(통계에서 뺀 학생).
+ * @typedef {$models.StatExclusion} StatExclusion
+ */
+
+/**
  * StudentCounselingRecord 학생 1:1 진학 상담 일지 구조체
  * @typedef {$models.StudentCounselingRecord} StudentCounselingRecord
  */

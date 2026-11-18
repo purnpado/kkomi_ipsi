@@ -96,6 +96,34 @@ async function masterScenario(page, accounts) {
             });
             if (!stuck) throw new Error('매트릭스 학교명 줄이 고정되지 않았습니다');
         }],
+        ['07c-학년부장-상담-관리칸', async () => {
+            await clickMenu(page, 'dash');
+            await openStudentBySearch(page);
+            await page.waitForSelector('#statExclusionMount details', { timeout: 10000 });
+            await page.evaluate(() => {
+                const d = document.querySelector('#statExclusionMount details');
+                d.open = true;
+                d.scrollIntoView({ block: 'center' });
+            });
+            // 체크해 저장되는지 확인(가상 자료 사본이라 바꿔도 된다). 두 번째 테마에서는 이미 체크돼 있다.
+            const checked = await page.$eval('#statExclusionCheck', (c) => c.checked);
+            if (!checked) {
+                await page.click('#statExclusionCheck');
+                await page.waitForFunction(() => /뺐습니다/.test(document.querySelector('#statExclusionStatus')?.textContent || ''), { timeout: 10000 });
+            }
+            await wait(300);
+        }],
+        ['06b-학년부장-판정기준-통계제외목록', async () => {
+            await clickMenu(page, 'judgment');
+            await page.waitForSelector('#statExclusionList', { timeout: 10000 });
+            await page.evaluate(() => {
+                const d = document.querySelector('#statExclusionList');
+                d.open = true;
+                d.scrollIntoView({ block: 'center' });
+            });
+            await page.waitForFunction(() => /1명/.test(document.querySelector('#statExclusionListBody')?.textContent || ''), { timeout: 10000 })
+                .catch(() => { throw new Error('상담 화면에서 체크한 학생이 확인 목록에 나오지 않습니다'); });
+        }],
         ['05b-학년부장-공식경쟁률', async () => {
             await clickMenu(page, 'cutoff');
             await page.click('#openCompetitionBtn');

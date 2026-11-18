@@ -39,3 +39,9 @@ import * as $models from "./models.js";
  * merge. It intentionally does not expose raw student values in the preview.
  * @typedef {$models.PatchPreviewItem} PatchPreviewItem
  */
+
+/**
+ * StatExclusionMark 입시 통계 제외 여부와 바꾼 시각(UTC "2006-01-02 15:04:05").
+ * 병합할 때 더 최근에 바꾼 쪽을 남긴다.
+ * @typedef {$models.StatExclusionMark} StatExclusionMark
+ */

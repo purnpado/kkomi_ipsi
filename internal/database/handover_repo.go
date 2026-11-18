@@ -187,7 +187,7 @@ func (dm *DBManager) StoreSharedPackage(pkg *SharedPackageV2) (*SharedPackageImp
 // HistoryFromCurrentClasses 아직 보관 기록이 없는 학년도의 지금 학급 원서 기록을 익명으로 만든다
 // (결과 확정 전에 인수인계 파일을 만들거나, 이전 버전 최종 보관본을 바꿀 때).
 func (dm *DBManager) HistoryFromCurrentClasses(onlyResults bool) ([]HistoryRecord, error) {
-	records, err := dm.GetSchoolApplicationRecords()
+	records, err := dm.GetStatsApplicationRecords() // 통계 제외 학생은 인수인계 파일에 넣지 않는다
 	if err != nil {
 		return nil, err
 	}

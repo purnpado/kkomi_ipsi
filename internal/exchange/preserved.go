@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"PHGC/internal/database"
+	"PHGC/internal/model"
 )
 
 type preservedAppRow struct {
@@ -58,6 +59,8 @@ type preservedClassData struct {
 	Counsels  []preservedCounselRow
 	Overrides []preservedStudentOverride
 	Wishlists []preservedWishlist
+	// StatExclusions 입시 통계 제외 표시(해제 기록 포함): 번호·이름 → 표시
+	StatExclusions map[[2]string]model.StatExclusionMark
 }
 
 func extractPreservedClassData(dm *database.DBManager, dbPath string) (preservedClassData, error) {
@@ -115,6 +118,9 @@ func extractPreservedClassData(dm *database.DBManager, dbPath string) (preserved
 			}
 		}
 	}
+
+	// 5. 입시 통계 제외 표시
+	result.StatExclusions = database.ReadStatExclusions(db)
 
 	return result, nil
 }
@@ -179,6 +185,10 @@ func restorePreservedClassData(dm *database.DBManager, dbPath string, data prese
 			ON CONFLICT(student_num, student_name) DO UPDATE SET items_json = excluded.items_json, updated_at = excluded.updated_at`,
 			w.StudentNum, w.StudentName, w.ItemsJSON, w.UpdatedAt)
 		keep(err)
+	}
+	// 5. 입시 통계 제외 표시: 새 배포자료(학년부장 기록)보다 담임 PC에서 더 최근에 바꾼 것만 남긴다.
+	for key, mark := range data.StatExclusions {
+		keep(database.UpsertStatExclusion(db, key[0], key[1], mark, true))
 	}
 	if firstErr != nil {
 		return fmt.Errorf("기존 학급 자료 병합 중 오류: %w", firstErr)

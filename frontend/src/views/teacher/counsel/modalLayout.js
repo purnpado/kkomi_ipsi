@@ -292,6 +292,9 @@ export function renderStudentModalLayout(ctx) {
                 </div>
             </div>
 
+            <!-- 접힌 관리 칸(입시 통계 제외): statExclusion.js 가 담임·학년부장에게만 그린다. 인쇄하지 않는다 -->
+            <div id="statExclusionMount" class="no-print"></div>
+
             <!-- 화면용 모달 하단 닫기 바 (스크롤 끝에서도 즉시 닫기 지원) -->
             <div class="pt-4 border-t border-slate-700/60 flex items-center justify-between flex-wrap gap-3 no-print">
                 <div class="text-xs text-slate-400 flex items-center gap-1.5">

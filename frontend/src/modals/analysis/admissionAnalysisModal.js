@@ -315,10 +315,12 @@ export async function openAdmissionAnalysisModal() {
                         </p>
                     </div>
                 `;
+                if (currentSourceMode !== 'consolidated') appendStatExcludedNote(container, year);
                 return;
             }
 
             renderStatsDashboard(container, stats, currentSourceMode);
+            if (currentSourceMode !== 'consolidated') appendStatExcludedNote(container, year);
         } catch (e) {
             console.error('분석 렌더링 실패:', e);
             container.innerHTML = `
@@ -358,4 +360,17 @@ export async function openAdmissionAnalysisModal() {
 
     // 초기 로드 실행
     loadAndRenderAnalysis();
+}
+
+// 우리 학교 통계에서 뺀 원서(입시 통계 제외 학생) 건수만 알린다. 학교·학과를 가리지 않은 학년도 전체 건수라
+// 누가 어느 학교에 지원했는지 드러나지 않는다.
+async function appendStatExcludedNote(container, year) {
+    try {
+        const count = await window.go.main.App.GetStatExcludedApplicationCount(Number(year) || 0);
+        if (!count) return;
+        const note = document.createElement('p');
+        note.className = 'mt-3 text-xs text-slate-400';
+        note.textContent = `이 학년도 우리 학교 원서 중 ${count}건은 입시 통계에 넣지 않도록 정한 학생의 원서라 집계에서 뺐습니다.`;
+        container.appendChild(note);
+    } catch (_) { /* 건수를 못 읽어도 분석은 그대로 보인다 */ }
 }

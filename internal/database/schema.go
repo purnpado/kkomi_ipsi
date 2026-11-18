@@ -222,6 +222,14 @@ func (dm *DBManager) EnsureClassDBSchema(dbPath string) error {
 			updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 			PRIMARY KEY(student_num, student_name)
 		);
+		-- 입시 통계 제외(특수교육대상자·학생선수 등). 사유는 저장하지 않는다. 해제도 excluded=0 행으로 남겨 시각 비교에 쓴다.
+		CREATE TABLE IF NOT EXISTS student_stat_exclusions (
+			student_num TEXT NOT NULL,
+			student_name TEXT NOT NULL,
+			excluded INTEGER NOT NULL DEFAULT 0,
+			updated_at TEXT NOT NULL DEFAULT '',
+			PRIMARY KEY(student_num, student_name)
+		);
 	`)
 
 	// 기존 테이블에 컬럼 추가 (오류 무시 - 이미 존재할 경우)

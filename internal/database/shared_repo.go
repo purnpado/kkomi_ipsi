@@ -118,7 +118,7 @@ func (dm *DBManager) BuildSharedPackageV2(admissionYear int) (*SharedPackageV2, 
 		admissionYear = time.Now().Year() + 1
 	}
 
-	records, err := dm.GetSchoolApplicationRecords()
+	records, err := dm.GetStatsApplicationRecords() // 통계 제외 학생은 관내 공유 파일에 넣지 않는다
 	if err != nil {
 		return nil, err
 	}

@@ -68,15 +68,20 @@ export async function openJudgmentSettingsModal({ onSaved } = {}) {
                     <th class="p-2 text-left">학교</th><th class="p-2 text-left">전형</th><th class="p-2">만점</th><th class="p-2 text-left">방식</th><th class="p-2 text-left">값</th>
                 </tr></thead><tbody>${rules.map(overrideRow).join('') || '<tr><td colspan="5" class="p-3 text-slate-500">학교 규칙 목록을 불러오지 못했습니다.</td></tr>'}</tbody></table>
             </div>
+            <details id="statExclusionList" class="rounded-xl border border-slate-700/60 bg-slate-900/40">
+                <summary class="cursor-pointer select-none px-4 py-2.5 text-xs font-bold text-slate-300">입시 통계에서 뺀 학생</summary>
+                <div class="px-4 pb-3 pt-1 text-xs text-slate-300" id="statExclusionListBody" role="status" aria-live="polite">펼치면 불러옵니다.</div>
+            </details>
             <div class="flex justify-end gap-2">
-                <button id="cancelJudgmentSettings" class="btn-secondary px-4 py-2 text-sm">취소</button>
-                <button id="saveJudgmentSettings" class="btn-primary px-4 py-2 text-sm">저장</button>
+                <button id="cancelJudgmentSettings" class="btn-secondary w-auto whitespace-nowrap px-4 py-2 text-sm">취소</button>
+                <button id="saveJudgmentSettings" class="btn-primary w-auto whitespace-nowrap px-5 py-2 text-sm">저장</button>
             </div>
         </div>`;
     document.body.appendChild(modal);
     const close = () => modal.remove();
     modal.querySelector('#closeJudgmentSettings').addEventListener('click', close);
     modal.querySelector('#cancelJudgmentSettings').addEventListener('click', close);
+    bindStatExclusionList(modal);
     modal.querySelector('#saveJudgmentSettings').addEventListener('click', async () => {
         const num = id => parseFloat(modal.querySelector(id).value);
         const next = {
@@ -104,6 +109,29 @@ export async function openJudgmentSettingsModal({ onSaved } = {}) {
             onSaved?.();
         } catch (err) {
             showModalAlert(`판정 기준 저장 실패: ${err}`, '오류', 'error');
+        }
+    });
+}
+
+// 입시 통계 제외 학생 확인 목록(학년부장). 펼칠 때만 불러와 창을 여는 것만으로는 이름이 보이지 않게 한다.
+// 표시는 각 학생 상담 화면 맨 아래 [관리]에서 바꾼다.
+function bindStatExclusionList(modal) {
+    const box = modal.querySelector('#statExclusionList');
+    const body = modal.querySelector('#statExclusionListBody');
+    if (!box || !body) return;
+    box.addEventListener('toggle', async () => {
+        if (!box.open) return;
+        body.textContent = '불러오는 중…';
+        try {
+            const list = await window.go.main.App.GetStatExclusionList();
+            if (!list || list.length === 0) {
+                body.textContent = '입시 통계에서 뺀 학생이 없습니다. 학생 상담 화면 맨 아래 [관리]에서 정할 수 있습니다.';
+                return;
+            }
+            body.innerHTML = `<p class="mb-1.5 text-slate-400">${list.length}명 · 바꾸려면 학생 상담 화면 맨 아래 [관리]를 엽니다.</p>`
+                + `<ul class="space-y-0.5">${list.map(s => `<li class="num">${escapeHtml(String(s.classNum))}반 ${escapeHtml(String(s.studentNum))}번 ${escapeHtml(s.studentName)}</li>`).join('')}</ul>`;
+        } catch (err) {
+            body.textContent = `목록을 불러오지 못했습니다: ${err}`;
         }
     });
 }
