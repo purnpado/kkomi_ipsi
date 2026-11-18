@@ -82,6 +82,38 @@ async function masterScenario(page, accounts) {
             if (!docked) throw new Error('화면 안에 띄워지지 않았습니다');
         });
     }
+    // 화면 높이 그대로 찍어야 확인되는 것: 매트릭스를 아래로 내렸을 때 학교명 줄 고정, 공식 경쟁률 창
+    const viewportShots = [
+        ['08b-학년부장-매트릭스-아래로', async () => {
+            await clickMenu(page, 'matrix');
+            await wait(2000);
+            await page.evaluate(() => { const el = document.querySelector('#panelScreenMount .matrix-scroll'); if (el) el.scrollTop = 1200; });
+            await wait(400);
+            const stuck = await page.evaluate(() => {
+                const el = document.querySelector('#panelScreenMount .matrix-scroll');
+                const th = el?.querySelector('thead th');
+                return el && th ? Math.abs(th.getBoundingClientRect().top - el.getBoundingClientRect().top) < 4 : false;
+            });
+            if (!stuck) throw new Error('매트릭스 학교명 줄이 고정되지 않았습니다');
+        }],
+        ['05b-학년부장-공식경쟁률', async () => {
+            await clickMenu(page, 'cutoff');
+            await page.click('#openCompetitionBtn');
+            await wait(1200);
+        }]
+    ];
+    for (const [name, fn] of viewportShots) {
+        for (const theme of THEMES) {
+            await setLook(page, theme);
+            try {
+                await fn();
+                shots.push(await shot(page, OUT, `${name}-${theme}`, { fullPage: false }));
+            } catch (err) {
+                problems.push(`${name}-${theme}: ${err.message}`);
+            }
+            await closeModals(page);
+        }
+    }
     for (const [tab, label] of [['students', '학생별'], ['school', '학교별결과'], ['general', '일반고결과']]) {
         await each(page, `10d-학년부장-원서관리-${label}`, async () => {
             await clickMenu(page, 'applications');

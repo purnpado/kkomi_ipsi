@@ -1,4 +1,4 @@
-import { normalizeSchoolName } from '../../../core/utils.js';
+import { escapeHtml, normalizeSchoolName } from '../../../core/utils.js';
 import { admissionLabel } from '../../../core/admissionYear.js';
 
 // 커트라인 관리: 저장값 대조표와 학교·학과별 입력 행 HTML 구성
@@ -36,7 +36,7 @@ export function buildCutoffRowsHTML(ctx, view) {
         if (!matchTab) return false;
         if (!ctx.searchKeyword) return true;
         const q = ctx.searchKeyword.toLowerCase();
-        return sch.name.toLowerCase().includes(q) || sch.items.some(it => (it.dept || '').toLowerCase().includes(q) || (it.track || '').toLowerCase().includes(q));
+        return sch.name.toLowerCase().includes(q) || (sch.fullName || '').toLowerCase().includes(q) || sch.items.some(it => (it.dept || '').toLowerCase().includes(q) || (it.track || '').toLowerCase().includes(q));
     });
 
     // 학교 목록 카드 HTML 생성
@@ -131,7 +131,7 @@ export function buildCutoffRowsHTML(ctx, view) {
                             <div class="flex items-center justify-between border-b border-slate-700/50 pb-3 flex-wrap gap-2">
                                 <div class="flex items-center gap-2.5 flex-wrap">
                                     <span class="text-xl">🏫</span>
-                                    <h3 class="font-bold text-white text-base">${sch.name}</h3>
+                                    <h3 class="font-bold text-white text-base">${escapeHtml(sch.fullName || sch.name)}</h3>
                                     <span class="text-xs px-2.5 py-0.5 rounded-full bg-indigo-900/60 text-indigo-300 border border-indigo-500/30 font-semibold">${sch.categoryLabel} (${sch.totalMax})</span>
                                     <span class="text-[11px] px-2.5 py-0.5 rounded-full bg-emerald-950/70 text-emerald-300 border border-emerald-500/40 font-bold flex items-center gap-1">🏷️ ${ctx.currentAdmissionYear}년 입학 기준</span>
                                 </div>

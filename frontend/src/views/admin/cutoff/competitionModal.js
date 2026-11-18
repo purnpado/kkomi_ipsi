@@ -33,8 +33,8 @@ function buildRows(ctx) {
         const tracks = [...new Set((sch.items || []).map(it => ctx.normalizeTrack(it.track)).filter(Boolean))];
         const depts = [...new Set((sch.items || []).map(it => ctx.normalizeDept(it.dept)).filter(Boolean))];
         tracks.forEach(track => {
-            rows.push({ school: sch.name, categoryLabel: sch.categoryLabel, dept: '', track });
-            depts.forEach(dept => rows.push({ school: sch.name, categoryLabel: sch.categoryLabel, dept, track }));
+            rows.push({ school: sch.name, fullName: sch.fullName || sch.name, categoryLabel: sch.categoryLabel, dept: '', track });
+            depts.forEach(dept => rows.push({ school: sch.name, fullName: sch.fullName || sch.name, categoryLabel: sch.categoryLabel, dept, track }));
         });
     });
     return rows;
@@ -71,7 +71,7 @@ function renderBody(modal, ctx, year, guideQuotas) {
         return `
             <tr class="competition-row border-b border-slate-800 ${firstOfSchool ? 'border-t-2 border-t-slate-600' : ''}"
                 data-school="${escapeAttr(row.school)}" data-dept="${escapeAttr(row.dept)}" data-track="${escapeAttr(row.track)}" data-had="${saved ? '1' : ''}">
-                <td class="p-2 font-bold text-white whitespace-nowrap">${firstOfSchool ? escapeHtml(row.school) : ''}</td>
+                <td class="p-2 font-bold text-white whitespace-nowrap">${firstOfSchool ? escapeHtml(row.fullName || row.school) : ''}</td>
                 <td class="p-2 text-slate-300">${row.dept ? escapeHtml(row.dept) : '<span class="text-indigo-300 font-bold">학교 전체</span>'}</td>
                 <td class="p-2 text-slate-300 whitespace-nowrap">${escapeHtml(row.track)}</td>
                 <td class="p-2 text-center"><input type="text" inputmode="numeric" class="competition-quota input-field py-1 px-2 text-xs text-right w-20 ${!saved && guide ? 'border-sky-500/60' : ''}" value="${quota || ''}" placeholder="정원" ${guide ? `title="요강 모집정원 ${guide.quota}명${guide.source ? ` (${escapeAttr(guide.source)})` : ''}"` : ''}></td>

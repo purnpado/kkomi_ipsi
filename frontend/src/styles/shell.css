@@ -196,7 +196,7 @@ body.shell-on .watermark { display: none; }
     box-shadow: 0 2px 10px rgba(17, 24, 39, 0.06) !important;
 }
 /* 매트릭스는 학생이 많아 표가 길다: 화면 높이 안에서 위아래·좌우로 스크롤해 가로 막대가 늘 보이게 한다 */
-#matrixModal.docked-panel .overflow-x-auto { max-height: calc(100vh - 260px); overflow-y: auto; }
+#matrixModal.docked-panel .matrix-scroll { max-height: calc(100vh - 260px); }
 
 /* 인쇄: 화면 안에 띄운 문서(상담표·매트릭스·원서대장 등)도 인쇄되게 본문 영역을 남긴다 */
 @media print {

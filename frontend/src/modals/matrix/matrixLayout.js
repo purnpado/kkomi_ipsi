@@ -104,8 +104,8 @@ export function renderMatrixLayout(ctx, mx) {
                 </div>
 
                 <!-- 매트릭스 테이블 (가로 스크롤 없이 모니터 한 화면에 100% 쏙 들어가도록 유연한 반응형 구조 적용) -->
-                <div class="overflow-x-auto rounded-xl border border-slate-700/50 bg-slate-800/30 custom-scrollbar">
-                    <table class="w-full text-left border-collapse text-xs">
+                <div class="matrix-scroll overflow-x-auto rounded-xl border border-slate-700/50 bg-slate-800/30 custom-scrollbar">
+                    <table class="matrix-table w-full text-left border-collapse text-xs">
                         <thead>
                             <tr class="bg-slate-800/90 text-text-muted border-b border-slate-700/70 text-center whitespace-nowrap">
                                 <th class="p-2 w-12 font-bold text-indigo-300">반</th>
