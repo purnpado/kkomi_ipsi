@@ -1,4 +1,6 @@
 import { openModal } from '../../../core/navigation.js';
+import { showModalAlert } from '../../../core/dialogs.js';
+import { getWishlist, saveWishlist } from './wishlistStore.js';
 
 // 상담 모달: 목표고교 담기·바로 지원 연결
 export function bindWishlistControls(ctx) {
@@ -6,28 +8,17 @@ export function bindWishlistControls(ctx) {
     const wishlistContainer = document.getElementById('wishlistContainer');
     const wishlistCountBadge = document.getElementById('wishlistCountBadge');
 
-    const getStoredWishlist = () => {
-        for (const key of ctx.possibleKeys) {
-            try {
-                const raw = localStorage.getItem(key);
-                if (raw) {
-                    const parsed = JSON.parse(raw);
-                    if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-                }
-            } catch (_) {}
-        }
-        return [];
-    };
+    // 관심학교 목록은 학급 DB에 저장한다(wishlistStore.js). 화면은 저장소의 사본을 고쳐 다시 저장한다.
+    const getStoredWishlist = () => [...getWishlist(ctx.classNum, ctx.studentNum, ctx.name)];
 
     const saveStoredWishlist = (list) => {
-        const jsonStr = JSON.stringify(list);
-        for (const key of ctx.possibleKeys) {
-            try {
-                localStorage.setItem(key, jsonStr);
-            } catch (e) {
-                console.warn('관심학교 저장 실패:', key, e);
-            }
-        }
+        ctx.wishlist = list;
+        saveWishlist(ctx.classNum, ctx.studentNum, ctx.name, list).catch((err) => {
+            // 저장에 실패하면(조회 전용 계정 등) 화면을 저장된 목록으로 되돌린다.
+            ctx.wishlist = getWishlist(ctx.classNum, ctx.studentNum, ctx.name);
+            updateWishlistUI();
+            showModalAlert('관심학교를 저장하지 못했습니다: ' + err, '저장 실패', 'error');
+        });
     };
 
     const bindWishlistInnerEvents = () => {

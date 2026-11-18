@@ -555,6 +555,17 @@ export function GetStudentTranscript(classNum, studentNum, name) {
 }
 
 /**
+ * GetStudentWishlist 상담 화면 관심학교 목록(JSON 배열 문자열). 담임은 본인 학급만 본다.
+ * @param {number} classNum
+ * @param {string} studentNum
+ * @param {string} studentName
+ * @returns {$CancellablePromise<string>}
+ */
+export function GetStudentWishlist(classNum, studentNum, studentName) {
+    return $Call.ByID(174527593, classNum, studentNum, studentName);
+}
+
+/**
  * GetTransferStudents 전입생 목록. 담임은 본인 학급만, 학년부장·진로부장은 전 학급을 본다.
  * @returns {$CancellablePromise<$models.TransferStudent[] | null>}
  */
@@ -1020,6 +1031,18 @@ export function SaveStudentCounselingRecord(record) {
  */
 export function SaveStudentExtra(classNum, studentNum, name, extraJSON) {
     return $Call.ByID(49283567, classNum, studentNum, name, extraJSON);
+}
+
+/**
+ * SaveStudentWishlist 관심학교 목록 저장. 진로부장은 조회 전용, 담임은 본인 학급만.
+ * @param {number} classNum
+ * @param {string} studentNum
+ * @param {string} studentName
+ * @param {string} itemsJSON
+ * @returns {$CancellablePromise<void>}
+ */
+export function SaveStudentWishlist(classNum, studentNum, studentName, itemsJSON) {
+    return $Call.ByID(3261583948, classNum, studentNum, studentName, itemsJSON);
 }
 
 /**

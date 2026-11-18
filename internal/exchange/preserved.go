@@ -45,10 +45,19 @@ type preservedStudentOverride struct {
 	ExtraJSON      string
 }
 
+// preservedWishlist 상담 화면 관심학교 목록(학급 DB student_wishlists)
+type preservedWishlist struct {
+	StudentNum  string
+	StudentName string
+	ItemsJSON   string
+	UpdatedAt   string
+}
+
 type preservedClassData struct {
 	Apps      []preservedAppRow
 	Counsels  []preservedCounselRow
 	Overrides []preservedStudentOverride
+	Wishlists []preservedWishlist
 }
 
 func extractPreservedClassData(dm *database.DBManager, dbPath string) (preservedClassData, error) {
@@ -95,10 +104,26 @@ func extractPreservedClassData(dm *database.DBManager, dbPath string) (preserved
 		}
 	}
 
+	// 4. 관심학교 목록(예전 학급 DB에는 표가 없을 수 있다)
+	wishRows, err := db.Query(`SELECT student_num, student_name, items_json, IFNULL(updated_at, '') FROM student_wishlists`)
+	if err == nil {
+		defer wishRows.Close()
+		for wishRows.Next() {
+			var w preservedWishlist
+			if err := wishRows.Scan(&w.StudentNum, &w.StudentName, &w.ItemsJSON, &w.UpdatedAt); err == nil {
+				result.Wishlists = append(result.Wishlists, w)
+			}
+		}
+	}
+
 	return result, nil
 }
 
 func restorePreservedClassData(dm *database.DBManager, dbPath string, data preservedClassData) error {
+	// 예전 버전 배포자료의 학급 DB에도 새 표(관심학교 등)가 있도록 먼저 맞춘다.
+	if err := dm.EnsureClassDBSchema(dbPath); err != nil {
+		return err
+	}
 	db, err := dm.OpenDB(dbPath)
 	if err != nil {
 		return err
@@ -146,6 +171,13 @@ func restorePreservedClassData(dm *database.DBManager, dbPath string, data prese
 	for _, so := range data.Overrides {
 		_, err := db.Exec(`UPDATE students SET attendance_json = ?, volunteer_json = ?, extra_json = ? WHERE student_num = ? AND name = ?`,
 			so.AttendanceJSON, so.VolunteerJSON, so.ExtraJSON, so.StudentNum, so.Name)
+		keep(err)
+	}
+	// 4. 관심학교 목록 복원(담임 PC에서 고친 목록을 그대로 남긴다)
+	for _, w := range data.Wishlists {
+		_, err := db.Exec(`INSERT INTO student_wishlists (student_num, student_name, items_json, updated_at) VALUES (?, ?, ?, ?)
+			ON CONFLICT(student_num, student_name) DO UPDATE SET items_json = excluded.items_json, updated_at = excluded.updated_at`,
+			w.StudentNum, w.StudentName, w.ItemsJSON, w.UpdatedAt)
 		keep(err)
 	}
 	if firstErr != nil {

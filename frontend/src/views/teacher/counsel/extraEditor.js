@@ -1,4 +1,5 @@
 import { printOnly } from '../../../print/printEngine.js';
+import { getWishlist } from './wishlistStore.js';
 import { renderStudentModalContent } from './studentModal.js';
 
 // 상담 모달: 비교과 저장·상담표 인쇄
@@ -61,19 +62,9 @@ export function bindExtraSaveAndPrint(ctx) {
         // [인쇄 직전 실시간 관심/희망학교 필터링 동기화]
         // 1. 등록된 관심학교(로컬스토리지 다중키) 및 희망원서(DB 데이터 + 화면 입력값) 실시간 수집
         const registeredSchoolNames = new Set();
-        for (const key of ctx.possibleKeys) {
-            try {
-                const raw = localStorage.getItem(key);
-                if (raw) {
-                    const parsed = JSON.parse(raw);
-                    if (Array.isArray(parsed)) {
-                        parsed.forEach(w => {
-                            if (w.schoolName && w.schoolName.trim()) registeredSchoolNames.add(w.schoolName.trim());
-                        });
-                    }
-                }
-            } catch (_) {}
-        }
+        getWishlist(ctx.classNum, ctx.studentNum, ctx.name).forEach(w => {
+            if (w.schoolName && w.schoolName.trim()) registeredSchoolNames.add(w.schoolName.trim());
+        });
 
         (ctx.data.applications || []).forEach(a => {
             if (a && a.schoolName && a.schoolName.trim()) registeredSchoolNames.add(a.schoolName.trim());

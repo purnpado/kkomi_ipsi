@@ -68,6 +68,9 @@ func TestRedistributionMergesTeacherLocalDataWithPassword(t *testing.T) {
 	if err := teacher.SaveStudentExtra(1, "1", "가상학생", `{"leadership":2}`); err != nil {
 		t.Fatal(err)
 	}
+	if err := teacher.SaveStudentWishlist(1, "1", "가상학생", `[{"schoolName":"울산마이스터고","trackName":"일반"}]`); err != nil {
+		t.Fatal(err)
+	}
 	if err := teacher.db.SealAllDatabases(); err != nil {
 		t.Fatal(err)
 	}
@@ -127,6 +130,9 @@ func TestRedistributionMergesTeacherLocalDataWithPassword(t *testing.T) {
 	student, err := after.db.GetStudent(1, "1", "가상학생")
 	if err != nil || student.ExtraData != `{"leadership":2}` {
 		t.Fatalf("직접 입력한 가산점이 옮겨져야 합니다: %#v, %v", student, err)
+	}
+	if wish, err := after.GetStudentWishlist(1, "1", "가상학생"); err != nil || wish != `[{"schoolName":"울산마이스터고","trackName":"일반"}]` {
+		t.Fatalf("관심학교 목록이 옮겨져야 합니다: %q, %v", wish, err)
 	}
 	if err := after.db.SealAllDatabases(); err != nil {
 		t.Fatal(err)

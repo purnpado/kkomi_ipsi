@@ -208,6 +208,13 @@ func (dm *DBManager) EnsureClassDBSchema(dbPath string) error {
 			created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 			updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 		);
+		CREATE TABLE IF NOT EXISTS student_wishlists (
+			student_num TEXT NOT NULL,
+			student_name TEXT NOT NULL,
+			items_json TEXT NOT NULL DEFAULT '[]',
+			updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+			PRIMARY KEY(student_num, student_name)
+		);
 	`)
 
 	// 기존 테이블에 컬럼 추가 (오류 무시 - 이미 존재할 경우)

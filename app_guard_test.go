@@ -73,6 +73,20 @@ func TestBackendRejectsNonMasterWrites(t *testing.T) {
 	if err := anonymous.SetupApp(database.SetupRequest{SchoolName: "가로채기", ClassCount: 1, AdminPassword: "x", SharedDataPassword: "y", AdmissionYear: 2027}); err == nil {
 		t.Error("설정이 끝난 뒤 로그인 없이 초기 설정을 다시 할 수 있으면 안 됩니다")
 	}
+	// 관심학교: 진로부장은 조회 전용, 담임은 본인 반만
+	wish := `[{"schoolName":"울산마이스터고"}]`
+	if err := viewer.SaveStudentWishlist(1, "1", "가상학생", wish); err == nil {
+		t.Error("진로부장이 관심학교를 바꿀 수 있으면 안 됩니다")
+	}
+	if err := homeroom.SaveStudentWishlist(2, "1", "가상학생", wish); err == nil {
+		t.Error("담임이 다른 반 관심학교를 바꿀 수 있으면 안 됩니다")
+	}
+	if err := homeroom.SaveStudentWishlist(1, "1", "가상학생", wish); err != nil {
+		t.Errorf("담임의 본인 반 관심학교 저장이 막히면 안 됩니다: %v", err)
+	}
+	if got, err := viewer.GetStudentWishlist(1, "1", "가상학생"); err != nil || got != wish {
+		t.Errorf("진로부장도 관심학교를 볼 수는 있어야 합니다: %q %v", got, err)
+	}
 	// 학년부장은 그대로 할 수 있다
 	if err := master.SaveCutoffs(cutoff); err != nil {
 		t.Errorf("학년부장의 커트라인 저장이 막히면 안 됩니다: %v", err)

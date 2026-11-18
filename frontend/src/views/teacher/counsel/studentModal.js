@@ -8,6 +8,7 @@ import { bindCounselRecords } from './counselLog.js';
 import { bindWishlistControls } from './wishlist.js';
 import { notifyClassUpdated, notifyStudentSelected } from '../../../core/navigation.js';
 import { openWhatIfModal } from './whatIfModal.js';
+import { getWishlist, loadWishlist } from './wishlistStore.js';
 
 export async function openStudentModal(classNum, studentNum, name) {
     // 기존 모달 제거
@@ -31,6 +32,7 @@ export async function openStudentModal(classNum, studentNum, name) {
             window.go.main.App.GetCutoffs().catch(() => []),
             window.go.main.App.GetOfficialAdmissionData().catch(() => ({ items: [] })),
             window.go.main.App.GetStudentApplications ? window.go.main.App.GetStudentApplications(classNum, String(studentNum), name).catch(() => []) : Promise.resolve([]),
+            loadWishlist(classNum, studentNum, name),
         ]);
 
         if (fullData) {
@@ -92,26 +94,8 @@ function prepareStudentModalState(ctx) {
     };
     ctx.normalizeDept = (dept) => String(dept || '').replace(/\s+/g, '');
 
-    // 학생별 관심학교(장바구니) 목록 로드 (모든 키 포맷 호환)
-    const wishlistKey = `phgc_wishlist_${ctx.classNum}_${ctx.studentNum}`;
-    ctx.possibleKeys = [
-        wishlistKey,
-        `phgc_wishlist_${ctx.classNum}_${parseInt(ctx.studentNum, 10)}`,
-        `phgc_wishlist_${ctx.classNum}_${String(ctx.studentNum).padStart(2, '0')}`
-    ];
-    ctx.wishlist = [];
-    for (const key of ctx.possibleKeys) {
-        try {
-            const raw = localStorage.getItem(key);
-            if (raw) {
-                const parsed = JSON.parse(raw);
-                if (Array.isArray(parsed) && parsed.length > 0) {
-                    ctx.wishlist = parsed;
-                    break;
-                }
-            }
-        } catch (_) {}
-    }
+    // 학생별 관심학교(장바구니) 목록: 상담 화면을 열 때 학급 DB에서 읽어 둔 값(wishlistStore.js)
+    ctx.wishlist = getWishlist(ctx.classNum, ctx.studentNum, ctx.name);
 }
 
 // 상담 모달: 목표고교 목록 HTML 렌더러
