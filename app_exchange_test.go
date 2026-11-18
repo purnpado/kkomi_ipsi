@@ -25,7 +25,8 @@ func TestSelectedTeacherPatchMergeAndExpectedSupportToken(t *testing.T) {
 	if err := dm.InitClassDB(1); err != nil {
 		t.Fatal(err)
 	}
-	app := &App{db: dm}
+	// 취합자료 병합은 학년부장 작업이다(백엔드 권한 확인).
+	app := &App{db: dm, user: &database.User{Username: "admin", Role: "master"}}
 	token1, err := dm.GetExpectedSupportToken()
 	if err != nil || len(token1) < 32 {
 		t.Fatalf("expected support token: %q, %v", token1, err)

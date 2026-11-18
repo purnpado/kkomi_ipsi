@@ -1,12 +1,12 @@
 package main
 
 import (
-	"runtime"
 	"context"
 	"embed"
 	"log"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 
 	"PHGC/internal/sync"

@@ -63,6 +63,10 @@ func TestAdministratorPasswordResetUnlocksEncryptedDataAfterRestart(t *testing.T
 	}); err != nil {
 		t.Fatalf("SetupApp: %v", err)
 	}
+	// 실제 프로그램처럼 초기 설정 뒤 학년부장으로 로그인한 상태에서 비밀번호를 바꾼다.
+	if _, err := app.UnlockAndLogin("admin", "initial-admin-password"); err != nil {
+		t.Fatalf("login: %v", err)
+	}
 	if err := app.SetUserPassword("admin", "reset-admin-password"); err != nil {
 		t.Fatalf("SetUserPassword(admin): %v", err)
 	}
@@ -94,6 +98,9 @@ func TestTeacherPasswordResetPackageRestoresLoginWithoutClassDatabase(t *testing
 		AdmissionYear:      2027,
 	}); err != nil {
 		t.Fatalf("SetupApp: %v", err)
+	}
+	if _, err := admin.UnlockAndLogin("admin", "admin-password"); err != nil {
+		t.Fatalf("login: %v", err)
 	}
 	if err := admin.db.SealAllDatabases(); err != nil {
 		t.Fatalf("Seal baseline: %v", err)

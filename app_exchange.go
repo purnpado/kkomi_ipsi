@@ -13,6 +13,9 @@ import (
 // package.  It is called immediately after the administrator assigns a new
 // initial password.
 func (a *App) SavePasswordResetPackage(username string) (string, error) {
+	if err := a.requireMaster("비밀번호 재설정 파일 만들기"); err != nil {
+		return "", err
+	}
 	path, err := a.saveFileDialog(
 		"담임 비밀번호 재설정 파일 저장",
 		fmt.Sprintf("꼬미입시-%s-비밀번호재설정.kkomireset", username),
@@ -98,6 +101,9 @@ func (a *App) OpenDistributionPackageWithPassword(password string) (*exchange.Di
 
 // SaveTeacherPatch opens a native save dialog and writes an encrypted patch.
 func (a *App) SaveTeacherPatch(password, username string, classNum int, changes []model.PatchChange) (string, error) {
+	if err := a.requireHomeroomOf(classNum, "취합자료 만들기"); err != nil {
+		return "", err
+	}
 	classTag := username
 	if classNum > 0 && !strings.Contains(username, fmt.Sprintf("%d", classNum)) {
 		classTag = fmt.Sprintf("3%02d_%s", classNum, username)
@@ -140,6 +146,9 @@ func (a *App) SaveCurrentClassPatch(password string) (string, error) {
 
 // OpenTeacherPatchPreview selects a patch without applying it.
 func (a *App) OpenTeacherPatchPreview(password string) (model.PatchPreview, error) {
+	if err := a.requireMaster("취합자료 병합"); err != nil {
+		return model.PatchPreview{}, err
+	}
 	// 공용 데이터 암호 사전 검증: 틀린 암호 입력 시 파일 탐색기를 열지 않고 즉시 차단
 	if _, err := crypto.OpenSharedKeyEnvelope(a.db.DataDir, password); err != nil {
 		return model.PatchPreview{}, fmt.Errorf("공용 데이터 비밀번호가 올바르지 않습니다")
@@ -157,6 +166,9 @@ func (a *App) OpenTeacherPatchPreview(password string) (model.PatchPreview, erro
 
 // OpenTeacherPatch lets the administrator select and merge one or more patch files.
 func (a *App) OpenTeacherPatch(password string) (map[string]int, error) {
+	if err := a.requireMaster("취합자료 병합"); err != nil {
+		return nil, err
+	}
 	// 공용 데이터 암호 사전 검증: 틀린 암호 입력 시 파일 탐색기를 열지 않고 즉시 차단
 	if _, err := crypto.OpenSharedKeyEnvelope(a.db.DataDir, password); err != nil {
 		return nil, fmt.Errorf("공용 데이터 비밀번호가 올바르지 않습니다")

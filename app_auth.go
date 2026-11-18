@@ -37,6 +37,11 @@ func (a *App) UpdateAdmissionYear(admissionYear int) error {
 
 // SetupApp 초기 설정 저장
 func (a *App) SetupApp(req database.SetupRequest) error {
+	// 초기 설정이 이미 끝난 뒤에는 학년부장만 다시 저장할 수 있다. 로그인 없이 다시 부르면
+	// 새 암호화 키가 만들어져 기존 학생 자료를 열 수 없게 되므로 막는다.
+	if a.CheckSetupComplete() && !a.isMaster() {
+		return fmt.Errorf("초기 설정이 이미 끝났습니다. 학년부장으로 로그인한 뒤 [나이스 자료·학년도 관리]에서 고입 연도·학급 수를 바꾸세요")
+	}
 	if req.SchoolName == "" || req.ClassCount <= 0 || req.AdminPassword == "" || req.SharedDataPassword == "" {
 		return fmt.Errorf("모든 설정 값을 올바르게 입력해주세요")
 	}
@@ -232,6 +237,9 @@ func (a *App) Logout() {
 
 // ChangeUserPassword 비밀번호 변경
 func (a *App) ChangeUserPassword(username, newPassword string) error {
+	if err := a.requireSelfOrMaster(username, "비밀번호 바꾸기"); err != nil {
+		return err
+	}
 	return a.replaceUserKeyEnvelope(username, newPassword, func() error {
 		return a.db.ChangeUserPassword(username, newPassword)
 	})
@@ -282,6 +290,9 @@ func (a *App) GetUsers() ([]database.User, error) {
 
 // SetUserPassword 특정 사용자 비밀번호 설정 (관리자용)
 func (a *App) SetUserPassword(username, newPassword string) error {
+	if err := a.requireMaster("계정 관리"); err != nil {
+		return err
+	}
 	if strings.TrimSpace(newPassword) == "" {
 		return fmt.Errorf("새 비밀번호를 입력해주세요")
 	}
@@ -317,6 +328,9 @@ func (a *App) SetUserPassword(username, newPassword string) error {
 
 // AddViewerUser 뷰어 계정 추가 (관리자용)
 func (a *App) AddViewerUser(username, newPassword string) error {
+	if err := a.requireMaster("계정 관리"); err != nil {
+		return err
+	}
 	if err := a.db.AddViewerUser(username, newPassword); err != nil {
 		return err
 	}
@@ -330,6 +344,9 @@ func (a *App) VerifyAdminPassword(password string) (bool, error) {
 
 // CreateUser 새 사용자 등록 (관리자, 뷰어, 담임교사 등)
 func (a *App) CreateUser(username, password, role string, classNum int) error {
+	if err := a.requireMaster("계정 관리"); err != nil {
+		return err
+	}
 	if err := a.db.CreateUser(username, password, role, classNum); err != nil {
 		return err
 	}
@@ -338,6 +355,9 @@ func (a *App) CreateUser(username, password, role string, classNum int) error {
 
 // DeleteUser 사용자 삭제
 func (a *App) DeleteUser(username string) error {
+	if err := a.requireMaster("계정 관리"); err != nil {
+		return err
+	}
 	if err := a.db.DeleteUser(username); err != nil {
 		return err
 	}

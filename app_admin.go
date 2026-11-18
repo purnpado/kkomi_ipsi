@@ -47,16 +47,25 @@ func (a *App) OpenMultipleExcelFiles(title string) ([]string, error) {
 
 // ProcessExcel 엑셀 파일을 읽고 분할 저장 (단일 파일 호환)
 func (a *App) ProcessExcel(filePath string) (map[int]int, error) {
+	if err := a.requireMaster("나이스 자료 올리기"); err != nil {
+		return nil, err
+	}
 	return a.ProcessMultipleExcel([]string{filePath})
 }
 
 // ProcessAttendanceExcel 출결 엑셀 파싱 후 DB 병합 (단일 파일 호환)
 func (a *App) ProcessAttendanceExcel(filePath string) (map[int]int, error) {
+	if err := a.requireMaster("나이스 자료 올리기"); err != nil {
+		return nil, err
+	}
 	return a.ProcessMultipleAttendanceExcel([]string{filePath})
 }
 
 // ProcessVolunteerExcel 봉사 엑셀 파싱 후 DB 병합 (단일 파일 호환)
 func (a *App) ProcessVolunteerExcel(filePath string) (map[int]int, error) {
+	if err := a.requireMaster("나이스 자료 올리기"); err != nil {
+		return nil, err
+	}
 	return a.ProcessMultipleVolunteerExcel([]string{filePath})
 }
 
@@ -72,22 +81,37 @@ func (a *App) GetClassStatus(classCount int) map[int]int {
 // --- 고입 커트라인 관리 ---
 
 func (a *App) SaveCutoffs(cutoffs []database.CutoffInfo) error {
+	if err := a.requireMaster("커트라인 수정"); err != nil {
+		return err
+	}
 	return a.db.SaveCutoffs(cutoffs)
 }
 
 func (a *App) DeleteCutoff(year int, schoolName, department, track string) error {
+	if err := a.requireMaster("커트라인 수정"); err != nil {
+		return err
+	}
 	return a.db.DeleteCutoff(year, schoolName, department, track)
 }
 
 func (a *App) DeleteCutoffs(cutoffs []database.CutoffInfo) error {
+	if err := a.requireMaster("커트라인 수정"); err != nil {
+		return err
+	}
 	return a.db.DeleteCutoffs(cutoffs)
 }
 
 func (a *App) ResetCutoffs(year int) error {
+	if err := a.requireMaster("커트라인 수정"); err != nil {
+		return err
+	}
 	return a.db.ResetCutoffs(year)
 }
 
 func (a *App) PurgeOldCutoffs(baseAdmissionYear, keepYears int) (int64, error) {
+	if err := a.requireMaster("커트라인 수정"); err != nil {
+		return 0, err
+	}
 	return a.db.PurgeOldCutoffs(baseAdmissionYear, keepYears)
 }
 
@@ -100,6 +124,9 @@ func (a *App) GetCutoffs() ([]database.CutoffInfo, error) {
 
 // ResetAllData 데이터 폴더 삭제를 통해 완전 초기화
 func (a *App) ResetAllData() error {
+	if err := a.requireMaster("전체 초기화"); err != nil {
+		return err
+	}
 	// DB 연결이 열려 있을 수 있으므로 GC를 강제로 호출하거나 그냥 폴더 내용물을 지움
 	// 가장 확실한 것은 설정 파일들과 DB 파일들을 지우는 것
 	dataDir := a.db.DataDir
@@ -237,6 +264,9 @@ func (a *App) GetOfficialAdmissionData() (*sync.OfficialAdmissionData, error) {
 
 // SaveOfficialAdmissionData 로컬 공식 고입자료 저장
 func (a *App) SaveOfficialAdmissionData(items []map[string]interface{}) error {
+	if err := a.requireMaster("공식 공개자료 저장"); err != nil {
+		return err
+	}
 	if items == nil {
 		items = []map[string]interface{}{}
 	}
@@ -246,15 +276,24 @@ func (a *App) SaveOfficialAdmissionData(items []map[string]interface{}) error {
 
 // ProcessMultipleExcel 복수 학급 성적 엑셀 파일을 일괄 처리 (전체 반 일괄 업로드 지원)
 func (a *App) ProcessMultipleExcel(filePaths []string) (map[int]int, error) {
+	if err := a.requireMaster("나이스 자료 올리기"); err != nil {
+		return nil, err
+	}
 	return a.db.ProcessMultipleExcel(filePaths)
 }
 
 // ProcessMultipleAttendanceExcel 복수 학급 출결 엑셀 파일을 일괄 처리
 func (a *App) ProcessMultipleAttendanceExcel(filePaths []string) (map[int]int, error) {
+	if err := a.requireMaster("나이스 자료 올리기"); err != nil {
+		return nil, err
+	}
 	return a.db.ProcessMultipleAttendanceExcel(filePaths)
 }
 
 // ProcessMultipleVolunteerExcel 복수 학급 봉사 엑셀 파일을 일괄 처리
 func (a *App) ProcessMultipleVolunteerExcel(filePaths []string) (map[int]int, error) {
+	if err := a.requireMaster("나이스 자료 올리기"); err != nil {
+		return nil, err
+	}
 	return a.db.ProcessMultipleVolunteerExcel(filePaths)
 }

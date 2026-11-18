@@ -93,6 +93,9 @@ func (a *App) isMaster() bool {
 
 // UpdateSchoolRankSnapshots 전교생 기준 석차 및 백분율을 일괄 산출하여 스냅샷으로 보관
 func (a *App) UpdateSchoolRankSnapshots() error {
+	if err := a.requireMaster("전교 석차 갱신"); err != nil {
+		return err
+	}
 	return a.db.UpdateSchoolRankSnapshots()
 }
 

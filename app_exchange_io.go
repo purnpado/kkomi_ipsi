@@ -13,6 +13,9 @@ import (
 
 // ExportPasswordResetPackage 담임·진로 계정용 암호화 비밀번호 재설정 파일 생성
 func (a *App) ExportPasswordResetPackage(username, outputPath string) error {
+	if err := a.requireMaster("비밀번호 재설정 파일 만들기"); err != nil {
+		return err
+	}
 	return exchange.ExportPasswordResetPackage(a.db, a.dataKey, username, outputPath)
 }
 
@@ -46,21 +49,33 @@ func (a *App) ImportDistributionPackageWithPassword(inputPath, password string) 
 
 // ExportTeacherPatch 학급 단위 암호화 취합자료 작성
 func (a *App) ExportTeacherPatch(password, username string, classNum int, changes []model.PatchChange, outputPath string) error {
+	if err := a.requireHomeroomOf(classNum, "취합자료 만들기"); err != nil {
+		return err
+	}
 	return exchange.ExportTeacherPatch(a.db, password, username, classNum, changes, outputPath)
 }
 
 // ImportTeacherPatch 취합자료 복호화 후 허용된 변경만 반영
 func (a *App) ImportTeacherPatch(password, inputPath string) (int, error) {
+	if err := a.requireMaster("취합자료 병합"); err != nil {
+		return 0, err
+	}
 	return exchange.ImportTeacherPatch(a.db, password, inputPath)
 }
 
 // ImportTeacherPatchSelected 학년부장이 미리보기에서 선택한 항목만 병합
 func (a *App) ImportTeacherPatchSelected(password, inputPath string, selections []model.PatchMergeSelection) (int, error) {
+	if err := a.requireMaster("취합자료 병합"); err != nil {
+		return 0, err
+	}
 	return exchange.ImportTeacherPatchSelected(a.db, password, inputPath, selections)
 }
 
 // InspectTeacherPatch 병합 전 안전한 메타정보만 미리보기
 func (a *App) InspectTeacherPatch(password, inputPath string) (model.PatchPreview, error) {
+	if err := a.requireMaster("취합자료 병합"); err != nil {
+		return model.PatchPreview{}, err
+	}
 	return exchange.InspectTeacherPatch(a.db, password, inputPath)
 }
 
