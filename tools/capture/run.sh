@@ -1,7 +1,7 @@
 #!/bin/zsh
 # 꼬미입시 화면 자동 캡처 (개발용). 가상 시뮬레이션 자료만 쓰며 실제 학교 data 에는 손대지 않는다.
 # 사용법: zsh tools/capture/run.sh [학교폴더=가람중학교] [시나리오=all]
-#   시나리오: all | master | homeroom | viewer
+#   시나리오: all | master | homeroom | viewer | audit(대비·작은 글씨·포커스·가로 넘침 측정)
 # 결과: test-data/capture/latest/*.png (git 제외)
 set -e
 REPO="$(cd "$(dirname "$0")/../.." && pwd)"
@@ -37,7 +37,11 @@ done
 OUT="$WORK/latest"
 rm -rf "$OUT" && mkdir -p "$OUT"
 set +e
-node "$REPO/tools/capture/capture.js" --url "http://localhost:$PORT/" --out "$OUT" --scenario "$SCENARIO"
+if [ "$SCENARIO" = "audit" ]; then
+  node "$REPO/tools/capture/audit.js" --url "http://localhost:$PORT/" | tee "$OUT/측정.txt"
+else
+  node "$REPO/tools/capture/capture.js" --url "http://localhost:$PORT/" --out "$OUT" --scenario "$SCENARIO"
+fi
 STATUS=$?
 lsof -nP -iTCP:$PORT -sTCP:LISTEN -t 2>/dev/null | xargs kill 2>/dev/null || true
 echo "▶ 결과 폴더: $OUT"
