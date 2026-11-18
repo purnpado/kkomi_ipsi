@@ -23,6 +23,7 @@
 - **원서 관리 화면(2026-11-18)**: 원서·결과 → [원서 관리]. 학생별 원서(일반고 일괄 지원·되돌리기), 학교별 결과 입력(합격자만 체크·배정 학과·최종/1차, 전기고 합격자 일반고 원서 자동 삭제), 일반고 결과(불합격자만 체크). 모두 미리보기 확인 뒤 저장, `application_bulk_log`로 되돌림. 학년부장 전교·담임 본인 반·진로부장 조회. 계획서 `docs/application-management-plan.md`.
 - **공통 입력칸·버튼 스타일을 Tailwind components 층으로(2026-11-18)**: `styles/layout.css`의 `.glass-card`·`.input-field`·`.btn-primary`·`.btn-secondary` 등이 층 밖에 있어 화면 코드의 크기 유틸리티(`py-1.5`, `text-sm` …, 57곳)를 무시하고 크게 그려지던 문제를 고쳤다.
 
+- **커트라인 화면 오류 수정(2026-11-18)**: `views/admin/cutoff/cutoffView.js`가 학과·전형 정규화 함수를 정의하기 전에 써서(`normalizeDept is not a function`) 화면을 열 때 중복 커트라인 자동 정리가 한 번도 돌지 않았다. 정의를 커트라인 읽기 앞으로 옮기고, 규칙을 백엔드(`normalizeCutoffTrack`·`normalizeCutoffDept`)와 맞췄다(취업희망자 특별전형·취업자 특별전형 → 취업희망자, 일반계고 → 일반, 학교전체 → 공란). 서버 모드 favicon 404도 막았다. 캡처 도구(`tools/capture/capture.js`)는 이제 콘솔 오류의 본문·파일·직전 화면과 404 주소를 기록한다.
 - **UI/UX 진단 B 기준(2026-11-18)**: `docs/design-standards.md`(색 이름표·글자 크기 단계·숫자 표 규칙·아이콘·용어표), 변수 `styles/tokens.css`(Tailwind `kk-*` 이름), 대비 검사 `node tools/design/check-contrast.mjs`. 판정 '적정' 아이콘 🔵, 숫자 `font-mono` → `.num`, 화면 용어 일괄 정리. 새 화면과 2월 React 전환은 이 기준을 쓴다.
 - **UI/UX 진단 A 묶음 수정(2026-11-18)**: 라이트·다크 대비 부족과 12px 미만 글씨를 거의 0으로(측정표는 진단 문서 4장), 키보드로 누를 수 있는 칸·포커스 테두리·닫기 버튼 이름·알림 전달·움직임 줄이기·말줄임표. `styles/a11y.css`, `core/a11y.js`.
 - **UI/UX 진단(2026-11-18)**: `docs/ui-diagnosis-2026-11-18.md`. 라이트 모드 보조 글자 대비 4.1~4.5:1, 12px 미만 글자 과다, 키보드로 안 눌리는 칸 10곳, 이름 없는 닫기 버튼 17곳, 포커스 표시 없는 입력 15곳, 창 포커스 가두기 없음 등을 A(지금)·B(기준)·C(React 때)로 분류. 측정 `zsh tools/capture/run.sh 가람중학교 audit`.

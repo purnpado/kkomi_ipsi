@@ -39,6 +39,24 @@ async function loadCutoffScreenData(ctx) {
 
     ctx.currentAdmissionYear = baseAdmissionYear;
 
+    // 아래 중복 정리·건수 집계가 쓰므로 커트라인을 읽기 전에 정의한다(백엔드 normalizeCutoffTrack/Dept 와 같은 규칙).
+    // 전형명 정규화 헬퍼 ('일반전형' -> '일반', '특별전형' -> '특별')
+    ctx.normalizeTrack = (t) => {
+        if (!t) return '일반';
+        const s = String(t).trim();
+        if (s === '일반' || s === '일반전형' || s === '일반계고' || s === '일반계고전형') return '일반';
+        if (s === '특별' || s === '특별전형') return '특별';
+        if (s === '취업' || s === '취업희망자' || s === '취업희망자전형' || s === '취업희망자 특별전형' || s === '취업자 특별전형' || s === '취업자전형') return '취업희망자';
+        return s.replace(/전형$/, '');
+    };
+
+    // 학과명 정규화 헬퍼 ('공통', '전체', '학교 전체' -> '')
+    ctx.normalizeDept = (d) => {
+        if (!d) return '';
+        const s = String(d).trim();
+        return (s === '공통' || s === '전체' || s === '학교 전체' || s === '학교전체') ? '' : s;
+    };
+
     ctx.allSavedCutoffs = [];
     try {
         ctx.allSavedCutoffs = await window.go.main.App.GetCutoffs() || [];
@@ -158,24 +176,6 @@ async function loadCutoffScreenData(ctx) {
     } catch (e) {
         console.warn('공용 고교 목록을 불러오지 못해 빈 목록으로 시작합니다:', e);
     }
-
-    // 전형명 정규화 헬퍼 ('일반전형' -> '일반', '특별전형' -> '특별')
-    ctx.normalizeTrack = (t) => {
-        if (!t) return '일반';
-        const s = String(t).trim();
-        if (s === '일반' || s === '일반전형') return '일반';
-        if (s === '특별' || s === '특별전형') return '특별';
-        if (s === '취업' || s === '취업희망자' || s === '취업희망자전형') return '취업희망자';
-        if (s === '일반계고' || s === '일반계고전형') return '일반계고';
-        return s.replace(/전형$/, '');
-    };
-
-    // 학과명 정규화 헬퍼 ('공통', '전체', '학교 전체' -> '')
-    ctx.normalizeDept = (d) => {
-        if (!d) return '';
-        const s = String(d).trim();
-        return (s === '공통' || s === '전체' || s === '학교 전체') ? '' : s;
-    };
 
     // 브라우저 캐시 잔재(구버전 localStorage) 완전 삭제
     try {

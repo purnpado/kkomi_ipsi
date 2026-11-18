@@ -124,9 +124,20 @@ async function main() {
     });
     const page = await browser.newPage();
     const consoleErrors = [];
-    page.on('pageerror', (err) => consoleErrors.push(String(err)));
-    page.on('console', (msg) => {
-        if (msg.type() === 'error' && !msg.text().includes('WebSocket')) consoleErrors.push(msg.text());
+    // 어느 화면에서 났는지 알 수 있도록 마지막으로 찍은 화면 이름을 함께 남긴다.
+    const where = () => (shots.length ? ` (직전 화면: ${path.basename(shots[shots.length - 1])})` : ' (첫 화면 전)');
+    page.on('pageerror', (err) => consoleErrors.push(`${err && err.stack ? err.stack.split('\n').slice(0, 3).join(' / ') : String(err)}${where()}`));
+    page.on('response', (res) => {
+        if (res.status() >= 400) consoleErrors.push(`HTTP ${res.status()} ${res.request().method()} ${res.url()}${where()}`);
+    });
+    page.on('console', async (msg) => {
+        if (msg.type() !== 'error' || msg.text().includes('WebSocket')) return;
+        if (msg.text().startsWith('Failed to load resource')) return; // 위 response 기록에 주소와 함께 남는다
+        // console.error(err) 는 text() 가 "JSHandle@error" 로만 나오므로 오류 본문을 꺼낸다.
+        const parts = await Promise.all(msg.args().map((a) =>
+            a.evaluate((v) => (v instanceof Error ? `${v.name}: ${v.message}` : typeof v === 'object' ? JSON.stringify(v) : String(v))).catch(() => '?')));
+        const loc = msg.location();
+        consoleErrors.push(`${parts.join(' ') || msg.text()}${loc && loc.url ? ` @ ${loc.url.replace(/^.*\/assets\//, '')}:${loc.lineNumber}` : ''}${where()}`);
     });
     page.on('dialog', (d) => d.dismiss());
     try {
