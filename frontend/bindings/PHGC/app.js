@@ -465,6 +465,15 @@ export function GetLoginIndex() {
 }
 
 /**
+ * GetNiceRoster 나이스 원서 입력 일람표. 담임은 본인 반만, 학년부장·진로부장은 반을 고르거나 0(전교).
+ * @param {number} classNum
+ * @returns {$CancellablePromise<database$0.NiceRosterRow[] | null>}
+ */
+export function GetNiceRoster(classNum) {
+    return $Call.ByID(3861027881, classNum);
+}
+
+/**
  * GetOfficialAdmissionData 로컬 공식 고입자료 목록 조회
  * @returns {$CancellablePromise<sync$0.OfficialAdmissionData | null>}
  */
@@ -612,6 +621,17 @@ export function GetStudentCounselingRecords(classNum, studentNum, studentName) {
  */
 export function GetStudentFullDetail(classNum, studentNum, name) {
     return $Call.ByID(2007808590, classNum, studentNum, name);
+}
+
+/**
+ * GetStudentNiceRows 상담 화면 "지원 원서" 칸: 학생이 지원하는 학교·전형의 원서마다 나이스 원서 화면 대조표.
+ * @param {number} classNum
+ * @param {string} studentNum
+ * @param {string} name
+ * @returns {$CancellablePromise<database$0.NiceRosterRow[] | null>}
+ */
+export function GetStudentNiceRows(classNum, studentNum, name) {
+    return $Call.ByID(1945288634, classNum, studentNum, name);
 }
 
 /**

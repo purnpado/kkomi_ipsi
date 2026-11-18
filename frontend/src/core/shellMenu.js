@@ -23,6 +23,7 @@ export function buildShellMenu(user) {
                 { id: 'applications', label: '원서 관리', hint: '일괄 지원·학교별 결과 입력', screen: 'applications' },
                 { id: 'app-summary', label: '우리 학교 지원현황', screen: 'school-summary' },
                 { id: 'register', label: '원서대장', screen: 'register' },
+                { id: 'nice-roster', label: '나이스 원서 입력 일람표', hint: '지원 학생별 나이스 입력값', screen: 'nice-roster', params: { classNum: null } },
                 { id: 'matrix', label: '신호등 매트릭스', screen: 'matrix', params: { classNum: null } }
             ] },
             { id: 'analysis', label: '입시 분석', items: [
@@ -54,6 +55,7 @@ export function buildShellMenu(user) {
                 { id: 'applications', label: '원서 관리', hint: '우리 반 원서·결과 입력', screen: 'applications' },
                 { id: 'class-summary', label: '우리 반 지원현황', screen: 'class-summary', params: { classNum: myClass } },
                 { id: 'register', label: '원서대장', screen: 'register' },
+                { id: 'nice-roster', label: '나이스 원서 입력 일람표', hint: '우리 반 지원 학생 입력값', screen: 'nice-roster', params: { classNum: myClass } },
                 { id: 'matrix', label: '신호등 매트릭스', screen: 'matrix', params: { classNum: myClass } }
             ] },
             { id: 'analysis', label: '입시 분석', items: [
@@ -74,6 +76,7 @@ export function buildShellMenu(user) {
             { id: 'apps', label: '원서·결과', items: [
                 { id: 'applications', label: '원서 관리', hint: '일괄 지원·학교별 결과 입력', screen: 'applications' },
                 { id: 'app-summary', label: '우리 학교 지원현황', screen: 'school-summary' },
+                { id: 'nice-roster', label: '나이스 원서 입력 일람표', hint: '지원 학생별 나이스 입력값', screen: 'nice-roster', params: { classNum: null } },
                 { id: 'matrix', label: '신호등 매트릭스', screen: 'matrix', params: { classNum: null } }
             ] },
             { id: 'analysis', label: '입시 분석', items: [
@@ -86,6 +89,6 @@ export function buildShellMenu(user) {
 }
 
 /** 공통 틀을 보여 줄 화면(로그인 뒤 화면)인지 */
-export const SHELL_SCREENS = new Set(['admin', 'home', 'teacher', 'users', 'cutoff', 'analysis', 'matrix', 'school-summary', 'class-summary', 'register', 'shared', 'counsel', 'applications']);
+export const SHELL_SCREENS = new Set(['admin', 'home', 'teacher', 'users', 'cutoff', 'analysis', 'matrix', 'school-summary', 'class-summary', 'register', 'shared', 'counsel', 'applications', 'nice-roster']);
 
 export const ROLE_LABELS = { master: '학년부장', homeroom: '담임', viewer: '진로부장' };

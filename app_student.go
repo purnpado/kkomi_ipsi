@@ -151,3 +151,27 @@ func (a *App) GetSchoolScoreBasis(classNum int, studentNum, name, schoolName, tr
 	}
 	return calc.SchoolBasisFor(full, schoolName, track), nil
 }
+
+// GetStudentNiceRows 상담 화면 "지원 원서" 칸: 학생이 지원하는 학교·전형의 원서마다 나이스 원서 화면 대조표.
+func (a *App) GetStudentNiceRows(classNum int, studentNum, name string) ([]database.NiceRosterRow, error) {
+	if a.user == nil {
+		return nil, fmt.Errorf("로그인이 필요합니다")
+	}
+	if a.user.Role == "homeroom" && a.user.ClassNum != classNum {
+		return nil, fmt.Errorf("담당 학급(%d반) 학생만 볼 수 있습니다", a.user.ClassNum)
+	}
+	return a.db.GetStudentNiceRows(classNum, studentNum, name, a.isMaster())
+}
+
+// GetNiceRoster 나이스 원서 입력 일람표. 담임은 본인 반만, 학년부장·진로부장은 반을 고르거나 0(전교).
+func (a *App) GetNiceRoster(classNum int) ([]database.NiceRosterRow, error) {
+	if a.user == nil {
+		return nil, fmt.Errorf("로그인이 필요합니다")
+	}
+	if a.user.Role == "homeroom" {
+		if classNum != a.user.ClassNum {
+			return nil, fmt.Errorf("담당 학급(%d반) 일람표만 볼 수 있습니다", a.user.ClassNum)
+		}
+	}
+	return a.db.GetNiceRoster(classNum, a.isMaster())
+}

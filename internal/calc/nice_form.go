@@ -50,7 +50,8 @@ type NiceForm struct {
 	Title    string           `json:"title"`
 	Notes    []string         `json:"notes"`    // 나이스 화면 위 안내 문구
 	Rows     [][]NiceFormCell `json:"rows"`     // 나이스 화면과 같은 줄·순서
-	Warnings []string         `json:"warnings"` // 나이스 화면과 다를 수 있는 이유
+	Warnings []string         `json:"warnings"` // 이 학생 값이 나이스 화면과 다를 수 있는 이유(있을 때만)
+	Hints    []string         `json:"hints"`    // 늘 붙는 맞춰 보기 안내
 }
 
 // SchoolBasisView 학교별 산출 상세 창이 받는 값: 산출에 쓴 원자료와 나이스 대조표(배치가 없는 전형은 nil).
@@ -166,7 +167,7 @@ func vocationalNiceForm(b *ScoreBasis) *NiceForm {
 	if !b.CutoffEntered {
 		form.Warnings = append(form.Warnings, fmt.Sprintf("%s 기준 출결을 아직 입력하지 않아 나이스 성적 파일의 출결로 계산했습니다. 나이스 원서 화면의 출결과 다를 수 있습니다.", cutoffLabel(b.AttendanceCutoff)))
 	}
-	form.Warnings = append(form.Warnings, "나이스는 지각·조퇴·결과를 따로 보여 주지만, 꼬미입시는 마감일 기준 합계로 입력받으므로 합계를 맞춰 보세요.")
+	form.Hints = append(form.Hints, "나이스는 지각·조퇴·결과를 따로 보여 주지만, 꼬미입시는 마감일 기준 합계로 입력받으므로 합계를 맞춰 보세요.")
 	return form
 }
 

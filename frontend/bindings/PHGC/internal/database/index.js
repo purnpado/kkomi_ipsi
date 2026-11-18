@@ -85,6 +85,11 @@ import * as $models from "./models.js";
  */
 
 /**
+ * NiceRosterRow 원서 한 건의 나이스 대조 줄.
+ * @typedef {$models.NiceRosterRow} NiceRosterRow
+ */
+
+/**
  * @typedef {$models.PreferenceRankStat} PreferenceRankStat
  */
 

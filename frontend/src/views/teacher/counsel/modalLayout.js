@@ -43,6 +43,9 @@ export function renderStudentModalLayout(ctx) {
                 ${renderGeneralSummary(ctx.data)}
             </div>
 
+            <!-- 지원 원서 · 나이스 원서 입력값(niceApply.js, 원서가 있을 때만). 인쇄하지 않는다 -->
+            <div id="niceApplyMount" class="no-print"></div>
+
             <!-- 2. 수기 입력 가산점 및 리더십 영역 (출결·봉사는 나이스 자동 산출) -->
             ${(() => {
             const isViewer = state.currentUser && state.currentUser.Role === 'viewer';

@@ -1,5 +1,5 @@
 import { normalizeSchoolName, normalizeTrack } from '../../../core/utils.js';
-import { renderNiceFormTable, attendanceBasisText } from './niceFormTable.js';
+import { renderNiceFormTable, attendanceBasisText } from '../../../core/niceFormTable.js';
 
 // ===== 학교별 산출 규칙 안내 =====
 // 안내 문구는 백엔드 산출 규칙(internal/calc)에서 만들어 GetSchoolRuleList로 내려온다.

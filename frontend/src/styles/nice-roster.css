@@ -1,0 +1,43 @@
+/* 나이스 원서 입력 일람표(views/applications/niceRosterView.js). 색은 디자인 기준 변수만 쓴다. */
+.nice-roster { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; max-width: 1600px; margin: 0 auto; min-width: 0; }
+.nice-roster-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; flex-wrap: wrap; }
+.nice-roster-head h2 { font-size: var(--kk-fs-6); font-weight: var(--kk-fw-bold); color: var(--kk-text-strong); line-height: var(--kk-lh-tight); }
+.nice-roster-head p { margin-top: 4px; font-size: var(--kk-fs-2); color: var(--kk-text-2); }
+.nice-roster-actions { display: flex; align-items: center; gap: 8px; }
+.nice-roster-class { display: flex; align-items: center; gap: 6px; font-size: var(--kk-fs-2); color: var(--kk-text-2); }
+.nice-roster-class select { width: auto; padding: 6px 10px; font-size: var(--kk-fs-2); }
+.nice-roster-group { min-width: 0; border: 1px solid var(--kk-line-strong); border-radius: 12px; background: var(--kk-surface); padding: 12px 14px; }
+.nice-roster-group h3 { font-size: var(--kk-fs-4); font-weight: var(--kk-fw-bold); color: var(--kk-text-strong); }
+.nice-roster-group h3 span { margin-left: 6px; font-size: var(--kk-fs-1); font-weight: var(--kk-fw-regular); color: var(--kk-text-3); }
+.nice-roster-scroll { margin-top: 8px; overflow: auto; max-height: calc(100vh - 300px); }
+.nice-roster-table { width: 100%; border-collapse: collapse; font-size: var(--kk-fs-2); }
+.nice-roster-table th, .nice-roster-table td { padding: 5px 6px; border: 1px solid var(--kk-line-strong); text-align: center; white-space: nowrap; color: var(--kk-text-1); }
+.nice-roster-table thead th { position: sticky; top: 0; z-index: 1; background: var(--kk-sunken); color: var(--kk-text-2); font-weight: var(--kk-fw-strong); }
+.nice-roster-table thead tr:nth-child(2) th { top: 29px; }
+.nice-roster-table tbody th { font-weight: var(--kk-fw-strong); color: var(--kk-text-strong); }
+.nice-roster-table tbody tr:nth-child(even) { background: var(--kk-sunken); }
+.nice-roster-table td.num { font-weight: var(--kk-fw-strong); color: var(--kk-text-strong); }
+.nice-roster-table .nice-note { display: block; font-size: var(--kk-fs-1); font-weight: var(--kk-fw-regular); color: var(--kk-warning); }
+.nice-roster-school { text-align: left !important; white-space: normal !important; word-break: keep-all; min-width: 9em; max-width: 13em; }
+.nice-roster-table thead th { white-space: normal; word-break: keep-all; }
+.nice-roster-check .nice-warn { color: var(--kk-warning); font-weight: var(--kk-fw-strong); font-size: var(--kk-fs-1); }
+.nice-roster-pending { margin-top: 6px; font-size: var(--kk-fs-2); color: var(--kk-text-2); }
+.nice-roster-pending summary { cursor: pointer; color: var(--kk-text-1); }
+.nice-roster-pending summary span { margin-left: 4px; color: var(--kk-text-3); }
+.nice-roster-pending p { margin: 4px 0 0 16px; line-height: var(--kk-lh-body); }
+.nice-roster-empty { padding: 48px 0; text-align: center; color: var(--kk-text-2); font-size: var(--kk-fs-3); }
+
+/* 인쇄(A4 가로): 일람표만 흰 종이에. 공통 틀·버튼은 숨긴다. */
+@media print {
+    body.printing[data-print-kind="nice-roster"] #app { display: block !important; padding: 0 !important; margin: 0 !important; }
+    body.printing[data-print-kind="nice-roster"] #shellTop,
+    body.printing[data-print-kind="nice-roster"] #shellNav,
+    body.printing[data-print-kind="nice-roster"] .no-print { display: none !important; }
+    body.printing[data-print-kind="nice-roster"] .nice-roster * { color: #000 !important; background: #fff !important; box-shadow: none !important; }
+    body.printing[data-print-kind="nice-roster"] .nice-roster-scroll { max-height: none !important; overflow: visible !important; }
+    body.printing[data-print-kind="nice-roster"] .nice-roster-table { font-size: 8pt; }
+    body.printing[data-print-kind="nice-roster"] .nice-roster-table th,
+    body.printing[data-print-kind="nice-roster"] .nice-roster-table td { border: 1px solid #555 !important; padding: 2px 4px; }
+    body.printing[data-print-kind="nice-roster"] .nice-roster-table thead th { position: static; }
+    body.printing[data-print-kind="nice-roster"] .nice-roster-group { border: none !important; padding: 0 !important; break-inside: auto; }
+}

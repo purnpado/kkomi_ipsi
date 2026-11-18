@@ -33,10 +33,10 @@ async function each(page, name, fn) {
     }
 }
 
-async function openStudentBySearch(page) {
+async function openStudentBySearch(page, query = '1-1') {
     await page.click('#shellSearchInput', { clickCount: 3 });
     await page.keyboard.press('Backspace');
-    await page.keyboard.type('1-1');
+    await page.keyboard.type(query);
     await wait(2500);
     await page.keyboard.press('Enter');
     await wait(2500);
@@ -113,6 +113,15 @@ async function masterScenario(page, accounts) {
             }
             await wait(300);
         }],
+        ['07d-학년부장-상담-지원원서-나이스', async () => {
+            // 가상 자료에서 특성화고 원서가 있는 학생(2반 9번)
+            await clickMenu(page, 'dash');
+            await openStudentBySearch(page, '2-9');
+            await page.waitForSelector('#niceApplyMount .nice-apply .nice-form', { timeout: 15000 })
+                .catch(() => { throw new Error('상담 화면에 지원 원서 나이스 대조표가 없습니다'); });
+            await page.evaluate(() => document.querySelector('#niceApplyMount').scrollIntoView({ block: 'start' }));
+            await wait(400);
+        }],
         ['06b-학년부장-판정기준-통계제외목록', async () => {
             await clickMenu(page, 'judgment');
             await page.waitForSelector('#statExclusionList', { timeout: 10000 });
@@ -160,6 +169,27 @@ async function masterScenario(page, accounts) {
             await wait(800);
         });
     }
+    await each(page, '10e-학년부장-나이스일람표', async () => {
+        await clickMenu(page, 'nice-roster');
+        await page.waitForSelector('.nice-roster', { timeout: 30000 });
+    });
+    // 일람표 인쇄 모양(인쇄 엔진이 붙이는 상태를 흉내 내 인쇄 매체로 찍는다)
+    try {
+        await setLook(page, 'light');
+        await clickMenu(page, 'nice-roster');
+        await page.waitForSelector('.nice-roster', { timeout: 30000 });
+        await page.evaluate(() => { document.body.classList.add('printing'); document.body.dataset.printKind = 'nice-roster'; });
+        await page.evaluate(() => window.scrollTo(0, 0));
+        await page.emulateMediaType('print');
+        await page.setViewport({ width: 1123, height: 794, deviceScaleFactor: 1 });
+        shots.push(await shot(page, OUT, '10f-학년부장-나이스일람표-인쇄', { fullPage: false }));
+    } catch (err) {
+        problems.push(`나이스 일람표 인쇄: ${err.message}`);
+    } finally {
+        await page.emulateMediaType(null);
+        await page.evaluate(() => { document.body.classList.remove('printing'); delete document.body.dataset.printKind; });
+        await page.setViewport({ width: 1366, height: 768, deviceScaleFactor: 1 });
+    }
     await logout(page);
 }
 
@@ -169,6 +199,10 @@ async function homeroomScenario(page, accounts) {
     await login(page, URL, homeroom.username, accounts.firstTime);
     await each(page, '11-담임-대시보드', () => clickMenu(page, 'dash'));
     await each(page, '13-담임-원서관리', () => clickMenu(page, 'applications'));
+    await each(page, '14-담임-나이스일람표', async () => {
+        await clickMenu(page, 'nice-roster');
+        await page.waitForSelector('.nice-roster', { timeout: 20000 });
+    });
     await each(page, '12-담임-명렬표', async () => {
         await clickMenu(page, 'classes');
         await settle(page, 1200);

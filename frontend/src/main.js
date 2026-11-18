@@ -25,6 +25,7 @@ import { openPatchImportModal } from './views/admin/patchMergeView.js';
 import { renderTeacherScreen } from './views/teacher/classListView.js';
 import { renderHomeScreen } from './views/home/homeView.js';
 import { renderApplicationsScreen } from './views/applications/applicationsView.js';
+import { renderNiceRosterScreen } from './views/applications/niceRosterView.js';
 import { openStudentModal } from './views/teacher/counsel/studentModal.js';
 import { openPredictionDetailModal } from './views/teacher/simulation/predictionDetailModal.js';
 import { renderGuideModal } from './modals/guideModal.js';
@@ -69,6 +70,7 @@ const SCREEN_ROUTES = {
     'teacher': (d) => renderTeacherScreen(d.schoolName || '', d.classNum ?? null),
     'home': (d) => renderHomeScreen(d.schoolName || ''),
     'applications': () => renderApplicationsScreen(),
+    'nice-roster': (d) => renderNiceRosterScreen(d.classNum ?? null),
     // 창으로 만든 기능을 메뉴에서는 화면으로 연다(core/panelScreen.js)
     'analysis': () => renderPanelScreen({ screen: 'analysis', elementId: 'admissionAnalysisModal', open: openAdmissionAnalysisModal, title: '입시 분석' }),
     'matrix': (d) => renderPanelScreen({ screen: 'matrix', elementId: 'matrixModal', open: () => openMatrixModal(d.classNum ?? null), title: '신호등 매트릭스' }),

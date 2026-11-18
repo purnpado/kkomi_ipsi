@@ -47,7 +47,8 @@ import * as model$0 from "../model/models.js";
  * @property {string} title
  * @property {string[] | null} notes - 나이스 화면 위 안내 문구
  * @property {(NiceFormCell[] | null)[] | null} rows - 나이스 화면과 같은 줄·순서
- * @property {string[] | null} warnings - 나이스 화면과 다를 수 있는 이유
+ * @property {string[] | null} warnings - 이 학생 값이 나이스 화면과 다를 수 있는 이유(있을 때만)
+ * @property {string[] | null} hints - 늘 붙는 맞춰 보기 안내
  */
 
 /**

@@ -10,6 +10,7 @@ import { notifyClassUpdated, notifyStudentSelected } from '../../../core/navigat
 import { openWhatIfModal } from './whatIfModal.js';
 import { getWishlist, loadWishlist } from './wishlistStore.js';
 import { mountStatExclusion } from './statExclusion.js';
+import { mountNiceApply } from './niceApply.js';
 
 export async function openStudentModal(classNum, studentNum, name) {
     // 기존 모달 제거
@@ -71,6 +72,7 @@ export function renderStudentModalContent(modalEl, classNum, studentNum, name, d
     bindCounselRecords(ctx);
     bindWishlistControls(ctx);
     mountStatExclusion(ctx);
+    mountNiceApply(ctx);
     ctx.modalEl.querySelector('#openWhatIfBtn')?.addEventListener('click', () => openWhatIfModal(ctx));
 }
 

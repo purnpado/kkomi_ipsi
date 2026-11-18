@@ -1,4 +1,4 @@
-/* 나이스 원서 화면 대조표(views/teacher/simulation/niceFormTable.js).
+/* 나이스 원서 화면 대조표(core/niceFormTable.js).
    나이스 원서등록 화면처럼 항목 이름 칸은 회색 바탕, 값 칸은 밝은 바탕으로 줄마다 맞춰 보기 쉽게 한다.
    색은 디자인 기준 변수(styles/tokens.css)만 쓰므로 라이트·다크가 함께 맞는다. */
 .nice-form {
@@ -35,3 +35,18 @@
 }
 .nice-form-table .nice-note { display: block; font-size: var(--kk-fs-1); font-weight: var(--kk-fw-regular); color: var(--kk-warning); }
 .nice-form-warnings { margin-top: 8px; font-size: var(--kk-fs-1); color: var(--kk-text-2); line-height: var(--kk-lh-body); list-style: disc; padding-left: 16px; }
+
+/* 상담 화면 "지원 원서 · 나이스 원서 입력값"(views/teacher/counsel/niceApply.js) */
+.nice-apply { display: grid; gap: 8px; }
+.nice-apply-title { font-size: var(--kk-fs-4); font-weight: var(--kk-fw-bold); color: var(--kk-text-strong); }
+.nice-apply-title span { margin-left: 6px; font-size: var(--kk-fs-1); font-weight: var(--kk-fw-regular); color: var(--kk-text-3); }
+.nice-apply-item { border: 1px solid var(--kk-line-strong); border-radius: 12px; background: var(--kk-sunken); }
+.nice-apply-item > summary {
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+    padding: 10px 14px; cursor: pointer; font-size: var(--kk-fs-3); color: var(--kk-text-1);
+}
+.nice-apply-cat { font-size: var(--kk-fs-1); padding: 1px 8px; border-radius: 999px; background: var(--kk-surface); color: var(--kk-text-2); border: 1px solid var(--kk-line-strong); }
+.nice-apply-status { margin-left: auto; font-size: var(--kk-fs-1); color: var(--kk-text-2); }
+.nice-apply-body { padding: 0 10px 10px; }
+.nice-apply-note { padding: 4px 6px 2px; font-size: var(--kk-fs-2); color: var(--kk-text-2); }
+.nice-form-warnings .nice-warn { list-style: none; margin-left: -16px; color: var(--kk-warning); font-weight: var(--kk-fw-strong); }

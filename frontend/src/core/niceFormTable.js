@@ -1,7 +1,7 @@
 // "나이스 원서 화면 대조" 표: 울산 나이스 원서등록 화면(내신교과성적 및 출결상황 정보)과 같은 칸·같은 순서.
 // 배치와 값은 모두 백엔드(internal/calc/nice_form.go)가 산출식이 실제로 쓴 값으로 만들어 내려준다.
 // 화면은 받은 줄·칸을 그대로 그리기만 하므로, 전형이 늘어도(마이스터고·일반고) 이 파일은 고치지 않는다.
-import { escapeAttr, escapeHtml } from '../../../core/utils.js';
+import { escapeAttr, escapeHtml } from './utils.js';
 
 const CELL_CLASS = {
     head: 'nice-head',
@@ -28,15 +28,18 @@ function rowHTML(row) {
     }).join('');
 }
 
-/** 대조표 HTML. 대조표가 없는 전형이면 빈 문자열. */
+let niceFormSeq = 0;
+
+/** 대조표 HTML. 대조표가 없는 전형이면 빈 문자열. 한 화면에 여러 개를 그려도 제목 id 가 겹치지 않는다. */
 export function renderNiceFormTable(form) {
     if (!form || !Array.isArray(form.rows) || form.rows.length === 0) return '';
     const notes = (form.notes || []).map(n => `<li>※ ${escapeHtml(n)}</li>`).join('');
-    const warnings = (form.warnings || []).map(w => `<li>${escapeHtml(w)}</li>`).join('');
+    const warnings = [...(form.warnings || []).map(w => `<li class="nice-warn">⚠ ${escapeHtml(w)}</li>`), ...(form.hints || []).map(h => `<li>${escapeHtml(h)}</li>`)].join('');
+    const titleId = `niceFormTitle${++niceFormSeq}`;
     return `
-        <section class="nice-form" aria-labelledby="niceFormTitle">
+        <section class="nice-form" aria-labelledby="${titleId}">
             <div class="nice-form-head">
-                <h4 id="niceFormTitle">${escapeHtml(form.title || '나이스 원서 화면 대조')} <span>나이스 원서등록 화면과 같은 순서</span></h4>
+                <h4 id="${titleId}">${escapeHtml(form.title || '나이스 원서 화면 대조')} <span>나이스 원서등록 화면과 같은 순서</span></h4>
                 ${notes ? `<ul class="nice-form-notes">${notes}</ul>` : ''}
             </div>
             <div class="nice-form-scroll">

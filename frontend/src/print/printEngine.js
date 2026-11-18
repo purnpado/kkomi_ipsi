@@ -3,7 +3,7 @@
 // 화면 전체가 아닌 선택한 문서만 A4로 인쇄한다.
 // 매트릭스는 열 수가 많아 A4 가로, 개인 문서는 A4 세로를 기본값으로 사용한다.
 export function printOnly(kind, orientation = 'portrait') {
-    const allowedKinds = new Set(['report', 'transcript', 'matrix', 'register', 'summary', 'guide', 'prediction']);
+    const allowedKinds = new Set(['report', 'transcript', 'matrix', 'register', 'summary', 'guide', 'prediction', 'nice-roster']);
     const safeKind = allowedKinds.has(kind) ? kind : 'report';
     const safeOrientation = orientation === 'landscape' ? 'landscape' : 'portrait';
     const previous = document.getElementById('runtimePrintPageStyle');
