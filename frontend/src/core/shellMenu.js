@@ -20,6 +20,7 @@ export function buildShellMenu(user) {
                 { id: 'classes', label: '학급 명렬표·상담', hint: '학급을 골라 학생 상담', screen: 'teacher', params: { classNum: null } }
             ] },
             { id: 'apps', label: '원서·결과', items: [
+                { id: 'applications', label: '원서 관리', hint: '일괄 지원·학교별 결과 입력', screen: 'applications' },
                 { id: 'app-summary', label: '우리 학교 지원현황', screen: 'school-summary' },
                 { id: 'register', label: '원서대장', screen: 'register' },
                 { id: 'matrix', label: '신호등 매트릭스', screen: 'matrix', params: { classNum: null } }
@@ -50,6 +51,7 @@ export function buildShellMenu(user) {
                 { id: 'classes', label: '우리 반 명렬표·상담', hint: `3학년 ${myClass}반 · 취합자료 제출`, screen: 'teacher', params: { classNum: myClass } }
             ] },
             { id: 'apps', label: '원서·결과', items: [
+                { id: 'applications', label: '원서 관리', hint: '우리 반 원서·결과 입력', screen: 'applications' },
                 { id: 'class-summary', label: '우리 반 지원현황', screen: 'class-summary', params: { classNum: myClass } },
                 { id: 'register', label: '원서대장', screen: 'register' },
                 { id: 'matrix', label: '신호등 매트릭스', screen: 'matrix', params: { classNum: myClass } }
@@ -70,6 +72,7 @@ export function buildShellMenu(user) {
                 { id: 'classes', label: '학급 둘러보기', hint: '명렬표·상담 조회 전용', screen: 'teacher', params: { classNum: null } }
             ] },
             { id: 'apps', label: '원서·결과', items: [
+                { id: 'applications', label: '원서 관리', hint: '일괄 지원·학교별 결과 입력', screen: 'applications' },
                 { id: 'app-summary', label: '우리 학교 지원현황', screen: 'school-summary' },
                 { id: 'matrix', label: '신호등 매트릭스', screen: 'matrix', params: { classNum: null } }
             ] },
@@ -83,6 +86,6 @@ export function buildShellMenu(user) {
 }
 
 /** 공통 틀을 보여 줄 화면(로그인 뒤 화면)인지 */
-export const SHELL_SCREENS = new Set(['admin', 'home', 'teacher', 'users', 'cutoff', 'analysis', 'matrix', 'school-summary', 'class-summary', 'register', 'shared', 'counsel']);
+export const SHELL_SCREENS = new Set(['admin', 'home', 'teacher', 'users', 'cutoff', 'analysis', 'matrix', 'school-summary', 'class-summary', 'register', 'shared', 'counsel', 'applications']);
 
 export const ROLE_LABELS = { master: '학년부장', homeroom: '담임', viewer: '진로부장' };

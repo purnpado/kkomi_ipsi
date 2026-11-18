@@ -87,6 +87,16 @@ func TestBackendRejectsNonMasterWrites(t *testing.T) {
 	if got, err := viewer.GetStudentWishlist(1, "1", "가상학생"); err != nil || got != wish {
 		t.Errorf("진로부장도 관심학교를 볼 수는 있어야 합니다: %q %v", got, err)
 	}
+	// 원서 일괄 처리: 진로부장 불가, 담임은 본인 반만
+	if _, err := viewer.BulkCreateGeneralApplications(2027, 0, false); err == nil {
+		t.Error("진로부장이 원서 일괄 처리를 할 수 있으면 안 됩니다")
+	}
+	if _, err := homeroom.BulkSetGeneralResults(2027, 2, nil, false); err == nil {
+		t.Error("담임이 다른 반 원서를 일괄 처리할 수 있으면 안 됩니다")
+	}
+	if _, err := homeroom.BulkCreateGeneralApplications(2027, 0, false); err != nil {
+		t.Errorf("담임의 본인 반 일괄 처리(미리보기)가 막히면 안 됩니다: %v", err)
+	}
 	// 학년부장은 그대로 할 수 있다
 	if err := master.SaveCutoffs(cutoff); err != nil {
 		t.Errorf("학년부장의 커트라인 저장이 막히면 안 됩니다: %v", err)

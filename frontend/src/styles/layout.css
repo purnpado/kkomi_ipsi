@@ -2,6 +2,9 @@
 
 /* ===== 앱 공통 컴포넌트 스타일 ===== */
 
+/* 공통 부품은 Tailwind 의 components 층에 둔다. 층 밖에 두면 화면 코드에서 붙인
+   크기·간격 유틸리티(py-1.5, text-sm, px-3 …)보다 항상 이겨서, 작게 지정한 입력칸·버튼이 크게 그려진다. */
+@layer components {
 /* 글래스모피즘 카드 */
 .glass-card {
     background: rgba(30, 41, 59, 0.8);
@@ -121,4 +124,6 @@ input[type="number"]::-webkit-inner-spin-button {
     display: inline-block;
     vertical-align: middle;
     margin-right: 0.5rem;
+}
+
 }

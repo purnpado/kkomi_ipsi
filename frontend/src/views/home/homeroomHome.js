@@ -62,7 +62,7 @@ export function homeroomHomeHTML({ classNum, data }) {
 
     const todo = `
         <ul class="space-y-2 text-sm text-slate-300 list-disc pl-5">
-            ${students.length - withApps > 0 ? `<li>원서를 아직 입력하지 않은 학생 ${students.length - withApps}명</li>` : ''}
+            ${students.length - withApps > 0 ? `<li>원서를 아직 입력하지 않은 학생 ${students.length - withApps}명 — [원서 관리]의 <strong>일반고 일괄 지원</strong>으로 한 번에 넣을 수 있습니다</li>` : ''}
             ${cutoffCount === 0 ? '<li>합격선(커트라인)이 아직 없어 판정이 "기준 없음"으로 나옵니다. 학년부장 배포자료를 확인하세요.</li>' : ''}
             <li>상담·원서를 입력한 뒤에는 [우리 반 명렬표]의 <strong>취합자료 내보내기</strong>로 학년부장에게 제출합니다.</li>
         </ul>`;
@@ -80,6 +80,7 @@ export function homeroomHomeHTML({ classNum, data }) {
                     ${section('할 일', todo)}
                     ${section('바로가기', shortcutGrid([
                         { id: 'class-list', label: '우리 반 명렬표', desc: '학생별 점수·상담·취합자료 제출' },
+                        { id: 'applications', label: '원서 관리', desc: '일반고 일괄 지원, 결과 입력' },
                         { id: 'class-summary', label: '우리 반 지원현황', desc: '학교·학과별 지원 인원' },
                         { id: 'matrix', label: '신호등 매트릭스', desc: '학교별 판정을 한 표로' },
                         { id: 'analysis', label: '입시 분석·추세', desc: '합격선 추세·학과 지망 전략' }

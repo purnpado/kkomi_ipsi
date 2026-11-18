@@ -55,7 +55,7 @@ export async function loadMasterData() {
         step('collect', '원서 취합', `${classesWithApps.size}/${classCount}반 · 학생 ${withApps}/${students.length}명`,
             classCount > 0 && missingClasses.length === 0 ? 'done' : 'todo', 'patch'),
         step('result', '결과 입력', allApps.length ? `결과 ${resulted}건 · 남은 원서 ${pending}건` : '원서가 들어온 뒤 입력',
-            allApps.length > 0 && pending === 0 ? 'done' : 'todo', 'school-summary'),
+            allApps.length > 0 && pending === 0 ? 'done' : 'todo', 'applications'),
         step('close', '결과 확정', closed ? `${(closure.closedAt || '').slice(0, 10)} 확정` : '확정하면 익명 기록으로 보관',
             closed ? 'done' : 'todo', 'school-summary'),
         step('handover', '인수인계·관내 공유', '다음 학년도 학년부장·관내 학교에 넘기기', closed ? 'info' : 'todo', 'admin')
@@ -72,7 +72,7 @@ export async function loadMasterData() {
         alerts.push({ tone: 'amber', title: `원서가 없는 반 ${missingClasses.length}곳`, detail: `${missingClasses.join('·')}반 — 담임 취합자료를 받아 병합하세요.`, action: 'patch' });
     }
     if (!closed && resulted > 0 && pending > 0) {
-        alerts.push({ tone: 'slate', title: `결과가 없는 원서 ${pending}건`, detail: '결과를 모두 입력한 뒤 [우리 학교 지원현황]에서 결과를 확정합니다.', action: 'school-summary' });
+        alerts.push({ tone: 'slate', title: `결과가 없는 원서 ${pending}건`, detail: '[원서 관리]에서 학교별 결과·일반고 결과를 한 번에 넣은 뒤 [우리 학교 지원현황]에서 결과를 확정합니다.', action: 'applications' });
     }
 
     return {

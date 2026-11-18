@@ -82,6 +82,13 @@ async function masterScenario(page, accounts) {
             if (!docked) throw new Error('화면 안에 띄워지지 않았습니다');
         });
     }
+    for (const [tab, label] of [['students', '학생별'], ['school', '학교별결과'], ['general', '일반고결과']]) {
+        await each(page, `10d-학년부장-원서관리-${label}`, async () => {
+            await clickMenu(page, 'applications');
+            await page.evaluate((t) => document.querySelector(`.apps-tab[data-tab="${t}"]`)?.click(), tab);
+            await wait(800);
+        });
+    }
     await logout(page);
 }
 
@@ -90,6 +97,7 @@ async function homeroomScenario(page, accounts) {
     if (!homeroom) return problems.push('담임 계정이 없습니다');
     await login(page, URL, homeroom.username, accounts.firstTime);
     await each(page, '11-담임-대시보드', () => clickMenu(page, 'dash'));
+    await each(page, '13-담임-원서관리', () => clickMenu(page, 'applications'));
     await each(page, '12-담임-명렬표', async () => {
         await clickMenu(page, 'classes');
         await settle(page, 1200);

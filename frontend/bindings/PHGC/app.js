@@ -68,6 +68,45 @@ export function ApplyUpdate() {
 }
 
 /**
+ * BulkCreateGeneralApplications 원서가 없는 학생에게 후기 일반고 지원예정 원서를 만든다.
+ * @param {number} year
+ * @param {number} classNum
+ * @param {boolean} apply
+ * @returns {$CancellablePromise<database$0.BulkSummary | null>}
+ */
+export function BulkCreateGeneralApplications(year, classNum, apply) {
+    return $Call.ByID(851559472, year, classNum, apply);
+}
+
+/**
+ * BulkSetGeneralResults 일반고 결과: rejected 학생("반|번호|이름")은 불합격, 결과 없는 나머지는 합격.
+ * @param {number} year
+ * @param {number} classNum
+ * @param {string[] | null} rejected
+ * @param {boolean} apply
+ * @returns {$CancellablePromise<database$0.BulkSummary | null>}
+ */
+export function BulkSetGeneralResults(year, classNum, rejected, apply) {
+    return $Call.ByID(527726241, year, classNum, rejected, apply);
+}
+
+/**
+ * BulkSetSchoolResults 한 학교·전형 지원자 결과. accepted: "반|번호|이름" → 배정 학과(없으면 "").
+ * @param {number} year
+ * @param {number} classNum
+ * @param {string} category
+ * @param {string} schoolName
+ * @param {string} track
+ * @param {string} mode
+ * @param {{ [_ in string]?: string } | null} accepted
+ * @param {boolean} apply
+ * @returns {$CancellablePromise<database$0.BulkSummary | null>}
+ */
+export function BulkSetSchoolResults(year, classNum, category, schoolName, track, mode, accepted, apply) {
+    return $Call.ByID(3285322487, year, classNum, category, schoolName, track, mode, accepted, apply);
+}
+
+/**
  * ChangeUserPassword 비밀번호 변경
  * @param {string} username
  * @param {string} newPassword
@@ -579,6 +618,15 @@ export function GetTransferStudents() {
  */
 export function GetUsers() {
     return $Call.ByID(3799424509);
+}
+
+/**
+ * HasUndoableBulk 되돌릴 수 있는 최근 일괄 처리가 있는지
+ * @param {number} classNum
+ * @returns {$CancellablePromise<boolean>}
+ */
+export function HasUndoableBulk(classNum) {
+    return $Call.ByID(112099677, classNum);
 }
 
 /**
@@ -1110,6 +1158,16 @@ export function StartNewAcademicYear(newYear, classCount) {
  */
 export function SyncWithServer() {
     return $Call.ByID(1595479593);
+}
+
+/**
+ * UndoLastBulkApplications 가장 최근 일괄 처리를 되돌린다.
+ * @param {number} year
+ * @param {number} classNum
+ * @returns {$CancellablePromise<number>}
+ */
+export function UndoLastBulkApplications(year, classNum) {
+    return $Call.ByID(1755282180, year, classNum);
 }
 
 /**

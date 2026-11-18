@@ -208,6 +208,13 @@ func (dm *DBManager) EnsureClassDBSchema(dbPath string) error {
 			created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 			updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 		);
+		CREATE TABLE IF NOT EXISTS application_bulk_log (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			batch_id TEXT NOT NULL,
+			action TEXT NOT NULL,
+			row_json TEXT NOT NULL,
+			created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+		);
 		CREATE TABLE IF NOT EXISTS student_wishlists (
 			student_num TEXT NOT NULL,
 			student_name TEXT NOT NULL,

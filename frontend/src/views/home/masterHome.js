@@ -64,6 +64,7 @@ export function masterHomeHTML(data) {
                 <div class="xl:col-span-2 flex flex-col gap-4 min-w-0">
                     ${section('확인이 필요한 일', alertList(alerts))}
                     ${section('바로가기', shortcutGrid([
+                        { id: 'applications', label: '원서 관리', desc: '일반고 일괄 지원, 학교별 결과 입력' },
                         { id: 'admin', label: '나이스 자료·학년도 관리', desc: '엑셀 올리기, 고입 연도·학급 수, 인수인계' },
                         { id: 'class-list-all', label: '학급 명렬표·상담', desc: '학급을 골라 학생 상담' },
                         { id: 'matrix-all', label: '신호등 매트릭스', desc: '전교 학교별 판정' },

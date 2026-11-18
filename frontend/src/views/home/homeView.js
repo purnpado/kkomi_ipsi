@@ -38,6 +38,7 @@ function runAction(action, schoolName) {
         'matrix-all': () => navigate('matrix', { schoolName, classNum: null }),
         analysis: () => navigate('analysis', { schoolName }),
         register: () => navigate('register', { schoolName }),
+        applications: () => navigate('applications', { schoolName }),
         admin: () => navigate('admin', { schoolName }),
         settings: () => navigate('admin', { schoolName }),
         cutoff: () => navigate('cutoff', { schoolName }),

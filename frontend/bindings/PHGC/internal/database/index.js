@@ -35,6 +35,11 @@ import * as $models from "./models.js";
  */
 
 /**
+ * BulkSummary 일괄 처리 결과(미리보기 포함)
+ * @typedef {$models.BulkSummary} BulkSummary
+ */
+
+/**
  * CompetitionRecord 공식 발표 경쟁률 한 건(운영자 수동 입력).
  * @typedef {$models.CompetitionRecord} CompetitionRecord
  */

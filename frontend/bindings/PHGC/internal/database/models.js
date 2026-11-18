@@ -93,6 +93,17 @@
  */
 
 /**
+ * BulkSummary 일괄 처리 결과(미리보기 포함)
+ * @typedef {Object} BulkSummary
+ * @property {string} batchId
+ * @property {number} changed - 만들거나 바꾼 원서 수
+ * @property {number} accepted - 합격으로 바뀌는 원서 수
+ * @property {number} rejected - 불합격으로 바뀌는 원서 수
+ * @property {number} removed - 전기고 합격으로 지운 일반고 원서 수
+ * @property {string[] | null} names - 대상 학생(최대 60명, 미리보기 표시용)
+ */
+
+/**
  * CompetitionRecord 공식 발표 경쟁률 한 건(운영자 수동 입력).
  * @typedef {Object} CompetitionRecord
  * @property {number} admissionYear
