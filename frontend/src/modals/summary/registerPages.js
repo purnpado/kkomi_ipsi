@@ -133,8 +133,7 @@ export function buildRegisterPages(ctx, reg) {
                                         <th rowspan="2" class="border border-black w-28" style="${tableHeaderPadding}">내신·1차 점수<br><span class="text-[10px] font-normal">(취득점/만점)</span></th>
                                         <th rowspan="2" class="border border-black w-48" style="${tableHeaderPadding}">지원고등학교</th>
                                         <th rowspan="2" class="border border-black text-center" style="${tableHeaderPadding} min-width: 190px;">
-                                            지원학과(전기: 1지망·배정학과)<br>
-                                             또는 배정학교(후기고)
+                                            지원학과(전기: 1지망·배정학과)
                                         </th>
                                         <th rowspan="2" class="border border-black p-2 w-16 whitespace-nowrap">
                                             합격<br>여부

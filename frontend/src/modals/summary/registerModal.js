@@ -211,7 +211,7 @@ function renderRegisterLayout(ctx, reg) {
     ctx.modal.querySelector('#printRegisterBtn')?.addEventListener('click', () => printOnly('register', 'landscape'));
 }
 
-// 원서대장: 배율·출력 방식·학급 필터·결재란·배정학교 입력 연결
+// 원서대장: 배율·출력 방식·학급 필터·결재란 연결
 function bindRegisterControls(ctx, reg) {
     // 페이지 크기 맞춤 변경 이벤트
     ctx.modal.querySelector('#registerPageScaleSelect')?.addEventListener('change', (e) => {
