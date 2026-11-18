@@ -61,7 +61,9 @@ Gitea 원본을 복제한 뒤 다음 개발 도구를 설치해야 합니다.
 - `frontend/src/main.js`: 앱 부트스트랩과 최상위 이벤트 라우팅(화면·모달 라우팅 표)만 담당
 - `frontend/src/core/admissionYear.js`: 고입 학년도 계산·표시의 단일 기준. 저장값은 고교 입학 학년도(예: 2027) 하나이고, 화면에는 "2027 고입 (현 중3 · 2026학년도)" / "2026 고입 결과"처럼 표시합니다. 학년도는 3월에 시작하므로 1~2월도 직전 학년도로 계산합니다. 연도 표기·기본값은 반드시 이 함수를 씁니다.
 - `frontend/src/core/`: `eventBus.js`(이벤트 버스), `navigation.js`(navigate·openModal·변경 알림 발행 함수), `store.js`(중앙 상태 저장소), `wailsBridge.js`(Wails v3에서 `window.go.main.App.*` 호환), `dialogs.js`, `screenLock.js`, `updater.js`
-- `frontend/src/views/auth/`, `views/admin/`(대시보드·계정·취합 병합·`cutoff/` 커트라인), `views/teacher/`(학급 명렬표·`studentList/`·`counsel/` 1:1 상담·`simulation/` 합격 예측): 메뉴별 화면
+- `frontend/src/views/auth/`, `views/admin/`(나이스 자료·학년도 관리 `dashboardView.js`+`manage/`, 계정·취합 병합·`cutoff/` 커트라인), `views/teacher/`(학급 명렬표·`studentList/`·`counsel/` 1:1 상담·`simulation/` 합격 예측), `views/home/`(역할별 대시보드: 학년부장·담임·진로부장): 메뉴별 화면
+- 공통 틀(v1.7.0 화면 개편, 설계 `docs/ui-redesign-plan.md`): `core/appShell.js`(위쪽 막대)·`core/shellMenu.js`(역할별 왼쪽 메뉴)·`core/shellSearch.js`(학생 검색)·`core/preferences.js`(라이트/다크·글꼴)·`core/panelScreen.js`(창 모듈을 화면 안에 띄움: 입시 분석·매트릭스·지원현황·원서대장·관내 공유·상담), `core/transferBadges.js`(전입생 뱃지). 라이트 모드는 `styles/theme-light-colors.css`가 Tailwind 색 이름을 바꿔 적용하므로 화면 코드의 색 이름은 다크 기준으로 둔다. 사용 설명서 본문은 `modals/guide/`.
+- 화면 확인: `zsh tools/capture/run.sh`(서버 모드 + 설치된 Chrome으로 역할별 주요 화면을 라이트·다크로 찍음, 가상 시뮬레이션 자료 사본만 사용, 결과 `test-data/capture/latest/`). 화면을 고친 뒤 찍어서 직접 확인한다.
 - `frontend/src/modals/`(`summary/`, `application/`, `analysis/`, `matrix/`), `frontend/src/styles/`(`app.css`가 `@import`): 모달과 스타일
 - 화면·모달 모듈끼리는 서로 직접 import 하지 않고 `core/navigation.js`의 발행 함수로 요청합니다. 새 화면·모달은 `main.js`의 라우팅 표에 등록합니다.
 - `server-data/highschools.json`: 고교·학과 마스터 목록과 학년도별 요강 모집정원(`quotas`, 운영자가 요강을 확인해 수동 등록). 실행 파일에 포함되며(`main.go` embed) `go test`가 학과 정원 합과 합계를 대조한다.
@@ -107,6 +109,9 @@ v1.6.4부터 실행 파일은 **`꼬미입시.exe`**입니다(참여 학교가 �
 git push gitea main
 git push github main
 ```
+
+- 원격 이름은 컴퓨터마다 다를 수 있다. 먼저 `git remote -v`로 확인한다. 예: 맥 작업 폴더는 Gitea가 `origin`이고 GitHub 원격이 없어 `git push origin main` → `git push https://github.com/purnpado/kkomi_ipsi.git main`(태그도 같은 순서)으로 푸시한다.
+- 맥에서 릴리즈할 때는 `publish.ps1` 대신 `docs/handover.md` "릴리즈 절차"(버전 파일 갱신 → `wails3 build GOOS=windows` → Python `zipfile`로 zip → `SHA256SUMS.txt` → 태그·푸시 → GitHub·Gitea 릴리즈)를 따른다. 맥 앱(`bin/꼬미입시.app`)은 시험용으로만 빌드하고 릴리즈에 올리지 않는다.
 
 - 정식 릴리즈는 사용자 승인 후에만 `publish.ps1 -Version "x.y.z" -Notes "한국어 릴리즈 노트"`로 진행합니다. 이 스크립트는 버전 갱신, Wails 빌드, 커밋, 태그, 양쪽 원격 푸시, 릴리즈 에셋 업로드를 수행합니다.
 - 꼬미입시 전환은 후보 빌드로 실제 학교 `data` 복제본과 교환 파일을 검증하고, 참여 학교 전체의 전환 확인 뒤에만 정식 릴리즈합니다. 전환 전에는 기존 `PHGC.exe`와 `data`를 삭제하지 않습니다.
