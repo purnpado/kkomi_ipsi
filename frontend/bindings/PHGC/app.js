@@ -1177,6 +1177,26 @@ export function SelfDestruct() {
 }
 
 /**
+ * SetSharedPackageExcluded 학교·학년도 파일 전체를 관내 통계·판정 근거에서 빼거나 다시 넣는다.
+ * @param {number} pkgID
+ * @param {boolean} excluded
+ * @returns {$CancellablePromise<void>}
+ */
+export function SetSharedPackageExcluded(pkgID, excluded) {
+    return $Call.ByID(2989639136, pkgID, excluded);
+}
+
+/**
+ * SetSharedRecordExcluded 원서 한 건을 관내 통계·판정 근거에서 빼거나 다시 넣는다.
+ * @param {number} recordID
+ * @param {boolean} excluded
+ * @returns {$CancellablePromise<void>}
+ */
+export function SetSharedRecordExcluded(recordID, excluded) {
+    return $Call.ByID(161301885, recordID, excluded);
+}
+
+/**
  * SetStudentStatExclusion 입시 통계 제외를 켜거나 끈다. 성적 산출·상담 판정은 바뀌지 않는다.
  * @param {number} classNum
  * @param {string} studentNum
@@ -1316,6 +1336,14 @@ export function UpdateSchoolRankSnapshots() {
  */
 export function VerifyAdminPassword(password) {
     return $Call.ByID(4149818354, password);
+}
+
+/**
+ * VerifySharedData 받은 관내 공유 자료 전체 점검(학생 정보 없음).
+ * @returns {$CancellablePromise<database$0.SharedVerifyReport | null>}
+ */
+export function VerifySharedData() {
+    return $Call.ByID(3324445897);
 }
 
 /**

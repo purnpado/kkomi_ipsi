@@ -247,21 +247,21 @@ func TestConsolidatedAdmissionStatsCalculation(t *testing.T) {
 	dmA.SetDataKey(keyA)
 	_ = dmA.InitConfigDB()
 	_ = dmA.InitClassDB(1)
-	_ = dmA.SaveSchoolConfig("A중학교", 1, "passA", false, 2026)
+	_ = dmA.SaveSchoolConfig("A중학교", 1, "passA", false, 2027)
 	_ = dmA.SaveApplication(model.ApplicationRecord{
-		ClassNum: 1, StudentNum: "30101", StudentName: "A1", AdmissionYear: 2026, Category: "special",
+		ClassNum: 1, StudentNum: "30101", StudentName: "A1", AdmissionYear: 2027, Category: "special",
 		SchoolName: "울산에너지고", Track: "일반전형",
 		Status: "합격", Score: 190.0,
 		Preferences: []string{"신재생에너지과"}, AssignedDepartment: "신재생에너지과",
 	})
 	_ = dmA.SaveApplication(model.ApplicationRecord{
-		ClassNum: 1, StudentNum: "30102", StudentName: "A2", AdmissionYear: 2026, Category: "special",
+		ClassNum: 1, StudentNum: "30102", StudentName: "A2", AdmissionYear: 2027, Category: "special",
 		SchoolName: "울산에너지고", Track: "일반전형",
 		Status: "합격", Score: 195.0,
 		Preferences: []string{"신재생에너지과"}, AssignedDepartment: "신재생에너지과",
 	})
 	_ = dmA.SaveApplication(model.ApplicationRecord{
-		ClassNum: 1, StudentNum: "30103", StudentName: "A3", AdmissionYear: 2026, Category: "special",
+		ClassNum: 1, StudentNum: "30103", StudentName: "A3", AdmissionYear: 2027, Category: "special",
 		SchoolName: "울산에너지고", Track: "일반전형",
 		Status: "불합격", Score: 175.0,
 		Preferences: []string{"신재생에너지과"}, AssignedDepartment: "신재생에너지과",
@@ -275,21 +275,21 @@ func TestConsolidatedAdmissionStatsCalculation(t *testing.T) {
 	dmB.SetDataKey(keyB)
 	_ = dmB.InitConfigDB()
 	_ = dmB.InitClassDB(1)
-	_ = dmB.SaveSchoolConfig("B중학교", 1, "passB", false, 2026)
+	_ = dmB.SaveSchoolConfig("B중학교", 1, "passB", false, 2027)
 	_ = dmB.SaveApplication(model.ApplicationRecord{
-		ClassNum: 1, StudentNum: "30101", StudentName: "B1", AdmissionYear: 2026, Category: "special",
+		ClassNum: 1, StudentNum: "30101", StudentName: "B1", AdmissionYear: 2027, Category: "special",
 		SchoolName: "울산에너지고", Track: "일반전형",
 		Status: "합격", Score: 180.0,
 		Preferences: []string{"신재생에너지과"}, AssignedDepartment: "신재생에너지과",
 	})
 	_ = dmB.SaveApplication(model.ApplicationRecord{
-		ClassNum: 1, StudentNum: "30102", StudentName: "B2", AdmissionYear: 2026, Category: "special",
+		ClassNum: 1, StudentNum: "30102", StudentName: "B2", AdmissionYear: 2027, Category: "special",
 		SchoolName: "울산에너지고", Track: "일반전형",
 		Status: "합격", Score: 185.0,
 		Preferences: []string{"신재생에너지과"}, AssignedDepartment: "신재생에너지과",
 	})
 	_ = dmB.SaveApplication(model.ApplicationRecord{
-		ClassNum: 1, StudentNum: "30103", StudentName: "B3", AdmissionYear: 2026, Category: "special",
+		ClassNum: 1, StudentNum: "30103", StudentName: "B3", AdmissionYear: 2027, Category: "special",
 		SchoolName: "울산에너지고", Track: "일반전형",
 		Status: "불합격", Score: 182.0,
 		Preferences: []string{"신재생에너지과"}, AssignedDepartment: "신재생에너지과",
@@ -299,8 +299,8 @@ func TestConsolidatedAdmissionStatsCalculation(t *testing.T) {
 	passB := "PassB123"
 	pathA := filepath.Join(tempA, "pkg_a.phgc")
 	pathB := filepath.Join(tempB, "pkg_b.phgc")
-	_ = ExportSharedPackageV2(dmA, 2026, passA, pathA)
-	_ = ExportSharedPackageV2(dmB, 2026, passB, pathB)
+	_ = ExportSharedPackageV2(dmA, 2027, passA, pathA)
+	_ = ExportSharedPackageV2(dmB, 2027, passB, pathB)
 
 	// 통합 DB 생성 및 두 학교 패키지 임포트
 	tempCons, _ := os.MkdirTemp("", "phgc-cons-*")
@@ -325,7 +325,7 @@ func TestConsolidatedAdmissionStatsCalculation(t *testing.T) {
 	// 최저: 180.0, 최고: 195.0, 평균: 187.5
 	// 중앙값: (185 + 190) / 2 = 187.5
 	// 불합격 최고: 182.0 >= 합격 최저 180.0 => HasOverlap = true, Overlap: [180.0, 182.0]
-	stats, err := dmCons.GetConsolidatedAdmissionStats(2026, "울산에너지고", "신재생에너지과", "일반전형", 5.0)
+	stats, err := dmCons.GetConsolidatedAdmissionStats(2027, "울산에너지고", "신재생에너지과", "일반전형", 5.0)
 	if err != nil {
 		t.Fatalf("GetConsolidatedAdmissionStats failed: %v", err)
 	}
@@ -410,7 +410,18 @@ func TestSharedPackageV1BackwardCompatibility(t *testing.T) {
 		t.Errorf("Unexpected V1 import result: %+v", res)
 	}
 
-	// 요약 통계로부터 관내 통계 조회 확인
+	// 옛 형식 자료는 점검할 수 없어 처음에는 관내 통계에서 빠진다(기준 학년도 이전이기도 함).
+	if stats, err := dm.GetConsolidatedAdmissionStats(2026, "현대공고", "전기전자과", "일반전형", 1.0); err != nil || stats != nil {
+		t.Fatalf("옛 형식 자료는 기본 통계 제외여야 합니다: %+v %v", stats, err)
+	}
+	schools, _ := dm.GetParticipatingSchools(2026)
+	if len(schools) != 1 {
+		t.Fatalf("참여 학교: %+v", schools)
+	}
+	if err := dm.SetSharedPackageExcluded(schools[0].ID, false); err != nil {
+		t.Fatal(err)
+	}
+	// 학년부장이 다시 넣으면 요약 통계로부터 관내 통계를 낸다.
 	stats, err := dm.GetConsolidatedAdmissionStats(2026, "현대공고", "전기전자과", "일반전형", 1.0)
 	if err != nil {
 		t.Fatalf("GetConsolidatedAdmissionStats for V1 failed: %v", err)
@@ -435,6 +446,13 @@ func TestConsolidatedStatsWholeSchoolWhenDepartmentEmpty(t *testing.T) {
 	}
 	if _, err := ImportSharedPackageV2(other, "pw", path); err != nil {
 		t.Fatal(err)
+	}
+	// 기준 학년도(2027) 이전 다른 학교 자료는 기본 제외이므로 학년부장이 다시 넣은 상태로 집계를 본다.
+	schools, _ := other.GetParticipatingSchools(2026)
+	for _, sc := range schools {
+		if err := other.SetSharedPackageExcluded(sc.ID, false); err != nil {
+			t.Fatal(err)
+		}
 	}
 	whole, err := other.GetConsolidatedAdmissionStats(2026, "울산마이스터고", "", "일반", 1)
 	if err != nil || whole == nil || whole.TotalApplicants == 0 {

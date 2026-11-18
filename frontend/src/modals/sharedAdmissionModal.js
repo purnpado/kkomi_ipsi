@@ -3,6 +3,7 @@ import { showModalAlert, showModalConfirm, showModalPrompt } from '../core/dialo
 import { state } from '../core/store.js';
 import { admissionLabel, admissionLongLabel, currentAdmissionYear, resolveAdmissionYear } from '../core/admissionYear.js';
 import { notifyStatsRecalculated } from '../core/navigation.js';
+import { mountSharedVerify } from './sharedVerify/verifyPanel.js';
 
 /**
  * 관내 고입 결과 공유 및 취합 관리 모달 (V2 규격)
@@ -177,6 +178,9 @@ export async function openSharedAdmissionModal() {
                         </table>
                     </div>
                 </div>
+
+                <!-- 4. 자료 검증(modals/sharedVerify/verifyPanel.js) -->
+                <section id="sharedVerifyMount" class="shared-verify" aria-label="관내 공유 자료 검증"></section>
             </div>
 
             <!-- Footer -->
@@ -190,6 +194,7 @@ export async function openSharedAdmissionModal() {
     `;
 
     document.body.appendChild(modal);
+    mountSharedVerify(modal.querySelector('#sharedVerifyMount'));
 
     // 이벤트 리스너 바인딩
     const closeModal = () => modal.remove();
@@ -300,6 +305,7 @@ export async function openSharedAdmissionModal() {
                 // 목록 갱신
                 const list = await window.go.main.App.GetParticipatingSchools(admissionYear) || [];
                 updateSchoolsTable(modal, list);
+                mountSharedVerify(modal.querySelector('#sharedVerifyMount'));
             }
         } catch (e) {
             console.error('취합 실패:', e);

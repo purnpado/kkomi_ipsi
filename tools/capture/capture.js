@@ -144,6 +144,15 @@ async function masterScenario(page, accounts) {
                 .catch(() => { throw new Error('특성화고 산출 상세 창에 나이스 대조표가 없습니다'); });
             await wait(500);
         }],
+        ['10g-학년부장-관내공유-자료검증', async () => {
+            await clickMenu(page, 'shared');
+            await page.waitForSelector('#sharedVerifyMount .vs-table, #sharedVerifyMount .vs-guide', { timeout: 30000 });
+            await page.waitForFunction(() => !/점검하는 중/.test(document.querySelector('#sharedVerifyMount')?.textContent || ''), { timeout: 30000 });
+            await page.evaluate(() => document.querySelector('#sharedVerifyMount [data-pkg-open]')?.click());
+            await wait(500);
+            await page.evaluate(() => document.querySelector('#sharedVerifyMount').scrollIntoView({ block: 'start' }));
+            await wait(400);
+        }],
         ['05b-학년부장-공식경쟁률', async () => {
             await clickMenu(page, 'cutoff');
             await page.click('#openCompetitionBtn');

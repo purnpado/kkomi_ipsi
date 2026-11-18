@@ -182,11 +182,11 @@ func (dm *DBManager) GetConsolidatedGeneralCutoff(admissionYear int) (*GeneralCu
 	}
 	defer db.Close()
 	res := &GeneralCutoffResult{AdmissionYear: admissionYear}
-	_ = db.QueryRow(`SELECT COUNT(DISTINCT s.school_pkg_id) FROM shared_anonymous_scores s WHERE s.admission_year = ? AND s.high_school = ?`,
+	_ = db.QueryRow(`SELECT COUNT(DISTINCT s.school_pkg_id) FROM shared_anonymous_scores s WHERE s.admission_year = ? AND s.high_school = ? AND s.excluded = 0`,
 		admissionYear, GeneralHighSchoolKey).Scan(&res.ParticipatingSchool)
 	_ = db.QueryRow(`SELECT quota, applicants FROM general_quota_records WHERE admission_year = ?`, admissionYear).Scan(&res.Quota, &res.Applicants)
 
-	rows, err := db.Query(`SELECT status, score, COALESCE(general_detail_json, '') FROM shared_anonymous_scores WHERE admission_year = ? AND high_school = ?`,
+	rows, err := db.Query(`SELECT status, score, COALESCE(general_detail_json, '') FROM shared_anonymous_scores WHERE admission_year = ? AND high_school = ? AND excluded = 0`,
 		admissionYear, GeneralHighSchoolKey)
 	if err != nil {
 		return nil, err

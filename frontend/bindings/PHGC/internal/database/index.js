@@ -113,6 +113,11 @@ import * as $models from "./models.js";
  */
 
 /**
+ * SharedGroupIssue 학교·학과·전형 묶음 단위 점검(정원 초과 등).
+ * @typedef {$models.SharedGroupIssue} SharedGroupIssue
+ */
+
+/**
  * SharedPackageCover V2 공유 파일 표지
  * @typedef {$models.SharedPackageCover} SharedPackageCover
  */
@@ -130,6 +135,21 @@ import * as $models from "./models.js";
 /**
  * SharedScoreHistogramBucket 구간별 점수 히스토그램
  * @typedef {$models.SharedScoreHistogramBucket} SharedScoreHistogramBucket
+ */
+
+/**
+ * SharedVerifyIssue 원서 한 건의 점검 결과.
+ * @typedef {$models.SharedVerifyIssue} SharedVerifyIssue
+ */
+
+/**
+ * SharedVerifyReport 자료 검증 화면 전체.
+ * @typedef {$models.SharedVerifyReport} SharedVerifyReport
+ */
+
+/**
+ * SharedVerifySchool 학교·학년도 파일 한 개의 점검 요약.
+ * @typedef {$models.SharedVerifySchool} SharedVerifySchool
  */
 
 /**

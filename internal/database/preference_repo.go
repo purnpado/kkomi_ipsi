@@ -130,7 +130,7 @@ func (dm *DBManager) GetPreferenceStrategy(admissionYear int, highSchool, track 
 	defer db.Close()
 	rows, err := db.Query(`SELECT s.department, s.preference_rank, s.status, s.score, COALESCE(s.first_stage_result, '')
 		FROM shared_anonymous_scores s JOIN shared_participating_schools p ON p.id = s.school_pkg_id
-		WHERE s.admission_year = ? AND s.high_school = ? AND s.track = ? AND p.school_name <> ?`, admissionYear, school, trk, ownSchool)
+		WHERE s.admission_year = ? AND s.high_school = ? AND s.track = ? AND p.school_name <> ? AND s.excluded = 0`, admissionYear, school, trk, ownSchool)
 	if err != nil {
 		return nil, fmt.Errorf("관내 공유 자료 조회 실패: %w", err)
 	}

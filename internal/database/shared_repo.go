@@ -85,7 +85,11 @@ func (dm *DBManager) InitSharedDatabaseTables() error {
 		overlap_max REAL NOT NULL,
 		FOREIGN KEY(school_pkg_id) REFERENCES shared_participating_schools(id) ON DELETE CASCADE
 	)`)
-	return err
+	if err != nil {
+		return err
+	}
+	dm.migrateSharedExclusion(db)
+	return nil
 }
 
 // shuffleAnonymousRecords Fisher-Yates 알고리즘을 암호학적으로 안전한 난수로 수행하여 순서 무작위화

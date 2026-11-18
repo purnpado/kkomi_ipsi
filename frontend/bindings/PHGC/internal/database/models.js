@@ -290,6 +290,16 @@ import * as calc$0 from "../calc/models.js";
  */
 
 /**
+ * SharedGroupIssue 학교·학과·전형 묶음 단위 점검(정원 초과 등).
+ * @typedef {Object} SharedGroupIssue
+ * @property {number} admissionYear
+ * @property {string} highSchool
+ * @property {string} department
+ * @property {string} track
+ * @property {string} message
+ */
+
+/**
  * SharedPackageCover V2 공유 파일 표지
  * @typedef {Object} SharedPackageCover
  * @property {string} schoolName - 발송 중학교 이름 (취합 메타데이터 및 중복 파일 식별용)
@@ -298,6 +308,8 @@ import * as calc$0 from "../calc/models.js";
  * @property {string} appVersion - 앱 버전
  * @property {number} formatVersion - 포맷 버전 (2)
  * @property {number} recordCount - 포함된 익명 학생 레코드 수
+ * @property {boolean} [localReviewed] - 인수인계 파일로 다음 학년도에 넘길 때만 쓰는 이 학교 PC의 검증 결과(관내 공유 파일에는 들어가지 않음).
+ * @property {boolean} [localExcluded]
  */
 
 /**
@@ -331,6 +343,55 @@ import * as calc$0 from "../calc/models.js";
  * @property {number} maxScore
  * @property {number} acceptedCount
  * @property {number} rejectedCount
+ */
+
+/**
+ * SharedVerifyIssue 원서 한 건의 점검 결과.
+ * @typedef {Object} SharedVerifyIssue
+ * @property {number} recordId
+ * @property {number} pkgId
+ * @property {string} schoolName
+ * @property {number} admissionYear
+ * @property {string} highSchool
+ * @property {string} department
+ * @property {string} track
+ * @property {string} status
+ * @property {number} score
+ * @property {string} level - error | warning
+ * @property {string} code
+ * @property {string} message
+ * @property {boolean} excluded
+ * @property {string} [refScope] - 튀는 값 점검에서만: 비교한 묶음(학과 이름 또는 "학교 전체"), 확인 기준선, 비교한 합격 점수(그림용)
+ * @property {number} [fence]
+ * @property {number[] | null} [refScores]
+ * @property {number} [refMax] - 그 전형 만점(그림 축)
+ */
+
+/**
+ * SharedVerifyReport 자료 검증 화면 전체.
+ * @typedef {Object} SharedVerifyReport
+ * @property {number} baselineYear
+ * @property {SharedVerifySchool[] | null} schools
+ * @property {SharedVerifyIssue[] | null} issues
+ * @property {SharedGroupIssue[] | null} groupIssues
+ */
+
+/**
+ * SharedVerifySchool 학교·학년도 파일 한 개의 점검 요약.
+ * @typedef {Object} SharedVerifySchool
+ * @property {number} pkgId
+ * @property {string} schoolName
+ * @property {number} admissionYear
+ * @property {number} formatVersion
+ * @property {number} recordCount
+ * @property {string} importedAt
+ * @property {boolean} excluded
+ * @property {boolean} isOwn
+ * @property {boolean} beforeBaseline - 기준 학년도 이전 자료
+ * @property {number} errors
+ * @property {number} warnings
+ * @property {number} excludedRecords - 원서 단위로 뺀 수
+ * @property {number} formulaOther - 다른 요강 학년도 산출식으로 계산된 원서 수(원서마다 늘어놓지 않고 학교 단위로 보인다)
  */
 
 /**

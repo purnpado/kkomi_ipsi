@@ -14,6 +14,9 @@ type SharedPackageCover struct {
 	AppVersion    string    `json:"appVersion"`    // 앱 버전
 	FormatVersion int       `json:"formatVersion"` // 포맷 버전 (2)
 	RecordCount   int       `json:"recordCount"`   // 포함된 익명 학생 레코드 수
+	// 인수인계 파일로 다음 학년도에 넘길 때만 쓰는 이 학교 PC의 검증 결과(관내 공유 파일에는 들어가지 않음).
+	LocalReviewed bool `json:"localReviewed,omitempty"`
+	LocalExcluded bool `json:"localExcluded,omitempty"`
 }
 
 // AnonymousApplicationRecord 개인 식별 정보(이름, 학번, 반, 입력시각)가 완전히 제거된 익명 학생별 점수 자료
@@ -30,6 +33,8 @@ type AnonymousApplicationRecord struct {
 	// 1차 전형 결과(합격·불합격, 단계 구분 없는 전형·기존 자료는 빈값). 1차 합격 후 2차 탈락을
 	// 관내 전체 표본으로 따로 분석하기 위한 결과 항목이며 개인 식별 정보가 아니다.
 	FirstStageResult string `json:"firstStageResult,omitempty"`
+	// LocalExcluded 이 학교 PC에서 통계 제외한 원서(인수인계 파일로만 넘김)
+	LocalExcluded bool `json:"localExcluded,omitempty"`
 	// 후기 일반고 항목별 점수(교과·출석·봉사·가산점 입력 여부·확정 여부). 다른 전형은 비움.
 	GeneralDetail *SharedGeneralDetail `json:"generalDetail,omitempty"`
 }

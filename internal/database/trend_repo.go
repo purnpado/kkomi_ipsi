@@ -148,7 +148,7 @@ func (dm *DBManager) GetAdmissionTrend(highSchool, department, track string) ([]
 	// 관내 자료의 만점·산출식 버전
 	if db, err := dm.OpenDB(dm.GetConfigDBPath()); err == nil {
 		query := `SELECT admission_year, COALESCE(score_details_json, ''), COALESCE(formula_version, '') FROM shared_anonymous_scores
-			WHERE high_school = ? AND track = ?`
+			WHERE high_school = ? AND track = ? AND excluded = 0`
 		args := []interface{}{school, trk}
 		if dept != "" {
 			query += ` AND department = ?`

@@ -1,0 +1,43 @@
+/* 관내 공유 결과 → 자료 검증(modals/sharedVerify/*). 색은 디자인 기준 변수만 쓴다. */
+.shared-verify { display: grid; gap: 10px; border-top: 1px solid var(--kk-line); padding-top: 16px; }
+.vs-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
+.vs-head h3 { font-size: var(--kk-fs-4); font-weight: var(--kk-fw-bold); color: var(--kk-text-strong); }
+.vs-head h3 span { margin-left: 6px; font-size: var(--kk-fs-1); font-weight: var(--kk-fw-regular); color: var(--kk-text-3); }
+.vs-guide { font-size: var(--kk-fs-2); color: var(--kk-text-2); line-height: var(--kk-lh-body); }
+.vs-btn {
+    padding: 4px 10px; border-radius: 8px; border: 1px solid var(--kk-control); background: var(--kk-surface);
+    color: var(--kk-text-1); font-size: var(--kk-fs-1); font-weight: var(--kk-fw-strong); cursor: pointer; white-space: nowrap;
+}
+.vs-btn:hover { border-color: var(--kk-accent); color: var(--kk-accent); }
+.vs-scroll { overflow-x: auto; }
+.vs-table, .vs-issues { width: 100%; border-collapse: collapse; font-size: var(--kk-fs-2); }
+.vs-table th, .vs-table td, .vs-issues th, .vs-issues td { padding: 6px 8px; border-bottom: 1px solid var(--kk-line); text-align: left; color: var(--kk-text-1); vertical-align: top; }
+.vs-table thead th, .vs-issues thead th { color: var(--kk-text-2); font-weight: var(--kk-fw-strong); background: var(--kk-sunken); }
+.vs-table tbody th { font-weight: var(--kk-fw-strong); color: var(--kk-text-strong); }
+.vs-row-excluded th, .vs-row-excluded td { color: var(--kk-text-3); }
+.vs-actions { display: flex; gap: 6px; justify-content: flex-end; }
+.vs-note { font-size: var(--kk-fs-1); color: var(--kk-text-3); font-weight: var(--kk-fw-regular); }
+.vs-ok { color: var(--kk-success); font-weight: var(--kk-fw-strong); }
+.vs-err { color: var(--kk-danger); font-weight: var(--kk-fw-strong); }
+.vs-warn { color: var(--kk-warning); font-weight: var(--kk-fw-strong); }
+.vs-detail > td { background: var(--kk-sunken); padding: 10px 12px; }
+.vs-msg { max-width: 34em; line-height: var(--kk-lh-body); }
+.vs-check { display: inline-flex; gap: 4px; align-items: center; white-space: nowrap; font-size: var(--kk-fs-1); }
+.vs-request { margin-top: 8px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.vs-groups { display: grid; gap: 4px; font-size: var(--kk-fs-2); color: var(--kk-text-1); }
+.vs-strips { display: grid; gap: 8px; margin-bottom: 8px; }
+.vs-strip { background: var(--kk-surface); border: 1px solid var(--kk-line); border-radius: 8px; padding: 6px 10px; }
+.vs-strip figcaption { font-size: var(--kk-fs-2); font-weight: var(--kk-fw-strong); color: var(--kk-text-1); }
+.vs-strip figcaption span { margin-left: 6px; font-size: var(--kk-fs-1); font-weight: var(--kk-fw-regular); color: var(--kk-text-3); }
+.vs-plot { position: relative; height: 64px; margin: 4px 12px 0; }
+.vs-axis { position: absolute; left: 0; right: 0; top: 40px; border-top: 1px solid var(--kk-line-strong); }
+.vs-fence { position: absolute; top: 18px; height: 22px; border-left: 2px dashed var(--kk-text-3); }
+.vs-fence-label, .vs-tick { position: absolute; top: 44px; font-size: var(--kk-fs-1); color: var(--kk-text-3); white-space: nowrap; }
+.vs-fence-label { transform: translateX(4px); }
+.vs-tick-end { right: 0; }
+.vs-dot {
+    position: absolute; top: 26px; width: 10px; height: 10px; margin-left: -5px; border-radius: 50%;
+    background: var(--kk-chart-mark); border: 2px solid var(--kk-surface); opacity: 0.9;
+}
+.vs-dot-flag { background: var(--kk-chart-flag); opacity: 1; z-index: 1; }
+.vs-flag-label { position: absolute; top: 4px; transform: translateX(-50%); font-size: var(--kk-fs-1); font-weight: var(--kk-fw-bold); color: var(--kk-text-1); white-space: nowrap; }

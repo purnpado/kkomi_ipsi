@@ -94,24 +94,25 @@ func (dm *DBManager) ExportStoredSharedPackages() ([]SharedPackageV2, error) {
 		id                int64
 		school            string
 		year, format, cnt int
+		excluded          bool
 	}
 	var pkgs []pkgRow
-	rows, err := db.Query(`SELECT id, school_name, admission_year, format_version, record_count FROM shared_participating_schools ORDER BY admission_year, school_name`)
+	rows, err := db.Query(`SELECT id, school_name, admission_year, format_version, record_count, excluded FROM shared_participating_schools ORDER BY admission_year, school_name`)
 	if err != nil {
 		return nil, err
 	}
 	for rows.Next() {
 		var p pkgRow
-		if err := rows.Scan(&p.id, &p.school, &p.year, &p.format, &p.cnt); err == nil {
+		if err := rows.Scan(&p.id, &p.school, &p.year, &p.format, &p.cnt, &p.excluded); err == nil {
 			pkgs = append(pkgs, p)
 		}
 	}
 	rows.Close()
 	out := []SharedPackageV2{}
 	for _, p := range pkgs {
-		pkg := SharedPackageV2{Cover: SharedPackageCover{SchoolName: p.school, AdmissionYear: p.year, CreatedAt: time.Now().UTC(), FormatVersion: 2, RecordCount: p.cnt}}
+		pkg := SharedPackageV2{Cover: SharedPackageCover{SchoolName: p.school, AdmissionYear: p.year, CreatedAt: time.Now().UTC(), FormatVersion: 2, RecordCount: p.cnt, LocalReviewed: true, LocalExcluded: p.excluded}}
 		recRows, err := db.Query(`SELECT high_school, department, track, preference_rank, status, score, score_basis, COALESCE(score_details_json,''),
-			COALESCE(formula_version,''), COALESCE(first_stage_result,''), COALESCE(general_detail_json,'') FROM shared_anonymous_scores WHERE school_pkg_id = ?`, p.id)
+			COALESCE(formula_version,''), COALESCE(first_stage_result,''), COALESCE(general_detail_json,''), self_excluded FROM shared_anonymous_scores WHERE school_pkg_id = ?`, p.id)
 		if err != nil {
 			return nil, err
 		}
@@ -119,7 +120,7 @@ func (dm *DBManager) ExportStoredSharedPackages() ([]SharedPackageV2, error) {
 			var a AnonymousApplicationRecord
 			var details, general string
 			if err := recRows.Scan(&a.HighSchool, &a.Department, &a.Track, &a.PreferenceRank, &a.Status, &a.Score, &a.ScoreBasis, &details,
-				&a.FormulaVersion, &a.FirstStageResult, &general); err != nil {
+				&a.FormulaVersion, &a.FirstStageResult, &general, &a.LocalExcluded); err != nil {
 				continue
 			}
 			var d model.ApplicationScoreDetails

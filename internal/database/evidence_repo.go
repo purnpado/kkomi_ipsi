@@ -221,7 +221,7 @@ func (dm *DBManager) GetAdmissionEvidence() ([]AdmissionEvidence, error) {
 	defer db.Close()
 	rows, err := db.Query(`SELECT s.admission_year, s.high_school, s.department, s.track, s.status, s.score, COALESCE(s.first_stage_result, '')
 		FROM shared_anonymous_scores s JOIN shared_participating_schools p ON p.id = s.school_pkg_id
-		WHERE p.school_name <> ?`, ownSchool)
+		WHERE p.school_name <> ? AND s.excluded = 0`, ownSchool)
 	if err != nil {
 		return nil, err
 	}

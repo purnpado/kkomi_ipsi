@@ -33,6 +33,9 @@
     --kk-judge-hope: #fcd34d;        --kk-judge-hope-bg: #33291a;
     --kk-judge-challenge: #fda4af;   --kk-judge-challenge-bg: #3a1a2a;
     --kk-judge-none: #cbd5e1;        --kk-judge-none-bg: #1e293b; /* 판단 근거 부족·기준 없음 */
+    /* 그래프 점(dataviz 검증기로 색약·명도 범위 통과): 일반 점 / 확인 필요 점(⚠ 표시와 함께) */
+    --kk-chart-mark: #7c83f2;
+    --kk-chart-flag: #c87a0a;
 
     /* 글자 크기 단계(px) — 이 일곱 값만 쓴다 */
     --kk-fs-1: 12px;   /* 배지·표 보조 문구(최소) */
@@ -75,6 +78,8 @@ html[data-theme="light"] {
     --kk-judge-hope: #92400e;        --kk-judge-hope-bg: #fffbeb;
     --kk-judge-challenge: #9f1239;   --kk-judge-challenge-bg: #fff1f2;
     --kk-judge-none: #424f63;        --kk-judge-none-bg: #f1f5f9;
+    --kk-chart-mark: #4f46e5;
+    --kk-chart-flag: #8a4508;
 }
 
 /* ===== 기준 클래스 ===== */

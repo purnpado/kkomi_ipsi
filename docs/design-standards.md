@@ -22,6 +22,7 @@
 | 흐림 | `--kk-text-3` | #8e9cb2 | #5d6a80 | 단위, 안내 한 줄. **이보다 흐린 글자는 쓰지 않는다** |
 | 강조 글자 | `--kk-accent` | #a5adfb | #4f46e5 | 링크, 선택된 메뉴 글자 |
 | 강조 버튼 바탕 | `--kk-accent-fill` | #4f46e5 | #4f46e5 | 주 버튼(글자 `--kk-on-fill` 흰색) |
+| 그래프 점 | `--kk-chart-mark` / `--kk-chart-flag` | #7c83f2 / #c87a0a | #4f46e5 / #8a4508 | 분포 그림의 일반 점 / 확인 필요 점(⚠ 표시와 함께). dataviz 검증기로 색약 구분·명도 범위 통과 |
 | 포커스 테두리 | `--kk-focus` | #818cf8 | #5b4ae0 | `:focus-visible` |
 | 성공 | `--kk-success` | #6ee7b7 | #126b34 | 저장 완료, 합격 |
 | 주의 | `--kk-warning` | #fcd34d | #8a4508 | 확인 필요, 미입력 |

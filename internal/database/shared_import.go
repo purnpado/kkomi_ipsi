@@ -54,8 +54,8 @@ func (dm *DBManager) ImportV2Package(db *sql.DB, v2 *SharedPackageV2) (*SharedPa
 
 	// 익명 학생 점수 자료 배치 삽입
 	stmtScore, err := tx.Prepare(`INSERT INTO shared_anonymous_scores 
-		(school_pkg_id, admission_year, high_school, department, track, preference_rank, status, score, score_basis, stage1_common_score, stage1_school_score, score_details_json, formula_version, first_stage_result, general_detail_json) 
-		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
+		(school_pkg_id, admission_year, high_school, department, track, preference_rank, status, score, score_basis, stage1_common_score, stage1_school_score, score_details_json, formula_version, first_stage_result, general_detail_json, self_excluded) 
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
 	if err != nil {
 		return nil, err
 	}
@@ -67,7 +67,7 @@ func (dm *DBManager) ImportV2Package(db *sql.DB, v2 *SharedPackageV2) (*SharedPa
 			pkgID, admissionYear, rec.HighSchool, rec.Department, rec.Track,
 			rec.PreferenceRank, rec.Status, rec.Score, rec.ScoreBasis,
 			rec.ScoreDetails.Percentile, rec.ScoreDetails.AcademicScore,
-			string(detailsJSON), rec.FormulaVersion, rec.FirstStageResult, generalDetailJSON(rec.GeneralDetail),
+			string(detailsJSON), rec.FormulaVersion, rec.FirstStageResult, generalDetailJSON(rec.GeneralDetail), boolInt(rec.LocalExcluded),
 		)
 		if err != nil {
 			return nil, err
@@ -95,9 +95,17 @@ func (dm *DBManager) ImportV2Package(db *sql.DB, v2 *SharedPackageV2) (*SharedPa
 		}
 	}
 
+	// 인수인계로 넘어온 자료는 이전 학년도 PC의 검증 결과를 그대로 쓰고, 새로 받은 파일은 기준 규칙을 적용한다.
+	if v2.Cover.LocalReviewed {
+		if _, err := tx.Exec(`UPDATE shared_participating_schools SET excluded = ?, reviewed = 1 WHERE id = ?`, boolInt(v2.Cover.LocalExcluded), pkgID); err != nil {
+			return nil, err
+		}
+	}
 	if err := tx.Commit(); err != nil {
 		return nil, err
 	}
+	applySharedBaseline(db, dm.ownSchoolName())
+	syncSharedExclusion(db)
 
 	// 현재 관내 전체 참여 학교 수 및 총 학생 레코드 수 조회
 	var totalSchools, totalRecords int
