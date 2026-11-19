@@ -12,7 +12,7 @@
  * @property {string} studentNum
  * @property {string} studentName
  * @property {number} admissionYear
- * @property {string} category - meister, special, self_foreign, general, other
+ * @property {string} category - meister, special, self_foreign, general, other(울산 예술고 등), out_province(타시도 고교, 모든 유형), none
  * @property {string} schoolName
  * @property {string} track
  * @property {string} status
