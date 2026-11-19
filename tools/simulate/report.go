@@ -287,6 +287,7 @@ func (sm *sim) report() string {
 		}
 		w("| %d | %d | %d | %s | %d | %d | %d개교 |", yr.year, classes, years[yr.year], status, histCount[yr.year], actual, len(schools))
 	}
+	b.WriteString(sm.verifySection())
 	return b.String()
 }
 
