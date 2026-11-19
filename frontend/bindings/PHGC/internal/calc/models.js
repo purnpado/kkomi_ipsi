@@ -96,6 +96,10 @@ import * as model$0 from "../model/models.js";
  * @property {boolean} cutoffEntered - 마감일 기준 출결을 수기로 입력했는지
  * @property {number} absenceDays - 미인정 결석(일)
  * @property {number} lateEtcCount - 미인정 지각·조퇴·결과 합(회)
+ * @property {number} lateCount - 미인정 지각(회). SplitKnown 이 false 면 0
+ * @property {number} earlyCount - 미인정 조퇴(회)
+ * @property {number} resultCount - 미인정 결과(회)
+ * @property {boolean} splitKnown - 지각·조퇴·결과를 따로 알 수 있는지(예전 마감일 기준 수기 입력은 합계만 있음)
  * @property {number} finalAbsenceDays - 최종결석 = 결석 + (지각+조퇴+결과)÷3, 소수점 절사
  * @property {number} volunteerHours
  */
