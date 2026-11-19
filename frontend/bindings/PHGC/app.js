@@ -515,6 +515,16 @@ export function GetPreferenceStrategy(admissionYear, highSchool, track) {
 }
 
 /**
+ * GetRegisterSeparateStudents 원서대장에서 점수 칸을 "별도전형"으로 적을 학생(통계 제외 표시, "반|번호|이름").
+ * 원서대장은 공식 문서라 보는 사람마다 내용이 같아야 하므로 진로부장에게도 준다(사용자 결정 2026-11-19).
+ * 사유는 저장하지 않으므로 어디에도 나오지 않는다. 담임은 본인 반 학생만 받는다.
+ * @returns {$CancellablePromise<string[] | null>}
+ */
+export function GetRegisterSeparateStudents() {
+    return $Call.ByID(339524023);
+}
+
+/**
  * @returns {$CancellablePromise<model$0.ApplicationRecord[] | null>}
  */
 export function GetSchoolApplicationRecords() {

@@ -4,8 +4,10 @@
 // 단, 8월 31일 이전에 전입한 학년은 울산 기준 시수를 그대로 쓴다. 재학생 대상이므로 2022년 이후 기준(4시간 만점)만 다룬다.
 // 전입생([전입] 뱃지가 붙는 학생: 나이스 교과 성적 비고에 "전입")에게만 보인다. 계산한 값은 위의 학년별 "봉사(시간)" 칸에
 // 채워 넣을 뿐이고, 점수 계산은 그 칸([저장 후 재계산])이 맡는다. 진로부장(조회 전용)에게는 보이지 않는다.
-// 나이스 성적 파일 비고에는 보통 전입일이 없으므로 담임이 학적을 보고 넣는다. 전입일과 도우미 입력값은
-// [저장 후 재계산] 때 학생 수기 입력(extra)의 transfer_date·transfer_volunteer 로 함께 저장한다(extraEditor.js).
+// 나이스 비고만으로는 울산 관내 전입인지 타 시·도 전입인지 알 수 없으므로 담임이 고른다(기본: 고르지 않음).
+// 관내 전입은 기준 시수가 같아 환산하지 않는다. 나이스 성적 파일 비고에는 보통 전입일이 없으므로 담임이 학적을 보고 넣는다.
+// 전입 구분·전입일·도우미 입력값은 [저장 후 재계산] 때 학생 수기 입력(extra)의 transfer_origin·transfer_date·transfer_volunteer 로
+// 함께 저장한다(extraEditor.js).
 import { escapeAttr, escapeHtml } from '../../../core/utils.js';
 import { transferNote } from '../../../core/transferBadges.js';
 import { currentSchoolYear } from '../../../core/admissionYear.js';
@@ -56,13 +58,26 @@ export function volunteerTransferHTML(ctx, isViewer) {
     if (!note || isViewer) return '';
     const saved = typeof ctx.rawExtra?.transfer_date === 'string' ? ctx.rawExtra.transfer_date : '';
     const fromNote = parseTransferDate(note);
+    const origin = ['other', 'ulsan'].includes(ctx.rawExtra?.transfer_origin) ? ctx.rawExtra.transfer_origin : '';
+    const radio = (value, label) => `
+        <label class="inline-flex items-center gap-1.5 cursor-pointer">
+            <input type="radio" name="volTransferOrigin" value="${value}" class="accent-amber-400" ${origin === value ? 'checked' : ''} />
+            <span>${label}</span>
+        </label>`;
     const hint = saved ? '저장해 둔 전입일입니다.'
         : fromNote ? '나이스 비고에서 읽은 날짜입니다. 학적의 전입일과 다르면 고쳐 주세요.'
         : '나이스 성적 파일에는 전입일이 없습니다. 학적(전입 일자)을 보고 넣어 주세요. [저장 후 재계산] 때 함께 저장됩니다.';
     return `
         <details id="volTransferBox" class="rounded-lg bg-slate-800/60 border border-amber-500/40 p-2.5 text-[11px] text-slate-300" open>
-            <summary class="cursor-pointer select-none font-bold text-amber-200">타 시·도 전입생 봉사 환산 <span class="font-normal text-slate-400">(나이스 비고: ${escapeHtml(note)})</span></summary>
+            <summary class="cursor-pointer select-none font-bold text-amber-200">전입생 봉사 환산 <span class="font-normal text-slate-400">(나이스 비고: ${escapeHtml(note)})</span></summary>
             <div class="mt-2 space-y-2">
+                <div class="flex items-center gap-3 flex-wrap" role="radiogroup" aria-label="전입 구분">
+                    <span>전입 구분</span>
+                    ${radio('other', '타 시·도에서 전입')}
+                    ${radio('ulsan', '울산 관내 전입')}
+                </div>
+                <p id="volTransferOriginMsg" class="text-amber-200"></p>
+                <div id="volTransferOther" class="space-y-2">
                 <label class="flex items-center gap-2 flex-wrap">
                     <span>전입일</span>
                     <input type="date" id="volTransferDate" class="input-field py-1 px-1.5 text-xs" value="${escapeAttr(saved || fromNote)}" />
@@ -77,6 +92,7 @@ export function volunteerTransferHTML(ctx, isViewer) {
                     환산 시수 = 4시간 × 실시 시수 ÷ 그 시·도의 해당 학년 기준 시수(소수 첫째 자리에서 반올림). 8월 31일 이전에 전입한 학년과 그 뒤 학년은 울산 기준을 그대로 씁니다.
                     재학하지 않은 학년(해외 귀국 등)은 칸을 비워 두면 요강 4)항 공식으로 자동 환산합니다. 넣은 뒤 [저장 후 재계산]을 눌러야 반영됩니다.
                 </p>
+                </div>
             </div>
         </details>
     `;
@@ -151,6 +167,20 @@ export function bindVolunteerTransfer(ctx) {
         rowsEl.querySelector(`[data-score="${g}"]`).textContent = r == null ? '-' : volunteerScore(r).toFixed(1);
     });
     dateInput.addEventListener('change', render);
+    // 전입 구분: 타 시·도일 때만 환산 칸을 보인다. 관내로 바꿔도 넣어 둔 시수는 지우지 않고 숨기기만 한다.
+    const otherEl = box.querySelector('#volTransferOther');
+    const originMsg = box.querySelector('#volTransferOriginMsg');
+    const showOrigin = () => {
+        const origin = box.querySelector('input[name="volTransferOrigin"]:checked')?.value || '';
+        otherEl.hidden = origin !== 'other';
+        originMsg.hidden = origin === 'other';
+        originMsg.className = origin === 'ulsan' ? 'text-slate-300' : 'text-amber-200';
+        originMsg.textContent = origin === 'ulsan'
+            ? '울산 관내 전입은 기준 시수가 같아 환산하지 않습니다. 학년별 봉사 칸을 비워 두면 나이스 자료로 자동 계산합니다(전에 환산 값을 넣었다면 지우고 저장해 주세요).'
+            : '울산 관내 전입인지 타 시·도 전입인지 골라 주세요. 타 시·도 전입일 때만 기준 시수를 환산합니다.';
+    };
+    box.querySelectorAll('input[name="volTransferOrigin"]').forEach((el) => el.addEventListener('change', showOrigin));
+    showOrigin();
     box.querySelector('#volTransferApply').addEventListener('click', () => {
         const modes = transferGradeModes(dateInput.value, third);
         const filled = [];
@@ -175,11 +205,12 @@ export function collectVolunteerTransfer(modalEl) {
     const box = modalEl.querySelector('#volTransferBox');
     if (!box) return null;
     const date = box.querySelector('#volTransferDate')?.value || '';
+    const origin = box.querySelector('input[name="volTransferOrigin"]:checked')?.value || '';
     const volunteer = {};
     box.querySelectorAll('#volTransferRows input[data-g]').forEach((el) => {
         const g = el.dataset.g;
         if (el.value.trim() === '') return;
         volunteer[g] = { ...(volunteer[g] || {}), [el.dataset.k]: el.value.trim() };
     });
-    return { date, volunteer };
+    return { origin, date, volunteer };
 }

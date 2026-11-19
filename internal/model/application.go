@@ -29,7 +29,7 @@ type ApplicationRecord struct {
 	StudentNum         string   `json:"studentNum"`
 	StudentName        string   `json:"studentName"`
 	AdmissionYear      int      `json:"admissionYear"`
-	Category           string   `json:"category"` // meister, special, self_foreign, general, other
+	Category           string   `json:"category"` // meister, special, self_foreign, general, other(울산 예술고 등), out_province(타시도 고교, 모든 유형), none
 	SchoolName         string   `json:"schoolName"`
 	Track              string   `json:"track"`
 	Status             string   `json:"status"`

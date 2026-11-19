@@ -35,9 +35,11 @@ export function bindExtraSaveAndPrint(ctx) {
                 }
             }
 
-            // 타 시·도 전입생 봉사 환산 도우미(전입생에게만 있음): 전입일과 입력값을 함께 저장
+            // 전입생 봉사 환산 도우미(전입생에게만 있음): 전입 구분·전입일·입력값을 함께 저장
             const transfer = collectVolunteerTransfer(ctx.modalEl);
             if (transfer) {
+                if (transfer.origin) newExtra.transfer_origin = transfer.origin;
+                else delete newExtra.transfer_origin;
                 if (transfer.date) newExtra.transfer_date = transfer.date;
                 else delete newExtra.transfer_date;
                 if (Object.keys(transfer.volunteer).length) newExtra.transfer_volunteer = transfer.volunteer;

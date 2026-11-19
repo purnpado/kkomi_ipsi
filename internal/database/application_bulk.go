@@ -22,7 +22,7 @@ type BulkSummary struct {
 
 const generalTrack = "후기 일반계고"
 
-var earlyCategories = map[string]bool{"meister": true, "special": true, "self_foreign": true, "other": true}
+var earlyCategories = map[string]bool{"meister": true, "special": true, "self_foreign": true, "other": true, "out_province": true}
 
 func (s *BulkSummary) addName(classNum int, studentNum, name string) {
 	if len(s.Names) < 60 {

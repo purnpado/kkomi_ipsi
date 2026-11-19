@@ -21,7 +21,7 @@ func (dm *DBManager) saveApplication(record model.ApplicationRecord, merge bool)
 	if record.ClassNum < 1 || record.StudentNum == "" || record.StudentName == "" || record.AdmissionYear < 2000 || record.Category == "" || record.Status == "" {
 		return fmt.Errorf("지원 기록 정보가 올바르지 않습니다")
 	}
-	validCategories := map[string]bool{"meister": true, "special": true, "self_foreign": true, "general": true, "other": true, "none": true}
+	validCategories := map[string]bool{"meister": true, "special": true, "self_foreign": true, "general": true, "other": true, "out_province": true, "none": true}
 	validStatuses := map[string]bool{
 		"미입력":  true,
 		"지원희망": true, "지원 희망": true,
@@ -49,6 +49,9 @@ func (dm *DBManager) saveApplication(record model.ApplicationRecord, merge bool)
 	}
 	if (record.Category == "meister" || record.Category == "special" || record.Category == "self_foreign") && record.SchoolName == "" {
 		return fmt.Errorf("마이스터고·특성화고·자사고·외고 지원에는 학교명이 필요합니다")
+	}
+	if record.Category == "out_province" && strings.TrimSpace(record.SchoolName) == "" {
+		return fmt.Errorf("타시도 고교 지원에는 학교명이 필요합니다")
 	}
 	if record.Category == "none" && record.SchoolName == "" {
 		record.SchoolName = "미진학"
@@ -85,10 +88,10 @@ func (dm *DBManager) saveApplication(record model.ApplicationRecord, merge bool)
 		return err
 	}
 	defer db.Close()
-	if !merge && record.ID > 0 && record.Category == "other" {
-		// 기존 기타 지원의 학교명을 수정할 때 새 원서를 추가하지 않는다.
+	if !merge && record.ID > 0 && (record.Category == "other" || record.Category == "out_province") {
+		// 기존 기타·타시도 지원의 학교명을 고치거나 기타 ↔ 타시도로 구분을 바꿀 때 새 원서를 추가하지 않는다.
 		var oldYear int
-		if err := db.QueryRow(`SELECT admission_year FROM student_applications WHERE id=? AND student_num=? AND student_name=? AND category='other'`, record.ID, record.StudentNum, record.StudentName).Scan(&oldYear); err != nil {
+		if err := db.QueryRow(`SELECT admission_year FROM student_applications WHERE id=? AND student_num=? AND student_name=? AND category IN ('other','out_province')`, record.ID, record.StudentNum, record.StudentName).Scan(&oldYear); err != nil {
 			return fmt.Errorf("수정할 기타 지원 기록을 찾을 수 없습니다: %w", err)
 		}
 		if oldYear != record.AdmissionYear {
@@ -100,8 +103,8 @@ func (dm *DBManager) saveApplication(record model.ApplicationRecord, merge bool)
 				return fmt.Errorf("%d 고입 결과가 확정되어 지원현황을 수정할 수 없습니다", oldYear)
 			}
 		}
-		_, err = db.Exec(`UPDATE student_applications SET admission_year=?, school_name=?, track=?, status=?, score=?, score_basis=?, preferences_json=?, assigned_department=?, assigned_school=?, first_stage_result=?, updated_at=CURRENT_TIMESTAMP WHERE id=? AND student_num=? AND student_name=? AND category='other'`,
-			record.AdmissionYear, record.SchoolName, record.Track, record.Status, record.Score, record.ScoreBasis, string(prefs), record.AssignedDepartment, record.AssignedSchool, record.FirstStageResult, record.ID, record.StudentNum, record.StudentName)
+		_, err = db.Exec(`UPDATE student_applications SET admission_year=?, category=?, school_name=?, track=?, status=?, score=?, score_basis=?, preferences_json=?, assigned_department=?, assigned_school=?, first_stage_result=?, updated_at=CURRENT_TIMESTAMP WHERE id=? AND student_num=? AND student_name=? AND category IN ('other','out_province')`,
+			record.AdmissionYear, record.Category, record.SchoolName, record.Track, record.Status, record.Score, record.ScoreBasis, string(prefs), record.AssignedDepartment, record.AssignedSchool, record.FirstStageResult, record.ID, record.StudentNum, record.StudentName)
 		return err
 	}
 	timestamp := record.UpdatedAt

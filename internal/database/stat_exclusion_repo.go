@@ -139,6 +139,17 @@ func (dm *DBManager) statExcludedSet() map[string]bool {
 	return set
 }
 
+// StatExcludedStudentKeys 통계 제외로 표시된 학생 "반|번호|이름" 목록(원서대장 점수 칸 "별도전형" 표시용, 사유 없음).
+func (dm *DBManager) StatExcludedStudentKeys() []string {
+	set := dm.statExcludedSet()
+	keys := make([]string, 0, len(set))
+	for k := range set {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	return keys
+}
+
 // ListStatExclusions 학년부장 확인 목록: 통계에서 뺀 학생(반·번호 순).
 func (dm *DBManager) ListStatExclusions() ([]StatExclusion, error) {
 	config, err := dm.GetSchoolConfig()

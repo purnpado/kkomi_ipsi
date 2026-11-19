@@ -42,6 +42,14 @@ async function prepareRegisterModal(ctx) {
         .then(list => (list || []).forEach(s => ctx.studentResults.set(`${classNum}|${s.studentNum}|${s.name}`, s.schoolResults || [])))
         .catch(() => {})));
 
+    // 입시 통계 제외 학생은 점수 칸을 "별도전형"으로 적는다(registerRows.js).
+    ctx.separateStudents = new Set();
+    try {
+        ctx.separateStudents = new Set((await window.go.main.App.GetRegisterSeparateStudents?.()) || []);
+    } catch (e) {
+        console.warn('별도전형 학생 목록 로드 실패:', e);
+    }
+
     ctx.isHomeroom = state.currentUser && state.currentUser.Role === 'homeroom';
     ctx.homeroomClass = ctx.isHomeroom ? state.currentUser.ClassNum : null;
 

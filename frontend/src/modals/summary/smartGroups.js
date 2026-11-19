@@ -71,7 +71,7 @@ export function buildSmartApplicationGroups(records) {
     if (!Array.isArray(records) || records.length === 0) return [];
 
     const categoryLabel = category => ({
-        meister: '마이스터고', special: '특성화고', self_foreign: '자사고·외고', general: '후기 일반고', other: '기타', none: '미진학'
+        meister: '마이스터고', special: '특성화고', self_foreign: '자사고·외고', general: '후기 일반고', other: '기타', out_province: '타시도 고교', none: '미진학'
     }[category] || category);
 
     const groupsMap = new Map();
@@ -163,7 +163,7 @@ export function buildSmartApplicationGroups(records) {
     });
 
     // 정렬: 입학년도 역순 -> 학교구분(마이스터, 특성화, 자사고, 일반고) -> 학교명 -> 전형(특별 먼저, 일반) -> 학과명
-    const catOrder = { meister: 1, special: 2, self_foreign: 3, general: 4, other: 5, none: 6 };
+    const catOrder = { meister: 1, special: 2, self_foreign: 3, general: 4, other: 5, out_province: 6, none: 7 };
     const trackOrder = track => (track.includes('특별') || track.includes('취업') ? 1 : 2);
 
     const list = Array.from(groupsMap.values()).sort((a, b) => {

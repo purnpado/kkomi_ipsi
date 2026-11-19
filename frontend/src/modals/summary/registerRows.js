@@ -5,6 +5,20 @@ import { isSameTrack, normalizeSchoolName, displayTrack } from '../../core/utils
 
 const ACCEPTED = ['합격', '최종 진학', '최종진학'];
 
+// "기타" 구분에서 고르는 울산 학교. 이 밖의 학교명을 직접 넣은 원서는 타시도 진학으로 본다
+// (원서 입력 창 studentApplicationModal.js 의 목록과 같다).
+const ULSAN_OTHER_SCHOOLS = ['울산예술고등학교', '울산스포츠과학고등학교', '울산고운고등학교', '울산애니원고등학교', '울산과학고등학교'];
+
+/** 타시도 고교 원서인지: 타시도 구분, 또는 예전처럼 기타 구분에 직접 입력한 학교명(울산으로 시작하지 않음)·"타시도 고등학교". */
+export function isOutOfProvince(app) {
+    if (app.category === 'out_province') return true;
+    if (app.category !== 'other') return false;
+    const name = String(app.schoolName || '').trim();
+    if (!name || name === '기타') return false;
+    if (name === '타시도 고등학교') return true;
+    return !ULSAN_OTHER_SCHOOLS.includes(name) && !name.startsWith('울산');
+}
+
 // 전형 진행 순서: 전기(마이스터고 → 특성화고 취업희망자 → 특성화고 일반 → 자사고·외고·기타) → 후기 일반고 → 미진학
 function stageOrder(app) {
     const track = String(app.track || '');
@@ -13,6 +27,7 @@ function stageOrder(app) {
         case 'special': return track.includes('취업') ? 2 : 3;
         case 'self_foreign': return 4;
         case 'other': return 5;
+        case 'out_province': return 5;
         case 'general': return 6;
         case 'none': return 7;
         default: return 8;
@@ -92,7 +107,9 @@ function firstStageResult(ctx, app) {
 
 function scoreText(ctx, app) {
     // 자사고·외고·과학고·예술고 등 별도 전형 학교는 점수를 기록하지 않는다.
-    if (['self_foreign', 'other', 'none'].includes(app.category)) return app.category === 'none' ? '-' : '별도전형';
+    if (['self_foreign', 'other', 'out_province', 'none'].includes(app.category)) return app.category === 'none' ? '-' : '별도전형';
+    // 입시 통계 제외 학생(특수교육대상자·학생선수 등)도 성적과 다른 기준으로 선발되므로 점수 대신 "별도전형"(사유는 적지 않음).
+    if (ctx.separateStudents?.has(`${app.classNum}|${String(app.studentNum ?? '').trim()}|${String(app.studentName ?? '').trim()}`)) return '별도전형';
     // 원서에 저장된 점수(지원할 때의 확정값)를 먼저 쓰고, 없으면 지금 산출한 1차 전형 점수로 채운다.
     const result = firstStageResult(ctx, app);
     const score = app.score > 0 ? app.score : Number(result?.totalScore) || 0;
@@ -113,6 +130,7 @@ function noteText(app) {
         parts.push(track.includes('전형') ? track : `${track}전형`);
     }
     if (app.category === 'none' && app.track) parts.push(app.track);
+    if (isOutOfProvince(app)) parts.push('타시도 진학');
     if ([app.schoolName, app.track, app.status].some(value => String(value || '').includes('추가'))) parts.push('[추가모집]');
     if (app.status === '최종 진학' || app.status === '최종진학') parts.push('최종 진학');
     return parts.join(' ');

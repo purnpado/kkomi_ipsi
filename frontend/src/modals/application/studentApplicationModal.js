@@ -37,7 +37,9 @@ async function prepareApplicationModal(ctx) {
     ctx.defaultAdmissionYear = resolveAdmissionYear(await window.go.main.App.GetSchoolConfig().catch(() => null));
     ctx.canEdit = !state.currentUser || state.currentUser.Role !== 'viewer';
     ctx.statusOptions = ['지원희망', '지원완료', '합격', '불합격'];
-    ctx.categoryOptions = [['meister', '마이스터고'], ['special', '특성화고'], ['self_foreign', '자사고·외고'], ['general', '후기 일반고'], ['other', '기타 (예술·스포츠과학·과학·애니원고, 타시도 등)'], ['none', '미진학 (진학포기)']];
+    ctx.categoryOptions = [['meister', '마이스터고'], ['special', '특성화고'], ['self_foreign', '자사고·외고'], ['general', '후기 일반고'], ['other', '기타 (울산 예술·스포츠과학·과학·애니원고 등)'], ['out_province', '타시도 고교 (자사고·외고·특목고·마이스터고·특성화고·일반고 등)'], ['none', '미진학 (진학포기)']];
+    // 학교명을 직접 넣을 수 있는 구분: 기타(울산 예술고 등 + 직접 입력), 타시도 고교(늘 직접 입력)
+    ctx.isCustomSchoolCategory = category => category === 'other' || category === 'out_province';
     // 지원현황 창은 목록 조회 실패 때문에 열리지 않으면 안 된다. Wails 바인딩
     // 누락·손상 또는 로컬 목록 파일 문제도 1.5초 안에 빈 목록으로 처리한다.
     ctx.withFallback = (operation, fallback, timeoutMs = 1500) => Promise.race([
@@ -92,7 +94,7 @@ async function prepareApplicationModal(ctx) {
         return ['해당 없음'];
     };
     ctx.trackOptions = (category, schoolName, selected = '') => {
-        if (category === 'other') return '<option value="해당 없음" selected>해당 없음</option>';
+        if (ctx.isCustomSchoolCategory(category)) return '<option value="해당 없음" selected>해당 없음</option>';
         const tracks = (['meister', 'special'].includes(category) && schoolName)
             ? (calculatedTracks(schoolName, category).length ? calculatedTracks(schoolName, category) : fallbackTracks(category))
             : fallbackTracks(category);
@@ -123,10 +125,12 @@ async function prepareApplicationModal(ctx) {
             const schools = ['현대청운고등학교', '울산외국어고등학교'];
             return `<option value="">학교 선택</option>${schools.map(name => `<option value="${escapeAttr(name)}" ${name === selected ? 'selected' : ''}>${escapeHtml(name)}</option>`).join('')}`;
         }
+        // 타시도 고교는 유형과 상관없이 학교명을 직접 입력한다.
+        if (category === 'out_province') return '<option value="__custom_school__" selected>학교명 직접 입력</option>';
         if (category === 'other') {
             const schools = ['울산예술고등학교', '울산스포츠과학고등학교', '울산고운고등학교', '울산애니원고등학교', '울산과학고등학교'];
             const custom = selected && !schools.includes(selected);
-            return `<option value="">학교 선택</option>${schools.map(name => `<option value="${escapeAttr(name)}" ${name === selected ? 'selected' : ''}>${escapeHtml(name)}</option>`).join('')}<option value="__custom_school__" ${custom ? 'selected' : ''}>타시도·기타 학교 직접 입력</option>`;
+            return `<option value="">학교 선택</option>${schools.map(name => `<option value="${escapeAttr(name)}" ${name === selected ? 'selected' : ''}>${escapeHtml(name)}</option>`).join('')}<option value="__custom_school__" ${custom ? 'selected' : ''}>기타 학교 직접 입력</option>`;
         }
         if (category === 'none') {
             return `<option value="미진학" selected>미진학</option>`;
@@ -161,7 +165,7 @@ async function prepareApplicationModal(ctx) {
     // 1차(정원의 1.3~1.5배 선발)·2차(면접 등) 전형 단계 결과. 커트라인 분석에서 2차 탈락을 구분한다.
     ctx.stageOptions = (selected = '') => [['', '미발표 · 구분 안 함'], ['합격', '1차 합격'], ['불합격', '1차 불합격']]
         .map(([v, t]) => `<option value="${v}" ${v === selected ? 'selected' : ''}>${t}</option>`).join('');
-    ctx.isUnscoredCategory = category => ['self_foreign', 'other', 'none'].includes(category);
+    ctx.isUnscoredCategory = category => ['self_foreign', 'other', 'out_province', 'none'].includes(category);
     // 특성화고 취업희망자 특별전형은 1개 학과(1지망)만 지원할 수 있다.
     ctx.preferenceLimit = (category, track) => (category === 'special' && String(track || '').includes('취업') ? 1 : 5);
     ctx.departmentControls = (schoolName, preferences = [], assignedDepartment = '', limit = 5) => {

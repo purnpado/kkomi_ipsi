@@ -5,10 +5,10 @@ import { resolveAdmissionYear } from '../../core/admissionYear.js';
 
 export const RESULT_STATUSES = new Set(['합격', '불합격', '최종 진학', '최종진학', '미진학', '포기']);
 export const PENDING_STATUSES = new Set(['미입력', '지원희망', '지원 희망', '지원예정', '지원 예정', '지원완료', '지원 완료']);
-export const EARLY_CATEGORIES = new Set(['meister', 'special', 'self_foreign', 'other']);
+export const EARLY_CATEGORIES = new Set(['meister', 'special', 'self_foreign', 'other', 'out_province']);
 
 export const CATEGORY_LABELS = {
-    meister: '마이스터고', special: '특성화고', self_foreign: '자사고·외고', other: '기타', general: '후기 일반고', none: '미진학'
+    meister: '마이스터고', special: '특성화고', self_foreign: '자사고·외고', other: '기타', out_province: '타시도', general: '후기 일반고', none: '미진학'
 };
 
 export const studentKey = (classNum, studentNum, name) => `${Number(classNum)}|${String(studentNum).trim()}|${String(name || '').trim()}`;
