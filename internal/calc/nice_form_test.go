@@ -46,7 +46,7 @@ func TestVocationalNiceFormGolden(t *testing.T) {
 	want := []string{
 		"1학년 2학기 | 교과성취점수 | 16 | 과목수 | 8 | 2학년 2학기 | 교과성취점수 | 19 | 과목수 | 8",
 		"2학년 1학기 | 교과성취점수 | 19 | 과목수 | 8 | 3학년 1학기 | 교과성취점수 | 17 | 과목수 | 8",
-		"최종결석(일) | 2 | 지각·조퇴·결과(회) | 4 | 결석(일) | 1 | 봉사시수 | 40",
+		"최종결석(일) | 2 | 지각(회) | 2 | 조퇴(회) | 1 | 결과(회) | 1 | 결석(일) | 1 | 봉사시수 | 40",
 	}
 	if len(form.Rows) != len(want) {
 		t.Fatalf("줄 수: %d", len(form.Rows))
@@ -69,13 +69,16 @@ func TestVocationalNiceFormUsesCutoffAttendance(t *testing.T) {
 	if form == nil {
 		t.Fatal("대조표가 있어야 합니다")
 	}
-	if got := cellTexts(form.Rows[2]); got != "최종결석(일) | 4 | 지각·조퇴·결과(회) | 5 | 결석(일) | 3 | 봉사시수 | 40" {
+	if got := cellTexts(form.Rows[2]); got != "최종결석(일) | 4 | 지각(회) | - | 조퇴(회) | - | 결과(회) | - | 결석(일) | 3 | 봉사시수 | 40" {
 		t.Fatalf("9/30 기준 출결: %s", got)
 	}
 	for _, w := range form.Warnings {
-		if strings.Contains(w, "아직 입력하지 않아") {
+		if strings.Contains(w, "따로 없어") {
 			t.Fatalf("입력했으면 미입력 안내가 없어야 합니다: %v", form.Warnings)
 		}
+	}
+	if !strings.Contains(strings.Join(form.Warnings, " "), "합계(5회)") {
+		t.Fatalf("예전 합계 입력은 합계를 알려야 합니다: %v", form.Warnings)
 	}
 	// 일반전형(10/31)은 9/30 입력을 쓰지 않는다.
 	if got := cellTexts(NiceFormFor(s, "울산상업고", "일반").Rows[2]); !strings.HasPrefix(got, "최종결석(일) | 2 |") {

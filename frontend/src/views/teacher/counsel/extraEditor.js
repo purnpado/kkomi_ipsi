@@ -1,6 +1,7 @@
 import { printOnly } from '../../../print/printEngine.js';
 import { getWishlist } from './wishlistStore.js';
 import { renderStudentModalContent } from './studentModal.js';
+import { collectVolunteerTransfer } from './volunteerTransfer.js';
 
 // 상담 모달: 비교과 저장·상담표 인쇄
 export function bindExtraSaveAndPrint(ctx) {
@@ -32,6 +33,15 @@ export function bindExtraSaveAndPrint(ctx) {
                     if (raw === '' || !Number.isFinite(value) || value < 0) delete newExtra[key];
                     else newExtra[key] = value;
                 }
+            }
+
+            // 타 시·도 전입생 봉사 환산 도우미(전입생에게만 있음): 전입일과 입력값을 함께 저장
+            const transfer = collectVolunteerTransfer(ctx.modalEl);
+            if (transfer) {
+                if (transfer.date) newExtra.transfer_date = transfer.date;
+                else delete newExtra.transfer_date;
+                if (Object.keys(transfer.volunteer).length) newExtra.transfer_volunteer = transfer.volunteer;
+                else delete newExtra.transfer_volunteer;
             }
 
             try {

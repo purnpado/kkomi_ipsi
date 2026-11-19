@@ -22,7 +22,7 @@
 .nice-form-notes { margin-top: 4px; font-size: var(--kk-fs-1); color: var(--kk-danger); line-height: var(--kk-lh-body); }
 .nice-form-scroll { margin-top: 8px; overflow-x: auto; }
 .nice-form-table { width: 100%; border-collapse: separate; border-spacing: 3px; font-size: var(--kk-fs-2); }
-.nice-form-table th, .nice-form-table td { padding: 6px 8px; border-radius: 4px; white-space: nowrap; text-align: center; }
+.nice-form-table th, .nice-form-table td { padding: 6px 7px; border-radius: 4px; white-space: nowrap; text-align: center; }
 .nice-form-table .nice-head { background: var(--kk-sunken); color: var(--kk-text-1); font-weight: var(--kk-fw-strong); }
 .nice-form-table .nice-label { background: var(--kk-sunken); color: var(--kk-text-2); font-weight: var(--kk-fw-regular); }
 .nice-form-table .nice-accent { color: var(--kk-accent); font-weight: var(--kk-fw-strong); }
@@ -31,7 +31,7 @@
     border: 1px solid var(--kk-line-strong);
     color: var(--kk-text-strong);
     font-weight: var(--kk-fw-strong);
-    min-width: 56px;
+    min-width: 44px;
 }
 .nice-form-table .nice-note { display: block; font-size: var(--kk-fs-1); font-weight: var(--kk-fw-regular); color: var(--kk-warning); }
 .nice-form-warnings { margin-top: 8px; font-size: var(--kk-fs-1); color: var(--kk-text-2); line-height: var(--kk-lh-body); list-style: disc; padding-left: 16px; }

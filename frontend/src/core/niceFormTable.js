@@ -56,8 +56,11 @@ export function renderNiceFormTable(form) {
 export function attendanceBasisText(basis, fullStudent) {
     if (basis) {
         const cutoff = basis.cutoffEntered ? `${basis.attendanceCutoff} 기준 입력값` : '나이스 성적 파일 출결';
-        return `최종결석 <strong>${basis.finalAbsenceDays}일</strong> <span class="text-[10px] text-slate-500">(결석 ${basis.absenceDays}일, 지각·조퇴·결과 ${basis.lateEtcCount}회 · ${cutoff})</span>`;
+        const split = basis.splitKnown
+            ? `지각 ${basis.lateCount}회 · 조퇴 ${basis.earlyCount}회 · 결과 ${basis.resultCount}회`
+            : `지각·조퇴·결과 합 ${basis.lateEtcCount}회`;
+        return `최종결석 <strong>${basis.finalAbsenceDays}일</strong> <span class="text-[10px] text-slate-500">(결석 ${basis.absenceDays}일, ${split} · ${cutoff})</span>`;
     }
-    const lateEtc = (fullStudent?.rawLateCount ?? 0) + (fullStudent?.rawEarlyCount ?? 0) + (fullStudent?.rawResultCount ?? 0);
-    return `미인정 결석 환산 <strong>${fullStudent?.absenceDays ?? 0}일</strong> <span class="text-[10px] text-slate-500">(결석 ${fullStudent?.rawAbsenceDays ?? 0}일, 지각·조퇴·결과 ${lateEtc}회)</span>`;
+    const s = fullStudent || {};
+    return `미인정 결석 환산 <strong>${s.absenceDays ?? 0}일</strong> <span class="text-[10px] text-slate-500">(결석 ${s.rawAbsenceDays ?? 0}일, 지각 ${s.rawLateCount ?? 0}회 · 조퇴 ${s.rawEarlyCount ?? 0}회 · 결과 ${s.rawResultCount ?? 0}회)</span>`;
 }

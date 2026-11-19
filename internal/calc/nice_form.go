@@ -33,6 +33,10 @@ type ScoreBasis struct {
 	CutoffEntered    bool            `json:"cutoffEntered"`    // 마감일 기준 출결을 수기로 입력했는지
 	AbsenceDays      int             `json:"absenceDays"`      // 미인정 결석(일)
 	LateEtcCount     int             `json:"lateEtcCount"`     // 미인정 지각·조퇴·결과 합(회)
+	LateCount        int             `json:"lateCount"`        // 미인정 지각(회). SplitKnown 이 false 면 0
+	EarlyCount       int             `json:"earlyCount"`       // 미인정 조퇴(회)
+	ResultCount      int             `json:"resultCount"`      // 미인정 결과(회)
+	SplitKnown       bool            `json:"splitKnown"`       // 지각·조퇴·결과를 따로 알 수 있는지(예전 마감일 기준 수기 입력은 합계만 있음)
 	FinalAbsenceDays int             `json:"finalAbsenceDays"` // 최종결석 = 결석 + (지각+조퇴+결과)÷3, 소수점 절사
 	VolunteerHours   int             `json:"volunteerHours"`
 }
@@ -98,7 +102,12 @@ func buildScoreBasis(student *StudentFullData, rule SchoolRule) *ScoreBasis {
 	// 출결: calculateForSchool 의 "3. 출결 점수"와 같은 우선순위(마감일 기준 수기 입력 → 나이스 성적 파일 출결)
 	basis.AbsenceDays = student.RawAbsenceDays
 	basis.LateEtcCount = student.RawLateCount + student.RawEarlyCount + student.RawResultCount
+	basis.LateCount, basis.EarlyCount, basis.ResultCount, basis.SplitKnown = student.RawLateCount, student.RawEarlyCount, student.RawResultCount, true
 	basis.FinalAbsenceDays = student.AbsenceDays
+	if (rule.AttendanceCutoff == "10/31" && student.HasOctAbsence) || ((rule.AttendanceCutoff == "9/30" || rule.AttendanceCutoff == "") && student.HasSeptAbsence) {
+		// 예전(v1.5.1까지) 마감일 기준 수기 입력은 지각·조퇴·결과 합계만 있다.
+		basis.LateCount, basis.EarlyCount, basis.ResultCount, basis.SplitKnown = 0, 0, 0, false
+	}
 	if rule.AttendanceCutoff == "10/31" && student.HasOctAbsence {
 		basis.CutoffEntered = true
 		basis.AbsenceDays, basis.LateEtcCount = student.OctAbsenceDays, student.OctLateEtc
@@ -158,17 +167,29 @@ func vocationalNiceForm(b *ScoreBasis) *NiceForm {
 			append(semCells("2_1"), semCells("3_1")...),
 			{
 				{Kind: "accent", Text: "최종결석(일)"}, {Kind: "value", Text: strconv.Itoa(b.FinalAbsenceDays)},
-				{Kind: "label", Text: "지각·조퇴·결과(회)"}, {Kind: "value", Text: strconv.Itoa(b.LateEtcCount)},
+				{Kind: "label", Text: "지각(회)"}, {Kind: "value", Text: splitCount(b, b.LateCount)},
+				{Kind: "label", Text: "조퇴(회)"}, {Kind: "value", Text: splitCount(b, b.EarlyCount)},
+				{Kind: "label", Text: "결과(회)"}, {Kind: "value", Text: splitCount(b, b.ResultCount)},
 				{Kind: "label", Text: "결석(일)"}, {Kind: "value", Text: strconv.Itoa(b.AbsenceDays)},
 				{Kind: "accent", Text: "봉사시수"}, {Kind: "value", Text: strconv.Itoa(b.VolunteerHours)},
 			},
 		},
 	}
 	if !b.CutoffEntered {
-		form.Warnings = append(form.Warnings, fmt.Sprintf("%s 기준 출결을 아직 입력하지 않아 나이스 성적 파일의 출결로 계산했습니다. 나이스 원서 화면의 출결과 다를 수 있습니다.", cutoffLabel(b.AttendanceCutoff)))
+		form.Warnings = append(form.Warnings, fmt.Sprintf("%s 기준 출결이 따로 없어 나이스 성적 파일의 출결로 계산했습니다. 성적 파일을 받은 날짜에 따라 나이스 원서 화면의 출결과 다를 수 있습니다.", cutoffLabel(b.AttendanceCutoff)))
 	}
-	form.Hints = append(form.Hints, "나이스는 지각·조퇴·결과를 따로 보여 주지만, 꼬미입시는 마감일 기준 합계로 입력받으므로 합계를 맞춰 보세요.")
+	if !b.SplitKnown {
+		form.Warnings = append(form.Warnings, fmt.Sprintf("예전에 입력한 %s 기준 출결은 지각·조퇴·결과 합계(%d회)만 있어 따로 보여 줄 수 없습니다. 나이스 화면의 세 값을 더해 맞춰 보세요.", cutoffLabel(b.AttendanceCutoff), b.LateEtcCount))
+	}
 	return form
+}
+
+// splitCount 지각·조퇴·결과 한 칸. 합계만 아는 예전 입력이면 "-".
+func splitCount(b *ScoreBasis, n int) string {
+	if !b.SplitKnown {
+		return "-"
+	}
+	return strconv.Itoa(n)
 }
 
 func semesterLabelLong(sem string) string {

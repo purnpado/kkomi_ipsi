@@ -3,6 +3,7 @@ import { transferBadge } from '../../../core/transferBadges.js';
 import { state } from '../../../core/store.js';
 import { judgmentModeToggleHTML } from '../../../core/admissionJudgment.js';
 import { renderGeneralSummary } from './generalSummary.js';
+import { volunteerTransferHTML } from './volunteerTransfer.js';
 
 // 상담 모달: 전체 레이아웃 렌더링
 export function renderStudentModalLayout(ctx) {
@@ -21,6 +22,8 @@ export function renderStudentModalLayout(ctx) {
                         <input type="checkbox" id="printIncludeCounselCheck" class="rounded accent-indigo-500 cursor-pointer w-4 h-4" />
                         <span class="font-medium">상담 메모 포함</span>
                     </label>
+                    <!-- [관리] 버튼(입시 통계 제외): statExclusion.js 가 담임 본인 반·학년부장에게만 그린다. 인쇄하지 않는다 -->
+                    <div id="statExclusionMount" class="contents"></div>
                     <button id="openWhatIfBtn" class="px-3.5 h-9 rounded-xl font-bold text-xs bg-purple-700/70 hover:bg-purple-600 text-white border border-purple-400/50 flex items-center gap-1.5 transition-all cursor-pointer whitespace-nowrap active:scale-95" title="남은 학기 성적·결석·봉사·리더십·가산점을 바꿔 학교별 점수와 판정 변화를 봅니다(저장 안 함)">
                         <span>🔮</span> <span>가정해 보기</span>
                     </button>
@@ -134,6 +137,7 @@ export function renderStudentModalLayout(ctx) {
                                     ${[1, 2, 3].map(g => `<input type="text" inputmode="numeric" id="genVol${g}" class="input-field py-1 px-1.5 text-xs text-center" value="${ctx.rawExtra['general_volunteer_' + g] ?? ''}" placeholder="자동" ${isViewer ? 'disabled' : ''}/>`).join('')}
                                 </div>
                             </div>
+                            ${volunteerTransferHTML(ctx, isViewer)}
                             <p class="text-[10px] text-slate-400 mt-1">※ 후기 일반고 비교과 40점(출석 16·봉사 8·행발 8·창체 8). 출석·봉사는 학년별로 계산합니다.
                                 현재 출석 ${Number(ctx.data.generalHSAttendanceScore || 0).toFixed(1)} · 봉사 ${Number(ctx.data.generalHSVolunteerScore || 0).toFixed(1)} ·
                                 가산점 ${ctx.data.generalHSBonusEntered ? '<b class="text-emerald-300">입력 완료</b>' : '<b class="text-amber-300">미입력 — 저장하면 입력 완료로 기록됩니다</b>'}</p>
@@ -294,9 +298,6 @@ export function renderStudentModalLayout(ctx) {
                     <span><strong>학생·학부모 확인:</strong> ________________ (인)</span>
                 </div>
             </div>
-
-            <!-- 접힌 관리 칸(입시 통계 제외): statExclusion.js 가 담임·학년부장에게만 그린다. 인쇄하지 않는다 -->
-            <div id="statExclusionMount" class="no-print"></div>
 
             <!-- 화면용 모달 하단 닫기 바 (스크롤 끝에서도 즉시 닫기 지원) -->
             <div class="pt-4 border-t border-slate-700/60 flex items-center justify-between flex-wrap gap-3 no-print">

@@ -28,7 +28,8 @@
 .counsel-city { margin-top: 14px; color: var(--color-slate-300); font-size: 12px; line-height: 1.6; }
 .counsel-details { margin-top: 14px; border-top: 1px solid var(--color-slate-700); }
 .counsel-details summary { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 13px 0 0; color: var(--color-indigo-300); font-size: 13px; font-weight: 700; cursor: pointer; list-style: none; }
-.counsel-details summary::-webkit-details-marker { display: none; }
+.counsel-details summary::-webkit-details-marker,
+.stat-exclusion > summary::-webkit-details-marker { display: none; }
 .counsel-details[open] summary span { transform: rotate(180deg); }
 .counsel-details-body { padding-top: 8px; }
 .counsel-terms { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; margin-top: 10px; }
