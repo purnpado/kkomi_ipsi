@@ -67,7 +67,7 @@ export async function loadMasterData() {
     if (total === 0) alerts.push({ tone: 'rose', title: '학생 자료가 없습니다', detail: '나이스 교과 성적 엑셀부터 올리세요.', action: 'admin' });
     else if (att === 0 || vol === 0) alerts.push({ tone: 'amber', title: '출결·봉사 자료가 비어 있습니다', detail: `출결 ${att}명 · 봉사 ${vol}명 — 판정 점수가 낮게 나올 수 있습니다.`, action: 'admin' });
     if (home.cutoffCount === 0) alerts.push({ tone: 'amber', title: '합격선이 없습니다', detail: '판정이 모두 "기준 없음"으로 나옵니다. 커트라인을 등록하거나 지난 학년도 자료를 가져오세요.', action: 'cutoff' });
-    if (lastYearCompetition === 0) alerts.push({ tone: 'slate', title: `${year - 1} 고입 공식 경쟁률 미입력`, detail: '요강 모집정원은 채워져 있고 지원자 수만 넣으면 미달 여부를 판정에 함께 표시합니다.', action: 'cutoff' });
+    if (lastYearCompetition === 0) alerts.push({ tone: 'slate', title: `${year - 1} 고입 지원자 수 미입력`, detail: '[커트라인·경쟁률] → [지원자 수·경쟁률]: 요강 모집정원은 채워져 있어 지원자 수만 넣으면 미달 여부를 판정에 함께 표시합니다.', action: 'cutoff' });
     if (classCount > 0 && missingClasses.length > 0 && missingClasses.length < classCount) {
         alerts.push({ tone: 'amber', title: `원서가 없는 반 ${missingClasses.length}곳`, detail: `${missingClasses.join('·')}반 — 담임 취합자료를 받아 병합하세요.`, action: 'patch' });
     }

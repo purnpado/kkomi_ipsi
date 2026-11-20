@@ -171,67 +171,10 @@ export function bindPublicDataTab(ctx, ui) {
     }
 }
 
-// 커트라인 관리: 전체 연도 저장·관내 공유·돌아가기
+// 커트라인 관리: 돌아가기
+// (전체연도 일괄 저장·예전 형식 관내 자료 내보내기/병합 버튼은 뺐다 — 지난 해 커트라인을 덮어쓰거나 점검 없이 다른 학교 자료를 넣었다.
+//  관내 공유는 [관내 공유 결과] 메뉴의 새 형식으로 한다. 백엔드 ExportJointShareData·ImportJointShareData는 호환을 위해 남겨 둔다.)
 export function bindCutoffShareAndBack(ctx, ui) {
-    // 전체 연도 일괄 저장 버튼 이벤트 연결
-    document.getElementById('saveAllYearsCutoffsBtn')?.addEventListener('click', () => {
-        ui.saveAllYearsCutoffs();
-    });
-
-    // 9. 관내 진학자료 내보내기 (커트라인 + 지원현황 통계 + 공식자료 오프라인 패키징)
-    document.getElementById('exportJointDataBtn')?.addEventListener('click', async () => {
-        const btn = document.getElementById('exportJointDataBtn');
-        btn.disabled = true;
-        btn.innerHTML = '<span class="spinner"></span> 내보내는 중…';
-        try {
-            // 현재 수정 중인 커트라인 우선 자동 저장
-            await ui.saveAllCutoffs(true);
-            const path = await window.go.main.App.ExportJointShareData(ctx.currentAdmissionYear);
-            if (path) {
-                await showModalAlert({
-                    title: '자료 내보내기 완료',
-                    message: `<strong>${admissionLabel(ctx.currentAdmissionYear)}</strong> 관내 진학자료가 안전하게 저장되었습니다!<br><br>📂 <strong>저장 파일:</strong><br><span class="text-xs text-indigo-300 font-mono break-all">${path}</span><br><br><span class="text-emerald-400 text-xs">✓ 학생 성명, 학급 등 개인정보는 100% 원천 배제되었습니다.<br>✓ 이 파일을 타 학교 진학 담당 선생님께 전달하여 공유하세요.</span>`,
-                    type: 'success'
-                });
-            }
-        } catch (err) {
-            await showModalAlert({ title: '내보내기 실패', message: String(err), type: 'error' });
-        } finally {
-            btn.disabled = false;
-            btn.innerHTML = '<span>📤</span> 자료 내보내기';
-        }
-    });
-
-    // 10. 타교 진학자료 병합 (타 학교 커트라인, 합격결과, 공식자료 스마트 병합)
-    document.getElementById('importJointDataBtn')?.addEventListener('click', async () => {
-        const btn = document.getElementById('importJointDataBtn');
-        btn.disabled = true;
-        btn.innerHTML = '<span class="spinner"></span> 병합 중…';
-        try {
-            const res = await window.go.main.App.ImportJointShareData(ctx.currentAdmissionYear);
-            if (res) {
-                ctx.allSavedCutoffs = await window.go.main.App.GetCutoffs() || [];
-                const totalAllYears = (ctx.allSavedCutoffs || []).length;
-                await showModalAlert({
-                    title: '타교자료 일괄 병합 완료',
-                    message: `선택하신 타 학교 진학자료가 성공적으로 병합되었습니다!<br><br>` +
-                             `• 처리된 파일: <strong>${res.files || 1}개 학교 자료</strong><br>` +
-                             `• 커트라인 갱신: 총 <strong>${res.cutoffs || 0}건</strong> (전체 고입 연도 누적 병합)<br>` +
-                             `• 타교 지원현황 합격선 반영: <strong>${res.applications || 0}건</strong><br>` +
-                             `• 공식 공개자료 보완: <strong>${res.official || 0}건</strong><br><br>` +
-                             `<span class="text-xs text-slate-400 block">💡 상단 고입 연도를 전환하시면 각 연도별로 분할 저장된 커트라인(${res.cutoffs || 0}건 중 해당 연도분)을 확인하실 수 있습니다. (전체 보관: ${totalAllYears}건)</span>`,
-                    type: 'success'
-                });
-                ctx.renderMainScreen();
-            }
-        } catch (err) {
-            await showModalAlert({ title: '병합 실패', message: String(err), type: 'error' });
-        } finally {
-            btn.disabled = false;
-            btn.innerHTML = '<span>📥</span> 타교자료 병합';
-        }
-    });
-
     // 11. 대시보드로 돌아가기
     document.getElementById('backToAdminBtn')?.addEventListener('click', () => {
         navigate('admin', { schoolName: ctx.schoolName });

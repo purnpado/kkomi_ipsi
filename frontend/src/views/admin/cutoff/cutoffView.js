@@ -8,6 +8,7 @@ import { bindPublicDataTab, bindCutoffShareAndBack } from './cutoffPublicTab.js'
 import { defineCutoffSavers } from './cutoffSave.js';
 import { state } from '../../../core/store.js';
 import { currentAdmissionYear } from '../../../core/admissionYear.js';
+import { bindCutoffList } from './cutoffList.js';
 
 // ===== 고교별 커트라인 관리 화면 (단일 페이지 통합 네비게이션 & 최저/최고/평균 입력 지원) =====
 export async function renderCutoffScreen(schoolName) {
@@ -237,6 +238,7 @@ function defineCutoffMainRenderer(ctx) {
     ctx.searchKeyword = '';
     ctx.publicYearFilterMode = 'current'; // 'current': 상단 고교 입학년도 동기화, 'all': 전체 연도 모아보기
     ctx.deletedCutoffList = []; // 사용자가 UI에서 삭제하거나 비운 커트라인 목록 (DB 삭제 동기화용)
+    ctx.openSchools = new Set(); // 펼쳐 둔 학교(다시 그려도 유지)
 
     ctx.renderMainScreen = () => {
         // 화면 구성 요소들이 공유하는 상태 (파트 함수 간 전달)
@@ -257,6 +259,7 @@ function defineCutoffEventBinder(ctx) {
         bindPublicDataTab(ctx, ui);
         defineCutoffSavers(ctx, ui);
         bindCutoffShareAndBack(ctx, ui);
+        bindCutoffList(ctx); // 거르기·펼침 상태·[✏️]·저장하지 않은 변경 표시
     };
 }
 

@@ -4,6 +4,8 @@ import { app } from '../../../core/dom.js';
 import { notifyStatsRecalculated } from '../../../core/navigation.js';
 import { admissionLabel } from '../../../core/admissionYear.js';
 import { openCompetitionModal } from './competitionModal.js';
+import { applyCutoffFilter, confirmDiscard, markRowDirty } from './cutoffList.js';
+import { chooseResetScope, chooseSourceYear } from './cutoffDialogs.js';
 
 // 커트라인 관리: 연도 복사·연도 선택·검색·탭 전환
 export function bindCutoffYearAndSearch(ctx, ui) {
@@ -19,14 +21,7 @@ export function bindCutoffYearAndSearch(ctx, ui) {
             return;
         }
 
-        const confirmed = await showModalConfirm({
-            title: '커트라인 데이터 복사',
-            message: `<strong>${admissionLabel(sourceYear)}</strong>의 커트라인(총 <strong>${sourceData.length}건</strong>)을 현재 <strong>${admissionLabel(ctx.currentAdmissionYear)}</strong>로 복사해 오시겠습니까?<br><br><span class="text-xs text-amber-300">※ 복사 후 상단의 <strong>[💾 커트라인 저장]</strong> 버튼을 누르시면 ${admissionLabel(ctx.currentAdmissionYear)} 데이터로 DB에 최종 저장됩니다.</span>`,
-            confirmText: '복사하기',
-            type: 'info'
-        });
-
-        if (!confirmed) return;
+        // 학년도 고르기 창에서 이미 확인했다.
 
         const rows = app.querySelectorAll('.cutoff-item-row');
         let filledCount = 0;
@@ -48,13 +43,14 @@ export function bindCutoffYearAndSearch(ctx, ui) {
                 if (minInput) minInput.value = match.minValue || '';
                 if (maxInput) maxInput.value = match.maxValue || '';
                 if (avgInput) avgInput.value = match.avgValue || '';
+                markRowDirty(tr); // 채운 값은 [저장]해야 반영된다
                 filledCount++;
             }
         });
 
         await showModalAlert({
             title: '복사 완료',
-            message: `<strong>${admissionLabel(sourceYear)}</strong> 커트라인 중 <strong>${filledCount}개</strong> 항목이 현재 화면에 채워졌습니다!<br><br>내용을 확인하신 후 상단의 <strong>[💾 커트라인 저장]</strong> 버튼을 꼭 눌러주세요.`,
+            message: `<strong>${admissionLabel(sourceYear)}</strong> 커트라인 중 <strong>${filledCount}개</strong> 항목을 칸에 채웠습니다.<br><br>확인한 뒤 위쪽 <strong>[💾 저장]</strong>을 눌러야 반영됩니다.`,
             type: 'success'
         });
     };
@@ -68,18 +64,16 @@ export function bindCutoffYearAndSearch(ctx, ui) {
         if (availableYears.length === 0) {
             await showModalAlert({
                 title: '복사 가능한 연도 없음',
-                message: '다른 고입 연도에 저장된 커트라인 데이터가 없습니다.<br>타교자료를 병합하거나 직접 커트라인을 먼저 입력해 주세요.',
+                message: '다른 고입 연도에 저장된 커트라인이 없습니다.<br>커트라인을 직접 넣거나 [고교 발표 자료(참고)]에서 반영해 주세요.',
                 type: 'info'
             });
             return;
         }
 
-        if (availableYears.length === 1) {
-            await executeCopyFromYear(availableYears[0]);
-        } else {
-            // 여러 연도가 있을 경우 가장 최근 등록 연도로 복사 확인
-            await executeCopyFromYear(availableYears[0]);
-        }
+        // 가져올 학년도를 고른다(예전에는 가장 최근 학년도만 가져왔다).
+        const year = await chooseSourceYear(admissionLabel(ctx.currentAdmissionYear),
+            availableYears.map((y) => ({ year: y, label: `${admissionLabel(y)} (${ctx.getCutoffCountByYear(y)}건)` })));
+        if (year) await executeCopyFromYear(year);
     });
 
     // 0-2. 배너의 바로 복사 버튼
@@ -91,7 +85,11 @@ export function bindCutoffYearAndSearch(ctx, ui) {
     });
 
     // 1. 입학년도 변경 이벤트: 선택 즉시 해당 연도 데이터 로드
-    document.getElementById('admissionYearSelect')?.addEventListener('change', (e) => {
+    document.getElementById('admissionYearSelect')?.addEventListener('change', async (e) => {
+        if (!(await confirmDiscard())) {
+            e.target.value = String(ctx.currentAdmissionYear); // 저장하지 않은 변경을 지키려고 그대로 둔다
+            return;
+        }
         ctx.currentAdmissionYear = parseInt(e.target.value, 10);
         ctx.renderMainScreen();
     });
@@ -101,6 +99,8 @@ export function bindCutoffYearAndSearch(ctx, ui) {
     if (searchInput) {
         searchInput.addEventListener('input', (e) => {
             ctx.searchKeyword = e.target.value.trim();
+            // 학교 목록은 다시 그리지 않고 숨기기만 한다(입력한 값이 지워지지 않음). 발표 자료 탭은 예전처럼 다시 그린다.
+            if (ctx.currentTab !== 'public') return applyCutoffFilter(ctx);
             ctx.renderMainScreen();
             const freshInput = document.getElementById('cutoffSchoolSearch');
             if (freshInput) {
@@ -116,8 +116,24 @@ export function bindCutoffYearAndSearch(ctx, ui) {
 
     // 3. 탭 전환 이벤트
     app.querySelectorAll('.nav-tab-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            ctx.currentTab = btn.dataset.tab;
+        btn.addEventListener('click', async () => {
+            const next = btn.dataset.tab;
+            const redraw = next === 'public' || ctx.currentTab === 'public';
+            if (!redraw) {
+                // 학교 종류 탭: 다시 그리지 않고 숨기기만(입력한 값 유지)
+                ctx.currentTab = next;
+                app.querySelectorAll('.nav-tab-btn').forEach((b) => {
+                    const on = b.dataset.tab === next;
+                    b.classList.toggle('bg-primary', on);
+                    b.classList.toggle('text-white', on);
+                    b.classList.toggle('shadow-md', on);
+                    b.classList.toggle('bg-slate-800/60', !on && b.dataset.tab !== 'public');
+                    b.classList.toggle('text-slate-400', !on && b.dataset.tab !== 'public');
+                });
+                return applyCutoffFilter(ctx);
+            }
+            if (!(await confirmDiscard())) return;
+            ctx.currentTab = next;
             ctx.renderMainScreen();
         });
     });
@@ -173,38 +189,23 @@ export function bindCutoffRowEditing(ctx, ui) {
             const tbody = card.querySelector('tbody');
             if (tbody) {
                 const tr = document.createElement('tr');
-                tr.className = "border-b border-slate-700/40 hover:bg-slate-800/40 transition-colors cutoff-item-row";
+                tr.className = 'cutoff-item-row';
                 tr.dataset.school = schName;
                 tr.dataset.type = scoreType;
                 const unit = scoreType === 'percentile' ? '%' : '점';
                 tr.innerHTML = `
-                        <td class="p-3">
-                            <input type="text" class="input-field py-1.5 px-2.5 text-xs font-bold text-white row-dept-name" value="" placeholder="비우면 학교 전체" />
-                        </td>
-                        <td class="p-3">
-                            <input type="text" class="input-field py-1.5 px-2.5 text-xs text-indigo-300 row-track-name" value="일반" placeholder="전형 (예: 일반)" />
-                        </td>
-                        <td class="p-3 text-center">
-                            <div class="flex items-center justify-center gap-1">
-                                <input type="text" inputmode="decimal" class="input-field py-1.5 px-2 text-xs text-right font-bold text-emerald-300 w-28 row-min-score" 
-                                       value="" placeholder="최저점" />
-                                <span class="text-xs text-slate-400">${unit}</span>
-                            </div>
-                        </td>
-                        <td class="p-3 text-center">
-                            <div class="flex items-center justify-center gap-1">
-                                <input type="text" inputmode="decimal" class="input-field py-1.5 px-2 text-xs text-right font-semibold text-sky-300 w-28 row-max-score" 
-                                       value="" placeholder="선택" />
-                                <span class="text-xs text-slate-400">${unit}</span>
-                            </div>
-                        </td>
+                        <td class="cutoff-dept-cell"><input type="text" class="input-field cutoff-edit row-dept-name" value="" placeholder="비우면 학교 전체" aria-label="학과명" /></td>
+                        <td><input type="text" class="input-field cutoff-edit row-track-name" value="일반" placeholder="전형 (예: 일반, 취업희망자)" aria-label="전형" /></td>
+                        <td class="text-center"><span class="cutoff-score"><input type="text" inputmode="decimal" class="input-field cutoff-num row-min-score" value="" placeholder="–" aria-label="최저점" /><span>${unit}</span></span></td>
+                        <td class="text-center"><span class="cutoff-score"><input type="text" inputmode="decimal" class="input-field cutoff-num row-max-score" value="" placeholder="–" aria-label="최고 불합격점" /><span>${unit}</span></span></td>
                         <input type="hidden" class="row-avg-score" value="" />
-                        <td class="p-3 text-center">
-                            <button class="text-xs text-danger/80 hover:text-danger hover:bg-danger/10 p-1.5 rounded transition-colors btn-delete-row" title="행 삭제">🗑️</button>
-                        </td>
+                        <td class="text-center"><button type="button" class="cutoff-icon-btn btn-delete-row" title="행 삭제" aria-label="행 삭제">🗑️</button></td>
                     `;
                 tbody.appendChild(tr);
-                tr.querySelector('.btn-delete-row').addEventListener('click', () => tr.remove());
+                card.open = true;
+                markRowDirty(tr);
+                tr.querySelector('.row-dept-name')?.focus();
+                tr.querySelector('.btn-delete-row').addEventListener('click', () => { tr.remove(); markRowDirty(null); });
             }
         });
     });
@@ -281,22 +282,10 @@ export function bindPublicDataApply(ctx, ui) {
 
     // 7-1. 커트라인 초기화 버튼 이벤트 (연도별 선택 또는 전체 초기화)
     document.getElementById('resetCutoffsBtn')?.addEventListener('click', async () => {
-        const confirmed = await showModalConfirm({
-            title: '커트라인 초기화 확인',
-            message: `현재 선택된 <strong>${admissionLabel(ctx.currentAdmissionYear)}</strong> 커트라인을 초기화하시겠습니까?<br><br><span class="text-xs text-slate-400">※ 전체 5개년 모든 데이터를 완전 백지화하려면 다음 질문에서 전체 초기화를 선택할 수 있습니다.</span>`,
-            confirmText: '초기화 진행',
-            type: 'warning'
-        });
-        if (!confirmed) return;
-
-        const isAllYears = await showModalConfirm({
-            title: '전체 연도 초기화 선택',
-            message: `모든 연도(5개년 전체)의 커트라인과 공개 입결 데이터를 완전 백지화하시겠습니까?<br><br>- <strong>[전체 백지화]</strong>: 5개년 전체 데이터 삭제<br>- <strong>[해당 연도만]</strong>: 현재 ${admissionLabel(ctx.currentAdmissionYear)} 데이터만 삭제`,
-            confirmText: '전체 백지화',
-            cancelText: '해당 연도만',
-            type: 'error'
-        });
-
+        // 한 창에서 범위를 고른다. 취소·Esc는 아무것도 지우지 않는다(5개년 전체는 "전체 지우기"를 직접 써야 함).
+        const scope = await chooseResetScope(admissionLabel(ctx.currentAdmissionYear));
+        if (!scope) return;
+        const isAllYears = scope === 'all';
         try {
             if (isAllYears) {
                 if (window.go?.main?.App?.ResetCutoffs) {
@@ -314,10 +303,10 @@ export function bindPublicDataApply(ctx, ui) {
             ctx.allSavedCutoffs = await window.go.main.App.GetCutoffs() || [];
             notifyStatsRecalculated({ cutoffs: ctx.allSavedCutoffs });
             await showModalAlert({
-                title: '초기화 완료',
+                title: '지우기 완료',
                 message: isAllYears 
-                    ? '전체 연도의 고교 커트라인 및 공개 입결 데이터가 완전히 초기화되었습니다.' 
-                    : `<strong>${admissionLabel(ctx.currentAdmissionYear)}</strong>의 고교 커트라인이 안전하게 초기화되었습니다.`,
+                    ? '5개년 전체 커트라인과 고교 발표 자료를 지웠습니다.' 
+                    : `<strong>${admissionLabel(ctx.currentAdmissionYear)}</strong>의 커트라인을 지웠습니다.`,
                 type: 'success'
             });
             ctx.renderMainScreen();

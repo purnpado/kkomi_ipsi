@@ -134,7 +134,7 @@ export function renderStatsDashboard(container, stats, sourceMode) {
                         <span>❔ 판단 근거 부족</span>
                         <span class="num">${properCutoff > 0 ? `<${properCutoff.toFixed(2)}점` : '-'}</span>
                     </div>
-                    <p class="text-[11px] text-slate-300">이 자료에는 불합격 사례가 없어 합격 최저점이 합격선의 상한일 뿐입니다. 이보다 낮은 점수의 합격 여부는 판단할 수 없습니다. 미달 여부는 커트라인 관리의 [공식 경쟁률]에 입력한 값으로만 표시합니다.</p>
+                    <p class="text-[11px] text-slate-300">이 자료에는 불합격 사례가 없어 합격 최저점이 합격선의 상한일 뿐입니다. 이보다 낮은 점수의 합격 여부는 판단할 수 없습니다. 미달 여부는 [커트라인·경쟁률] → [지원자 수·경쟁률]에 입력한 값으로만 표시합니다.</p>
                 </div>
                 ` : `
                 <!-- 소신 -->

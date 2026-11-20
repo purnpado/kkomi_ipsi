@@ -140,9 +140,9 @@ export async function openCompetitionModal(ctx) {
         <div class="glass-card w-full max-w-5xl max-h-[92vh] flex flex-col p-5 md:p-6 rounded-2xl bg-slate-900/98 border border-slate-700 shadow-2xl space-y-3 text-xs">
             <div class="flex items-start justify-between gap-3 border-b border-slate-700/60 pb-3">
                 <div>
-                    <h3 class="text-lg font-black text-white flex items-center gap-2"><span>📊</span> 공식 경쟁률 입력 (모집정원·지원자 수)</h3>
+                    <h3 class="text-lg font-black text-white flex items-center gap-2"><span>📊</span> 지원자 수·경쟁률</h3>
                     <p class="text-[11px] text-slate-400 mt-1 leading-relaxed">
-                        모집정원은 요강, 지원자 수는 고교의 원서 접수 결과 발표값을 입력합니다. 상담 화면은 이 값으로만 <strong class="text-sky-300">미달</strong>과 경쟁률을 표시합니다.<br>
+                        <strong class="text-slate-200">모집정원은 그해 요강대로 미리 채워져 있습니다</strong>(파란 테두리, 요강이 바뀌었으면 고치세요). 고교가 원서 접수 결과로 발표한 <strong class="text-slate-200">지원자 수</strong>만 넣으면 됩니다. 상담 화면은 이 값으로만 <strong class="text-sky-300">미달</strong>과 경쟁률을 표시합니다.<br>
                         우리 자료에 불합격자가 없다는 것만으로는 미달인지, 지원자 점수가 높아 모두 합격한 것인지 알 수 없습니다(⚠ 표시).
                     </p>
                 </div>

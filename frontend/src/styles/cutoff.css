@@ -1,0 +1,62 @@
+/* 커트라인·경쟁률 화면 (views/admin/cutoff/) — 색은 tokens.css 변수만 쓴다 */
+.cutoff-head { display: grid; gap: 12px; padding-bottom: 14px; border-bottom: 1px solid var(--kk-line); }
+.cutoff-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.cutoff-year { display: inline-flex; align-items: center; gap: 6px; color: var(--kk-text-2); font-size: var(--kk-fs-2); font-weight: 700; }
+.cutoff-year select { width: auto; padding: 6px 10px; font-size: var(--kk-fs-2); font-weight: 700; }
+.cutoff-main-btn, .cutoff-sub-btn, .cutoff-danger-btn, .cutoff-link-btn {
+    display: inline-flex; align-items: center; gap: 4px; height: 36px; padding: 0 14px; border-radius: 10px;
+    font-size: var(--kk-fs-2); font-weight: 700; cursor: pointer; white-space: nowrap; width: auto;
+}
+.cutoff-main-btn { background: var(--kk-accent-fill); color: var(--kk-on-fill); border: 1px solid var(--kk-accent-fill); }
+.cutoff-main-btn:hover { filter: brightness(1.1); }
+.cutoff-sub-btn { background: var(--kk-sunken); color: var(--kk-text-1); border: 1px solid var(--kk-control); }
+.cutoff-sub-btn:hover { border-color: var(--kk-accent); color: var(--kk-accent); }
+.cutoff-link-btn { background: transparent; border: 0; color: var(--kk-accent); padding: 0 6px; }
+.cutoff-link-btn:hover { text-decoration: underline; }
+.cutoff-danger-btn { margin-left: auto; background: transparent; color: var(--kk-danger); border: 1px solid var(--kk-danger); }
+.cutoff-danger-btn:disabled { opacity: .45; cursor: not-allowed; }
+.cutoff-dirty-count { font-weight: 800; }
+.cutoff-dirty-note { margin: 0; color: var(--kk-warning); font-size: var(--kk-fs-2); font-weight: 700; }
+body.shell-on #backToAdminBtn { display: none; }
+
+.cutoff-empty-hint { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--kk-line-strong); background: var(--kk-sunken); color: var(--kk-text-1); }
+
+.cutoff-school-list { display: grid; gap: 8px; }
+.cutoff-school { border: 1px solid var(--kk-line-strong); border-radius: 12px; background: var(--kk-surface); }
+.cutoff-school[open] { border-color: var(--kk-accent); }
+.cutoff-summary { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 10px 14px; cursor: pointer; list-style: none; color: var(--kk-text-1); font-size: var(--kk-fs-2); }
+.cutoff-summary::-webkit-details-marker { display: none; }
+.cutoff-summary strong { color: var(--kk-text-strong); font-size: var(--kk-fs-3); }
+.cutoff-summary:hover { background: var(--kk-sunken); border-radius: 12px; }
+.cutoff-chev { color: var(--kk-text-3); transition: transform .15s; }
+.cutoff-school[open] .cutoff-chev { transform: rotate(90deg); }
+.cutoff-chip { padding: 1px 8px; border-radius: 999px; background: var(--kk-sunken); color: var(--kk-text-2); font-size: var(--kk-fs-1); font-weight: 600; }
+.cutoff-progress { margin-left: auto; color: var(--kk-text-2); font-size: var(--kk-fs-1); }
+.cutoff-progress b { color: var(--kk-text-strong); }
+.cutoff-tag { padding: 1px 8px; border-radius: 999px; border: 1px solid var(--kk-warning); color: var(--kk-warning); font-size: var(--kk-fs-1); font-weight: 700; }
+.cutoff-body { padding: 4px 14px 12px; border-top: 1px solid var(--kk-line); }
+.cutoff-body-actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 0; }
+.cutoff-muted { color: var(--kk-text-3); font-size: var(--kk-fs-1); font-weight: 400; }
+
+.cutoff-table { width: 100%; border-collapse: collapse; font-size: var(--kk-fs-2); }
+.cutoff-table th { padding: 6px 8px; text-align: left; color: var(--kk-text-2); font-weight: 700; background: var(--kk-sunken); }
+.cutoff-table td { padding: 4px 8px; border-bottom: 1px solid var(--kk-line); color: var(--kk-text-1); vertical-align: middle; }
+.cutoff-table tr.is-dirty td { background: var(--kk-judge-hope-bg); }
+.cutoff-text { font-weight: 600; }
+.cutoff-dept-cell .cutoff-text { color: var(--kk-text-strong); font-weight: 700; }
+.cutoff-edit { padding: 4px 8px !important; font-size: var(--kk-fs-2) !important; width: 100%; }
+.cutoff-score { display: inline-flex; align-items: center; gap: 4px; color: var(--kk-text-3); font-size: var(--kk-fs-1); }
+.cutoff-num { width: 96px !important; padding: 4px 8px !important; text-align: right; font-weight: 700; font-size: var(--kk-fs-2) !important; font-variant-numeric: tabular-nums; }
+.cutoff-num::placeholder { color: var(--kk-text-3); }
+.cutoff-icon-btn { padding: 4px 6px; border-radius: 6px; background: transparent; border: 0; cursor: pointer; }
+.cutoff-icon-btn:hover { background: var(--kk-sunken); }
+
+.cutoff-dialog { width: 100%; max-width: 440px; padding: 20px; display: grid; gap: 12px; }
+.cutoff-dialog-title { font-size: var(--kk-fs-4); font-weight: 800; color: var(--kk-text-strong); }
+.cutoff-dialog-text { font-size: var(--kk-fs-2); color: var(--kk-text-2); line-height: 1.6; }
+.cutoff-dialog-field { display: grid; gap: 6px; font-size: var(--kk-fs-2); color: var(--kk-text-1); }
+.cutoff-dialog-field.hidden { display: none; }
+.cutoff-dialog-choice { display: flex; align-items: center; gap: 8px; font-size: var(--kk-fs-2); color: var(--kk-text-1); cursor: pointer; }
+.cutoff-dialog-actions { display: flex; justify-content: flex-end; gap: 8px; }
+@media (prefers-reduced-motion: reduce) { .cutoff-chev { transition: none; } }
+.cutoff-dialog-actions .cutoff-danger-btn { margin-left: 0; }

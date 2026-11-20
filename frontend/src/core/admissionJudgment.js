@@ -250,7 +250,7 @@ export function judgmentTitle(result) {
     const competition = describeCompetition(result);
     if (result.level === 'insufficient') {
         return `기준선 ${result.cutoff.toFixed(2)}점${source}은 불합격 사례가 없는 합격 최저점이라 합격선의 상한입니다. `
-            + `이보다 낮은 점수(${describeDiff(result)})가 합격할지는 판단할 근거가 없습니다.${competition ? ` ${competition}` : ' 공식 경쟁률을 입력하면 미달 여부를 함께 보여 줍니다.'}`;
+            + `이보다 낮은 점수(${describeDiff(result)})가 합격할지는 판단할 근거가 없습니다.${competition ? ` ${competition}` : ' [지원자 수·경쟁률]을 입력하면 미달 여부를 함께 보여 줍니다.'}`;
     }
     const range = result.upperLevel && result.upperLevel !== result.level ? ` · 가산점 반영 시 최대 ${result.upperLabel}` : '';
     const evidence = describeEvidence(result);
