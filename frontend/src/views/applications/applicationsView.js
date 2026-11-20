@@ -65,7 +65,7 @@ function toolbarHTML() {
 }
 
 function tabBodyHTML() {
-    const opts = { showClass: who().role !== 'homeroom', canEdit: canEdit() };
+    const opts = { showClass: who().role !== 'homeroom', canEdit: canEdit(), year: data.year };
     if (view.tab === 'school') {
         const groups = visibleGroups();
         if (!groups.find((g) => g.key === view.groupKey)) view.groupKey = groups[0]?.key || '';
@@ -138,7 +138,7 @@ function bind() {
     query?.addEventListener('input', () => {
         view.query = query.value;
         const table = app.querySelector('#appsTable');
-        if (table) table.innerHTML = studentsTableHTML(visibleStudents(), { showClass: who().role !== 'homeroom', canEdit: canEdit() });
+        if (table) table.innerHTML = studentsTableHTML(visibleStudents(), { showClass: who().role !== 'homeroom', canEdit: canEdit(), year: data.year });
         bindRowButtons();
     });
     bindRowButtons();

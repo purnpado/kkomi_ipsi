@@ -15,6 +15,7 @@ export const KIND_TEXT = {
     rename_conflict: '담임이 학교·전형을 바꿨지만 학년부장이 배포 뒤 옛 원서를 고침',
     suspect: '학교·전형을 바꾼 것으로 보이는 원서(예전 버전 파일)',
     gh_missing: '학년부장 PC에 없는 원서(학년부장이 지웠거나 PC 시계가 다름)',
+    new_locked: '이중지원 금지 학생의 새 원서(이미 합격·최종 진학·등록 포기)',
 };
 
 export const ACTION_TEXT = {

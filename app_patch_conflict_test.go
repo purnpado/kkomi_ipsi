@@ -84,11 +84,10 @@ func TestPatchConflictFlowKeepsGradeHeadFinal(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	// 학년부장도 배포 뒤 마이스터고 원서를 고친다.
+	// 학년부장도 배포 뒤 마이스터고 원서를 고친다(불합격 — 합격이면 이중지원 금지로 새 원서가 막혀 이 흐름과 다르다).
 	for _, r := range mustApps(t, master) {
 		if r.SchoolName == "울산마이스터고" {
-			r.Status = "합격"
-			r.AssignedDepartment = "기계과"
+			r.Status = "불합격"
 			if err := master.SaveStudentApplication(r); err != nil {
 				t.Fatal(err)
 			}
@@ -118,13 +117,13 @@ func TestPatchConflictFlowKeepsGradeHeadFinal(t *testing.T) {
 	if err != nil || count != 1 || held != 3 {
 		t.Fatalf("일괄 병합: count=%d held=%d err=%v", count, held, err)
 	}
-	assertSchools(t, master, map[string]string{"울산공고": "지원예정", "울산상고": "지원예정", "울산마이스터고": "합격"})
+	assertSchools(t, master, map[string]string{"울산공고": "지원예정", "울산상고": "지원예정", "울산마이스터고": "불합격"})
 
 	// 상세 검토 기본값: 학교 바꿈·지움은 반영, 학년부장이 고친 원서는 유지.
 	if _, err := master.ImportTeacherPatchSelected("shared-pw", patchPath, []model.PatchMergeSelection{{StudentNum: "1", Applications: true}}); err != nil {
 		t.Fatal(err)
 	}
-	assertSchools(t, master, map[string]string{"울산여상": "지원예정", "울산마이스터고": "합격"})
+	assertSchools(t, master, map[string]string{"울산여상": "지원예정", "울산마이스터고": "불합격"})
 }
 
 func mustApps(t *testing.T, a *App) []model.ApplicationRecord {

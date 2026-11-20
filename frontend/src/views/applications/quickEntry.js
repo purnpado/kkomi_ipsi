@@ -1,3 +1,4 @@
+import { blocksNewApplication, lockMessage } from '../../core/doubleApply.js';
 // 전기고 원서 빠른 입력(applicationsQuick.js)의 계산 부분: 학생 찾기·학교·전형·학과 지망 수·저장할 원서 만들기.
 // 화면과 떼어 두어 node --test 로 확인한다(quickEntry.test.js).
 
@@ -63,8 +64,10 @@ export function existingApplication(student, year, category, schoolName, track) 
 }
 
 /** 입력값 확인: 문제가 있으면 안내 문장, 없으면 '' */
-export function quickEntryProblem({ student, category, schoolName, track, preferences, departmentCount, limit }) {
+export function quickEntryProblem({ student, category, schoolName, track, preferences, departmentCount, limit, year, status, existing }) {
     if (!student) return '학생을 먼저 고르세요.';
+    const lock = blocksNewApplication(student.apps, year, { status, isExisting: Boolean(existing) });
+    if (lock) return lockMessage(lock);
     if (!['meister', 'special'].includes(category)) return '구분(마이스터고·특성화고)을 고르세요.';
     if (!schoolName) return '지원 학교를 고르세요.';
     if (!track) return '전형을 고르세요.';

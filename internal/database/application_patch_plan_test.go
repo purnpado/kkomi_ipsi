@@ -266,6 +266,16 @@ func TestPatchPlanKeepsGradeHeadFinal(t *testing.T) {
 			want:      map[string]string{"울산공고/일반전형": "지원완료", "울산상고/일반전형": "지원완료"},
 		},
 		{
+			name: "이중지원 금지 학생의 새 원서는 확인 필요, 기본은 반영하지 않음",
+			setup: func(t *testing.T, dm *DBManager) {
+				ghSave(t, dm, planApp("울산공고", "일반전형", "합격", tPre))
+			},
+			apps:      []model.ApplicationRecord{planApp("울산공고", "일반전형", "합격", tPre), planApp("울산상고", "일반전형", "지원완료", tAfter)},
+			base:      newBase,
+			wantKinds: []string{PatchKindNewLocked},
+			want:      map[string]string{"울산공고/일반전형": "합격"},
+		},
+		{
 			name: "확정된 학년도 원서는 건너뛰고 병합은 실패하지 않음",
 			setup: func(t *testing.T, dm *DBManager) {
 				ghSave(t, dm, planApp("울산상고", "일반전형", "합격", tPre))

@@ -3,6 +3,7 @@
 import { escapeAttr, escapeHtml } from '../../core/utils.js';
 import { transferBadge } from '../../core/transferBadges.js';
 import { RESULT_STATUSES, STUDENT_FILTERS, appLabel } from './applicationsData.js';
+import { findApplicationLock } from '../../core/doubleApply.js';
 
 const STATUS_TONE = {
     합격: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40',
@@ -35,7 +36,7 @@ export function filterStudents(students, filterId, query) {
 }
 
 /** @returns {string} 학생별 원서 표 HTML */
-export function studentsTableHTML(students, { showClass, canEdit }) {
+export function studentsTableHTML(students, { showClass, canEdit, year }) {
     if (!students.length) {
         return '<div class="py-10 text-center text-sm text-slate-400">조건에 맞는 학생이 없습니다.</div>';
     }
@@ -47,7 +48,7 @@ export function studentsTableHTML(students, { showClass, canEdit }) {
             <td class="py-2 px-2"><div class="flex flex-wrap gap-1.5">${appChips(s.apps)}</div></td>
             <td class="py-2 px-2 text-right">
                 <button type="button" class="apps-open-form btn-secondary text-xs px-3 py-1.5 font-bold whitespace-nowrap" style="width:auto"
-                    data-class="${s.classNum}" data-num="${escapeAttr(s.studentNum)}" data-name="${escapeAttr(s.name)}">${canEdit ? '원서 입력' : '원서 보기'}</button>
+                    data-class="${s.classNum}" data-num="${escapeAttr(s.studentNum)}" data-name="${escapeAttr(s.name)}">${!canEdit ? '원서 보기' : (findApplicationLock(s.apps, year) ? '원서 보기·결과 고치기' : '원서 입력')}</button>
             </td>
         </tr>`).join('');
     return `

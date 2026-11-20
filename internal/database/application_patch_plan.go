@@ -28,6 +28,7 @@ const (
 	PatchKindRenameConflict  = "rename_conflict"  // 담임이 학교·전형을 바꿨는데 학년부장이 옛 원서를 배포 뒤 고침
 	PatchKindSuspect         = "suspect"          // 예전 버전 파일: 학교·전형을 바꾼 것으로 보이는 원서
 	PatchKindGHMissing       = "gh_missing"       // 학년부장 PC에 없고 지운 기록도 없는 원서(학년부장이 예전 버전에서 지웠거나 PC 시계 차이)
+	PatchKindNewLocked       = "new_locked"       // 이중지원 금지 학생(합격·최종 진학·등록 포기)의 새 원서
 )
 
 // PatchBase 취합 파일의 기준 정보(배포 시각·형식 판).
@@ -100,6 +101,7 @@ var patchKindRules = map[string]kindRule{
 	PatchKindRenameConflict:  {"keep", "keep", true, []string{"keep", "replace", "both"}},
 	PatchKindSuspect:         {"both", "keep", true, []string{"both", "replace", "keep"}},
 	PatchKindGHMissing:       {"keep", "keep", true, []string{"keep", "teacher"}},
+	PatchKindNewLocked:       {"skip", "skip", true, []string{"skip", "apply"}},
 }
 
 func newPlanEntry(kind, id string, mine *model.ApplicationRecord, mineKey *model.ApplicationKey, theirs *model.ApplicationRecord, theirsDeleted *model.ApplicationKey) patchPlanEntry {
@@ -242,6 +244,11 @@ func (dm *DBManager) PlanPatchApplications(change model.PatchChange, base PatchB
 		}
 		result.entries = append(result.entries, entry)
 		if kind == PatchKindNew {
+			// 이중지원 금지: 학년부장 PC에서 이미 합격·최종 진학·등록 포기인 학생의 새 원서(지난 불합격 기록은 제외)
+			if lock := lockOf(mineList, t.AdmissionYear); lock != nil && t.Status != "불합격" {
+				result.entries[len(result.entries)-1] = newPlanEntry(PatchKindNewLocked, "a:"+key, lock, nil, &t, nil)
+				continue
+			}
 			news = append(news, len(result.entries)-1)
 		}
 	}

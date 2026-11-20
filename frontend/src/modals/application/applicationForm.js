@@ -3,6 +3,7 @@ import { showModalAlert, showModalConfirm } from '../../core/dialogs.js';
 import { notifyApplicationsChanged } from '../../core/navigation.js';
 import { suggestExtraRound } from '../../core/extraRound.js';
 import { NICE_PREVIEW_SLOT, refreshNicePreview } from './niceFormPreview.js';
+import { blocksNewApplication, findApplicationLock, lockMessage } from '../../core/doubleApply.js';
 import { displaySchool } from '../../core/schoolName.js';
 
 // 지원현황 입력: 원서별 입력 화면 렌더러 정의
@@ -98,7 +99,8 @@ export function defineApplicationRenderer(ctx) {
             return `<button class="app-record-tab px-3 py-2 rounded-lg text-xs font-bold transition-all ${i === activeIdx ? 'bg-primary text-white shadow-md' : 'bg-slate-800 text-text-muted hover:text-white'}" data-index="${i}">${presetBadge}${lockIcon}${escapeHtml(nameLabel)}${escapeHtml(trackPart)} · ${escapeHtml(statusPart)}</button>`;
         }).join('');
 
-        const addNewTabBtn = ctx.canEdit ? `
+        const yearLock = findApplicationLock(records, ctx.defaultAdmissionYear); // 이중지원 금지(합격·최종 진학·등록 포기)
+        const addNewTabBtn = ctx.canEdit && yearLock ? `<span class="px-3 py-2 rounded-lg text-xs font-bold text-rose-300 border border-rose-500/40" title="${escapeAttr(lockMessage(yearLock))}">⛔ 새 지원 불가(이중지원 금지)</span>` : ctx.canEdit ? `
             <button id="btnAddNewApplication" class="px-3 py-2 rounded-lg text-xs font-bold bg-indigo-950/80 text-indigo-300 border border-indigo-500/40 hover:bg-indigo-900/60 transition-colors flex items-center gap-1 cursor-pointer">
                 <span>➕</span> 새 지원 추가
             </button>
@@ -126,6 +128,7 @@ export function defineApplicationRenderer(ctx) {
         ctx.modal.innerHTML = `
           <div class="glass-card p-7 w-full max-w-5xl max-h-[90vh] overflow-y-auto"><div class="flex justify-between items-start gap-4 mb-5"><div><h2 class="text-2xl font-bold text-white">📝 ${escapeHtml(ctx.name)} 지원·합격 현황</h2><p class="text-sm text-text-muted mt-1">이 자료는 학급 암호화 DB와 취합자료 파일에만 저장됩니다. 중앙 서버로 전송되지 않습니다.</p></div><button aria-label="닫기" id="closeApplicationModal" class="text-3xl text-text-muted cursor-pointer">×</button></div>
           ${list}
+          ${!record.id && findApplicationLock(records, record.admissionYear || ctx.defaultAdmissionYear) ? `<p class="mb-3 p-3 rounded-lg border border-rose-500/50 text-sm text-rose-300">⛔ ${escapeHtml(lockMessage(findApplicationLock(records, record.admissionYear || ctx.defaultAdmissionYear)))}</p>` : ''}
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4 rounded-xl border border-slate-700 p-5 bg-slate-900/40">
             ${lockedBannerHTML}
             <label class="text-sm font-bold">고입 학년도<input id="appYear" type="text" inputmode="numeric" value="${record.admissionYear || ''}" class="input-field mt-1 w-full" ${ctx.canEdit && !isLocked ? '' : 'disabled'}></label>
@@ -402,6 +405,8 @@ export function defineApplicationRenderer(ctx) {
             if (category === 'special' && trackVal.includes('취업') && payload.preferences.length > 1) return alert('특성화고 취업희망자 특별전형은 1지망(1개 학과)만 지원할 수 있습니다.');
             if ((category === 'meister' || category === 'special') && ['합격', '최종 진학'].includes(payload.status) && !payload.assignedDepartment) return alert('합격 또는 최종 진학 결과는 실제 배정 학과를 선택해주세요.');
 
+            const doubleLock = blocksNewApplication(records, payload.admissionYear, { status: payload.status, isExisting: Boolean(record.id) });
+            if (doubleLock) return alert(lockMessage(doubleLock));
             if (active(payload)) {
                 if (category === 'meister' && activeIn('meister')) return alert('마이스터고는 단 1개의 학교에만 지원 가능합니다. (동일 학교 내 특별/일반 전형 복수 지원은 허용)');
                 if (category === 'special') {

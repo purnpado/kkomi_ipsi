@@ -12,6 +12,7 @@ import {
     buildQuickRecord, earlySchools, earlyTracks, existingApplication, findStudents,
     preferenceLimit, quickEntryProblem, schoolDepartments
 } from './quickEntry.js';
+import { findApplicationLock, lockLabel } from '../../core/doubleApply.js';
 
 const STATUSES = ['지원완료', '지원희망', '합격', '불합격'];
 const quick = { student: null, category: 'meister', school: '', track: '', status: '지원완료', extraRound: false, extraSuggested: false, prefs: [], entries: [], catalog: null, rules: null, message: '', tone: '' };
@@ -60,7 +61,8 @@ function studentHTML(year) {
             ${s.classNum}반 ${escapeHtml(s.studentNum)}번 ${escapeHtml(s.name)}
             <button type="button" id="quickClearStudent" class="text-xs text-indigo-200 underline" style="width:auto">다른 학생</button>
         </span>
-        <span class="text-xs text-slate-400">지금 원서: ${apps.length ? apps.map((a) => `${escapeHtml(appLabel(a))} ${statusChip(a.status)}`).join(' ') : '없음'}</span>`;
+        <span class="text-xs text-slate-400">지금 원서: ${apps.length ? apps.map((a) => `${escapeHtml(appLabel(a))} ${statusChip(a.status)}`).join(' ') : '없음'}</span>
+        ${findApplicationLock(s.apps, year) ? `<span class="basis-full text-xs font-bold text-rose-300">⛔ 이중지원 금지: ${escapeHtml(lockLabel(findApplicationLock(s.apps, year)))} — 새 원서는 넣을 수 없습니다(지난 불합격 기록만 가능)</span>` : ''}`;
 }
 
 function entriesHTML() {
@@ -131,7 +133,7 @@ export function bindQuickEntry(root, ctx) {
         let hits = [];
         input.addEventListener('input', () => {
             hits = findStudents(data().students, input.value);
-            suggest.innerHTML = hits.map((s, i) => `<button type="button" class="quick-hit px-2.5 py-1 rounded-lg text-xs border ${i === 0 ? 'border-indigo-400 text-white bg-indigo-500/20' : 'border-slate-600 text-slate-200'}" data-index="${i}" style="width:auto">${s.classNum}반 ${escapeHtml(s.studentNum)}번 ${escapeHtml(s.name)}</button>`).join('')
+            suggest.innerHTML = hits.map((s, i) => `<button type="button" class="quick-hit px-2.5 py-1 rounded-lg text-xs border ${i === 0 ? 'border-indigo-400 text-white bg-indigo-500/20' : 'border-slate-600 text-slate-200'}" data-index="${i}" style="width:auto">${s.classNum}반 ${escapeHtml(s.studentNum)}번 ${escapeHtml(s.name)}${findApplicationLock(s.apps, data().year) ? ` <span class="text-rose-300 font-bold">· ${escapeHtml(findApplicationLock(s.apps, data().year).status === '포기' ? '등록 포기' : '합격')}</span>` : ''}</button>`).join('')
                 || (input.value.trim() ? '<span class="text-xs text-slate-400">찾는 학생이 없습니다.</span>' : '');
             suggest.querySelectorAll('.quick-hit').forEach((b) => b.addEventListener('click', () => pick(hits[Number(b.dataset.index)])));
         });
@@ -165,7 +167,8 @@ export function bindQuickEntry(root, ctx) {
         e.preventDefault();
         const depts = departments();
         const limit = preferenceLimit(quick.category, quick.track, depts.length);
-        const problem = quickEntryProblem({ student: quick.student, category: quick.category, schoolName: quick.school, track: quick.track, preferences: quick.prefs.slice(0, limit), departmentCount: depts.length, limit });
+        const problem = quickEntryProblem({ student: quick.student, category: quick.category, schoolName: quick.school, track: quick.track, preferences: quick.prefs.slice(0, limit), departmentCount: depts.length, limit,
+            year: data().year, status: quick.status, existing: quick.student ? existingApplication(quick.student, data().year, quick.category, quick.school, quick.track) : null });
         if (problem) {
             quick.message = problem;
             quick.tone = 'error';

@@ -109,6 +109,12 @@ func (dm *DBManager) saveApplicationMode(record model.ApplicationRecord, mode sa
 			return err
 		}
 	}
+	if !merge {
+		// 이중지원 금지: 합격·최종 진학·등록 포기 원서가 있는 학생은 그해 새 원서를 넣을 수 없다(취합 병합은 학년부장이 고른다).
+		if err := checkNewApplicationAllowed(db, record); err != nil {
+			return err
+		}
+	}
 	timestamp := record.UpdatedAt
 	if !merge || timestamp == "" {
 		timestamp = ""

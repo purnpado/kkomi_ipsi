@@ -113,7 +113,7 @@ func pickPatchAction(entry patchPlanEntry, choose PatchChooser) string {
 // patchActionEffects 처리 이름이 학년부장 원서를 지우는지(del), 담임 원서를 쓰는지(write) 알려 준다.
 func patchActionEffects(kind, action string) (del, write bool) {
 	switch kind {
-	case PatchKindNew, PatchKindUpdate:
+	case PatchKindNew, PatchKindUpdate, PatchKindNewLocked:
 		return false, action == "apply"
 	case PatchKindConflictEdit, PatchKindGHDeleted, PatchKindGHMissing:
 		return false, action == "teacher"
