@@ -1,6 +1,7 @@
 import { escapeHtml, escapeAttr } from '../../../core/utils.js';
 import { showModalAlert, showModalConfirm } from '../../../core/dialogs.js';
 import { notifyClassUpdated } from '../../../core/navigation.js';
+import { displaySchool } from '../../../core/schoolName.js';
 
 // 상담 모달: 상담 일지 조회·저장·삭제
 export function bindCounselRecords(ctx) {
@@ -48,7 +49,7 @@ export function bindCounselRecords(ctx) {
                             </span>
                             ${r.targetSchool ? `
                                 <span class="text-[11px] px-2 py-0.5 rounded-md bg-slate-800 text-indigo-200 border border-slate-700 font-medium">
-                                    🏫 ${escapeHtml(r.targetSchool)}
+                                    🏫 ${escapeHtml(displaySchool(r.targetSchool))}
                                 </span>
                             ` : ''}
                             <span class="text-[10px] text-slate-400">

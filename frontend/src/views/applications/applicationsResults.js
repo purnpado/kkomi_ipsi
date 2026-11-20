@@ -5,10 +5,11 @@ import { escapeAttr, escapeHtml } from '../../core/utils.js';
 import { transferBadge } from '../../core/transferBadges.js';
 import { CATEGORY_LABELS, studentKey } from './applicationsData.js';
 import { statusChip } from './applicationsStudents.js';
+import { displaySchool } from '../../core/schoolName.js';
 
 export function groupOptions(groups, selectedKey) {
     if (!groups.length) return '<option value="">전기고 지원 기록이 없습니다</option>';
-    return groups.map((g) => `<option value="${escapeAttr(g.key)}" ${g.key === selectedKey ? 'selected' : ''}>${escapeHtml(`${g.schoolName} · ${g.track || CATEGORY_LABELS[g.category]} (${g.applicants.length}명)`)}</option>`).join('');
+    return groups.map((g) => `<option value="${escapeAttr(g.key)}" ${g.key === selectedKey ? 'selected' : ''}>${escapeHtml(`${displaySchool(g.schoolName)} · ${g.track || CATEGORY_LABELS[g.category]} (${g.applicants.length}명)`)}</option>`).join('');
 }
 
 function nameCell(s, showClass) {

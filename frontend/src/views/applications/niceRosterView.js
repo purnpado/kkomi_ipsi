@@ -10,6 +10,7 @@ import { admissionLongLabel } from '../../core/admissionYear.js';
 import { printOnly } from '../../print/printEngine.js';
 import { ScreenLockManager } from '../../core/screenLock.js';
 import { loadNiceUploadLine } from '../../core/niceUploads.js';
+import { displaySchool } from '../../core/schoolName.js';
 
 const view = { classNum: 0, classCount: 0, admissionYear: 0, rows: [], uploadLine: '' };
 const CATEGORY_LABEL = { meister: '마이스터고', special: '특성화고', general: '후기 일반고' };
@@ -62,7 +63,7 @@ function rowHTML(row, cols) {
     }).join('');
     return `<tr>
         <td class="num">${row.classNum}</td><td class="num">${escapeHtml(row.studentNum)}</td><th scope="row">${escapeHtml(row.studentName)}</th>
-        <td class="nice-roster-school">${escapeHtml(row.schoolName)} · ${escapeHtml(displayTrack(row.track))}</td>
+        <td class="nice-roster-school">${escapeHtml(displaySchool(row.schoolName))} · ${escapeHtml(displayTrack(row.track))}</td>
         <td>${escapeHtml(row.status || '')}</td>${cells}
         <td class="nice-roster-check">${warn ? `<span class="nice-warn" title="${escapeAttr(warn)}">⚠ 출결 확인</span>` : ''}</td>
     </tr>`;
@@ -98,7 +99,7 @@ function pendingHTML(rows) {
     const items = [...byNote.entries()].map(([note, list]) => `
         <details class="nice-roster-pending">
             <summary>${escapeHtml(note)} <span>${list.length}건</span></summary>
-            <p>${list.map((r) => `<span class="num">${r.classNum}반 ${escapeHtml(r.studentNum)}번</span> ${escapeHtml(r.studentName)}${r.category === 'general' ? '' : ` (${escapeHtml(r.schoolName)})`}`).join(' · ')}</p>
+            <p>${list.map((r) => `<span class="num">${r.classNum}반 ${escapeHtml(r.studentNum)}번</span> ${escapeHtml(r.studentName)}${r.category === 'general' ? '' : ` (${escapeHtml(displaySchool(r.schoolName))})`}`).join(' · ')}</p>
         </details>`).join('');
     return `
         <section class="nice-roster-group">

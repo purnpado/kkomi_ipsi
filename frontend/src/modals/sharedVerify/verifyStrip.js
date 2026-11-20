@@ -3,6 +3,7 @@
 // 마우스를 올리면 점수(title). 색은 styles/tokens.css 의 --kk-chart-* (색약·명도 범위 검증 통과).
 // 화면 너비에 따라 글자가 커지지 않도록 SVG 대신 백분율 위치의 HTML 로 그린다.
 import { escapeHtml, displayTrack } from '../../core/utils.js';
+import { displaySchool } from '../../core/schoolName.js';
 
 const pct = (score, max) => `${(Math.min(1, Math.max(0, score / max)) * 100).toFixed(2)}%`;
 
@@ -16,10 +17,10 @@ export function stripHTML(issue) {
     const flag = `<span class="vs-dot vs-dot-flag" style="left:${pct(issue.score, max)}" title="⚠ 확인 필요 ${escapeHtml(issue.status)} ${Number(issue.score).toFixed(2)}점"></span>`
         + `<span class="vs-flag-label" style="left:${pct(issue.score, max)}">⚠ ${escapeHtml(issue.status)} ${Number(issue.score).toFixed(1)}</span>`;
     const fence = `<span class="vs-fence" style="left:${pct(issue.fence, max)}"></span><span class="vs-fence-label" style="left:${pct(issue.fence, max)}">확인 기준 ${Number(issue.fence).toFixed(1)}</span>`;
-    const label = `${issue.admissionYear} 고입 ${issue.highSchool} ${displayTrack(issue.track)} ${issue.refScope}: 다른 학교 합격 ${issue.refScores.length}건, 확인 기준 ${Number(issue.fence).toFixed(2)}점, 걸린 원서 ${issue.status} ${Number(issue.score).toFixed(2)}점`;
+    const label = `${issue.admissionYear} 고입 ${displaySchool(issue.highSchool)} ${displayTrack(issue.track)} ${issue.refScope}: 다른 학교 합격 ${issue.refScores.length}건, 확인 기준 ${Number(issue.fence).toFixed(2)}점, 걸린 원서 ${issue.status} ${Number(issue.score).toFixed(2)}점`;
     return `
         <figure class="vs-strip">
-            <figcaption>${escapeHtml(issue.highSchool)} · ${escapeHtml(displayTrack(issue.track))} · ${escapeHtml(issue.refScope)} <span>${issue.admissionYear} 고입 · 다른 학교 합격 ${issue.refScores.length}건과 비교 · ${max}점 만점</span></figcaption>
+            <figcaption>${escapeHtml(displaySchool(issue.highSchool))} · ${escapeHtml(displayTrack(issue.track))} · ${escapeHtml(issue.refScope)} <span>${issue.admissionYear} 고입 · 다른 학교 합격 ${issue.refScores.length}건과 비교 · ${max}점 만점</span></figcaption>
             <div class="vs-plot" role="img" aria-label="${escapeHtml(label)}">
                 <span class="vs-axis"></span>${fence}${dots}${flag}
                 <span class="vs-tick" style="left:0">0</span><span class="vs-tick vs-tick-end">${max}</span>

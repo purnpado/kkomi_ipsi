@@ -13,6 +13,7 @@ import { STUDENT_FILTERS, loadApplicationsData } from './applicationsData.js';
 import { filterStudents, studentsTableHTML } from './applicationsStudents.js';
 import { collectAccepted, collectRejected, generalResultsHTML, groupOptions, schoolResultsHTML } from './applicationsResults.js';
 import { bindQuickEntry, loadQuickCatalog, quickEntryHTML } from './applicationsQuick.js';
+import { displaySchool } from '../../core/schoolName.js';
 
 const TABS = [
     { id: 'students', label: '학생별 원서' },
@@ -168,7 +169,7 @@ function bind() {
         const group = visibleGroups().find((g) => g.key === view.groupKey);
         const mode = app.querySelector('input[name="appsResultMode"]:checked')?.value || 'final';
         const accepted = collectAccepted(app);
-        runBulk(`${group.schoolName} 결과 저장`,
+        runBulk(`${displaySchool(group.schoolName)} 결과 저장`,
             (apply) => App.BulkSetSchoolResults(data.year, scopeClass(), group.category, group.schoolName, group.track, mode, accepted, apply),
             (p) => `${mode === 'first' ? '1차 ' : ''}합격 <strong>${p.accepted}명</strong>, ${mode === 'first' ? '1차 ' : ''}불합격 <strong>${p.rejected}명</strong>으로 저장합니다.${p.removed ? `<br>전기고 합격자 ${p.removed}명의 일반고 원서는 지웁니다(전기고 합격자는 후기고 지원 불가).` : ''}`);
     });

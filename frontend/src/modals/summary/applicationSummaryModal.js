@@ -6,6 +6,7 @@ import { openApplicationRegisterModal } from './registerModal.js';
 import { state } from '../../core/store.js';
 import { admissionLabel, admissionLongLabel, resolveAdmissionYear } from '../../core/admissionYear.js';
 import { notifyStatsRecalculated } from '../../core/navigation.js';
+import { displaySchool } from '../../core/schoolName.js';
 
 // 1. 우리 반 지원희망 모달 (스마트 지망 가로 뱃지 + 학생 명단 팝업 지원)
 export async function openClassApplicationSummaryModal(classNum) {
@@ -41,7 +42,7 @@ export async function openClassApplicationSummaryModal(classNum) {
                 const schoolCells = g.isFirstGroup ? `
                     <td class="p-3 border-r border-slate-700/50 text-center font-bold text-slate-300" rowspan="${g.rowSpanSchool}">${admissionLabel(g.admissionYear)}</td>
                     <td class="p-3 border-r border-slate-700/50 text-center font-semibold text-slate-300" rowspan="${g.rowSpanSchool}">${g.categoryLabel}</td>
-                    <td class="p-3 border-r border-slate-700/50 font-bold text-white" rowspan="${g.rowSpanSchool}">${escapeHtml(g.schoolName)}</td>
+                    <td class="p-3 border-r border-slate-700/50 font-bold text-white" rowspan="${g.rowSpanSchool}">${escapeHtml(displaySchool(g.schoolName))}</td>
                 ` : '';
 
                 const rankBadges = Object.keys(g.ranks).sort((a, b) => a - b).map(rank => `
@@ -121,7 +122,7 @@ export async function openClassApplicationSummaryModal(classNum) {
                 const rank = parseInt(btn.dataset.rank, 10);
                 const group = smartGroups.find(g => g.key === groupKey);
                 if (group && group.ranks[rank]) {
-                    openApplicantDetailModal(`[${group.schoolName}] ${group.department} (${group.track}) - ${rank}지망 지원자`, group.ranks[rank]);
+                    openApplicantDetailModal(`[${displaySchool(group.schoolName)}] ${group.department} (${group.track}) - ${rank}지망 지원자`, group.ranks[rank]);
                 }
             });
         });
@@ -132,7 +133,7 @@ export async function openClassApplicationSummaryModal(classNum) {
                 const groupKey = btn.dataset.groupKey;
                 const group = smartGroups.find(g => g.key === groupKey);
                 if (group) {
-                    openApplicantDetailModal(`[${group.schoolName}] ${group.department} (${group.track}) - 전체 지원자`, group.allStudents);
+                    openApplicantDetailModal(`[${displaySchool(group.schoolName)}] ${group.department} (${group.track}) - 전체 지원자`, group.allStudents);
                 }
             });
         });
@@ -205,7 +206,7 @@ export async function openApplicationSummaryModal() {
                 const schoolCells = g.isFirstGroup ? `
                     <td class="p-3 border-r border-slate-700/50 text-center font-bold text-slate-300" rowspan="${g.rowSpanSchool}">${admissionLabel(g.admissionYear)}</td>
                     <td class="p-3 border-r border-slate-700/50 text-center font-semibold text-slate-300" rowspan="${g.rowSpanSchool}">${g.categoryLabel}</td>
-                    <td class="p-3 border-r border-slate-700/50 font-bold text-white" rowspan="${g.rowSpanSchool}">${escapeHtml(g.schoolName)}</td>
+                    <td class="p-3 border-r border-slate-700/50 font-bold text-white" rowspan="${g.rowSpanSchool}">${escapeHtml(displaySchool(g.schoolName))}</td>
                 ` : '';
 
                 const rankBadges = Object.keys(g.ranks).sort((a, b) => a - b).map(rank => `
@@ -311,7 +312,7 @@ export async function openApplicationSummaryModal() {
                 const rank = parseInt(btn.dataset.rank, 10);
                 const group = smartGroups.find(g => g.key === groupKey);
                 if (group && group.ranks[rank]) {
-                    openApplicantDetailModal(`[${group.schoolName}] ${group.department} (${group.track}) - ${rank}지망 지원자`, group.ranks[rank]);
+                    openApplicantDetailModal(`[${displaySchool(group.schoolName)}] ${group.department} (${group.track}) - ${rank}지망 지원자`, group.ranks[rank]);
                 }
             });
         });
@@ -322,7 +323,7 @@ export async function openApplicationSummaryModal() {
                 const groupKey = btn.dataset.groupKey;
                 const group = smartGroups.find(g => g.key === groupKey);
                 if (group) {
-                    openApplicantDetailModal(`[${group.schoolName}] ${group.department} (${group.track}) - 전체 지원자`, group.allStudents);
+                    openApplicantDetailModal(`[${displaySchool(group.schoolName)}] ${group.department} (${group.track}) - 전체 지원자`, group.allStudents);
                 }
             });
         });

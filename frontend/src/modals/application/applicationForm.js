@@ -3,6 +3,7 @@ import { showModalAlert, showModalConfirm } from '../../core/dialogs.js';
 import { notifyApplicationsChanged } from '../../core/navigation.js';
 import { suggestExtraRound } from '../../core/extraRound.js';
 import { NICE_PREVIEW_SLOT, refreshNicePreview } from './niceFormPreview.js';
+import { displaySchool } from '../../core/schoolName.js';
 
 // 지원현황 입력: 원서별 입력 화면 렌더러 정의
 export function defineApplicationRenderer(ctx) {
@@ -87,7 +88,7 @@ export function defineApplicationRenderer(ctx) {
 
         const listTabs = workingRecords.map((r, i) => {
             const isRecNone = r.category === 'none';
-            const nameLabel = isRecNone ? '미진학' : (r.schoolName || (r.category === 'general' ? (r.assignedSchool ? `일반고[${r.assignedSchool}]` : '후기 일반고') : '기타'));
+            const nameLabel = isRecNone ? '미진학' : (r.schoolName || (r.category === 'general' ? (r.assignedSchool ? `일반고[${displaySchool(r.assignedSchool)}]` : '후기 일반고') : '기타'));
             const trackPart = ['meister', 'special'].includes(r.category) ? formatTrack(r.track) : '';
             const statusPart = isRecNone ? '미진학' : ((r.status === '지원예정' || r.status === '지원 예정' || !r.status) ? '지원희망' : r.status);
             const isRecPassed = ['합격', '최종 진학', '최종진학'].includes((r.status || '').trim());

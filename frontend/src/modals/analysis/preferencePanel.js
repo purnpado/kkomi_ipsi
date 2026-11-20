@@ -4,6 +4,7 @@
 // 근거: 정원 총원제로 합격자를 정한 뒤 점수 순으로 선지망부터 학과를 배정하는 방식(마이스터고·특성화고 일반전형).
 import { escapeHtml, displayTrack } from '../../core/utils.js';
 import { admissionLabel } from '../../core/admissionYear.js';
+import { displaySchool } from '../../core/schoolName.js';
 
 const fmt = v => (Number(v) > 0 ? Number(v).toFixed(2) : '-');
 
@@ -48,7 +49,7 @@ function render(container, st, track, score) {
     container.innerHTML = `
         <div class="p-5 rounded-xl bg-slate-800/40 border border-slate-700/60 space-y-3">
             <div class="flex flex-wrap items-center justify-between gap-2">
-                <h4 class="text-sm font-bold text-white">🎯 학과 지망 전략 · ${escapeHtml(st.highSchool)} ${escapeHtml(displayTrack(st.track))} · ${admissionLabel(st.admissionYear)} 결과</h4>
+                <h4 class="text-sm font-bold text-white">🎯 학과 지망 전략 · ${escapeHtml(displaySchool(st.highSchool))} ${escapeHtml(displayTrack(st.track))} · ${admissionLabel(st.admissionYear)} 결과</h4>
                 <label class="flex items-center gap-2 text-xs text-slate-300">학생 점수로 보기
                     <input id="prefScoreInput" type="text" inputmode="decimal" class="input-field py-1 px-2 text-xs text-right w-24" placeholder="예: 251.5" value="${score > 0 ? score : ''}">
                 </label>

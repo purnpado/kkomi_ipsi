@@ -4,6 +4,7 @@ import { renderStatsDashboard } from './statsDashboard.js';
 import { renderGeneralCutoffPanel } from './generalCutoffPanel.js';
 import { renderTrendChart } from './trendChart.js';
 import { renderPreferencePanel } from './preferencePanel.js';
+import { displaySchool } from '../../core/schoolName.js';
 
 const GENERAL_OPTION = '후기 일반고';
 const generalOptionHTML = selected => `<option value="${GENERAL_OPTION}" ${selected ? 'selected' : ''}>🏫 후기 일반고 (관내 합격선)</option>`;
@@ -134,7 +135,7 @@ export async function openAdmissionAnalysisModal() {
                             <span class="text-xs font-bold text-slate-400">목표 고교:</span>
                             <select id="analysisSchoolSelect" class="bg-slate-900 text-white font-bold text-xs border border-slate-700 rounded-lg px-2.5 py-1.5 outline-none cursor-pointer">
                                 ${schoolNames.length > 0 ? schoolNames.map(s => `
-                                    <option value="${escapeAttr(s)}" ${s === initialSchool ? 'selected' : ''}>${escapeHtml(s)}</option>
+                                    <option value="${escapeAttr(s)}" ${s === initialSchool ? 'selected' : ''}>${escapeHtml(displaySchool(s))}</option>
                                 `).join('') : `
                                     <option value="울산마이스터고">울산마이스터고</option>
                                     <option value="울산에너지고">울산에너지고</option>

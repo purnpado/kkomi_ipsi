@@ -90,9 +90,9 @@ export function renderMatrixLayout(ctx, mx) {
                                 <option value="avg_desc">내신평균 높은순 (상위권)</option>
                                 <option value="avg_asc">내신평균 낮은순</option>
                                 <option value="general_asc">일반고 안정순 (석차백분율 낮은순)</option>
-                                <option value="meister_desc">울산마이스터 환산점 높은순</option>
-                                <option value="energy_desc">울산에너지고 환산점 높은순</option>
-                                <option value="hyundai_desc">현대공업고 환산점 높은순</option>
+                                <option value="meister_desc">울산마이스터고등학교 환산점 높은순</option>
+                                <option value="energy_desc">울산에너지고등학교 환산점 높은순</option>
+                                <option value="hyundai_desc">현대공업고등학교 환산점 높은순</option>
                             </select>
                         </div>
                     </div>
@@ -107,21 +107,21 @@ export function renderMatrixLayout(ctx, mx) {
                 <div class="matrix-scroll overflow-x-auto rounded-xl border border-slate-700/50 bg-slate-800/30 custom-scrollbar">
                     <table class="matrix-table w-full text-left border-collapse text-xs">
                         <thead>
-                            <tr class="bg-slate-800/90 text-text-muted border-b border-slate-700/70 text-center whitespace-nowrap">
+                            <tr class="bg-slate-800/90 text-text-muted border-b border-slate-700/70 text-center">
                                 <th class="p-2 w-12 font-bold text-indigo-300">반</th>
                                 <th class="p-2 w-10 font-bold">번호</th>
                                 <th class="p-2 w-16 font-bold">성명</th>
                                 <th class="p-2 w-16 font-bold text-indigo-300">내신평균</th>
-                                <th class="p-1.5 text-amber-300 font-bold">🎓 울산마이스터</th>
-                                <th class="p-1.5 text-amber-300 font-bold">🎓 에너지고</th>
-                                <th class="p-1.5 text-amber-300 font-bold">🎓 현대공고</th>
-                                <th class="p-1.5 text-cyan-300 font-bold">🏭 울산상고</th>
-                                <th class="p-1.5 text-cyan-300 font-bold">🏭 울산여상</th>
-                                <th class="p-1.5 text-cyan-300 font-bold">🏭 울산생과고</th>
-                                <th class="p-1.5 text-cyan-300 font-bold">🏭 울산공고</th>
-                                <th class="p-1.5 text-cyan-300 font-bold">🏭 울산산업고</th>
-                                <th class="p-1.5 text-cyan-300 font-bold">🏭 미용예술고</th>
-                                <th class="p-1.5 text-cyan-300 font-bold">🏭 기술공고</th>
+                                <th class="p-1.5 text-amber-300 font-bold matrix-school-head">🎓 울산마이스터<br>고등학교</th>
+                                <th class="p-1.5 text-amber-300 font-bold matrix-school-head">🎓 울산에너지<br>고등학교</th>
+                                <th class="p-1.5 text-amber-300 font-bold matrix-school-head">🎓 현대공업<br>고등학교</th>
+                                <th class="p-1.5 text-cyan-300 font-bold matrix-school-head">🏭 울산상업<br>고등학교</th>
+                                <th class="p-1.5 text-cyan-300 font-bold matrix-school-head">🏭 울산여자상업<br>고등학교</th>
+                                <th class="p-1.5 text-cyan-300 font-bold matrix-school-head">🏭 울산생활과학<br>고등학교</th>
+                                <th class="p-1.5 text-cyan-300 font-bold matrix-school-head">🏭 울산공업<br>고등학교</th>
+                                <th class="p-1.5 text-cyan-300 font-bold matrix-school-head">🏭 울산산업<br>고등학교</th>
+                                <th class="p-1.5 text-cyan-300 font-bold matrix-school-head">🏭 울산미용예술<br>고등학교</th>
+                                <th class="p-1.5 text-cyan-300 font-bold matrix-school-head">🏭 울산기술공업<br>고등학교</th>
                                 <th class="p-2 w-32 text-emerald-300 font-bold whitespace-nowrap">🏫 후기 일반계고</th>
                             </tr>
                         </thead>

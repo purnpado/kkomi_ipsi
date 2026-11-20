@@ -41,6 +41,7 @@ import { loadAdmissionEvidence } from './core/admissionEvidence.js';
 import { loadTransferStudents, clearTransferStudents } from './core/transferBadges.js';
 import { updateShell } from './core/appShell.js';
 import { renderPanelScreen, leavePanelScreen } from './core/panelScreen.js';
+import { loadSchoolCatalog } from './core/schoolName.js';
 
 // 화면 잠금 및 전역 ESC 핸들러 초기화
 ScreenLockManager.init();
@@ -149,6 +150,7 @@ eventBus.on(EVENTS.LOGIN_SUCCESS, (detail) => {
     state.currentUser = detail?.user ?? null;
     // 4단계 판정 기준(학교 설정)과 판정 근거(불합격 사례 수·공식 경쟁률)를 로그인마다 다시 읽는다.
     loadJudgmentBasis();
+    loadSchoolCatalog(); // 화면에 보일 학교 정식 이름(고교 목록)
 });
 
 // 원서 결과·관내 취합·커트라인·경쟁률이 바뀌면 판정 근거를 다시 읽는다(연속 변경은 한 번으로 묶음).

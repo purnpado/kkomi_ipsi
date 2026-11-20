@@ -4,6 +4,7 @@
 import { escapeHtml, displayTrack } from '../../core/utils.js';
 import { totalMaxFor } from '../../core/admissionJudgment.js';
 import { admissionLabel } from '../../core/admissionYear.js';
+import { displaySchool } from '../../core/schoolName.js';
 
 const W = 720;
 const PAD = { left: 52, right: 20, top: 18, bottom: 34 };
@@ -159,7 +160,7 @@ function render(container, points, ctx) {
     container.innerHTML = `
         <div class="p-5 rounded-xl bg-slate-800/40 border border-slate-700/60 space-y-3">
             <div class="flex flex-wrap items-center justify-between gap-2">
-                <h4 class="text-sm font-bold text-white">📈 학년도 추세 · ${escapeHtml(ctx.school)} ${ctx.dept ? escapeHtml(ctx.dept) : '(학교 전체)'} · ${escapeHtml(displayTrack(ctx.track))}</h4>
+                <h4 class="text-sm font-bold text-white">📈 학년도 추세 · ${escapeHtml(displaySchool(ctx.school))} ${ctx.dept ? escapeHtml(ctx.dept) : '(학교 전체)'} · ${escapeHtml(displayTrack(ctx.track))}</h4>
                 <span class="inline-flex gap-0.5 rounded-lg border border-slate-600 bg-slate-900/70 p-0.5">${btn('score', '점수')}${btn('pct', '만점 대비 %')}</span>
             </div>
             <div class="flex flex-wrap gap-3 text-[11px] text-slate-300">${legendHTML()}</div>

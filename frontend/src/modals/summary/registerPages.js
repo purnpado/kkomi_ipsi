@@ -1,6 +1,7 @@
 import { escapeHtml } from '../../core/utils.js';
 import { admissionLabel } from '../../core/admissionYear.js';
 import { buildRegisterEntries } from './registerRows.js';
+import { displaySchool } from '../../core/schoolName.js';
 
 // 원서대장: 결재란과 학급별 대장 페이지 HTML 구성
 export function buildRegisterPages(ctx, reg) {
@@ -119,7 +120,7 @@ export function buildRegisterPages(ctx, reg) {
                                 </span>
                             </div>
                             <div class="tracking-widest text-base sm:text-lg">
-                                ${ctx.schoolName}
+                                ${displaySchool(ctx.schoolName)}
                             </div>
                         </div>
 
@@ -158,7 +159,7 @@ export function buildRegisterPages(ctx, reg) {
                     <div class="mt-8 pt-3 border-t border-slate-200 flex justify-between items-center text-xs text-slate-500 font-sans">
                         <span>출력일시: ${new Date().toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
                         <span>[내부 결재 및 원서 접수 확인용]</span>
-                        <span>${ctx.schoolName} 3학년 진학상담시스템</span>
+                        <span>${displaySchool(ctx.schoolName)} 3학년 진학상담시스템</span>
                     </div>
                 </div>
             `;

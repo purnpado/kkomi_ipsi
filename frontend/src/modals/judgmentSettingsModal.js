@@ -4,6 +4,7 @@
 import { escapeAttr, escapeHtml } from '../core/utils.js';
 import { getJudgmentSettings, saveJudgmentSettings, judgmentKey } from '../core/admissionJudgment.js';
 import { showModalAlert } from '../core/dialogs.js';
+import { displaySchool } from '../core/schoolName.js';
 
 const MODAL_ID = 'judgmentSettingsModal';
 
@@ -22,7 +23,7 @@ export async function openJudgmentSettingsModal({ onSaved } = {}) {
         const o = settings.overrides?.[key] || {};
         const mode = o.mode === 'ratio' || o.mode === 'points' ? o.mode : '';
         return `<tr class="border-b border-slate-700/50" data-key="${escapeAttr(key)}">
-            <td class="p-2 text-slate-200">${escapeHtml(rule.schoolName)}</td>
+            <td class="p-2 text-slate-200">${escapeHtml(displaySchool(rule.schoolName))}</td>
             <td class="p-2 text-slate-300">${escapeHtml(rule.trackName)}</td>
             <td class="p-2 text-slate-400 text-center">${escapeHtml(rule.totalMax)}점</td>
             <td class="p-2"><select class="input-field py-1 text-xs jo-mode">

@@ -15,7 +15,7 @@ export function renderStudentModalLayout(ctx) {
     ctx.modalEl.innerHTML = `
         <div class="glass-card print-document p-6 md:p-8 w-full max-w-6xl max-h-[92vh] overflow-y-auto space-y-6 print-modal relative" id="printReportArea">
             <!-- 모달 헤더 (스크롤 시에도 우측 상단에 고정되어 창 닫기 버튼이 항상 보임) -->
-            <div class="sticky -top-6 md:-top-8 -mx-6 md:-mx-8 px-6 md:px-8 py-3.5 bg-slate-900/95 backdrop-blur-md z-40 border-b border-slate-700/80 flex items-center justify-between gap-4 flex-wrap shadow-lg">
+            <div class="counsel-sticky-head sticky -top-6 md:-top-8 -mx-6 md:-mx-8 px-6 md:px-8 py-3.5 bg-slate-900/95 backdrop-blur-md z-40 border-b border-slate-700/80 flex items-center justify-between gap-4 flex-wrap shadow-lg">
                 <div class="min-w-0">
                     <h2 class="text-2xl font-black text-white flex items-center gap-2 flex-wrap">
                         👨‍🎓 ${escapeHtml(ctx.name)}${transferBadge(ctx.classNum, ctx.studentNum, ctx.name)} <span class="text-base text-slate-400 font-normal">(${escapeHtml(ctx.classNum)}반 ${escapeHtml(ctx.studentNum)}번)</span>
@@ -38,9 +38,11 @@ export function renderStudentModalLayout(ctx) {
                         <span class="text-base font-black">✕</span> <span class="ml-1 font-bold">창 닫기</span>
                     </button>
                 </div>
-                <p class="counsel-strip">${counselStripHTML(ctx.data)}</p>
                 <nav class="counsel-nav no-print" aria-label="상담 화면 바로가기">${SECTION_LINKS.map(([id, label]) => `<button type="button" class="counsel-nav-btn" data-target="${id}">${label}</button>`).join('')}</nav>
             </div>
+
+            <!-- 학생 한 줄 요약(평균 성취도·미인정 출결·인정 봉사): 고정 줄을 작게 두려고 고정 줄 밖에 둔다 -->
+            <p class="counsel-strip">${counselStripHTML(ctx.data)}</p>
 
             <!-- 1. 후기 일반고 내신(입력 고치기 칸 포함). 지원 원서 나이스 대조표는 원서 입력 창으로 옮겼다 -->
             ${renderGeneralSummary(ctx.data, generalInputsHTML(ctx, state.currentUser && state.currentUser.Role === 'viewer'))}
@@ -57,7 +59,7 @@ export function renderStudentModalLayout(ctx) {
                                 <span>🏛️</span> 전기고 가산점 · 마이스터고 리더십
                                 ${isViewer ? '<span class="text-[11px] text-warning font-normal">※ 진로부장은 조회 전용 모드입니다.</span>' : ''}
                             </h3>
-                            <p class="text-[11px] text-slate-400 mt-0.5">반장·부반장·전교 학생회장·부회장 활동만 인정합니다(한 학기당 2.5점, 에너지고 최대 10점·현대공고 최대 5점). 생활기록부에 기록된 학기만 체크합니다. 출결·봉사는 나이스 자료로 계산합니다.</p>
+                            <p class="text-[11px] text-slate-400 mt-0.5">반장·부반장·전교 학생회장·부회장 활동만 인정합니다(한 학기당 2.5점, 울산에너지고등학교 최대 10점·현대공업고등학교 최대 5점). 생활기록부에 기록된 학기만 체크합니다. 출결·봉사는 나이스 자료로 계산합니다.</p>
                         </div>
                         ${!isViewer ? `
                         <button id="saveExtraBtn" class="save-extra-btn px-4 h-9 rounded-xl font-bold text-xs bg-indigo-600 hover:bg-indigo-500 text-white flex items-center gap-1.5 shadow-md shadow-indigo-500/20 transition-all cursor-pointer whitespace-nowrap active:scale-95 no-print">
@@ -224,7 +226,7 @@ export function renderStudentModalLayout(ctx) {
 
             <!-- 화면용 모달 하단 닫기 바 (스크롤 끝에서도 즉시 닫기 지원) -->
             <div class="pt-4 border-t border-slate-700/60 flex items-center justify-between flex-wrap gap-3 no-print">
-                <div class="text-xs text-slate-400 flex items-center gap-1.5">
+                <div class="counsel-esc-hint text-xs text-slate-400 flex items-center gap-1.5">
                     <span>💡</span> <span>키보드 <strong>ESC</strong> 키를 누르시거나 바깥 어두운 배경을 클릭하셔도 창이 닫힙니다.</span>
                 </div>
                 <button type="button" id="bottomCloseModalBtn" class="px-5 py-2.5 rounded-xl font-bold text-xs bg-rose-950/70 hover:bg-rose-600 text-rose-200 hover:text-white border border-rose-500/40 transition-all cursor-pointer flex items-center gap-1.5 shadow-md active:scale-95">

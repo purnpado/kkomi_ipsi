@@ -12,6 +12,7 @@ import { admissionLongLabel, resolveAdmissionYear } from './admissionYear.js';
 import { buildShellMenu, ROLE_LABELS, SHELL_SCREENS } from './shellMenu.js';
 import { bindShellSearch, resetShellSearch } from './shellSearch.js';
 import { FONT_OPTIONS, THEME_OPTIONS, getFontChoice, getThemeChoice, setFontChoice, setThemeChoice } from './preferences.js';
+import { displaySchool } from './schoolName.js';
 
 const GROUP_ICONS = {
     dash: '<path d="M3 12l9-8 9 8"/><path d="M5 10v10h14V10"/>',
@@ -71,7 +72,7 @@ function renderTop() {
             <img src="${logoUniversal}" alt="" class="shell-logo" />
             <div class="shell-brand-text">
                 <strong>꼬미입시</strong>
-                <span>${escapeHtml(shellInfo.schoolName)}${yearText ? ` · ${escapeHtml(yearText)}` : ''}</span>
+                <span>${escapeHtml(displaySchool(shellInfo.schoolName))}${yearText ? ` · ${escapeHtml(yearText)}` : ''}</span>
             </div>
         </div>
         <span class="shell-role-chip">${escapeHtml(userLabel())}</span>

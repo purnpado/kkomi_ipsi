@@ -4,6 +4,7 @@ import { state } from '../core/store.js';
 import { admissionLabel, admissionLongLabel, currentAdmissionYear, resolveAdmissionYear } from '../core/admissionYear.js';
 import { notifyStatsRecalculated } from '../core/navigation.js';
 import { mountSharedVerify } from './sharedVerify/verifyPanel.js';
+import { displaySchool } from '../core/schoolName.js';
 
 /**
  * 관내 고입 결과 공유 및 취합 관리 모달 (V2 규격)
@@ -276,7 +277,7 @@ export async function openSharedAdmissionModal() {
             const formatLabel = cover.formatVersion === 2 ? 'V2 (익명 점수)' : 'V1 (요약 컷오프)';
             const confirmImport = await showModalConfirm(
                 `다음 학교의 공유 자료를 취합하시겠습니까?\n\n` +
-                `• 발송 학교: ${cover.schoolName}\n` +
+                `• 발송 학교: ${displaySchool(cover.schoolName)}\n` +
                 `• 고입 학년도: ${admissionLabel(cover.admissionYear)}\n` +
                 `• 자료 규격: ${formatLabel}\n` +
                 `• 포함 레코드: ${cover.recordCount}건\n\n` +
@@ -294,7 +295,7 @@ export async function openSharedAdmissionModal() {
                 const replaceMsg = result.isReplaced ? ' (기존 자료 교체됨)' : '';
                 await showModalAlert(
                     `성공적으로 자료를 취합했습니다!${replaceMsg}\n\n` +
-                    `• 학교명: ${result.schoolName}\n` +
+                    `• 학교명: ${displaySchool(result.schoolName)}\n` +
                     `• 포함 레코드: ${result.recordCount}건\n` +
                     `• 현재 참여 학교: 총 ${result.totalParticipatingSchool}곳\n` +
                     `• 관내 통합 학생 레코드: 총 ${result.totalAnonymousRecords}건`,
@@ -336,7 +337,7 @@ function renderParticipatingSchoolsRows(schools) {
             <tr class="hover:bg-slate-800/40 transition-colors">
                 <td class="py-3 px-4 font-semibold text-white flex items-center gap-2">
                     <span class="w-1.5 h-1.5 rounded-full bg-indigo-400"></span>
-                    ${escapeHtml(s.schoolName)}
+                    ${escapeHtml(displaySchool(s.schoolName))}
                 </td>
                 <td class="py-3 px-4 text-center">${admissionLabel(s.admissionYear)}</td>
                 <td class="py-3 px-4 text-center">${formatBadge}</td>

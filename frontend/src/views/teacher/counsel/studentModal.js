@@ -12,6 +12,7 @@ import { getWishlist, loadWishlist } from './wishlistStore.js';
 import { mountStatExclusion } from './statExclusion.js';
 import { bindVolunteerTransfer } from './volunteerTransfer.js';
 import { bindSchoolList, cleanSchoolName } from './schoolList.js';
+import { displaySchool } from '../../../core/schoolName.js';
 
 export async function openStudentModal(classNum, studentNum, name) {
     // 기존 모달 제거
@@ -122,7 +123,7 @@ function defineWishlistRenderer(ctx) {
                 <div class="space-y-1">
                     <div class="flex items-center gap-2 flex-wrap">
                         <span class="font-bold text-white text-sm flex items-center gap-1.5">
-                            <span class="text-amber-300">⭐</span> ${escapeHtml(item.schoolName)}
+                            <span class="text-amber-300">⭐</span> ${escapeHtml(displaySchool(item.schoolName))}
                         </span>
                         <span class="text-[10px] px-1.5 py-0.5 rounded bg-indigo-950 text-indigo-300 border border-indigo-500/40 font-semibold">
                             ${escapeHtml(displayTrack(item.trackName))}

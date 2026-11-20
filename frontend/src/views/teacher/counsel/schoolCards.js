@@ -2,6 +2,7 @@ import { escapeAttr, escapeHtml, displayTrack } from '../../../core/utils.js';
 import { judgeScore, judgmentBadge, describeDiff, describeEvidence } from '../../../core/admissionJudgment.js';
 import { admissionLabel } from '../../../core/admissionYear.js';
 import { rowSummaryCells } from './schoolList.js';
+import { displaySchool } from '../../../core/schoolName.js';
 
 // 상담 모달: 고교별 산출 결과 카드 HTML 구성
 export function buildSchoolResultCards(ctx) {
@@ -137,7 +138,7 @@ export function buildSchoolResultCards(ctx) {
                  data-avg5-cutoff="${recent5Average ? recent5Average.toFixed(2) : 0}"
                  data-history-count="${cutoffHistory.length}">
                 <summary class="csr-summary">
-                    <span class="csr-name"><strong>${escapeHtml(r.schoolName)}</strong><span class="csr-track">${escapeHtml(displayTrack(r.trackName))}</span>${matchedTag}</span>
+                    <span class="csr-name"><strong>${escapeHtml(displaySchool(r.schoolName))}</strong><span class="csr-track">${escapeHtml(displayTrack(r.trackName))}</span>${matchedTag}</span>
                     <span class="csr-pill">${cells.pill}</span>
                     <span class="csr-score num"><b>${r.totalScore.toFixed(2)}</b><small> / ${r.totalMax}</small></span>
                     <span class="csr-cut num">${cells.cut}</span>

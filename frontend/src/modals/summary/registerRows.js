@@ -2,6 +2,7 @@
 // 원서대장은 누적 기록이므로 최종 진학 학교 하나만 남기지 않고, 학생이 지원한 학교마다
 // 한 줄씩(불합격 학교·합격 학교를 각각) 전형 진행 순서대로 기입한다.
 import { isSameTrack, normalizeSchoolName, displayTrack } from '../../core/utils.js';
+import { displaySchool } from '../../core/schoolName.js';
 
 const ACCEPTED = ['합격', '최종 진학', '최종진학'];
 
@@ -76,7 +77,7 @@ function schoolText(app) {
 }
 
 function departmentText(app) {
-    if (app.category === 'general') return app.assignedSchool ? `배정: ${app.assignedSchool}` : '';
+    if (app.category === 'general') return app.assignedSchool ? `배정: ${displaySchool(app.assignedSchool)}` : '';
     if (ACCEPTED.includes(app.status) && app.assignedDepartment) return `${app.assignedDepartment} (배정)`;
     if (app.preferences && app.preferences.length > 0) {
         return app.preferences.length > 1 ? `${app.preferences[0]} (1지망)` : app.preferences[0];

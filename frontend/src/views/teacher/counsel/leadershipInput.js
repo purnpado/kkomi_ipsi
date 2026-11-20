@@ -13,7 +13,7 @@ export function leadershipPayload(checkedKeys, known, touched) {
 }
 
 function pointsText(terms) {
-    return `에너지고 <strong class="text-amber-300 num">${Math.min(10, terms * 2.5).toFixed(1)}</strong>점 · 현대공고 <strong class="text-amber-300 num">${Math.min(5, terms * 2.5).toFixed(1)}</strong>점`;
+    return `울산에너지고등학교 <strong class="text-amber-300 num">${Math.min(10, terms * 2.5).toFixed(1)}</strong>점 · 현대공업고등학교 <strong class="text-amber-300 num">${Math.min(5, terms * 2.5).toFixed(1)}</strong>점`;
 }
 
 export function leadershipHTML(data, isViewer) {

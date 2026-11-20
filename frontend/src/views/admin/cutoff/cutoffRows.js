@@ -1,5 +1,6 @@
 import { escapeHtml, normalizeSchoolName } from '../../../core/utils.js';
 import { admissionLabel } from '../../../core/admissionYear.js';
+import { displaySchool } from '../../../core/schoolName.js';
 
 // 커트라인 관리: 저장값 대조표와 학교·학과별 입력 행 HTML 구성
 export function buildCutoffRowsHTML(ctx, view) {
@@ -243,7 +244,7 @@ export function buildCutoffRowsHTML(ctx, view) {
                                                     "울산공업고", "울산기술공업고", "울산미용예술고", "울산산업고", "울산생활과학고", "울산여자상업고", "울산상업고", "울산애니원고",
                                                     "울산 후기 일반계고"
                                                 ].map(sName => `<option value="${sName}" ${normalizeSchoolName(group.school) === normalizeSchoolName(sName) ? 'selected' : ''}>${sName}</option>`).join('')}
-                                                ${!["울산마이스터고", "울산에너지고", "현대공업고", "울산공업고", "울산기술공업고", "울산미용예술고", "울산산업고", "울산생활과학고", "울산여자상업고", "울산상업고", "울산애니원고", "울산 후기 일반계고"].some(sName => normalizeSchoolName(group.school) === normalizeSchoolName(sName)) && group.school ? `<option value="${group.school}" selected>${group.school}</option>` : ''}
+                                                ${!["울산마이스터고", "울산에너지고", "현대공업고", "울산공업고", "울산기술공업고", "울산미용예술고", "울산산업고", "울산생활과학고", "울산여자상업고", "울산상업고", "울산애니원고", "울산 후기 일반계고"].some(sName => normalizeSchoolName(group.school) === normalizeSchoolName(sName)) && group.school ? `<option value="${group.school}" selected>${displaySchool(group.school)}</option>` : ''}
                                             </select>
                                         </div>
                                     </td>

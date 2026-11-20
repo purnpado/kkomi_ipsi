@@ -34,7 +34,7 @@ function formHTML(ctx) {
             ${field('남은 학기 성적', selectHTML('wiStep', [[-2, '두 단계 내려감'], [-1, '한 단계 내려감'], [0, '지금과 같음'], [1, '한 단계 오름'], [2, '두 단계 오름']], 0), '성적이 아직 없는 3-1·3-2를 바로 앞 학기 성적에서 바꿔 봄')}
             ${field('앞으로의 미인정 결석', numberHTML('wiAbsence', '0일'), '3학년에 더해짐')}
             ${field('추가 봉사', numberHTML('wiVolunteer', '0시간'), '3학년에 더해짐')}
-            ${field('리더십 인정 학기', selectHTML('wiLeader', [[-1, `그대로(${lead}학기)`], [0, '0학기'], [1, '1학기'], [2, '2학기'], [3, '3학기'], [4, '4학기']], -1), '에너지고·현대공고만 반영')}
+            ${field('리더십 인정 학기', selectHTML('wiLeader', [[-1, `그대로(${lead}학기)`], [0, '0학기'], [1, '1학기'], [2, '2학기'], [3, '3학기'], [4, '4학기']], -1), '울산에너지고등학교·현대공업고등학교만 반영')}
             ${field('후기고 3학년 창체 가산점', selectHTML('wiChangche', [['keep', `그대로(${bonus('changche_3')})`], ['yes', '받음'], ['no', '안 받음']], 'keep'))}
             ${field('후기고 3학년 행발 가산점', selectHTML('wiHaengbal', [['keep', `그대로(${bonus('haengbal_3')})`], ['yes', '받음'], ['no', '안 받음']], 'keep'))}
         </div>`;

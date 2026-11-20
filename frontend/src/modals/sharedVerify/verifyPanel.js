@@ -6,6 +6,7 @@ import { state } from '../../core/store.js';
 import { escapeHtml, displayTrack } from '../../core/utils.js';
 import { showModalAlert } from '../../core/dialogs.js';
 import { stripHTML } from './verifyStrip.js';
+import { displaySchool } from '../../core/schoolName.js';
 
 const isMaster = () => state.currentUser?.Role === 'master';
 let report = null;
@@ -30,7 +31,7 @@ function schoolRowHTML(s) {
         ? `<button type="button" class="vs-btn" data-pkg-toggle="${s.pkgId}" data-excluded="${s.excluded ? '1' : ''}">${s.excluded ? '통계에 다시 넣기' : '통계에서 빼기'}</button>`
         : '';
     return `<tr class="${s.excluded ? 'vs-row-excluded' : ''}">
-        <th scope="row">${escapeHtml(s.schoolName)}${note ? ` <span class="vs-note">${escapeHtml(note)}</span>` : ''}</th>
+        <th scope="row">${escapeHtml(displaySchool(s.schoolName))}${note ? ` <span class="vs-note">${escapeHtml(note)}</span>` : ''}</th>
         <td class="num">${s.admissionYear}</td>
         <td class="num">${s.recordCount}</td>
         <td>${checkCell(s)}${s.excludedRecords ? ` <span class="vs-note">원서 ${s.excludedRecords}건 뺌</span>` : ''}</td>
@@ -45,7 +46,7 @@ function issueRowHTML(is) {
         : (is.excluded ? '통계 제외' : '');
     return `<tr>
         <td>${is.level === 'error' ? '<span class="vs-err">오류</span>' : '<span class="vs-warn">확인 필요</span>'}</td>
-        <td>${escapeHtml(is.highSchool)} · ${escapeHtml(displayTrack(is.track))}${is.department ? ` · ${escapeHtml(is.department)}` : ''}</td>
+        <td>${escapeHtml(displaySchool(is.highSchool))} · ${escapeHtml(displayTrack(is.track))}${is.department ? ` · ${escapeHtml(is.department)}` : ''}</td>
         <td>${escapeHtml(is.status)}</td>
         <td class="num">${Number(is.score).toFixed(2)}</td>
         <td class="vs-msg">${escapeHtml(is.message)}</td>
@@ -55,8 +56,8 @@ function issueRowHTML(is) {
 
 /** 그 학교에 보낼 확인 요청 문구(학생 정보 없음). */
 function requestText(school, issues) {
-    const lines = issues.map((is, i) => `${i + 1}. ${is.highSchool} ${displayTrack(is.track)}${is.department ? ` ${is.department}` : ''} · ${is.status} ${Number(is.score).toFixed(2)}점 — ${is.message}`);
-    return `[꼬미입시 관내 공유 자료 확인 요청]\n${school.schoolName} ${school.admissionYear} 고입 공유 자료에서 아래 ${issues.length}건을 확인해 주세요.\n${lines.join('\n')}\n원서 결과·점수를 고친 뒤 관내 공유 파일을 다시 만들어 보내 주시면 새 자료로 바꿔 넣고 다시 점검합니다.`;
+    const lines = issues.map((is, i) => `${i + 1}. ${displaySchool(is.highSchool)} ${displayTrack(is.track)}${is.department ? ` ${is.department}` : ''} · ${is.status} ${Number(is.score).toFixed(2)}점 — ${is.message}`);
+    return `[꼬미입시 관내 공유 자료 확인 요청]\n${displaySchool(school.schoolName)} ${school.admissionYear} 고입 공유 자료에서 아래 ${issues.length}건을 확인해 주세요.\n${lines.join('\n')}\n원서 결과·점수를 고친 뒤 관내 공유 파일을 다시 만들어 보내 주시면 새 자료로 바꿔 넣고 다시 점검합니다.`;
 }
 
 function detailHTML(s) {
@@ -83,7 +84,7 @@ function detailHTML(s) {
 function render(mount) {
     if (!report) return;
     const rows = report.schools.map((s) => schoolRowHTML(s) + (openPkg === s.pkgId ? detailHTML(s) : '')).join('');
-    const groups = report.groupIssues.map((g) => `<li><span class="vs-warn">정원 초과</span> ${g.admissionYear} 고입 ${escapeHtml(g.highSchool)} · ${escapeHtml(displayTrack(g.track))}${g.department ? ` · ${escapeHtml(g.department)}` : ''} — ${escapeHtml(g.message)}</li>`).join('');
+    const groups = report.groupIssues.map((g) => `<li><span class="vs-warn">정원 초과</span> ${g.admissionYear} 고입 ${escapeHtml(displaySchool(g.highSchool))} · ${escapeHtml(displayTrack(g.track))}${g.department ? ` · ${escapeHtml(g.department)}` : ''} — ${escapeHtml(g.message)}</li>`).join('');
     mount.innerHTML = `
         <div class="vs-head">
             <h3>자료 검증 <span>${report.baselineYear} 고입부터 점검을 거친 관내 자료만 쌓습니다 · 우리 학교 자료는 항상 포함</span></h3>

@@ -1,6 +1,7 @@
 import { escapeHtml } from '../../core/utils.js';
 import { admissionLabel } from '../../core/admissionYear.js';
 import { buildRegisterEntries } from './registerRows.js';
+import { displaySchool } from '../../core/schoolName.js';
 
 // 원서대장: 엑셀 내보내기
 export function bindRegisterExcelExport(ctx, reg) {
@@ -59,7 +60,7 @@ export function bindRegisterExcelExport(ctx, reg) {
                             ${ctx.admissionYear - 1}학년도 제 3학년 ${currentClass}반 (${admissionLabel(ctx.admissionYear)})
                         </td>
                         <td colspan="${totalCols - 4}" class="meta" style="text-align:right;">
-                            학교명: ${escapeHtml(ctx.schoolName)}
+                            학교명: ${escapeHtml(displaySchool(ctx.schoolName))}
                         </td>
                     </tr>
                     <tr>
@@ -120,7 +121,7 @@ export function bindRegisterExcelExport(ctx, reg) {
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
-        link.download = `${ctx.admissionYear}고입_${ctx.schoolName}_고입원서대장_${classTag}.xls`;
+        link.download = `${ctx.admissionYear}고입_${displaySchool(ctx.schoolName)}_고입원서대장_${classTag}.xls`;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);

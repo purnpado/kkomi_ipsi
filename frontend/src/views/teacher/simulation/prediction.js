@@ -1,6 +1,7 @@
 import { escapeHtml, escapeAttr, normalizeSchoolName, isSameTrack } from '../../../core/utils.js';
 import { currentAdmissionYear } from '../../../core/admissionYear.js';
 import { judgeScore, judgmentToneClass, judgmentTitle } from '../../../core/admissionJudgment.js';
+import { displaySchool } from '../../../core/schoolName.js';
 
 // ===== 마이스터고 및 특성화고 합격 가능 예측 뱃지 렌더러 =====
 // 마이스터고 및 특성화고 고교·학과별 정밀 합격 분석 목록 추출 헬퍼
@@ -121,7 +122,7 @@ export function renderApplicationSummary(applications, classNum, studentNum, stu
         const theme = getStatusTheme(a.status);
         let school = a.schoolName || (a.category === 'general' ? '후기 일반고' : '기타');
         if (a.category === 'general' && a.assignedSchool) {
-            school = `일반고 [${a.assignedSchool}]`;
+            school = `일반고 [${displaySchool(a.assignedSchool)}]`;
         } else if (a.assignedDepartment) {
             school = `${school} (${a.assignedDepartment})`;
         }

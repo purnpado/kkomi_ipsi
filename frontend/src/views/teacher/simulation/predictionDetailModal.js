@@ -5,6 +5,7 @@ import { getPredictionAnalysisList } from './prediction.js';
 import { showSchoolScoreDetailModal } from './schoolScoreDetail.js';
 import { openModal } from '../../../core/navigation.js';
 import { admissionLabel } from '../../../core/admissionYear.js';
+import { displaySchool } from '../../../core/schoolName.js';
 
 // ===== 마이스터고 및 특성화고 합격 예측 상세 분석 팝업 모달 =====
 export async function openPredictionDetailModal(classNum, studentNum, studentName, category, extraData = {}) {
@@ -174,10 +175,10 @@ export async function openPredictionDetailModal(classNum, studentNum, studentNam
                 }
 
                 return `
-                    <div data-school="${escapeHtml(r.schoolName)}" data-track="${escapeHtml(r.trackName)}" role="button" tabindex="0" title="클릭하여 ${r.schoolName} ${r.trackName}전형 상세 성적 산출 내역 보기" class="bg-slate-900/90 p-3 rounded-xl border border-slate-700/70 hover:border-indigo-400 hover:bg-slate-800/90 flex items-center justify-between gap-3 shadow-inner hover:shadow-indigo-500/15 transition-all cursor-pointer group active:scale-98 prediction-score-item">
+                    <div data-school="${escapeHtml(r.schoolName)}" data-track="${escapeHtml(r.trackName)}" role="button" tabindex="0" title="클릭하여 ${displaySchool(r.schoolName)} ${r.trackName}전형 상세 성적 산출 내역 보기" class="bg-slate-900/90 p-3 rounded-xl border border-slate-700/70 hover:border-indigo-400 hover:bg-slate-800/90 flex items-center justify-between gap-3 shadow-inner hover:shadow-indigo-500/15 transition-all cursor-pointer group active:scale-98 prediction-score-item">
                         <div class="flex flex-col min-w-0">
                             <div class="flex items-center gap-1.5 flex-wrap">
-                                <span class="text-xs font-bold text-white group-hover:text-indigo-300 transition-colors truncate">${r.schoolName}</span>
+                                <span class="text-xs font-bold text-white group-hover:text-indigo-300 transition-colors truncate">${displaySchool(r.schoolName)}</span>
                                 <span class="text-[10px] text-indigo-400 opacity-0 group-hover:opacity-100 transition-opacity">🔍</span>
                                 ${badgeHTML}
                             </div>
@@ -217,7 +218,7 @@ export async function openPredictionDetailModal(classNum, studentNum, studentNam
                         ` : ''}
                         ${schoolSpans[idx] > 0 ? `
                             <td rowspan="${schoolSpans[idx]}" class="p-3 font-bold text-white text-left pl-3.5 bg-slate-900/20 border-r border-slate-700/60 align-middle whitespace-nowrap">
-                                ${item.schoolName}
+                                ${displaySchool(item.schoolName)}
                             </td>
                         ` : ''}
                         ${trackSpans[idx] > 0 ? `

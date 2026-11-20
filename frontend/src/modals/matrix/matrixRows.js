@@ -189,7 +189,7 @@ export function defineMatrixRows(ctx, mx) {
                                                   : '<span class="text-indigo-300 font-bold">[일반전형]</span>';
         
         const meisterCutoff = mx.getSchoolCutoffVal('울산마이스터고', trackMode, yearMode);
-        const meisterInfo = meisterCutoff > 0 ? ` · <span class="text-emerald-300">울산마이스터 기준선: ${meisterCutoff.toFixed(2)}점</span>` : '';
+        const meisterInfo = meisterCutoff > 0 ? ` · <span class="text-emerald-300">울산마이스터고등학교 기준선: ${meisterCutoff.toFixed(2)}점</span>` : '';
 
         return `${yearText} 기준 ${trackText} 학생 환산점수 및 합격선을 대조합니다.${meisterInfo}`;
     };

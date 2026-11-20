@@ -1,6 +1,6 @@
 /* 상담 화면의 요약 지표와 일반고 산출 근거 */
 /* 학생 이름 아래 한 줄 요약 */
-.counsel-strip { flex-basis: 100%; display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 8px; margin: -6px 0 0; color: var(--kk-text-2); font-size: var(--kk-fs-2); }
+.counsel-strip { flex-basis: 100%; display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 8px; margin: 0; color: var(--kk-text-2); font-size: var(--kk-fs-2); }
 .counsel-strip b { color: var(--kk-text-strong); font-weight: 800; margin-left: 2px; }
 .counsel-strip small { color: var(--kk-text-3); font-size: var(--kk-fs-1); }
 .counsel-strip-dot { color: var(--kk-text-3); }
@@ -8,7 +8,12 @@
 .counsel-nav { flex-basis: 100%; display: flex; flex-wrap: wrap; gap: 6px; }
 .counsel-nav-btn { padding: 4px 12px; border-radius: 999px; border: 1px solid var(--kk-control); background: var(--kk-sunken); color: var(--kk-text-1); font-size: var(--kk-fs-2); font-weight: 700; cursor: pointer; }
 .counsel-nav-btn:hover { border-color: var(--kk-accent); color: var(--kk-accent); }
-.counsel-section { scroll-margin-top: 150px; }
+.counsel-section { scroll-margin-top: 190px; }
+/* 화면 안에 띄운 상담 화면(core/panelScreen.js): 상자 자체 스크롤을 끄고, 이름·버튼·바로가기 줄을
+   공통 위쪽 막대(64px) 바로 아래에 붙인다. 상자가 스크롤하면 고정 줄이 페이지 스크롤을 따라오지 못한다. */
+#studentDetailModal.docked-panel #printReportArea { overflow: visible !important; }
+#studentDetailModal.docked-panel .counsel-esc-hint { visibility: hidden; } /* 화면에서는 Esc·바깥 누르기로 닫히지 않는다 */
+#studentDetailModal.docked-panel .counsel-sticky-head { top: var(--shell-top-h, 64px) !important; }
 .counsel-general { color: var(--color-slate-100); background: var(--color-slate-900); border: 1px solid var(--color-slate-700); border-radius: 18px; }
 .counsel-general { padding: 14px 18px; background: var(--color-slate-950); }
 .cg-head { display: flex; align-items: center; gap: 8px; }

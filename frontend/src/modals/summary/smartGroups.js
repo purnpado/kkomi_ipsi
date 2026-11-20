@@ -1,4 +1,5 @@
 import { escapeHtml } from '../../core/utils.js';
+import { displaySchool } from '../../core/schoolName.js';
 
 // 지원 학생 상세 명단 팝업 모달 (지망 뱃지 또는 총 인원수 클릭 시)
 export function openApplicantDetailModal(title, students) {
@@ -86,7 +87,7 @@ export function buildSmartApplicationGroups(records) {
         // 학생의 학과 및 지망 추출
         let items = [];
         if (cat === 'general') {
-            const dept = r.assignedSchool ? `[배정고] ${r.assignedSchool}` : '일반계고 공통';
+            const dept = r.assignedSchool ? `[배정고] ${displaySchool(r.assignedSchool)}` : '일반계고 공통';
             items.push({ dept, rank: 0 });
         } else {
             // 전기고 (마이스터/특성화): preferences 순회

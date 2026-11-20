@@ -88,6 +88,9 @@
     background: var(--color-slate-800);
     box-shadow: inset 0 -1px 0 var(--color-slate-700);
 }
+/* 학교명은 정식 이름("○○<br>고등학교") 두 줄 */
+.matrix-table thead th { white-space: nowrap; }
+.matrix-table thead th.matrix-school-head { white-space: normal; word-break: keep-all; line-height: 1.25; vertical-align: bottom; }
 @media print {
     .matrix-scroll { max-height: none !important; overflow: visible !important; }
     .matrix-table thead th { position: static; box-shadow: none; }
