@@ -1,0 +1,121 @@
+# React·Radix 화면 전환 계획서 (C 묶음)
+
+작성: 2026-11-21 (v1.8.0 기준). **계획만 세운 상태이며, 사용자 승인 전에는 시작하지 않는다.**
+기준 문서: `docs/design-standards.md`(색·글자·아이콘·용어, 7절 shadcn 변수 대응표), `frontend/src/styles/tokens.css`, `docs/ui-diagnosis-2026-11-18.md`(C 분류 항목).
+
+## 1. 한 줄 요약
+
+화면(`frontend/`)만 React + Radix(shadcn/ui)로 바꾼다. 점수 계산·저장(Go)·자료 형식은 그대로 둔다. 입시가 끝난 뒤(2027년 1~2월) main에서 한 화면씩 바꾸고(따로 브랜치 없음, 그동안 릴리즈 멈춤), 새 입시요강 반영보다 먼저 끝낸다. 결과는 v2.0.0으로 낸다.
+
+## 2. 왜, 무엇을 얻나
+
+| 지금 문제 | 전환 뒤 |
+|---|---|
+| 창(모달)에 포커스 가두기·Esc·대화상자 정보 없음(`role="dialog"` 0곳) | Radix Dialog·AlertDialog가 기본으로 해 준다 |
+| 화면마다 버튼·머리글·표 모양이 조금씩 다름 | 공통 부품(Button·Dialog·Table·Tabs 등) 하나로 통일 |
+| 이모지 아이콘(화면·OS마다 모양이 다름) | Lucide 선 아이콘 한 종류(design-standards 4절 대응표) |
+| HTML 글자를 이어 붙여 화면을 그림(`innerHTML`), 다시 그리면 입력값이 사라지는 오류가 반복됨(커트라인·상담 화면) | 상태가 바뀐 부분만 다시 그려 입력값이 유지됨 |
+| 큰 표(명렬표·원서 일람표)가 무거움 | TanStack Table + Virtual로 보이는 줄만 그림 |
+| `window` 전역 등록 51개(콘솔·구버전 호환용 흔적) | import와 이벤트 버스만 사용 |
+
+## 3. 바꾸지 않는 것 (불변)
+
+- **Go 쪽 전부**: `internal/`·`app*.go`의 계산식·DB·교환 파일 형식, Wails 바인딩 메서드 이름과 JSON 필드. 화면은 지금처럼 `window.go.main.App.*`(`core/wailsBridge.js`)로 부른다.
+- **학생 자료 보존**: DB 구조를 바꾸지 않는다. 업데이트 뒤 다시 입력하는 일이 없어야 한다.
+- **학교명 저장 방식**: 저장 이름표는 짧은 이름 그대로, 보일 때만 정식 이름(`core/schoolName.js`의 `displaySchool`). 전환 때 학교명을 보여 주는 부품 `<SchoolName>` 하나로 모아 빠뜨림을 막는다(2026-11-21 사용자 결정).
+- **화면 기능·용어**: 같은 기능을 같은 이름으로. 기능을 새로 넣거나 빼지 않는다(필요하면 따로 승인).
+- **인쇄 결과**: 상담 결과지·원서대장·일람표 인쇄 모양은 지금과 같게(전환 전 인쇄 화면을 찍어 두고 비교).
+
+## 4. 도구 묶음
+
+| 도구 | 쓰임 | 비고 |
+|---|---|---|
+| React 19 + react-dom | 화면 틀 | Vite 7에 `@vitejs/plugin-react` |
+| shadcn/ui (Radix Primitives) | Dialog·AlertDialog·Tabs·Select·Popover·Tooltip·DropdownMenu·Checkbox·RadioGroup·Switch·ScrollArea 등 | `components.json`을 먼저 만든다. 색은 7절 대응표로 `--kk-*`에 연결 |
+| Tailwind CSS v4 | 모양 | 이미 사용 중. `@theme inline`·`kk-*` 클래스 그대로 |
+| lucide-react | 아이콘 | 24칸, 선 1.8 |
+| sonner | 짧은 알림("저장했습니다") | 지금 `showModalAlert` 일부를 대신함(오류·확인은 AlertDialog) |
+| @tanstack/react-table, @tanstack/react-virtual | 큰 표 | 명렬표·원서 일람표·관내 공유 검증 표 |
+
+- 언어는 **JavaScript(JSX) 유지**를 기본안으로 한다. TypeScript는 배울 것·설정이 늘어 이번에는 쓰지 않는다(사용자 결정 필요, 6절).
+- 패키지는 버전을 정확히 적어(`package-lock.json`) 학교 PC 빌드와 맞춘다.
+- 작업 도구: 스킬 `shadcn`·`vercel-react-best-practices`·`frontend-design`·`ui-ux-pro-max`·`web-design-guidelines`·`emil-design-eng`·`wails3-desktop`, MCP `shadcn`(부품 찾기·추가)·`context7`(Radix·React 문서)·`playwright`(화면 확인).
+
+## 5. 파일·구조 규칙
+
+- **500줄 규칙을 `.jsx`·`.tsx`에도 적용**한다(`frontend/bindings`, shadcn이 만든 `components/ui/` 원본 부품은 고칠 때 500줄 안에서 나눔). 편법 없이 부품 단위로 나눈다.
+- 부품 하나에 파일 하나. 기능별 폴더는 지금 구조를 따른다: `views/{auth,admin,applications,home,teacher}`, `modals/{analysis,application,guide,matrix,sharedVerify,summary}`. 공통 부품은 `components/`(shadcn 원본 `components/ui/`, 꼬미입시 공통 `components/kk/`).
+- 계산·변환 함수(`core/`의 `doubleApply.js`·`quickEntry.js`·`schoolName.js`·`admissionYear.js` 등)는 React와 상관없는 순수 함수로 그대로 두고, 기존 `node --test` 검사를 유지한다.
+- **이벤트 기반 구조 유지**: `core/eventBus.js`의 신호(원서 변경·학급 변경·로그인 등)와 `core/navigation.js` 발행 함수를 그대로 쓴다. 화면·창끼리 직접 import 하지 않는다. React 쪽은 `useEventBus(신호, 처리)` 훅 하나로 구독·해제한다. 중앙 상태(`core/store.js`)는 `useStore(키)` 훅으로 읽는다(새 상태 관리 도구는 넣지 않는다).
+- **`window` 전역 등록 없애기**: `main.js`의 `Object.assign(window, …)`와 화면 파일의 `window.이름 =`을 import·이벤트로 바꾼다. 사용자 관리 화면이 `window.updateUserPassword` 등으로 부르는 5곳도 포함. 마지막에 `window.go`(바인딩) 말고는 남지 않게 검사한다.
+- `innerHTML` 이어 붙이기를 없앤다(글자는 React가 자동으로 안전 처리). `escapeHtml` 사용처(262곳)는 전환하며 자연히 사라진다.
+
+## 6. 사용자 결정 필요 (시작 전)
+
+1. **언어**: JavaScript(JSX) 유지(권장) / TypeScript.
+2. **루트 `app_*.go` 37개 정리**: 이번에 하지 않음(권장, 바인딩 주소가 바뀌어 위험) / 함께 함(`internal/app` 등으로 옮기고 바인딩·`wailsBridge.js`를 다시 만듦).
+3. **화면 모양 바꾸는 정도**: 지금 배치 그대로 부품만 바꿈(권장) / 이 기회에 배치도 손봄(화면마다 따로 승인).
+4. **v2.0.0 배포 방식**: 자동 업데이트로 바로 / 한두 학교 먼저 시험 뒤 전체.
+
+## 7. 작업 방식
+
+- **브랜치를 따로 만들지 않고 main에서 한다**(2026-11-21 사용자 결정). 입시가 끝난 1~2월에 하므로 main에서 다른 화면 수정이 거의 없다.
+- **전환 중에는 main에서 릴리즈하지 않는다.** 그 사이 학교에서 급한 오류가 나오면 마지막 릴리즈 태그(예: `v1.8.x`)에서 임시 갈래를 따서 고쳐 내고(v1.8.y), 같은 수정을 main에도 넣는다. 이 일은 10절에 적는다.
+- 단계마다 프로그램 전체가 동작하는 상태로 커밋한다(8절 "한 화면씩"). Gitea `origin` → GitHub 순서로 푸시해 백업한다.
+- 전환 작업에서는 **가상 자료(`test-data/시뮬레이션`)만** 쓴다. 맥 시험 앱을 다시 빌드할 때는 전처럼 `bin/data`를 먼저 백업한다.
+- 한 단계마다: `go test ./...`, `node --test`, `npm run build`, 캡처 도구(`zsh tools/capture/run.sh`, 라이트·다크)로 화면 확인, 500줄 검사 → 커밋.
+
+## 8. 단계 (위에서부터 차례로)
+
+방식: **한꺼번에 갈아엎지 않고 한 화면씩** 바꾼다. 지금 틀(`main.js` 라우팅 표·`core/panelScreen.js`) 안에 React로 만든 화면을 하나씩 끼워 넣어, 단계마다 프로그램 전체가 동작하는 상태를 유지한다.
+
+| 단계 | 내용 | 대상(지금 파일 수·줄 수) |
+|---|---|---|
+| 0 | 준비: React·shadcn 설치, `components.json`, 7절 변수 연결, `useEventBus`·`useStore` 훅, React 화면을 라우팅 표에 끼우는 연결 함수, 전환 전 화면·인쇄 사진 찍어 두기 | 설정 |
+| 1 | 공통 부품: Button·Dialog·AlertDialog·Tabs·Select·Table·Tooltip·Toast, `<SchoolName>`, 판정 배지, 숫자 칸(`.num`) | `components/` |
+| 2 | 알림·확인 창: `core/dialogs.js`(`showModalAlert`·`showModalConfirm`·`showModalPrompt`, 사용처 약 120곳)를 Radix AlertDialog로. 부르는 쪽 모양은 그대로 둬 한 번에 바뀜 | core |
+| 3 | 공통 틀: 위쪽 막대·왼쪽 메뉴·학생 검색·화면 잠금 | `core/appShell.js` 등 |
+| 4 | 로그인·첫 설정·홈 | views/auth 5개 1,097줄, views/home 7개 673줄 |
+| 5 | 학년부장 관리: 대시보드·나이스 자료·계정·취합 병합·커트라인 | views/admin 20개 3,269줄 |
+| 6 | 원서 관리: 일괄 지원·학교별 결과·전기고 빠른 입력·나이스 일람표 | views/applications 7개 921줄 |
+| 7 | 창: 원서 입력·원서대장·지원현황·입시 분석·매트릭스·관내 공유·사용 설명서 | modals 27개 4,957줄 |
+| 8 | 담임: 명렬표·1:1 상담·합격 예측 | views/teacher 23개 3,837줄 |
+| 9 | 인쇄 확인(0단계 사진과 비교), 큰 표 가상 스크롤 | print·styles |
+| 10 | 정리: `window` 전역 0개, 쓰지 않는 CSS·옛 함수 삭제, `agents.md`·`design-standards.md`·사용 설명서 갱신 | 전체 |
+| 11 | 주고받는 파일 확인(11절) → Windows 시험 빌드 → 학교 PC 확인 → v2.0.0 | 릴리즈 |
+
+- CSS 20개 파일(2,030줄)은 화면을 바꾸며 그 화면 것만 줄인다. `tokens.css`·`theme-light-colors.css`·`print*.css`는 끝까지 기준으로 남긴다.
+- 화면 단위 검사(지금 13개 파일·31개)는 계속 통과해야 한다. React 부품은 꼭 필요한 곳만 검사를 더한다.
+
+## 9. 위험과 대책
+
+| 위험 | 대책 |
+|---|---|
+| 전환 중 급한 오류 수정이 필요함 | 마지막 릴리즈 태그에서 임시 갈래로 고쳐 냄, main에도 같은 수정(10절 기록) |
+| 주고받는 파일을 못 읽게 됨 | 파일을 읽고 쓰는 일은 Go가 하므로 화면 전환과 상관없음. 그래도 11절로 확인 |
+| 인쇄 모양이 달라짐 | 0단계에서 인쇄 화면을 찍어 두고 9단계에서 비교 |
+| Windows WebView2에서만 생기는 문제 | 11단계 학교 PC 확인 전에 main에 합치지 않음 |
+| 실행 파일이 커지거나 느려짐 | 단계마다 `npm run build` 크기 기록, 큰 창은 나눠 불러오기 |
+| 전환이 2월 안에 끝나지 않음 | 릴리즈하지 않고 이어서 함. 새 요강은 계산 쪽(Go)에 반영(화면 전환과 부딪히지 않음) |
+
+## 10. 전환 중 급한 수정 기록
+
+| 날짜 | 고친 내용 | 임시 갈래 릴리즈 | main 반영 |
+|---|---|---|---|
+| | | | |
+
+## 11. 주고받는 파일 확인 (11단계)
+
+배포자료·담임 취합자료(`.phgcpatch`)·관내 공유 파일·인수인계 파일·비밀번호 재설정 파일은 **Go(`internal/exchange/`, `internal/database/shared_import.go` 등)가 읽고 쓴다.** 화면은 파일을 고르고 Go 기능을 부르기만 하므로, 화면 전환으로 파일 형식이 바뀌지 않는다. 그래도 릴리즈 전에 다음을 확인한다.
+
+- 가상 자료로 **v1.8.0이 만든 파일**(배포자료·취합자료·관내 공유·인수인계)을 전환한 프로그램에서 읽어 결과가 같은지 본다.
+- 반대로 **전환한 프로그램이 만든 파일**을 v1.8.0에서 읽어 본다(학교마다 업데이트 시기가 달라 섞여 쓰일 수 있음).
+- 취합 병합 상세 검토(충돌 분류·기본 선택)와 관내 공유 자료 검증 화면이 같은 결과를 보이는지 본다.
+- `go test ./...`의 교환 파일 검사(`app_exchange_test.go`·`app_patch_conflict_test.go`·`internal/exchange` 등)가 모두 통과해야 한다.
+
+## 12. 일정 (안)
+
+1. 2026-11 ~ 12: 입시 운영. main은 오류 수정만(v1.8.x).
+2. 2027-01: 6절 결정 → main에서 0~4단계(릴리즈 멈춤).
+3. 2027-02: 5~10단계 → 11단계(주고받는 파일·학교 PC 확인) → v2.0.0.
+4. 새 입시요강이 나오면: 계산식·정원 반영(v2.x). 그 다음 입시철 운영.
