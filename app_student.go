@@ -163,6 +163,17 @@ func (a *App) GetStudentNiceRows(classNum int, studentNum, name string) ([]datab
 	return a.db.GetStudentNiceRows(classNum, studentNum, name, a.isMaster())
 }
 
+// GetApplicationNiceRow 원서 입력 창: 고른 특성화고 학교·전형의 나이스 원서 입력값 대조표.
+func (a *App) GetApplicationNiceRow(classNum int, studentNum, name, category, schoolName, track string) (database.NiceRosterRow, error) {
+	if a.user == nil {
+		return database.NiceRosterRow{}, fmt.Errorf("로그인이 필요합니다")
+	}
+	if a.user.Role == "homeroom" && a.user.ClassNum != classNum {
+		return database.NiceRosterRow{}, fmt.Errorf("담당 학급(%d반) 학생만 볼 수 있습니다", a.user.ClassNum)
+	}
+	return a.db.GetApplicationNiceRow(classNum, studentNum, name, a.isMaster(), category, schoolName, track)
+}
+
 // GetNiceUploads 나이스 자료(성적·출결·봉사)를 반마다 마지막으로 올린 때. 담임은 본인 반만, 학년부장·진로부장은 반 또는 0(전교).
 func (a *App) GetNiceUploads(classNum int) ([]database.NiceUpload, error) {
 	if err := a.requireLogin(); err != nil {

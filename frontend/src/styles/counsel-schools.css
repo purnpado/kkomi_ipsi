@@ -1,0 +1,50 @@
+/* 상담 화면 학교별 판정: 한 줄 요약(누르면 펼침)·거르기 (views/teacher/counsel/schoolList.js) */
+.csl-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.csl-chips { display: flex; flex-wrap: wrap; gap: 4px; }
+.csl-chip { padding: 4px 11px; border-radius: 999px; border: 1px solid var(--kk-control); background: var(--kk-sunken); color: var(--kk-text-1); font-size: var(--kk-fs-2); font-weight: 700; cursor: pointer; }
+.csl-chip.is-on { background: var(--kk-accent-fill); border-color: var(--kk-accent-fill); color: var(--kk-on-fill); }
+.csl-level { width: auto; padding: 4px 8px; font-size: var(--kk-fs-2); }
+.csl-count { color: var(--kk-text-3); font-size: var(--kk-fs-1); }
+.csl-expand { margin-left: auto; padding: 4px 10px; border-radius: 8px; border: 1px solid var(--kk-control); background: transparent; color: var(--kk-text-2); font-size: var(--kk-fs-1); font-weight: 700; cursor: pointer; }
+
+.counsel-school-list { display: grid; gap: 6px; }
+.counsel-school-row { border: 1px solid var(--kk-line-strong); border-radius: 12px; background: var(--kk-surface); }
+.counsel-school-row[open] { border-color: var(--kk-accent); }
+.csr-summary {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 132px 120px 120px 80px auto 16px;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    cursor: pointer;
+    list-style: none;
+    font-size: var(--kk-fs-2);
+    color: var(--kk-text-1);
+}
+.csr-summary::-webkit-details-marker { display: none; }
+.csr-summary:hover { background: var(--kk-sunken); border-radius: 12px; }
+.csr-name { display: flex; align-items: center; gap: 6px; min-width: 0; flex-wrap: wrap; }
+.csr-name strong { color: var(--kk-text-strong); font-size: var(--kk-fs-3); }
+.csr-track { padding: 1px 7px; border-radius: 6px; background: var(--kk-sunken); color: var(--kk-text-2); font-size: var(--kk-fs-1); font-weight: 600; }
+.csr-tag { padding: 1px 7px; border-radius: 6px; border: 1px solid var(--kk-warning); color: var(--kk-warning); font-size: var(--kk-fs-1); font-weight: 700; }
+.csr-score b { color: var(--kk-text-strong); font-size: var(--kk-fs-3); }
+.csr-score small, .csr-cut, .csr-none { color: var(--kk-text-3); font-size: var(--kk-fs-1); }
+.csr-cut b { color: var(--kk-text-1); }
+.csr-diff { text-align: right; }
+.csr-up { color: var(--kk-success); }
+.csr-down { color: var(--kk-danger); }
+.csr-actions { display: flex; gap: 4px; }
+.csr-actions button { padding: 3px 8px !important; }
+.csr-chev { color: var(--kk-text-3); transition: transform .15s; }
+.counsel-school-row[open] .csr-chev { transform: rotate(90deg); }
+.csr-body { padding: 4px 14px 14px; border-top: 1px solid var(--kk-line); }
+@media (max-width: 980px) {
+    .csr-summary { grid-template-columns: minmax(0, 1fr) auto auto 16px; }
+    .csr-cut, .csr-diff { display: none; }
+}
+@media (prefers-reduced-motion: reduce) { .csr-chev { transition: none; } }
+@media print {
+    .counsel-school-row { border-color: #cbd5e1; background: #fff; break-inside: avoid; }
+    .csr-actions, .csr-chev { display: none; }
+    .csr-summary { grid-template-columns: minmax(0, 1fr) 132px 120px 120px 80px; color: #111827; }
+}

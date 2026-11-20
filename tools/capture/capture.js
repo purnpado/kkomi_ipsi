@@ -113,13 +113,22 @@ async function masterScenario(page, accounts) {
             }
             await wait(300);
         }],
-        ['07d-학년부장-상담-지원원서-나이스', async () => {
-            // 가상 자료에서 특성화고 원서가 있는 학생(2반 9번)
+        ['07d-학년부장-원서입력창-나이스', async () => {
+            // 가상 자료에서 특성화고 원서가 있는 학생(2반 9번): 상담 화면 특성화고 줄의 [희망입력] → 원서 입력 창 대조표
             await clickMenu(page, 'dash');
             await openStudentBySearch(page, '2-9');
-            await page.waitForSelector('#niceApplyMount .nice-apply .nice-form', { timeout: 15000 })
-                .catch(() => { throw new Error('상담 화면에 지원 원서 나이스 대조표가 없습니다'); });
-            await page.evaluate(() => document.querySelector('#niceApplyMount').scrollIntoView({ block: 'start' }));
+            await page.evaluate(() => [...document.querySelectorAll('.btn-direct-apply')].find((b) => b.dataset.cat === 'special')?.click());
+            await page.waitForSelector('#appNicePreview .nice-form', { timeout: 15000 })
+                .catch(() => { throw new Error('원서 입력 창에 나이스 대조표가 없습니다'); });
+            await page.evaluate(() => document.querySelector('#appNicePreview').scrollIntoView({ block: 'center' }));
+            await wait(400);
+        }],
+        ['07e-학년부장-상담-학교별판정-펼침', async () => {
+            await clickMenu(page, 'dash');
+            await openStudentBySearch(page, '2-9');
+            await page.evaluate(() => document.querySelector('.counsel-nav-btn[data-target="counselSecSchools"]')?.click());
+            await wait(800);
+            await page.evaluate(() => document.querySelector('#schoolCardsContainer .school-counsel-card summary')?.click());
             await wait(400);
         }],
         ['06b-학년부장-판정기준-통계제외목록', async () => {

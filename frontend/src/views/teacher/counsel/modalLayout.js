@@ -3,8 +3,12 @@ import { transferBadge } from '../../../core/transferBadges.js';
 import { state } from '../../../core/store.js';
 import { judgmentModeToggleHTML } from '../../../core/admissionJudgment.js';
 import { renderGeneralSummary } from './generalSummary.js';
-import { volunteerTransferHTML } from './volunteerTransfer.js';
 import { leadershipHTML } from './leadershipInput.js';
+import { generalInputsHTML } from './generalInputs.js';
+import { schoolListToolbarHTML } from './schoolList.js';
+
+// 위쪽 고정 줄의 바로가기(구역 id)
+const SECTION_LINKS = [['counselSecGeneral', '내신'], ['counselSecBonus', '가산점'], ['studentWishlistSection', '관심학교'], ['counselSecSchools', '학교별 판정'], ['counselSecLog', '상담 일지']];
 
 // 상담 모달: 전체 레이아웃 렌더링
 export function renderStudentModalLayout(ctx) {
@@ -16,7 +20,6 @@ export function renderStudentModalLayout(ctx) {
                     <h2 class="text-2xl font-black text-white flex items-center gap-2 flex-wrap">
                         👨‍🎓 ${escapeHtml(ctx.name)}${transferBadge(ctx.classNum, ctx.studentNum, ctx.name)} <span class="text-base text-slate-400 font-normal">(${escapeHtml(ctx.classNum)}반 ${escapeHtml(ctx.studentNum)}번)</span>
                     </h2>
-                    <p class="text-xs text-text-muted mt-0.5">학생 진학 상담 분석표 · 현재 누적 자료 기준</p>
                 </div>
                 <div class="flex items-center gap-2.5 no-print flex-wrap">
                     <label class="flex items-center gap-1.5 text-xs text-slate-300 cursor-pointer bg-slate-800 hover:bg-slate-700 px-3 py-2 rounded-xl border border-slate-700 select-none transition-all h-9 whitespace-nowrap" title="체크 시 상담 일지 메모 내용도 함께 인쇄됩니다">
@@ -35,112 +38,40 @@ export function renderStudentModalLayout(ctx) {
                         <span class="text-base font-black">✕</span> <span class="ml-1 font-bold">창 닫기</span>
                     </button>
                 </div>
+                <p class="counsel-strip">${counselStripHTML(ctx.data)}</p>
+                <nav class="counsel-nav no-print" aria-label="상담 화면 바로가기">${SECTION_LINKS.map(([id, label]) => `<button type="button" class="counsel-nav-btn" data-target="${id}">${label}</button>`).join('')}</nav>
             </div>
 
-            <!-- 1. 학생 요약과 일반고 산출 -->
-            <div class="counsel-overview">
-                <div class="counsel-metrics">
-                    <div class="counsel-metric"><span>전과목 평균 성취도</span><strong>${ctx.data.allAverage.toFixed(2)} <small>/ 5.0</small></strong><p>전체 과목 단순 평균</p></div>
-                    <div class="counsel-metric"><span>미인정 출결 (누적)</span><strong>${ctx.data.absenceDays}<small>일</small></strong><p>결석 ${ctx.data.rawAbsenceDays || 0}일 · 기타 ${(ctx.data.rawLateCount || 0) + (ctx.data.rawEarlyCount || 0) + (ctx.data.rawResultCount || 0)}회</p></div>
-                    <div class="counsel-metric"><span>인정 봉사시간</span><strong>${ctx.data.totalVolunteerHours}<small>시간</small></strong><p>기본 ${ctx.data.volunteerHours} + 추가 ${ctx.data.addVolunteerHours}</p></div>
-                </div>
-                ${renderGeneralSummary(ctx.data)}
-            </div>
-
-            <!-- 지원 원서 · 나이스 원서 입력값(niceApply.js, 원서가 있을 때만). 인쇄하지 않는다 -->
-            <div id="niceApplyMount" class="no-print"></div>
+            <!-- 1. 후기 일반고 내신(입력 고치기 칸 포함). 지원 원서 나이스 대조표는 원서 입력 창으로 옮겼다 -->
+            ${renderGeneralSummary(ctx.data, generalInputsHTML(ctx, state.currentUser && state.currentUser.Role === 'viewer'))}
 
             <!-- 2. 수기 입력 가산점 및 리더십 영역 (출결·봉사는 나이스 자동 산출) -->
             ${(() => {
             const isViewer = state.currentUser && state.currentUser.Role === 'viewer';
 
             return `
-                <div class="p-4 rounded-xl bg-indigo-950/20 border border-indigo-500/30 space-y-3 non-academic-input-section no-print">
+                <div class="p-4 rounded-xl bg-indigo-950/20 border border-indigo-500/30 space-y-3 non-academic-input-section counsel-section no-print" id="counselSecBonus">
                     <div class="flex items-center justify-between flex-wrap gap-2">
-                        <div class="flex items-center gap-2">
-                            <span class="text-base">✏️</span>
-                            <div>
-                                <h3 class="font-bold text-sm text-indigo-200 flex items-center gap-2">
-                                    전형별 가산점 및 리더십 수기 입력
-                                    ${isViewer ? '<span class="text-[11px] text-warning font-normal">※ 진로부장은 조회 전용 모드입니다.</span>' : ''}
-                                </h3>
-                                <p class="text-[11px] text-slate-400 mt-0.5">출결·봉사는 나이스 자료로 계산합니다. 학년별 자료가 없으면 누적 자료로 예상하며, 아래에서 직접 입력할 수 있습니다.</p>
-                            </div>
+                        <div>
+                            <h3 class="font-bold text-sm text-indigo-200 flex items-center gap-2">
+                                <span>🏛️</span> 전기고 가산점 · 마이스터고 리더십
+                                ${isViewer ? '<span class="text-[11px] text-warning font-normal">※ 진로부장은 조회 전용 모드입니다.</span>' : ''}
+                            </h3>
+                            <p class="text-[11px] text-slate-400 mt-0.5">반장·부반장·전교 학생회장·부회장 활동만 인정합니다(한 학기당 2.5점, 에너지고 최대 10점·현대공고 최대 5점). 생활기록부에 기록된 학기만 체크합니다. 출결·봉사는 나이스 자료로 계산합니다.</p>
                         </div>
                         ${!isViewer ? `
-                        <button id="saveExtraBtn" class="px-4 h-9 rounded-xl font-bold text-xs bg-indigo-600 hover:bg-indigo-500 text-white flex items-center gap-1.5 shadow-md shadow-indigo-500/20 transition-all cursor-pointer whitespace-nowrap active:scale-95 no-print">
+                        <button id="saveExtraBtn" class="save-extra-btn px-4 h-9 rounded-xl font-bold text-xs bg-indigo-600 hover:bg-indigo-500 text-white flex items-center gap-1.5 shadow-md shadow-indigo-500/20 transition-all cursor-pointer whitespace-nowrap active:scale-95 no-print">
                             <span>💾</span> <span>저장 후 재계산</span>
                         </button>
                         ` : ''}
                     </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs pt-1">
-                        <!-- ① 마이스터고 리더십 가산점 -->
-                        <section class="bg-slate-900/70 p-3.5 rounded-xl border border-indigo-500/30 space-y-2">
-                            <div class="flex items-center justify-between">
-                                <b class="text-indigo-200 text-sm flex items-center gap-1.5">
-                                    <span>🏛️</span> 마이스터고 리더십 활동 가산점
-                                </b>
-                                <span class="text-[11px] text-amber-300 font-semibold">에너지고 최대 10점 · 현대공고 최대 5점</span>
-                            </div>
-                            ${leadershipHTML(ctx.data, isViewer)}
-                            <p class="text-[10px] text-slate-400 mt-1">※ 반장·부반장·전교 학생회장·부회장 활동만 인정 (한 학기당 2.5점, 에너지고 최대 10점·현대공고 최대 5점). 생활기록부(창체 특기사항·행동특성)에 기록된 학기만 체크합니다.</p>
-                        </section>
-
-                        <!-- ② 후기 일반고 비교과 가산점 -->
-                        <section class="bg-slate-900/70 p-3.5 rounded-xl border border-emerald-500/30 space-y-2">
-                            <div class="flex items-center justify-between">
-                                <b class="text-emerald-200 text-sm flex items-center gap-1.5">
-                                    <span>🏫</span> 후기 일반고 창체·행발 가산점
-                                </b>
-                                <span class="text-[11px] text-emerald-300 font-semibold">각 학년당 +1점</span>
-                            </div>
-                            <div class="grid grid-cols-2 gap-2 pt-1">
-                                <div class="rounded-lg bg-slate-800/80 border border-slate-700 p-2.5 space-y-1.5">
-                                    <span class="text-[11px] font-bold text-slate-300 block">창체 활동 가산점</span>
-                                    <div class="flex items-center gap-2 flex-wrap">
-                                        ${[1, 2, 3].map(g => `
-                                            <label class="inline-flex items-center gap-1 text-xs text-slate-200 cursor-pointer">
-                                                <input type="checkbox" id="checkChangche${g}" class="accent-indigo-500 rounded cursor-pointer" ${ctx.extra['changche_' + g] ? 'checked' : ''} ${isViewer ? 'disabled' : ''}/>
-                                                <span>${g}학년</span>
-                                            </label>
-                                        `).join('')}
-                                    </div>
-                                </div>
-                                <div class="rounded-lg bg-slate-800/80 border border-slate-700 p-2.5 space-y-1.5">
-                                    <span class="text-[11px] font-bold text-slate-300 block">행발(행동발달) 가산점</span>
-                                    <div class="flex items-center gap-2 flex-wrap">
-                                        ${[1, 2, 3].map(g => `
-                                            <label class="inline-flex items-center gap-1 text-xs text-slate-200 cursor-pointer">
-                                                <input type="checkbox" id="checkHaengbal${g}" class="accent-indigo-500 rounded cursor-pointer" ${ctx.extra['haengbal_' + g] ? 'checked' : ''} ${isViewer ? 'disabled' : ''}/>
-                                                <span>${g}학년</span>
-                                            </label>
-                                        `).join('')}
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="rounded-lg bg-slate-800/60 border border-slate-700 p-2.5 space-y-1.5">
-                                <span class="text-[11px] font-bold text-slate-300 block">학년별 출결·봉사 <span class="font-normal text-slate-400">(선택 · 비우면 나이스 자료로 자동 계산)</span></span>
-                                <div class="grid grid-cols-4 gap-1.5 text-[11px] text-slate-300 items-center">
-                                    <span></span>${[1, 2, 3].map(g => `<span class="text-center">${g}학년</span>`).join('')}
-                                    <span title="미인정 결석일 + 지각·조퇴·결과 3회당 1일">결석 환산(일)</span>
-                                    ${[1, 2, 3].map(g => `<input type="text" inputmode="numeric" id="genAbs${g}" class="input-field py-1 px-1.5 text-xs text-center" value="${ctx.rawExtra['general_absence_' + g] ?? ''}" placeholder="자동" ${isViewer ? 'disabled' : ''}/>`).join('')}
-                                    <span>봉사(시간)</span>
-                                    ${[1, 2, 3].map(g => `<input type="text" inputmode="numeric" id="genVol${g}" class="input-field py-1 px-1.5 text-xs text-center" value="${ctx.rawExtra['general_volunteer_' + g] ?? ''}" placeholder="자동" ${isViewer ? 'disabled' : ''}/>`).join('')}
-                                </div>
-                            </div>
-                            ${volunteerTransferHTML(ctx, isViewer)}
-                            <p class="text-[10px] text-slate-400 mt-1">※ 후기 일반고 비교과 40점(출석 16·봉사 8·행발 8·창체 8). 출석·봉사는 학년별로 계산합니다.
-                                현재 출석 ${Number(ctx.data.generalHSAttendanceScore || 0).toFixed(1)} · 봉사 ${Number(ctx.data.generalHSVolunteerScore || 0).toFixed(1)} ·
-                                가산점 ${ctx.data.generalHSBonusEntered ? '<b class="text-emerald-300">입력 완료</b>' : '<b class="text-amber-300">미입력 — 저장하면 입력 완료로 기록됩니다</b>'}</p>
-                        </section>
-                    </div>
+                    <div class="text-xs">${leadershipHTML(ctx.data, isViewer)}</div>
                 </div>
                 `;
         })()}
 
             <!-- ⭐ 학생 희망·관심학교 장바구니 영역 (화면 상담용, 인쇄 시 자동 제외) -->
-            <div id="studentWishlistSection" class="p-4 rounded-2xl bg-indigo-950/30 border border-indigo-500/50 space-y-3 shadow-lg no-print">
+            <div id="studentWishlistSection" class="counsel-section p-4 rounded-2xl bg-indigo-950/30 border border-indigo-500/50 space-y-3 shadow-lg no-print">
                 <div class="flex items-center justify-between flex-wrap gap-2 pb-2 border-b border-indigo-500/20">
                     <div class="flex items-center gap-2">
                         <span class="text-xl">🛒</span>
@@ -159,7 +90,7 @@ export function renderStudentModalLayout(ctx) {
             </div>
 
             <!-- 3. 학교별 합격 가능성 리스트 -->
-            <div class="space-y-3">
+            <div class="space-y-3 counsel-section" id="counselSecSchools">
                 <div class="flex items-center justify-between flex-wrap gap-2">
                     <div>
                         <h3 class="font-bold text-sm text-white">🏫 목표 고교별 산출 점수 및 합격 가능성</h3>
@@ -185,16 +116,16 @@ export function renderStudentModalLayout(ctx) {
 
                 <div class="p-2.5 rounded-xl bg-slate-900/60 border border-slate-700/60 flex items-center justify-between text-xs no-print">
                     <span id="cutoffBaselineDesc" class="text-indigo-200 font-medium">🎯 <strong>직전 1개년(작년)</strong> 커트라인 및 공식 발표자료를 기준으로 합격 가능성을 판정합니다.</span>
-                    <span class="text-[11px] text-slate-400">탭을 클릭하면 실시간으로 신호등·게이지가 재계산됩니다</span>
+                    <span class="text-[11px] text-slate-400">줄을 누르면 학과별 합격선·점수 구성이 펼쳐집니다</span>
                 </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-3" id="schoolCardsContainer">
+                ${schoolListToolbarHTML(ctx)}
+                <div class="counsel-school-list" id="schoolCardsContainer">
                     ${ctx.cardsHTML}
                 </div>
             </div>
 
             <!-- 4. 스마트 1:1 진학 상담 일지 영역 -->
-            <div class="p-5 rounded-2xl bg-indigo-950/25 border border-indigo-500/40 space-y-4 shadow-xl counsel-section-container">
+            <div class="p-5 rounded-2xl bg-indigo-950/25 border border-indigo-500/40 space-y-4 shadow-xl counsel-section-container counsel-section" id="counselSecLog">
                 <div class="flex items-center justify-between flex-wrap gap-2 pb-3 border-b border-indigo-500/20">
                     <div>
                         <h3 class="font-black text-sm text-indigo-200 flex items-center gap-2">
@@ -302,4 +233,14 @@ export function renderStudentModalLayout(ctx) {
             </div>
         </div>
     `;
+}
+
+// 학생 이름 아래 한 줄 요약(전과목 평균 성취도·미인정 출결·인정 봉사)
+function counselStripHTML(d) {
+    const etc = (d.rawLateCount || 0) + (d.rawEarlyCount || 0) + (d.rawResultCount || 0);
+    return [
+        `평균 성취도 <b class="num">${Number(d.allAverage || 0).toFixed(2)}</b><small>/5.0</small>`,
+        `미인정 출결 <b class="num">${d.absenceDays}</b>일 <small>(결석 ${d.rawAbsenceDays || 0}일 · 지각·조퇴·결과 ${etc}회)</small>`,
+        `인정 봉사 <b class="num">${d.totalVolunteerHours}</b>시간 <small>(기본 ${d.volunteerHours} + 추가 ${d.addVolunteerHours})</small>`,
+    ].map((item) => `<span>${item}</span>`).join('<span class="counsel-strip-dot" aria-hidden="true">·</span>');
 }

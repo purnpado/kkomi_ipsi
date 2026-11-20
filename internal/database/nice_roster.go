@@ -113,6 +113,20 @@ func (dm *DBManager) GetStudentNiceRows(classNum int, studentNum, name string, i
 	return rows, nil
 }
 
+// GetApplicationNiceRow 원서 입력 창에서 고른 학교·전형 하나의 나이스 대조 줄(저장 전 값으로).
+// 특성화고만 대조표가 있다. 학교·전형 이름은 산출 규칙 이름으로 맞춘다.
+func (dm *DBManager) GetApplicationNiceRow(classNum int, studentNum, name string, isMaster bool, category, schoolName, track string) (NiceRosterRow, error) {
+	r := model.ApplicationRecord{ClassNum: classNum, StudentNum: studentNum, StudentName: name, Category: category, SchoolName: schoolName, Track: track}
+	if category != "special" || strings.TrimSpace(schoolName) == "" {
+		return niceRowFor(nil, r), nil
+	}
+	full, err := dm.GetStudentFullDetail(classNum, studentNum, name, isMaster)
+	if err != nil {
+		return NiceRosterRow{}, err
+	}
+	return niceRowFor(full, r), nil
+}
+
 // GetNiceRoster 반 단위 나이스 원서 입력 일람표. classNum 0 은 전교(학년부장·진로부장).
 func (dm *DBManager) GetNiceRoster(classNum int, isMaster bool) ([]NiceRosterRow, error) {
 	config, err := dm.GetSchoolConfig()

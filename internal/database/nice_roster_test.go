@@ -45,6 +45,14 @@ func TestNiceRosterRowsFollowApplications(t *testing.T) {
 	if got := special.NiceForm.Rows[0][2].Text + "/" + special.NiceForm.Rows[0][4].Text; got != "7/2" {
 		t.Fatalf("1-2 교과성취점수/과목수: %s", got)
 	}
+	// 원서 입력 창: 저장하지 않은 학교·전형 하나(이름 표기가 달라도 산출 규칙으로 맞춤)
+	row, err := dm.GetApplicationNiceRow(1, "1", "가상학생", true, "special", "울산상업고등학교", "취업희망자 특별전형")
+	if err != nil || row.NiceForm == nil || row.NiceForm.Rows[0][2].Text != "7" {
+		t.Fatalf("원서 입력 창 특성화고 대조표: %+v %v", row, err)
+	}
+	if row, err := dm.GetApplicationNiceRow(1, "1", "가상학생", true, "meister", "울산마이스터고등학교", "일반"); err != nil || row.NiceForm != nil || row.Note == "" {
+		t.Fatalf("마이스터고는 대조표 없이 안내만: %+v %v", row, err)
+	}
 	roster, err := dm.GetNiceRoster(0, true)
 	if err != nil || len(roster) != 1 {
 		t.Fatalf("전교 일람표: %d건 %v", len(roster), err)

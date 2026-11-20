@@ -1,4 +1,5 @@
 import { judgeScore, judgmentBadge, describeDiff, describeMargin, judgmentModeToggleHTML, bindJudgmentModeToggle, describeEvidence } from '../../../core/admissionJudgment.js';
+import { updateRowSummary } from './schoolList.js';
 // 상담 모달: 커트라인 기준 탭·학과 선택 연결
 export function bindBaselineControls(ctx) {
     let currentBaselineMode = 'last';
@@ -70,6 +71,7 @@ export function bindBaselineControls(ctx) {
 
             const badgeEl = document.getElementById(`badge_${rIdx}`);
             if (badgeEl) badgeEl.innerHTML = badge;
+            updateRowSummary(card, result, cutoffVal);
 
             const gaugeEl = document.getElementById(`gauge_${rIdx}`);
             if (gaugeEl) {
@@ -90,6 +92,7 @@ export function bindBaselineControls(ctx) {
                 }
             }
         });
+        ctx.refreshSchoolFilter?.(); // 판정이 바뀌면 판정 거르기도 다시 적용
     };
 
     // 판정 보기 방식(학교 설정/비율/점수) 전환: 현재 기준선 탭으로 다시 판정한다.

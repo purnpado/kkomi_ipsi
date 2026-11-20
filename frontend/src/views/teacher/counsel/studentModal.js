@@ -11,7 +11,7 @@ import { openWhatIfModal } from './whatIfModal.js';
 import { getWishlist, loadWishlist } from './wishlistStore.js';
 import { mountStatExclusion } from './statExclusion.js';
 import { bindVolunteerTransfer } from './volunteerTransfer.js';
-import { mountNiceApply } from './niceApply.js';
+import { bindSchoolList, cleanSchoolName } from './schoolList.js';
 
 export async function openStudentModal(classNum, studentNum, name) {
     // 기존 모달 제거
@@ -67,6 +67,7 @@ export function renderStudentModalContent(modalEl, classNum, studentNum, name, d
     defineWishlistRenderer(ctx);
     renderStudentModalLayout(ctx);
     bindStudentModalClose(ctx);
+    bindSchoolList(ctx);
     bindBaselineControls(ctx);
     bindExtraSaveAndPrint(ctx);
     fillGeneralCityCutoff(ctx);
@@ -74,7 +75,6 @@ export function renderStudentModalContent(modalEl, classNum, studentNum, name, d
     bindWishlistControls(ctx);
     mountStatExclusion(ctx);
     bindVolunteerTransfer(ctx);
-    mountNiceApply(ctx);
     ctx.modalEl.querySelector('#openWhatIfBtn')?.addEventListener('click', () => openWhatIfModal(ctx));
 }
 
@@ -83,10 +83,6 @@ function prepareStudentModalState(ctx) {
     ctx.todayDate = new Date().toISOString().split('T')[0];
 
     // 학교명 정규화 헬퍼 (마이스터, 에너지, 애니원 등 고유 명칭은 보존하고 고등학교/고 접미사만 정리)
-    const cleanSchoolName = (sch) => {
-        let s = String(sch || '').replace(/\s+/g, '');
-        return s.replace(/고등학교$/, '').replace(/공업고등학교$/, '공고').replace(/공업고$/, '공고').replace(/고$/, '');
-    };
     ctx.isSameSchool = (s1, s2) => {
         if (!s1 || !s2) return false;
         const raw1 = String(s1).trim();

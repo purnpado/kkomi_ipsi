@@ -1,11 +1,13 @@
 import { escapeAttr, escapeHtml, displayTrack } from '../../../core/utils.js';
 import { judgeScore, judgmentBadge, describeDiff, describeEvidence } from '../../../core/admissionJudgment.js';
 import { admissionLabel } from '../../../core/admissionYear.js';
+import { rowSummaryCells } from './schoolList.js';
 
 // 상담 모달: 고교별 산출 결과 카드 HTML 구성
 export function buildSchoolResultCards(ctx) {
     // 학교별 합격 가능성 카드 목록 생성
     ctx.cardsHTML = '';
+    const rows = []; // 관심·지원 학교를 위로 올리려고 모았다가 정렬한다
 
     ctx.data.schoolResults.forEach((r, rIdx) => {
         const isMeisterSchool = ['울산마이스터', '울산에너지', '현대공업'].some(kw => r.schoolName.includes(kw));
@@ -88,15 +90,16 @@ export function buildSchoolResultCards(ctx) {
             const pct = (r.totalScore / r.totalMax) * 100;
             const result = judgeScore({ score: r.totalScore, cutoff: cutoffVal, totalMax: r.totalMax, schoolName: r.schoolName, track: r.trackName, source, year: basis?.year, department: basis?.department });
             if (result.level === 'unknown') {
-                return { badge: `<span class="text-xs text-text-muted">만점의 ${pct.toFixed(1)}%</span>`, color: 'bg-primary', pct };
+                return { badge: `<span class="text-xs text-text-muted">만점의 ${pct.toFixed(1)}%</span>`, color: 'bg-primary', pct, result };
             }
             const color = { safe: 'bg-emerald-500', proper: 'bg-indigo-500', hope: 'bg-amber-500', challenge: 'bg-rose-500', insufficient: 'bg-slate-500' }[result.level];
             const evidenceText = describeEvidence(result);
             const badge = `${judgmentBadge(result)} <span class="text-[10px] text-slate-400">${describeDiff(result)}${source ? ` · ${source}` : ''}${evidenceText ? ` · <span class="text-amber-200">${evidenceText}</span>` : ''}</span>`;
-            return { badge, color, pct };
+            return { badge, color, pct, result };
         };
 
-        const { badge: initialBadge, color: initialColor, pct: initialPct } = getCutoffBadgeAndGauge(defaultCutoff);
+        const { badge: initialBadge, color: initialColor, pct: initialPct, result: initialResult } = getCutoffBadgeAndGauge(defaultCutoff);
+        const cells = rowSummaryCells(initialResult, defaultCutoff, r.totalScore);
 
         // 가중치 과목 상세 텍스트
         let weightDetailText = '';
@@ -118,8 +121,10 @@ export function buildSchoolResultCards(ctx) {
             schoolPrintClass = 'counsel-print-target-school';
         }
 
-        ctx.cardsHTML += `
-            <div class="p-4 rounded-xl bg-slate-800/70 border border-slate-700/70 space-y-2.5 school-counsel-card ${schoolPrintClass}" id="card_${rIdx}"
+        const matchedTag = isMatchedSchool ? '<span class="csr-tag">관심·지원</span>' : '';
+        rows.push({ matched: isMatchedSchool, html: `
+            <details class="school-counsel-card counsel-school-row ${schoolPrintClass}" id="card_${rIdx}"
+                 data-cat="${schoolCat}" data-matched="${isMatchedSchool ? 1 : 0}" data-level="${cells.level}"
                  data-school="${escapeAttr(r.schoolName)}"
                  data-track="${escapeAttr(r.trackName)}"
                  data-score="${r.totalScore}"
@@ -131,12 +136,13 @@ export function buildSchoolResultCards(ctx) {
                  data-avg3-cutoff="${recent3Average ? recent3Average.toFixed(2) : 0}"
                  data-avg5-cutoff="${recent5Average ? recent5Average.toFixed(2) : 0}"
                  data-history-count="${cutoffHistory.length}">
-                <div class="flex items-center justify-between flex-wrap gap-2">
-                    <div class="flex items-center gap-2">
-                        <span class="font-bold text-white text-base">${r.schoolName}</span>
-                        <span class="text-xs px-2 py-0.5 rounded bg-slate-700 text-slate-300 font-semibold">${escapeHtml(displayTrack(r.trackName))}</span>
-                    </div>
-                    <div class="flex items-center gap-1.5 flex-wrap">
+                <summary class="csr-summary">
+                    <span class="csr-name"><strong>${escapeHtml(r.schoolName)}</strong><span class="csr-track">${escapeHtml(displayTrack(r.trackName))}</span>${matchedTag}</span>
+                    <span class="csr-pill">${cells.pill}</span>
+                    <span class="csr-score num"><b>${r.totalScore.toFixed(2)}</b><small> / ${r.totalMax}</small></span>
+                    <span class="csr-cut num">${cells.cut}</span>
+                    <span class="csr-diff num">${cells.diff}</span>
+                    <span class="csr-actions">
                         <button type="button" class="btn-toggle-wishlist px-2.5 py-1 text-xs font-bold rounded-lg border transition-all flex items-center gap-1 cursor-pointer ${isAlreadyWish ? 'bg-amber-500/20 text-amber-300 border-amber-500/50 shadow-sm' : 'bg-slate-800 text-slate-300 border-slate-600 hover:text-white hover:border-slate-500'}"
                                 data-school="${escapeAttr(r.schoolName)}" data-track="${escapeAttr(r.trackName)}" data-score="${r.totalScore}" data-max="${r.totalMax}" data-cat="${schoolCat}" data-card="${rIdx}">
                             <span>${isAlreadyWish ? '⭐' : '☆'}</span> <span class="wishlist-btn-text">${isAlreadyWish ? '관심 등록됨' : '관심 담기'}</span>
@@ -145,9 +151,11 @@ export function buildSchoolResultCards(ctx) {
                                 data-school="${escapeAttr(r.schoolName)}" data-track="${escapeAttr(r.trackName)}" data-score="${r.totalScore}" data-cat="${schoolCat}" title="해당 학교로 희망원서 자동 입력">
                             <span>📝</span> 희망입력
                         </button>
-                        <div id="badge_${rIdx}">${initialBadge}</div>
-                    </div>
-                </div>
+                    </span>
+                    <span class="csr-chev" aria-hidden="true">▸</span>
+                </summary>
+                <div class="csr-body space-y-2.5">
+                <div id="badge_${rIdx}">${initialBadge}</div>
 
                 <!-- 학과별 커트라인 선택 드롭다운 (최신 연도 기준 학과별 깔끔 표기) -->
                 ${deptsForSchool.length > 0 ? `
@@ -201,7 +209,12 @@ export function buildSchoolResultCards(ctx) {
                     <span>점수차: <strong class="${r.totalScore >= defaultCutoff ? 'text-success' : 'text-danger'}">${(r.totalScore - defaultCutoff) >= 0 ? '+' : ''}${(r.totalScore - defaultCutoff).toFixed(2)}점</strong></span>
                     ` : '<span class="text-slate-500">※ 등록된 커트라인 점수가 없습니다.</span>'}
                 </div>
-            </div>
-        `;
+                </div>
+            </details>
+        ` });
     });
+    // 관심학교·지원 원서가 있는 학교를 맨 위로(나머지는 원래 순서)
+    rows.sort((a, b) => Number(b.matched) - Number(a.matched));
+    ctx.cardsHTML = rows.map((row) => row.html).join('')
+        + '<p id="schoolListEmpty" class="hidden text-xs text-slate-400 p-4 text-center">조건에 맞는 학교가 없습니다.</p>';
 }

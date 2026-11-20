@@ -2,6 +2,7 @@ import { escapeHtml, escapeAttr, displayTrack } from '../../core/utils.js';
 import { showModalAlert, showModalConfirm } from '../../core/dialogs.js';
 import { notifyApplicationsChanged } from '../../core/navigation.js';
 import { suggestExtraRound } from '../../core/extraRound.js';
+import { NICE_PREVIEW_SLOT, refreshNicePreview } from './niceFormPreview.js';
 
 // 지원현황 입력: 원서별 입력 화면 렌더러 정의
 export function defineApplicationRenderer(ctx) {
@@ -122,7 +123,7 @@ export function defineApplicationRenderer(ctx) {
         ` : '';
 
         ctx.modal.innerHTML = `
-          <div class="glass-card p-7 w-full max-w-3xl max-h-[90vh] overflow-y-auto"><div class="flex justify-between items-start gap-4 mb-5"><div><h2 class="text-2xl font-bold text-white">📝 ${escapeHtml(ctx.name)} 지원·합격 현황</h2><p class="text-sm text-text-muted mt-1">이 자료는 학급 암호화 DB와 취합자료 파일에만 저장됩니다. 중앙 서버로 전송되지 않습니다.</p></div><button aria-label="닫기" id="closeApplicationModal" class="text-3xl text-text-muted cursor-pointer">×</button></div>
+          <div class="glass-card p-7 w-full max-w-5xl max-h-[90vh] overflow-y-auto"><div class="flex justify-between items-start gap-4 mb-5"><div><h2 class="text-2xl font-bold text-white">📝 ${escapeHtml(ctx.name)} 지원·합격 현황</h2><p class="text-sm text-text-muted mt-1">이 자료는 학급 암호화 DB와 취합자료 파일에만 저장됩니다. 중앙 서버로 전송되지 않습니다.</p></div><button aria-label="닫기" id="closeApplicationModal" class="text-3xl text-text-muted cursor-pointer">×</button></div>
           ${list}
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4 rounded-xl border border-slate-700 p-5 bg-slate-900/40">
             ${lockedBannerHTML}
@@ -136,6 +137,7 @@ export function defineApplicationRenderer(ctx) {
             <label id="appStageArea" class="text-sm font-bold ${needsDepartment && ctx.stageInfo(record.schoolName, record.track) ? '' : 'hidden'}">1차 전형 결과 <span class="text-[11px] font-normal text-slate-400">(1차 합격 후 면접 등에서 떨어지면 '1차 합격' + 지원 상태 '불합격')</span><select id="appStage" class="input-field mt-1 w-full" ${ctx.canEdit && !isLocked ? '' : 'disabled'}>${ctx.stageOptions(record.firstStageResult || '')}</select><span id="appStageNote" class="block mt-1 text-[11px] font-normal text-indigo-300"></span></label>
             <label class="text-sm font-bold">점수 스냅샷 <span class="text-[11px] text-cyan-300">자동</span><input id="appScore" type="text" inputmode="decimal" value="${displayedScore || ''}" placeholder="${isUnscored && !isNone ? '별도 전형 학교 — 점수 미기록' : '학교·전형 선택 시 자동 산출'}" class="input-field mt-1 w-full" ${isUnscored ? 'disabled' : (autoScore || isLocked ? 'readonly' : (ctx.canEdit ? '' : 'disabled'))}></label>
             <label class="text-sm font-bold md:col-span-2">점수 기준 / 메모<input id="appBasis" value="${escapeAttr(displayedBasis)}" data-auto="${isAutoBasis}" placeholder="${isNone ? '예: 진학포기 사유, 기타 진로 등' : (isUnscored ? '예: 실기·면접 전형, 지원 학과, 메모 등' : '예: 3-1 누적 예상, 1차 서류점수 등')}" class="input-field mt-1 w-full" ${ctx.canEdit && !isLocked ? '' : 'disabled'}></label>
+            ${NICE_PREVIEW_SLOT}
             <div id="appPreferenceArea" class="md:col-span-2 ${needsDepartment ? '' : 'hidden'}">${ctx.departmentControls(record.schoolName, record.preferences || [], record.assignedDepartment || '', ctx.preferenceLimit(record.category, record.track))}</div>
             <p id="generalApplicationGuide" class="md:col-span-2 text-xs text-cyan-300 ${isGeneral ? '' : 'hidden'}">후기 일반고는 배정 고등학교를 입력하지 않아도 됩니다.</p>
             <p id="noneApplicationGuide" class="md:col-span-2 text-xs text-amber-300 ${isNone ? '' : 'hidden'}">미진학(진학포기) 학생은 학교와 점수를 입력하지 않으며, 지원 상태가 자동으로 ‘미진학’으로 처리됩니다.</p>
@@ -232,6 +234,7 @@ export function defineApplicationRenderer(ctx) {
             const previousTrack = track.value;
             track.innerHTML = ctx.trackOptions(category, schoolName, previousTrack);
             refreshStageArea();
+            refreshNicePreview(ctx, category, schoolName, track.value); // 특성화고만 나이스 대조표
             const prefArea = document.getElementById('appPreferenceArea');
             if (prefArea && prefArea.dataset.limit !== String(ctx.preferenceLimit(category, track.value))) refreshDepartmentControls();
             if (ctx.isCustomSchoolCategory(category)) {

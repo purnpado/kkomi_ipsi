@@ -26,6 +26,12 @@ func TestNiceRosterAccess(t *testing.T) {
 	if _, err := homeroom.GetStudentNiceRows(2, "1", "가상"); err == nil {
 		t.Fatal("담임이 다른 반 학생 대조를 보면 안 됩니다")
 	}
+	if _, err := homeroom.GetApplicationNiceRow(2, "1", "가상", "special", "울산상업고등학교", "일반"); err == nil {
+		t.Fatal("담임이 다른 반 학생의 원서 대조표를 보면 안 됩니다")
+	}
+	if _, err := (&App{db: dm}).GetApplicationNiceRow(1, "1", "가상", "special", "울산상업고등학교", "일반"); err == nil {
+		t.Fatal("로그인 전에는 원서 대조표를 볼 수 없어야 합니다")
+	}
 	if _, err := (&App{db: dm}).GetNiceRoster(1); err == nil {
 		t.Fatal("로그인 전에는 볼 수 없어야 합니다")
 	}

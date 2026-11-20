@@ -92,6 +92,7 @@ export function bindWishlistControls(ctx) {
         ctx.modalEl.querySelectorAll('.school-counsel-card').forEach(card => {
             const sch = card.dataset.school || card.querySelector('.font-bold.text-white')?.textContent || '';
             const isMatch = currentList.some(w => ctx.isSameSchool(w.schoolName, sch)) || (ctx.data.applications || []).some(a => ctx.isSameSchool(a.schoolName, sch));
+            card.dataset.matched = isMatch ? '1' : '0';
             if (hasRegistered) {
                 if (isMatch) {
                     card.classList.remove('counsel-print-unregistered-school');

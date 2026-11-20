@@ -27,7 +27,9 @@ function semesterDetails(d) {
         <p class="counsel-summary-note">${projection} ${substitutions.join(' ')}</p>`;
 }
 
-export function renderGeneralSummary(d) {
+// 후기 일반고 내신 칸: 큰 숫자 두 개와 판정을 한 줄에, 항목별 점수를 한 줄에 둔다.
+// 산출 근거와 후기 일반고 입력(창체·행발·학년별 출결·봉사·전입생 환산)은 접힌 칸으로 둔다(inputsHTML).
+export function renderGeneralSummary(d, inputsHTML = '') {
     const result = judgeGeneralPercentile(d.generalHSPercentile);
     const settings = getJudgmentSettings();
     const total = Number(d.generalHSTotalScore || 0);
@@ -37,16 +39,23 @@ export function renderGeneralSummary(d) {
     const parts = [['교과', d.generalHSAcademicScore, 2], ['출석', d.generalHSAttendanceScore, 1],
         ['봉사', d.generalHSVolunteerScore, 1], ['행발', d.generalHSBehaviorScore, 0], ['창체', d.generalHSCreativeScore, 0]];
     const partsHTML = parts.map(([label, value, digits]) => `<div class="counsel-score-part"><span>${label}</span><strong>${score(value, digits)}</strong></div>`).join('');
-    return `<section class="counsel-general" aria-labelledby="counselGeneralTitle">
-        <div class="counsel-general-heading"><div><span class="counsel-eyebrow">진학 상담 지표</span><h3 id="counselGeneralTitle">후기 일반고 내신</h3></div><span class="counsel-status">${projected ? '예상' : '확정'}</span></div>
-        <div class="counsel-general-main">
-            <div class="counsel-total"><span>내신 점수 <small>/ 200점</small></span><strong>${score(total, 2)}${hasRange ? ` <span class="counsel-range">~ ${score(high, 2)}</span>` : ''}<small>점</small></strong><p>${hasRange ? '미정 가산점을 포함한 예상 범위' : '현재 입력된 자료 기준'} · 가산점 제외 기본 지표 ${score(d.generalHSBaseScore, 2)}점</p></div>
-            <div class="counsel-percentile"><span>학교 내 교과 석차백분율</span><strong>${score(d.generalHSPercentile, 2)}<small>%</small></strong><span class="counsel-judgment counsel-judgment--${result.level}">${result.emoji} 학교 설정 기준 ${result.label}${result.level === 'unknown' ? '' : ' 구간'}</span><p>안정 ≤ ${settings.generalSafePct}% · 경계 ≤ ${settings.generalBorderPct}%</p></div>
+    const rangeNote = hasRange ? `<p class="cg-note">미정 가산점 포함 예상 범위 ~ ${score(high, 2)}점</p>` : '';
+    return `<section class="counsel-general counsel-section" id="counselSecGeneral" aria-labelledby="counselGeneralTitle">
+        <div class="cg-head"><h3 id="counselGeneralTitle">후기 일반고 내신</h3><span class="counsel-status">${projected ? '예상' : '확정'}</span></div>
+        <div class="cg-main">
+            <div class="cg-figure"><span>내신 점수</span><strong>${score(total, 2)}<small> / 200점</small></strong>${rangeNote}</div>
+            <div class="cg-figure"><span>교과 석차백분율</span><strong>${score(d.generalHSPercentile, 2)}<small>%</small></strong></div>
+            <div class="cg-judge"><span class="counsel-judgment counsel-judgment--${result.level}">${result.emoji} ${result.label}${result.level === 'unknown' ? '' : ' 구간'}</span><p class="cg-note">학교 설정: 안정 ≤ ${settings.generalSafePct}% · 경계 ≤ ${settings.generalBorderPct}%</p></div>
+            <div class="counsel-city" id="generalCityCutoff" role="status">관내 추정 합격선 자료를 확인하고 있습니다.</div>
         </div>
         <div class="counsel-score-parts" aria-label="내신 점수 구성">${partsHTML}</div>
-        <div class="counsel-city" id="generalCityCutoff" role="status">관내 추정 합격선 자료를 확인하고 있습니다.</div>
-        <details class="counsel-details"><summary>산출 근거 보기 <span aria-hidden="true">⌄</span></summary>
-            <div class="counsel-details-body">${semesterDetails(d)}<p class="counsel-summary-note">출석·봉사는 학년별로 산출합니다. ${d.generalHSPerGradeExact ? '학년별 자료를 반영했습니다.' : '학년별 미입력분은 누적 자료로 예상했습니다.'} ${d.generalHSBonusEntered ? '창체·행발 가산점 입력 완료.' : '창체·행발 가산점 미입력.'}</p></div>
-        </details>
+        <div class="cg-folds">
+            <details class="counsel-details"><summary>산출 근거 보기 <span aria-hidden="true">⌄</span></summary>
+                <div class="counsel-details-body"><p class="counsel-summary-note">가산점 제외 기본 지표 ${score(d.generalHSBaseScore, 2)}점.</p>${semesterDetails(d)}<p class="counsel-summary-note">출석·봉사는 학년별로 산출합니다. ${d.generalHSPerGradeExact ? '학년별 자료를 반영했습니다.' : '학년별 미입력분은 누적 자료로 예상했습니다.'} ${d.generalHSBonusEntered ? '창체·행발 가산점 입력 완료.' : '창체·행발 가산점 미입력.'}</p></div>
+            </details>
+            ${inputsHTML ? `<details class="counsel-details no-print" id="generalInputsFold"><summary>✏️ 입력 고치기 <span class="cg-fold-hint">${d.generalHSBonusEntered ? '창체·행발 입력 완료' : '창체·행발 미입력'}</span> <span aria-hidden="true">⌄</span></summary>
+                <div class="counsel-details-body">${inputsHTML}</div>
+            </details>` : ''}
+        </div>
     </section>`;
 }

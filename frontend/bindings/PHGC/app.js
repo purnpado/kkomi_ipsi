@@ -323,6 +323,20 @@ export function GetAppVersion() {
 }
 
 /**
+ * GetApplicationNiceRow 원서 입력 창: 고른 특성화고 학교·전형의 나이스 원서 입력값 대조표.
+ * @param {number} classNum
+ * @param {string} studentNum
+ * @param {string} name
+ * @param {string} category
+ * @param {string} schoolName
+ * @param {string} track
+ * @returns {$CancellablePromise<database$0.NiceRosterRow>}
+ */
+export function GetApplicationNiceRow(classNum, studentNum, name, category, schoolName, track) {
+    return $Call.ByID(136615170, classNum, studentNum, name, category, schoolName, track);
+}
+
+/**
  * GetApplicationSummaries returns school-internal aggregate counts only.
  * @returns {$CancellablePromise<database$0.ApplicationSummary[] | null>}
  */

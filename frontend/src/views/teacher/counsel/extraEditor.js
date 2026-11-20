@@ -3,13 +3,14 @@ import { getWishlist } from './wishlistStore.js';
 import { renderStudentModalContent } from './studentModal.js';
 import { collectVolunteerTransfer } from './volunteerTransfer.js';
 import { bindLeadership, collectLeadership } from './leadershipInput.js';
+import { expandSchoolsForPrint } from './schoolList.js';
 
 // 상담 모달: 비교과 저장·상담표 인쇄
 export function bindExtraSaveAndPrint(ctx) {
     // 수기 가산점 및 출결 저장 (담임 및 관리자만 가능)
     bindLeadership(ctx.modalEl);
-    const saveBtn = document.getElementById('saveExtraBtn');
-    if (saveBtn) {
+    // [저장 후 재계산]은 전기고 가산점 칸과 후기 일반고 "입력 고치기" 칸에 하나씩 있다(같은 저장).
+    ctx.modalEl.querySelectorAll('.save-extra-btn').forEach((saveBtn) => {
         saveBtn.addEventListener('click', async () => {
             saveBtn.disabled = true;
             saveBtn.textContent = '저장 중…';
@@ -60,10 +61,11 @@ export function bindExtraSaveAndPrint(ctx) {
                 saveBtn.textContent = '💾 저장 후 재계산';
             }
         });
-    }
+    });
 
     // 인쇄/PDF 저장
     document.getElementById('printReportBtn')?.addEventListener('click', () => {
+        expandSchoolsForPrint(ctx); // 거르기로 숨긴 줄도 보이고, 접힌 줄은 모두 펼쳐 인쇄한다
         const printArea = document.getElementById('printReportArea');
         const includeCounsel = document.getElementById('printIncludeCounselCheck')?.checked ?? false;
 
