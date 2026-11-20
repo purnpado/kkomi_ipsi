@@ -36,7 +36,9 @@ func TestPatchApplicationKeepsNewestAndIgnoresForeignID(t *testing.T) {
 		t.Helper()
 		candidate := r
 		candidate.UpdatedAt = timestamp
-		skip, err := dm.WouldSkipApplicationPatch(candidate)
+		candidate.Status = "불합격"
+		plan, err := dm.PlanPatchApplications(model.PatchChange{ClassNum: 1, StudentNum: "1", StudentName: "가상학생", Applications: []model.ApplicationRecord{candidate}}, PatchBase{})
+		skip := plan.Silent == 1 && len(plan.Items()) == 0
 		if err != nil || skip != expected {
 			t.Fatalf("preview %q: skip=%v err=%v", timestamp, skip, err)
 		}

@@ -245,6 +245,10 @@ func (dm *DBManager) EnsureClassDBSchema(dbPath string) error {
 	if err != nil {
 		return fmt.Errorf("학급 DB 초기화 실패: %w", err)
 	}
+	// 지운 원서 기록·학급 정보(취합 병합 때 학년부장 최종본을 지키는 데 쓴다)
+	if err := ensureApplicationTrackingSchema(db); err != nil {
+		return fmt.Errorf("학급 DB 초기화 실패(지운 원서 기록): %w", err)
+	}
 	return nil
 }
 
@@ -265,7 +269,9 @@ func (dm *DBManager) MigrateExistingClassDBs() error {
 		}
 		if err := dm.InitClassDB(classNum); err != nil {
 			failed = append(failed, fmt.Sprintf("%d반: %v", classNum, err))
+			continue
 		}
+		dm.markDistributionReceived(classNum)
 	}
 	if len(failed) > 0 {
 		return fmt.Errorf("학급 DB 구조 갱신 실패: %s", strings.Join(failed, "; "))

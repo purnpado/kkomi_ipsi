@@ -179,7 +179,7 @@ func ExportDistributionPackage(dm *database.DBManager, dataKey []byte, username,
 // ImportDistributionPackage 배포자료를 가져온다. 기존 학급 DB는 백업만 하고 새 DB로 옮기지 않는다
 // (암호를 모르는 경우의 선택지). 기존 자료를 옮기려면 ImportDistributionPackageWithPassword 를 쓴다.
 func ImportDistributionPackage(dm *database.DBManager, inputPath string) (string, error) {
-	result, err := importDistributionPackage(dm, inputPath, "", false)
+	result, err := importDistributionPackage(dm, inputPath, "", false, true)
 	if err != nil {
 		return "", err
 	}
@@ -188,11 +188,17 @@ func ImportDistributionPackage(dm *database.DBManager, inputPath string) (string
 
 // ImportDistributionPackageWithPassword 배포자료를 가져오면서 기존 학급 DB의 상담 일지·원서·수기 비교과를
 // 새 DB로 옮긴다. 기존 학급 DB가 있으면 공용 데이터 암호 또는 본인 비밀번호가 필요하다.
+// 담임이 아직 내지 않은 원서가 있으면 아무것도 바꾸지 않고 PendingConfirm 결과를 돌려준다.
 func ImportDistributionPackageWithPassword(dm *database.DBManager, inputPath, password string) (*DistributionImportResult, error) {
-	return importDistributionPackage(dm, inputPath, password, true)
+	return importDistributionPackage(dm, inputPath, password, true, false)
 }
 
-func importDistributionPackage(dm *database.DBManager, inputPath, password string, merge bool) (*DistributionImportResult, error) {
+// ImportDistributionPackageConfirmed 아직 내지 않은 원서가 있어도 학년부장 최종본으로 가져온다(그 원서는 백업에만 남음).
+func ImportDistributionPackageConfirmed(dm *database.DBManager, inputPath, password string) (*DistributionImportResult, error) {
+	return importDistributionPackage(dm, inputPath, password, true, true)
+}
+
+func importDistributionPackage(dm *database.DBManager, inputPath, password string, merge, allowUnsubmitted bool) (*DistributionImportResult, error) {
 	reader, err := zip.OpenReader(inputPath)
 	if err != nil {
 		return nil, fmt.Errorf("배포자료를 열 수 없습니다: %w", err)
@@ -259,6 +265,17 @@ func importDistributionPackage(dm *database.DBManager, inputPath, password strin
 		}
 		if preserved, err = collectLocalClassData(dm, tmpDir, key); err != nil {
 			return nil, err
+		}
+		// 원서는 학년부장 최종본을 따른다. 아직 내지 않은 원서가 있으면 먼저 확인받는다(아무것도 지우기 전).
+		unsubmitted, err := unsubmittedInPackage(dm, packageFiles, tmpDir, key, preserved)
+		if err != nil {
+			return nil, err
+		}
+		result.UnsubmittedApplications = unsubmitted
+		if unsubmitted > 0 && !allowUnsubmitted {
+			result.PendingConfirm = true
+			result.Path = inputPath
+			return result, nil
 		}
 		result.MergedWithLocalData = true
 	}

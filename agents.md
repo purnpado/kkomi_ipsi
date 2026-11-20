@@ -70,6 +70,7 @@ Gitea 원본을 복제한 뒤 다음 개발 도구를 설치해야 합니다.
 - `server-data/highschools.json`: 고교·학과 마스터 목록과 학년도별 요강 모집정원(`quotas`, 운영자가 요강을 확인해 수동 등록). 실행 파일에 포함되며(`main.go` embed) `go test`가 학과 정원 합과 합계를 대조한다.
 - `server-data/version.json`, `internal/sync/manager.go`: 버전 확인과 릴리즈 안내
 - `docs/admission-score-audit-plan.md`: 학교별 공식 산출식 검증 기준
+- `docs/patch-merge-rules.md`: 담임 취합 병합 규칙(학년부장 PC가 최종본, 지운 원서 기록·배포 시각·원서 분류)
 - `docs/인수인계_현재상태.md`, `docs/handover.md`: 현재 상태와 다음 작업
 
 ## 학년도 전환(학교 운영)

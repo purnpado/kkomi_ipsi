@@ -721,6 +721,17 @@ export function ImportDistributionPackage(inputPath) {
 }
 
 /**
+ * ImportDistributionPackageConfirmed 아직 내지 않은 원서가 있어도 학년부장 최종본으로 배포자료를 가져온다.
+ * (OpenDistributionPackageWithPassword가 PendingConfirm으로 돌려준 경로와 암호로 다시 부른다.)
+ * @param {string} inputPath
+ * @param {string} password
+ * @returns {$CancellablePromise<exchange$0.DistributionImportResult | null>}
+ */
+export function ImportDistributionPackageConfirmed(inputPath, password) {
+    return $Call.ByID(2018342975, inputPath, password);
+}
+
+/**
  * ImportDistributionPackageWithPassword 배포자료를 가져오면서 기존 학급 자료를 새 DB로 옮긴다.
  * @param {string} inputPath
  * @param {string} password
@@ -920,8 +931,9 @@ export function OpenSharedAdmissionPackageDialog() {
 
 /**
  * OpenTeacherPatch lets the administrator select and merge one or more patch files.
+ * 학년부장이 골라야 하는 원서(지우기·바꾸기·양쪽에서 고침)는 학년부장 것을 그대로 두고 반별 수를 알려 준다.
  * @param {string} password
- * @returns {$CancellablePromise<{ [_ in string]?: number } | null>}
+ * @returns {$CancellablePromise<model$0.PatchBatchResult | null>}
  */
 export function OpenTeacherPatch(password) {
     return $Call.ByID(857642469, password);

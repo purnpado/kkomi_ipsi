@@ -5,6 +5,11 @@
 import * as $models from "./models.js";
 
 /**
+ * ApplicationKey 원서 이름표(학년도·구분·학교·전형)와 지운 시각.
+ * @typedef {$models.ApplicationKey} ApplicationKey
+ */
+
+/**
  * ApplicationRecord is a local-only student admission application. Scores are
  * frozen at the time of application so later formula changes do not alter
  * historical results.
@@ -14,6 +19,21 @@ import * as $models from "./models.js";
 /**
  * ApplicationScoreDetails 원서 접수 시점의 세부 산출 점수 스냅샷
  * @typedef {$models.ApplicationScoreDetails} ApplicationScoreDetails
+ */
+
+/**
+ * PatchAppItem 한 원서(또는 학교·전형을 바꾼 옛·새 원서 한 쌍)의 병합 분류와 고를 수 있는 처리.
+ * @typedef {$models.PatchAppItem} PatchAppItem
+ */
+
+/**
+ * PatchAppSummary 화면에 보일 원서 요약(성적 수치 없음).
+ * @typedef {$models.PatchAppSummary} PatchAppSummary
+ */
+
+/**
+ * PatchBatchResult 여러 반 일괄 병합 결과. 학년부장이 골라야 하는 원서는 학년부장 것을 그대로 둔다.
+ * @typedef {$models.PatchBatchResult} PatchBatchResult
  */
 
 /**

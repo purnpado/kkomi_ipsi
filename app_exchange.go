@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"PHGC/internal/crypto"
+	"PHGC/internal/database"
 	"PHGC/internal/exchange"
 	"PHGC/internal/model"
 )
@@ -141,7 +142,12 @@ func (a *App) SaveCurrentClassPatch(password string) (string, error) {
 	if _, err := crypto.OpenSharedKeyEnvelope(a.db.DataDir, password); err != nil {
 		return "", fmt.Errorf("공용 데이터 암호가 올바르지 않습니다. 학년부장에게 확인 후 정확한 암호를 입력해 주세요")
 	}
-	return a.SaveTeacherPatch(password, a.user.Username, a.user.ClassNum, changes)
+	path, err := a.SaveTeacherPatch(password, a.user.Username, a.user.ClassNum, changes)
+	if err == nil && path != "" {
+		// 반 전체를 낸 시각: 배포자료를 다시 가져올 때 "아직 내지 않은 원서"를 찾는 기준
+		_ = a.db.SetClassMeta(a.user.ClassNum, database.MetaPatchExportedAt, database.NowDBTime())
+	}
+	return path, err
 }
 
 // OpenTeacherPatchPreview selects a patch without applying it.
@@ -165,7 +171,8 @@ func (a *App) OpenTeacherPatchPreview(password string) (model.PatchPreview, erro
 }
 
 // OpenTeacherPatch lets the administrator select and merge one or more patch files.
-func (a *App) OpenTeacherPatch(password string) (map[string]int, error) {
+// 학년부장이 골라야 하는 원서(지우기·바꾸기·양쪽에서 고침)는 학년부장 것을 그대로 두고 반별 수를 알려 준다.
+func (a *App) OpenTeacherPatch(password string) (*model.PatchBatchResult, error) {
 	if err := a.requireMaster("취합자료 병합"); err != nil {
 		return nil, err
 	}
@@ -181,19 +188,25 @@ func (a *App) OpenTeacherPatch(password string) (map[string]int, error) {
 	if err != nil || len(paths) == 0 {
 		return nil, err
 	}
-	totalMerged := 0
-	validFileCount := 0
+	result := &model.PatchBatchResult{ReviewByClass: map[int]int{}}
 	for _, path := range paths {
-		if count, err := a.ImportTeacherPatch(password, path); err == nil {
-			totalMerged += count
-			validFileCount++
+		preview, err := exchange.InspectTeacherPatch(a.db, password, path)
+		if err != nil {
+			continue
+		}
+		count, review, err := exchange.ImportTeacherPatchBulk(a.db, password, path)
+		if err != nil {
+			continue
+		}
+		result.Students += count
+		result.Files++
+		if review > 0 {
+			result.Review += review
+			result.ReviewByClass[preview.ClassNum] += review
 		}
 	}
-	if validFileCount == 0 {
+	if result.Files == 0 {
 		return nil, fmt.Errorf("선택된 파일 중 올바른 취합자료가 없거나 암호가 일치하지 않습니다")
 	}
-	return map[string]int{
-		"files":    validFileCount,
-		"students": totalMerged,
-	}, nil
+	return result, nil
 }

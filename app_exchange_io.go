@@ -47,6 +47,12 @@ func (a *App) ImportDistributionPackageWithPassword(inputPath, password string) 
 	return exchange.ImportDistributionPackageWithPassword(a.db, inputPath, password)
 }
 
+// ImportDistributionPackageConfirmed 아직 내지 않은 원서가 있어도 학년부장 최종본으로 배포자료를 가져온다.
+// (OpenDistributionPackageWithPassword가 PendingConfirm으로 돌려준 경로와 암호로 다시 부른다.)
+func (a *App) ImportDistributionPackageConfirmed(inputPath, password string) (*exchange.DistributionImportResult, error) {
+	return exchange.ImportDistributionPackageConfirmed(a.db, inputPath, password)
+}
+
 // ExportTeacherPatch 학급 단위 암호화 취합자료 작성
 func (a *App) ExportTeacherPatch(password, username string, classNum int, changes []model.PatchChange, outputPath string) error {
 	if err := a.requireHomeroomOf(classNum, "취합자료 만들기"); err != nil {

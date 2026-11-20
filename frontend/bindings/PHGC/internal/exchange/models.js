@@ -13,6 +13,9 @@
  * @property {number[] | null} unrestoredClasses
  * @property {string} backupFolder
  * @property {boolean} mergedWithLocalData
+ * @property {number} unsubmittedApplications - UnsubmittedApplications 담임이 배포·제출 뒤 고치거나 지워 놓고 아직 내지 않은 원서 수
+ * @property {boolean} pendingConfirm - PendingConfirm 아직 내지 않은 원서가 있어 가져오지 않고 확인을 기다림(Path로 다시 부른다)
+ * @property {string} [path]
  */
 
 /**

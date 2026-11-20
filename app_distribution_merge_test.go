@@ -65,6 +65,11 @@ func TestRedistributionMergesTeacherLocalDataWithPassword(t *testing.T) {
 	if err := teacher.SaveStudentApplication(model.ApplicationRecord{ClassNum: 1, StudentNum: "1", StudentName: "가상학생", AdmissionYear: 2027, Category: "meister", SchoolName: "울산마이스터고", Track: "일반", Status: "지원완료"}); err != nil {
 		t.Fatal(err)
 	}
+	// 같은 초 안에 배포·입력이 일어나는 시험 환경이라, 담임 입력 시각을 배포 뒤로 분명히 옮긴다.
+	if db, err := teacher.db.OpenDB(teacher.db.GetClassDBPath(1)); err == nil {
+		_, _ = db.Exec(`UPDATE student_applications SET updated_at = datetime('now', '+1 minute')`)
+		db.Close()
+	}
 	if err := teacher.SaveStudentExtra(1, "1", "가상학생", `{"leadership":2}`); err != nil {
 		t.Fatal(err)
 	}
@@ -99,11 +104,16 @@ func TestRedistributionMergesTeacherLocalDataWithPassword(t *testing.T) {
 		t.Fatalf("거부된 시도 뒤에도 기존 학급 DB가 남아 있어야 합니다: %v", err)
 	}
 
-	result, err := locked.ImportDistributionPackageWithPassword(pkgV2, "teacher-changed")
+	// 학년부장 PC가 최종본: 아직 내지 않은 담임 원서가 있으면 아무것도 바꾸지 않고 먼저 확인을 기다린다.
+	pending, err := locked.ImportDistributionPackageWithPassword(pkgV2, "teacher-changed")
+	if err != nil || !pending.PendingConfirm || pending.UnsubmittedApplications != 1 || pending.Path != pkgV2 || pending.BackupFolder != "" {
+		t.Fatalf("아직 내지 않은 원서 확인이 먼저 나와야 합니다: %#v, %v", pending, err)
+	}
+	result, err := locked.ImportDistributionPackageConfirmed(pkgV2, "teacher-changed")
 	if err != nil {
 		t.Fatalf("본인 비밀번호로 병합 가져오기: %v", err)
 	}
-	if !result.MergedWithLocalData || result.PreservedClasses != 1 || result.Counsels != 1 || result.Applications != 1 || result.Overrides != 1 || result.BackupFolder == "" {
+	if !result.MergedWithLocalData || result.PreservedClasses != 1 || result.Counsels != 1 || result.Applications != 0 || result.Overrides != 1 || result.BackupFolder == "" {
 		t.Fatalf("병합 결과 건수가 올바르지 않습니다: %#v", result)
 	}
 
@@ -124,8 +134,8 @@ func TestRedistributionMergesTeacherLocalDataWithPassword(t *testing.T) {
 		t.Fatalf("상담 기록이 옮겨져야 합니다: %#v, %v", counsels, err)
 	}
 	apps, err := after.GetStudentApplications(1, "1", "가상학생")
-	if err != nil || len(apps) != 1 || apps[0].Status != "지원완료" {
-		t.Fatalf("지원현황이 옮겨져야 합니다: %#v, %v", apps, err)
+	if err != nil || len(apps) != 0 {
+		t.Fatalf("원서는 학년부장 최종본(배포자료)을 따라야 합니다: %#v, %v", apps, err)
 	}
 	student, err := after.db.GetStudent(1, "1", "가상학생")
 	if err != nil || student.ExtraData != `{"leadership":2}` {

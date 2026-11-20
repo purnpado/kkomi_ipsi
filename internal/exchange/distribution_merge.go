@@ -33,6 +33,11 @@ type DistributionImportResult struct {
 	UnrestoredClasses   []int  `json:"unrestoredClasses"`
 	BackupFolder        string `json:"backupFolder"`
 	MergedWithLocalData bool   `json:"mergedWithLocalData"`
+	// UnsubmittedApplications 담임이 배포·제출 뒤 고치거나 지워 놓고 아직 내지 않은 원서 수
+	UnsubmittedApplications int `json:"unsubmittedApplications"`
+	// PendingConfirm 아직 내지 않은 원서가 있어 가져오지 않고 확인을 기다림(Path로 다시 부른다)
+	PendingConfirm bool   `json:"pendingConfirm"`
+	Path           string `json:"path,omitempty"`
 }
 
 var classDBNamePattern = regexp.MustCompile(`^class_(\d+)\.db(\.kkomi|\.phgc)?$`)
@@ -187,7 +192,6 @@ func mergeLocalDataIntoPackage(dm *database.DBManager, tmpDir string, key []byte
 			crypto.BackupLegacyFile(target)
 		}
 		result.PreservedClasses++
-		result.Applications += len(data.Apps)
 		result.Counsels += len(data.Counsels)
 		result.Overrides += len(data.Overrides)
 	}

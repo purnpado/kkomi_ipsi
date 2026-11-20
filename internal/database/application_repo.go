@@ -8,16 +8,26 @@ import (
 
 	"PHGC/internal/calc"
 	"PHGC/internal/model"
-	"PHGC/internal/parser"
 )
 
 func (dm *DBManager) SaveApplication(record model.ApplicationRecord) error {
-	return dm.saveApplication(record, false)
+	return dm.saveApplicationMode(record, saveNormal)
 }
 
-// merge preserves the source timestamp and only overwrites an older matching
-// record. Missing or invalid timestamps never overwrite an existing record.
-func (dm *DBManager) saveApplication(record model.ApplicationRecord, merge bool) error {
+// saveMode 원서 저장 방식.
+type saveMode int
+
+const (
+	// saveNormal 화면에서 저장: 지금 시각을 적고, ID가 있으면 그 원서를 제자리에서 고친다.
+	saveNormal saveMode = iota
+	// saveMergeNewer 원본 시각을 지키고, 같은 이름표 원서보다 엄격히 더 최근일 때만 덮는다.
+	saveMergeNewer
+	// saveForce 원본 시각을 지키고 덮는다(취합 병합에서 학년부장이 고른 처리).
+	saveForce
+)
+
+func (dm *DBManager) saveApplicationMode(record model.ApplicationRecord, mode saveMode) error {
+	merge := mode != saveNormal
 	if record.ClassNum < 1 || record.StudentNum == "" || record.StudentName == "" || record.AdmissionYear < 2000 || record.Category == "" || record.Status == "" {
 		return fmt.Errorf("지원 기록 정보가 올바르지 않습니다")
 	}
@@ -91,31 +101,20 @@ func (dm *DBManager) saveApplication(record model.ApplicationRecord, merge bool)
 		return err
 	}
 	defer db.Close()
-	if !merge && record.ID > 0 && (record.Category == "other" || record.Category == "out_province") {
-		// 기존 기타·타시도 지원의 학교명을 고치거나 기타 ↔ 타시도로 구분을 바꿀 때 새 원서를 추가하지 않는다.
-		var oldYear int
-		if err := db.QueryRow(`SELECT admission_year FROM student_applications WHERE id=? AND student_num=? AND student_name=? AND category IN ('other','out_province')`, record.ID, record.StudentNum, record.StudentName).Scan(&oldYear); err != nil {
-			return fmt.Errorf("수정할 기타 지원 기록을 찾을 수 없습니다: %w", err)
+	if !merge && record.ID > 0 {
+		// 이미 있는 원서를 열어 학년도·구분·학교·전형을 바꾸면 새 원서를 더하지 않고 그 원서를 고친다.
+		// (옛 이름표는 트리거가 지운 원서 기록으로 남겨 취합 병합 때 "바꾼 원서"로 알아본다.)
+		handled, err := updateApplicationInPlace(dm, db, record, string(prefs), scoreDetailsJSON)
+		if handled || err != nil {
+			return err
 		}
-		if oldYear != record.AdmissionYear {
-			closed, err := dm.IsAdmissionYearClosed(oldYear)
-			if err != nil {
-				return err
-			}
-			if closed {
-				return fmt.Errorf("%d 고입 결과가 확정되어 지원현황을 수정할 수 없습니다", oldYear)
-			}
-		}
-		_, err = db.Exec(`UPDATE student_applications SET admission_year=?, category=?, school_name=?, track=?, status=?, score=?, score_basis=?, preferences_json=?, assigned_department=?, assigned_school=?, first_stage_result=?, extra_round=?, updated_at=CURRENT_TIMESTAMP WHERE id=? AND student_num=? AND student_name=? AND category IN ('other','out_province')`,
-			record.AdmissionYear, record.Category, record.SchoolName, record.Track, record.Status, record.Score, record.ScoreBasis, string(prefs), record.AssignedDepartment, record.AssignedSchool, record.FirstStageResult, record.ExtraRound, record.ID, record.StudentNum, record.StudentName)
-		return err
 	}
 	timestamp := record.UpdatedAt
 	if !merge || timestamp == "" {
 		timestamp = ""
 	}
 	condition := ""
-	if merge {
+	if mode == saveMergeNewer {
 		condition = " WHERE julianday(?) IS NOT NULL AND julianday(student_applications.updated_at) IS NOT NULL AND julianday(?) > julianday(student_applications.updated_at)"
 	}
 	query := `INSERT INTO student_applications (student_num,student_name,admission_year,category,school_name,track,status,score,score_basis,preferences_json,assigned_department,assigned_school,score_details_json,first_stage_result,extra_round,updated_at)
@@ -132,7 +131,7 @@ func (dm *DBManager) saveApplication(record model.ApplicationRecord, merge bool)
 		score_details_json=CASE WHEN excluded.score_details_json != '' THEN excluded.score_details_json ELSE student_applications.score_details_json END,
 		updated_at=excluded.updated_at` + condition
 	args := []any{record.StudentNum, record.StudentName, record.AdmissionYear, record.Category, record.SchoolName, record.Track, record.Status, record.Score, record.ScoreBasis, string(prefs), record.AssignedDepartment, record.AssignedSchool, scoreDetailsJSON, record.FirstStageResult, record.ExtraRound, timestamp}
-	if merge {
+	if mode == saveMergeNewer {
 		args = append(args, record.UpdatedAt, record.UpdatedAt)
 	}
 	_, err = db.Exec(query, args...)
@@ -286,6 +285,8 @@ func (dm *DBManager) GetClassPatchChanges(classNum int) ([]model.PatchChange, er
 	if err != nil {
 		return nil, err
 	}
+	// 배포 뒤 지운 원서 기록만 싣는다(배포 사본에 함께 들어온 학년부장 쪽 옛 기록은 뺀다).
+	distributedAt, _ := dm.GetClassMeta(classNum, MetaDistributedAt)
 	changes := make([]model.PatchChange, 0, len(students))
 	for _, student := range students {
 		applications, err := dm.GetStudentApplications(classNum, student.StudentNum, student.Name)
@@ -293,53 +294,13 @@ func (dm *DBManager) GetClassPatchChanges(classNum int) ([]model.PatchChange, er
 			return nil, err
 		}
 		mark, _ := dm.GetStudentStatExclusion(classNum, student.StudentNum, student.Name)
-		changes = append(changes, model.PatchChange{ClassNum: classNum, StudentNum: student.StudentNum, StudentName: student.Name, Attendance: student.AttendanceData, Volunteer: student.VolunteerData, Extra: student.ExtraData, Applications: applications, StatExclusion: mark})
+		deleted, err := dm.GetApplicationDeletions(classNum, student.StudentNum, student.Name, distributedAt)
+		if err != nil {
+			return nil, err
+		}
+		changes = append(changes, model.PatchChange{ClassNum: classNum, StudentNum: student.StudentNum, StudentName: student.Name, Attendance: student.AttendanceData, Volunteer: student.VolunteerData, Extra: student.ExtraData, Applications: applications, StatExclusion: mark, DeletedApplications: deleted})
 	}
 	return changes, nil
-}
-
-// ApplyPatchChange applies teacher changes, including class-scoped application
-// records.  Every embedded record is bound to the same student and class.
-func (dm *DBManager) ApplyPatchChange(change model.PatchChange) error {
-	if change.ClassNum < 1 || change.StudentNum == "" || change.StudentName == "" {
-		return fmt.Errorf("변경분의 학생 정보가 올바르지 않습니다")
-	}
-	if change.Attendance != "" {
-		if _, err := dm.UpdateStudentAttendance(change.ClassNum, []parser.StudentExcelData{{StudentNum: change.StudentNum, Name: change.StudentName, AttendanceData: change.Attendance}}); err != nil {
-			return err
-		}
-	}
-	if change.Volunteer != "" {
-		if _, err := dm.UpdateStudentVolunteer(change.ClassNum, []parser.StudentExcelData{{StudentNum: change.StudentNum, Name: change.StudentName, VolunteerData: change.Volunteer}}); err != nil {
-			return err
-		}
-	}
-	if change.Extra != "" {
-		if err := dm.UpdateStudentExtra(change.ClassNum, change.StudentNum, change.StudentName, change.Extra); err != nil {
-			return err
-		}
-	}
-	for _, record := range change.Applications {
-		record.ClassNum = change.ClassNum
-		if record.StudentNum != "" && record.StudentNum != change.StudentNum {
-			return fmt.Errorf("지원 기록의 학생 번호가 변경분과 일치하지 않습니다")
-		}
-		if record.StudentName != "" && record.StudentName != change.StudentName {
-			return fmt.Errorf("지원 기록의 학생 이름이 변경분과 일치하지 않습니다")
-		}
-		record.StudentNum = change.StudentNum
-		record.StudentName = change.StudentName
-		if err := dm.saveApplication(record, true); err != nil {
-			return err
-		}
-	}
-	if change.StatExclusion != nil {
-		// 입시 통계 제외 표시: 학년부장 PC 기록보다 최근에 바꾼 것만 받는다.
-		if err := dm.MergeStudentStatExclusion(change.ClassNum, change.StudentNum, change.StudentName, *change.StatExclusion); err != nil {
-			return err
-		}
-	}
-	return nil
 }
 
 // normalizeFirstStageResult는 1차 전형 결과를 최종 상태와 맞춘다.

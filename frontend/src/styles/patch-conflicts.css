@@ -1,0 +1,36 @@
+/* 취합 병합: 원서 확인 목록 (views/admin/patchConflicts.js) — 색은 tokens.css 변수만 쓴다 */
+.patch-banner {
+    border: 1px solid var(--kk-warning);
+    border-radius: 12px;
+    background: var(--kk-judge-hope-bg);
+    color: var(--kk-text-1);
+    padding: 12px 14px;
+    margin-bottom: 12px;
+    font-size: var(--kk-fs-2);
+    line-height: 1.55;
+}
+.patch-banner p + p { margin-top: 4px; }
+.patch-banner-title { color: var(--kk-warning); font-weight: 700; font-size: var(--kk-fs-3); }
+
+.patch-apps { margin-top: 8px; display: grid; gap: 8px; }
+.patch-note { color: var(--kk-text-2); font-size: var(--kk-fs-1); }
+.patch-review-list { display: grid; gap: 8px; }
+.patch-review {
+    border: 1px solid var(--kk-line-strong);
+    border-left: 3px solid var(--kk-warning);
+    border-radius: 10px;
+    background: var(--kk-sunken);
+    padding: 10px 12px;
+}
+.patch-review-title { color: var(--kk-warning); font-weight: 700; font-size: var(--kk-fs-2); margin-bottom: 6px; }
+.patch-sides { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 8px; }
+@media (max-width: 720px) { .patch-sides { grid-template-columns: 1fr; } }
+.patch-side { display: flex; flex-direction: column; gap: 2px; border-radius: 8px; padding: 6px 8px; background: var(--kk-surface); border: 1px solid var(--kk-line); }
+.patch-side-mine { border-color: var(--kk-accent); }
+.patch-side-label { color: var(--kk-text-3); font-size: var(--kk-fs-1); }
+.patch-side-mine .patch-side-label { color: var(--kk-accent); font-weight: 700; }
+.patch-side-value { color: var(--kk-text-1); font-size: var(--kk-fs-2); }
+.patch-options { display: flex; flex-wrap: wrap; gap: 6px 14px; }
+.patch-option { display: inline-flex; align-items: center; gap: 6px; color: var(--kk-text-1); font-size: var(--kk-fs-2); cursor: pointer; }
+.patch-option input { accent-color: var(--kk-accent-fill); width: 16px; height: 16px; }
+.patch-default { color: var(--kk-text-3); font-size: var(--kk-fs-1); border: 1px solid var(--kk-control); border-radius: 999px; padding: 0 6px; }

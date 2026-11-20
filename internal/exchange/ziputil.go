@@ -102,6 +102,13 @@ func snapshotClassForRecipient(dm *database.DBManager, source, workDir, destinat
 		_, err = db.Exec("DELETE FROM student_counseling_records WHERE IFNULL(author_username, '') <> ?", recipient)
 	}
 	if err == nil {
+		// 배포한 시각: 담임 취합 파일에 실려, 학년부장 PC가 배포 뒤 고친 원서를 지키는 기준이 된다.
+		err = database.WriteClassMeta(db, database.MetaDistributedAt, database.NowDBTime())
+	}
+	if err == nil {
+		_, err = db.Exec("DELETE FROM class_meta WHERE key IN (?, ?)", database.MetaPatchExportedAt, database.MetaReceivedAt)
+	}
+	if err == nil {
 		_, err = db.Exec("VACUUM")
 	}
 	if err == nil {

@@ -62,6 +62,11 @@ type preservedClassData struct {
 	Wishlists []preservedWishlist
 	// StatExclusions 입시 통계 제외 표시(해제 기록 포함): 번호·이름 → 표시
 	StatExclusions map[[2]string]model.StatExclusionMark
+	// 원서는 학년부장 배포자료(최종본)를 따른다. 아래는 "아직 내지 않은 원서"를 찾는 데만 쓴다.
+	DistributedAt string
+	ReceivedAt    string
+	ExportedAt    string
+	Deletions     []database.StudentApplicationKey
 }
 
 func extractPreservedClassData(dm *database.DBManager, dbPath string) (preservedClassData, error) {
@@ -125,6 +130,12 @@ func extractPreservedClassData(dm *database.DBManager, dbPath string) (preserved
 	// 5. 입시 통계 제외 표시
 	result.StatExclusions = database.ReadStatExclusions(db)
 
+	// 6. 배포·제출 시각과 지운 원서 기록(아직 내지 않은 원서 찾기용)
+	result.DistributedAt = database.ReadClassMeta(db, database.MetaDistributedAt)
+	result.ReceivedAt = database.ReadClassMeta(db, database.MetaReceivedAt)
+	result.ExportedAt = database.ReadClassMeta(db, database.MetaPatchExportedAt)
+	result.Deletions = database.ReadAllApplicationDeletions(db)
+
 	return result, nil
 }
 
@@ -145,24 +156,8 @@ func restorePreservedClassData(dm *database.DBManager, dbPath string, data prese
 		}
 	}
 
-	// 1. Applications 복원 (같은 학생·학년도·전형이면 담임 PC의 최신 입력으로 갱신)
-	for _, a := range data.Apps {
-		_, err := db.Exec(`INSERT INTO student_applications (student_num, student_name, admission_year, category, school_name, track, status, score, score_basis, preferences_json, assigned_department, assigned_school, score_details_json, first_stage_result, extra_round, updated_at)
-			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-			ON CONFLICT(student_num, student_name, admission_year, category, school_name, track) DO UPDATE SET
-				status = excluded.status,
-				score = excluded.score,
-				score_basis = excluded.score_basis,
-				preferences_json = excluded.preferences_json,
-				assigned_department = excluded.assigned_department,
-				assigned_school = excluded.assigned_school,
-				first_stage_result = excluded.first_stage_result,
-				extra_round = excluded.extra_round,
-				score_details_json = CASE WHEN excluded.score_details_json <> '' THEN excluded.score_details_json ELSE student_applications.score_details_json END,
-				updated_at = excluded.updated_at`,
-			a.StudentNum, a.StudentName, a.AdmissionYear, a.Category, a.SchoolName, a.Track, a.Status, a.Score, a.ScoreBasis, a.PreferencesJSON, a.AssignedDepartment, a.AssignedSchool, a.ScoreDetailsJSON, a.FirstStageResult, a.ExtraRound, a.UpdatedAt)
-		keep(err)
-	}
+	// 1. 원서는 복원하지 않는다: 학년부장 PC가 최종본이므로 새 배포자료의 원서를 그대로 쓴다.
+	//    (아직 내지 않은 담임 원서는 가져오기 전에 확인받고, 가져오기 전 DB 백업에 남는다.)
 
 	// 2. Counseling records 복원 (중복이 없는 건만 추가)
 	for _, c := range data.Counsels {
