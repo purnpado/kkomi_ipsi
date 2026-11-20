@@ -50,3 +50,7 @@
 .nice-apply-body { padding: 0 10px 10px; }
 .nice-apply-note { padding: 4px 6px 2px; font-size: var(--kk-fs-2); color: var(--kk-text-2); }
 .nice-form-warnings .nice-warn { list-style: none; margin-left: -16px; color: var(--kk-warning); font-weight: var(--kk-fw-strong); }
+
+/* "나이스 자료 올린 날" 한 줄(core/niceUploads.js) */
+.nice-upload-line { margin-top: 2px; font-size: var(--kk-fs-1); color: var(--kk-text-2); }
+.nice-upload-line strong { color: var(--kk-text-1); font-weight: var(--kk-fw-strong); }

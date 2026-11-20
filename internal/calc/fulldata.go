@@ -55,6 +55,7 @@ type StudentFullData struct {
 	AddVolunteerHours    int                         `json:"addVolunteerHours"`   // 수기 추가 봉사 시간
 	TotalVolunteerHours  int                         `json:"totalVolunteerHours"` // 최종 봉사 시간 (기본 + 추가)
 	LeadershipTerms      int                         `json:"leadershipTerms"`     // 인정 리더십 활동 학기 수
+	LeadershipSemesters  []string                    `json:"leadershipSemesters"` // 리더십 인정 학기("1_2"…"3_1"). 학기별로 체크하지 않은 예전 자료는 nil
 
 	// 수기 입력 데이터
 	ExtraData   map[string]bool `json:"extraData"`   // "창체_1": true 등
@@ -348,6 +349,8 @@ func ParseStudentFullData(s parser.StudentExcelData) (*StudentFullData, error) {
 					if vf, ok := v.(float64); ok {
 						result.LeadershipTerms = int(vf)
 					}
+				} else if k == "leadership_semesters" {
+					result.LeadershipSemesters = parseLeadershipSemesters(v)
 				} else if vb, ok := v.(bool); ok {
 					result.ExtraData[k] = vb
 					// 창체 및 행발 가산점 항목당 1점 가산
@@ -359,6 +362,10 @@ func ParseStudentFullData(s parser.StudentExcelData) (*StudentFullData, error) {
 		}
 	}
 	result.ExtraPoints = extraSum
+	// 학기별로 체크한 리더십이 있으면 그 개수가 인정 학기 수다(예전 숫자 입력보다 우선).
+	if result.LeadershipSemesters != nil {
+		result.LeadershipTerms = len(result.LeadershipSemesters)
+	}
 	result.TotalVolunteerHours = result.VolunteerHours + result.AddVolunteerHours
 
 	// 모든 학교에 대한 점수 산출

@@ -31,16 +31,18 @@ export async function renderAdminScreen(schoolName) {
 
     let status = {};
     let updateStatus = {};
+    let uploads = [];
     try {
         status = await GetClassStatus(classCount);
         updateStatus = (await window.go?.main?.App?.GetDataUpdateStatus?.()) || {};
+        uploads = (await window.go?.main?.App?.GetNiceUploads?.(0)) || [];
     } catch (e) {
         console.error('상태 불러오기 실패:', e);
     }
 
     app.className = 'wide-layout';
     updateAppWindowTitle('master');
-    app.innerHTML = manageHTML({ schoolName, classCount, configuredYear, status, updateStatus });
+    app.innerHTML = manageHTML({ schoolName, classCount, configuredYear, status, updateStatus, uploads });
 
     ScreenLockManager.resetTimer();
     const rerender = () => renderAdminScreen(schoolName);

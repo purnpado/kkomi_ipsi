@@ -56,8 +56,9 @@ func TestVocationalNiceFormGolden(t *testing.T) {
 			t.Errorf("%d줄\n 기대: %s\n 실제: %s", i+1, w, got)
 		}
 	}
-	if len(form.Warnings) == 0 || !strings.Contains(form.Warnings[0], "10월 31일 기준 출결") {
-		t.Fatalf("마감일 기준 출결 미입력 안내: %v", form.Warnings)
+	// 나이스 파일에는 마감일이 없으므로 경고 없이 늘 같은 안내만 붙는다.
+	if len(form.Warnings) != 0 || len(form.Hints) != 1 || form.Hints[0] != NiceFileHint {
+		t.Fatalf("경고 없이 안내만: %v / %v", form.Warnings, form.Hints)
 	}
 }
 
@@ -106,6 +107,6 @@ func TestVocationalNiceFormMatchesCalculation(t *testing.T) {
 		}
 	}
 	if NiceFormFor(s, "울산마이스터고", "일반") != nil {
-		t.Fatal("마이스터고는 나이스 화면을 확인하기 전까지 대조표가 없어야 합니다")
+		t.Fatal("마이스터고는 나이스 대조표가 없어야 합니다(나이스 성적 파일 원자료와 같음)")
 	}
 }

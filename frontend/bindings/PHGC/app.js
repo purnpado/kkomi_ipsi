@@ -474,6 +474,15 @@ export function GetNiceRoster(classNum) {
 }
 
 /**
+ * GetNiceUploads 나이스 자료(성적·출결·봉사)를 반마다 마지막으로 올린 때. 담임은 본인 반만, 학년부장·진로부장은 반 또는 0(전교).
+ * @param {number} classNum
+ * @returns {$CancellablePromise<database$0.NiceUpload[] | null>}
+ */
+export function GetNiceUploads(classNum) {
+    return $Call.ByID(1400947272, classNum);
+}
+
+/**
  * GetOfficialAdmissionData 로컬 공식 고입자료 목록 조회
  * @returns {$CancellablePromise<sync$0.OfficialAdmissionData | null>}
  */

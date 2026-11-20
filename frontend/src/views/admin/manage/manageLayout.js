@@ -5,8 +5,9 @@
 import { escapeHtml } from '../../../core/utils.js';
 import { admissionLongLabel } from '../../../core/admissionYear.js';
 import { NEIS_STEPS } from './neisUpload.js';
+import { niceUploadParts } from '../../../core/niceUploads.js';
 
-function stepCard(step, count) {
+function stepCard(step, count, uploaded) {
     const done = count > 0;
     return `
         <button id="${step.buttonId}" type="button"
@@ -17,6 +18,7 @@ function stepCard(step, count) {
             </span>
             <span class="text-base font-bold text-white">${escapeHtml(step.label)}</span>
             <span class="text-xs text-slate-400 leading-snug">${escapeHtml(step.desc)}</span>
+            <span class="text-xs text-slate-300">마지막으로 올린 날: <strong class="num">${escapeHtml(uploaded)}</strong></span>
             <span class="neis-step-state text-xs font-bold text-indigo-300">파일 고르기 →</span>
         </button>`;
 }
@@ -58,7 +60,9 @@ function section(title, body, note = '', extra = '') {
         </section>`;
 }
 
-export function manageHTML({ schoolName, classCount, configuredYear, status, updateStatus }) {
+export function manageHTML({ schoolName, classCount, configuredYear, status, updateStatus, uploads = [] }) {
+    // 나이스 파일에는 마감일이 없어, 원서 마감일 기준으로 다시 올렸는지 떠올릴 수 있게 올린 날을 보인다.
+    const uploaded = Object.fromEntries(niceUploadParts(uploads).map((p) => [p.kind, p.text]));
     const counts = {
         grades: updateStatus.totalStudents || 0,
         attendance: updateStatus.attendanceCount || 0,
@@ -75,7 +79,7 @@ export function manageHTML({ schoolName, classCount, configuredYear, status, upd
 
             ${section('① 나이스 자료 올리기', `
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-                    ${NEIS_STEPS.map((step) => stepCard(step, counts[step.key])).join('')}
+                    ${NEIS_STEPS.map((step) => stepCard(step, counts[step.key], uploaded[step.key])).join('')}
                 </div>
                 <div id="uploadStatus" role="status" aria-live="polite" class="mt-3 text-sm text-center hidden"></div>`,
                 '순서대로 1 → 2 → 3단계 파일을 고르세요. 파일 고르는 창에서 <strong>모든 반 파일을 한 번에(Ctrl 또는 Shift)</strong> 고르면 전 학급이 함께 올라갑니다.')}

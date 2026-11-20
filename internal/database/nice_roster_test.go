@@ -7,7 +7,7 @@ import (
 	"PHGC/internal/parser"
 )
 
-// 지원 원서마다 나이스 대조표가 붙는다: 특성화고는 표, 일반고·마이스터고는 준비 중 안내, 다른 해 원서는 빼기.
+// 나이스 대조표는 특성화고 원서에만 붙는다: 마이스터고·후기 일반고와 다른 해 원서는 빼기.
 func TestNiceRosterRowsFollowApplications(t *testing.T) {
 	dm := newEvidenceTestDB(t) // 고입 연도 2027
 	student := parser.StudentExcelData{
@@ -34,14 +34,10 @@ func TestNiceRosterRowsFollowApplications(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(rows) != 3 {
-		t.Fatalf("2027 원서 3건만 나와야 합니다: %+v", rows)
+	if len(rows) != 1 || rows[0].Category != "special" {
+		t.Fatalf("2027 특성화고 원서 1건만 나와야 합니다(마이스터고·일반고 제외): %+v", rows)
 	}
-	// 정렬: 마이스터고 → 특성화고 → 일반고
-	if rows[0].Category != "meister" || rows[1].Category != "special" || rows[2].Category != "general" {
-		t.Fatalf("정렬 순서: %s %s %s", rows[0].Category, rows[1].Category, rows[2].Category)
-	}
-	special := rows[1]
+	special := rows[0]
 	if special.NiceForm == nil {
 		t.Fatalf("특성화고 원서에는 대조표가 있어야 합니다: %+v", special)
 	}
@@ -49,15 +45,11 @@ func TestNiceRosterRowsFollowApplications(t *testing.T) {
 	if got := special.NiceForm.Rows[0][2].Text + "/" + special.NiceForm.Rows[0][4].Text; got != "7/2" {
 		t.Fatalf("1-2 교과성취점수/과목수: %s", got)
 	}
-	if rows[0].NiceForm != nil || rows[0].Note == "" || rows[2].NiceForm != nil || rows[2].Note == "" {
-		t.Fatalf("마이스터고·일반고는 준비 중 안내만: %+v / %+v", rows[0], rows[2])
-	}
-
 	roster, err := dm.GetNiceRoster(0, true)
-	if err != nil || len(roster) != 3 {
+	if err != nil || len(roster) != 1 {
 		t.Fatalf("전교 일람표: %d건 %v", len(roster), err)
 	}
-	if roster[1].NiceForm == nil || roster[1].StudentName != "가상학생" {
-		t.Fatalf("일람표 특성화고 줄: %+v", roster[1])
+	if roster[0].NiceForm == nil || roster[0].StudentName != "가상학생" {
+		t.Fatalf("일람표 특성화고 줄: %+v", roster[0])
 	}
 }

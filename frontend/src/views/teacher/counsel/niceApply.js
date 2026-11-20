@@ -3,6 +3,7 @@
 // 원서가 없으면 칸을 그리지 않는다. 값과 배치는 백엔드(GetStudentNiceRows)가 산출식이 쓴 값으로 만든다.
 import { escapeHtml, displayTrack } from '../../../core/utils.js';
 import { renderNiceFormTable } from '../../../core/niceFormTable.js';
+import { loadNiceUploadLine } from '../../../core/niceUploads.js';
 
 const CATEGORY_LABEL = { meister: '마이스터고', special: '특성화고', general: '후기 일반고' };
 
@@ -39,9 +40,11 @@ export async function mountNiceApply(ctx) {
         return;
     }
     if (rows.length === 0) return;
+    const uploadLine = await loadNiceUploadLine(ctx.classNum);
     mount.innerHTML = `
         <section class="nice-apply" aria-label="지원 원서 나이스 원서 입력값">
             <h3 class="nice-apply-title">📝 지원 원서 · 나이스 원서 입력값 <span>나이스 원서등록 화면과 줄마다 맞춰 보세요</span></h3>
+            ${uploadLine}
             ${rows.map(rowHTML).join('')}
         </section>
     `;

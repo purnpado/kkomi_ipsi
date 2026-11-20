@@ -25,18 +25,13 @@ type NiceRosterRow struct {
 	Note        string         `json:"note"` // 대조표가 없을 때 이유
 }
 
-var niceCategoryOrder = map[string]int{"meister": 0, "special": 1, "general": 2}
+var niceCategoryOrder = map[string]int{"special": 0}
 
 // niceRowFor 원서 한 건에 대조표를 붙인다. full 은 그 학생의 산출 자료.
 func niceRowFor(full *calc.StudentFullData, r model.ApplicationRecord) NiceRosterRow {
 	row := NiceRosterRow{ClassNum: r.ClassNum, StudentNum: r.StudentNum, StudentName: r.StudentName, Category: r.Category, SchoolName: r.SchoolName, Track: r.Track, Status: r.Status}
-	switch r.Category {
-	case "general":
-		row.Note = "후기 일반고 나이스 대조표는 나이스 원서 화면을 확인한 뒤 추가합니다."
-		return row
-	case "meister", "special":
-	default:
-		row.Note = "점수를 산출하지 않는 전형입니다(별도 전형)."
+	if r.Category != "special" {
+		row.Note = "나이스 대조표가 없는 전형입니다."
 		return row
 	}
 	school, track := normalizeCutoffSchool(r.SchoolName), normalizeCutoffTrack(r.Track)
@@ -48,19 +43,21 @@ func niceRowFor(full *calc.StudentFullData, r model.ApplicationRecord) NiceRoste
 			row.NiceForm = view.NiceForm
 			return row
 		}
-		row.Note = "마이스터고 나이스 대조표는 나이스 원서 화면을 확인한 뒤 추가합니다."
+		row.Note = "이 전형의 나이스 대조표가 아직 없습니다."
 		return row
 	}
 	row.Note = "이 학교·전형의 산출식을 찾지 못했습니다."
 	return row
 }
 
-// isNiceTarget 나이스 대조 대상 원서: 그 고입 연도의 원서 중 지원 학교가 정해진 것(일반고는 학교 없이도 대상).
+// isNiceTarget 나이스 대조 대상 원서: 그 고입 연도의 특성화고 원서 중 지원 학교가 정해진 것.
+// 특성화고 나이스 화면은 예체능을 뺀 학기 합계를 나이스가 계산해 보여 주므로 산출 값과 맞춰 볼 수 있다.
+// 마이스터고 화면은 나이스 성적 파일 원자료를 그대로 보여 주고, 후기 일반고는 대조가 필요 없어 뺀다(담임 확인 2026-11-19).
 func isNiceTarget(r model.ApplicationRecord, admissionYear int) bool {
 	if admissionYear > 0 && r.AdmissionYear != admissionYear {
 		return false
 	}
-	return strings.TrimSpace(r.SchoolName) != "" || r.Category == "general"
+	return r.Category == "special" && strings.TrimSpace(r.SchoolName) != ""
 }
 
 func sortNiceRows(rows []NiceRosterRow) {

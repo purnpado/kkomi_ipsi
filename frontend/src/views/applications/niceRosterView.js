@@ -1,6 +1,6 @@
 // ===== 나이스 원서 입력 일람표 (app:navigate 'nice-roster') =====
 // 담임이 나이스에서 학생을 한 명씩 넘기며 원서를 쓸 때 옆에 띄워 두거나 인쇄해 줄마다 맞춰 보는 표.
-// 지원 원서가 있는 학생만, 원서 한 건이 한 줄이다. 값과 칸은 백엔드(GetNiceRoster)가 나이스 화면 배치대로 만든다.
+// 특성화고 원서가 있는 학생만(마이스터고·일반고는 대조가 필요 없어 백엔드가 뺀다), 원서 한 건이 한 줄이다. 값과 칸은 백엔드(GetNiceRoster)가 나이스 화면 배치대로 만든다.
 // 열은 대조표의 값 칸 순서(나이스 화면 순서)를 그대로 쓰므로 전형이 늘어도 이 파일은 고치지 않는다.
 // 담임은 우리 반, 학년부장·진로부장은 반을 고른다(조회 전용).
 import { app } from '../../core/dom.js';
@@ -9,8 +9,9 @@ import { escapeAttr, escapeHtml, displayTrack } from '../../core/utils.js';
 import { admissionLongLabel } from '../../core/admissionYear.js';
 import { printOnly } from '../../print/printEngine.js';
 import { ScreenLockManager } from '../../core/screenLock.js';
+import { loadNiceUploadLine } from '../../core/niceUploads.js';
 
-const view = { classNum: 0, classCount: 0, admissionYear: 0, rows: [] };
+const view = { classNum: 0, classCount: 0, admissionYear: 0, rows: [], uploadLine: '' };
 const CATEGORY_LABEL = { meister: '마이스터고', special: '특성화고', general: '후기 일반고' };
 
 const isHomeroom = () => state.currentUser?.Role === 'homeroom';
@@ -123,14 +124,15 @@ function render() {
             </select>
         </label>`;
     const body = view.rows.length === 0
-        ? '<p class="nice-roster-empty">올해 지원 원서가 있는 학생이 없습니다. 원서를 입력하면 여기에 학생별 나이스 원서 입력값이 나옵니다.</p>'
+        ? '<p class="nice-roster-empty">올해 특성화고 원서가 있는 학생이 없습니다. 특성화고 원서를 입력하면 여기에 학생별 나이스 원서 입력값이 나옵니다.</p>'
         : [...groups.entries()].map(([type, rows]) => groupHTML(type, rows)).join('') + pendingHTML(pending);
     app.innerHTML = `
         <div class="nice-roster print-document">
             <div class="nice-roster-head">
                 <div>
                     <h2>나이스 원서 입력 일람표</h2>
-                    <p>${escapeHtml(admissionLongLabel(view.admissionYear))} · 지원 원서가 있는 학생의 나이스 원서등록 화면 입력값입니다. 나이스에서 학생을 넘기며 줄마다 맞춰 보세요.</p>
+                    <p>${escapeHtml(admissionLongLabel(view.admissionYear))} · 특성화고 원서가 있는 학생의 나이스 원서등록 화면 입력값입니다. 나이스에서 학생을 넘기며 줄마다 맞춰 보세요.</p>
+                    ${view.uploadLine}
                 </div>
                 <div class="nice-roster-actions no-print">
                     ${classOptions}
@@ -149,7 +151,10 @@ function render() {
 async function load() {
     app.innerHTML = '<div class="py-24 text-center text-slate-400"><span class="spinner"></span> 나이스 원서 입력값을 만드는 중…</div>';
     try {
-        view.rows = await window.go.main.App.GetNiceRoster(view.classNum) || [];
+        [view.rows, view.uploadLine] = await Promise.all([
+            window.go.main.App.GetNiceRoster(view.classNum).then((r) => r || []),
+            loadNiceUploadLine(view.classNum),
+        ]);
     } catch (err) {
         app.innerHTML = `<div class="py-24 text-center text-rose-300" role="alert">일람표를 만들지 못했습니다: ${escapeHtml(String(err))}</div>`;
         return;

@@ -46,6 +46,9 @@ func (dm *DBManager) ProcessMultipleExcel(filePaths []string) (map[int]int, erro
 				errors = append(errors, fmt.Sprintf("[%s] %d반 저장 실패: %v", filepath.Base(filePath), classNum, err))
 				continue
 			}
+			if len(students) > 0 {
+				dm.recordNiceUpload(classNum, NiceUploadGrades)
+			}
 			if err := dm.RefreshClassSchoolScoreCache(classNum); err != nil {
 				errors = append(errors, fmt.Sprintf("[%s] %d반 점수 산출 실패: %v", filepath.Base(filePath), classNum, err))
 			}
@@ -101,6 +104,9 @@ func (dm *DBManager) ProcessMultipleAttendanceExcel(filePaths []string) (map[int
 				errors = append(errors, fmt.Sprintf("[%s] %d반 출결 데이터 저장 실패: %v", filepath.Base(filePath), classNum, err))
 				continue
 			}
+			if updatedCount > 0 { // 학생이 한 명도 맞지 않은 파일(다른 학교·학년)은 올린 것으로 치지 않는다
+				dm.recordNiceUpload(classNum, NiceUploadAttendance)
+			}
 			if err := dm.RefreshClassSchoolScoreCache(classNum); err != nil {
 				errors = append(errors, fmt.Sprintf("[%s] %d반 점수 갱신 실패: %v", filepath.Base(filePath), classNum, err))
 			}
@@ -155,6 +161,9 @@ func (dm *DBManager) ProcessMultipleVolunteerExcel(filePaths []string) (map[int]
 			if err != nil {
 				errors = append(errors, fmt.Sprintf("[%s] %d반 봉사 데이터 저장 실패: %v", filepath.Base(filePath), classNum, err))
 				continue
+			}
+			if updatedCount > 0 {
+				dm.recordNiceUpload(classNum, NiceUploadVolunteer)
 			}
 			if err := dm.RefreshClassSchoolScoreCache(classNum); err != nil {
 				errors = append(errors, fmt.Sprintf("[%s] %d반 점수 갱신 실패: %v", filepath.Base(filePath), classNum, err))

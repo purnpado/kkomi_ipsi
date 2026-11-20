@@ -163,6 +163,17 @@ func (a *App) GetStudentNiceRows(classNum int, studentNum, name string) ([]datab
 	return a.db.GetStudentNiceRows(classNum, studentNum, name, a.isMaster())
 }
 
+// GetNiceUploads 나이스 자료(성적·출결·봉사)를 반마다 마지막으로 올린 때. 담임은 본인 반만, 학년부장·진로부장은 반 또는 0(전교).
+func (a *App) GetNiceUploads(classNum int) ([]database.NiceUpload, error) {
+	if err := a.requireLogin(); err != nil {
+		return nil, err
+	}
+	if a.user.Role == "homeroom" {
+		classNum = a.user.ClassNum
+	}
+	return a.db.GetNiceUploads(classNum)
+}
+
 // GetNiceRoster 나이스 원서 입력 일람표. 담임은 본인 반만, 학년부장·진로부장은 반을 고르거나 0(전교).
 func (a *App) GetNiceRoster(classNum int) ([]database.NiceRosterRow, error) {
 	if a.user == nil {

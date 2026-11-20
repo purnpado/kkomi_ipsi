@@ -90,6 +90,11 @@ import * as $models from "./models.js";
  */
 
 /**
+ * NiceUpload 한 반·한 종류의 마지막 올린 때("2006-01-02 15:04", 컴퓨터 시각).
+ * @typedef {$models.NiceUpload} NiceUpload
+ */
+
+/**
  * @typedef {$models.PreferenceRankStat} PreferenceRankStat
  */
 

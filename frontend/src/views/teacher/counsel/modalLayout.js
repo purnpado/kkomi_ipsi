@@ -4,6 +4,7 @@ import { state } from '../../../core/store.js';
 import { judgmentModeToggleHTML } from '../../../core/admissionJudgment.js';
 import { renderGeneralSummary } from './generalSummary.js';
 import { volunteerTransferHTML } from './volunteerTransfer.js';
+import { leadershipHTML } from './leadershipInput.js';
 
 // 상담 모달: 전체 레이아웃 렌더링
 export function renderStudentModalLayout(ctx) {
@@ -80,19 +81,10 @@ export function renderStudentModalLayout(ctx) {
                                 <b class="text-indigo-200 text-sm flex items-center gap-1.5">
                                     <span>🏛️</span> 마이스터고 리더십 활동 가산점
                                 </b>
-                                <span class="text-[11px] text-amber-300 font-semibold">최대 10점</span>
+                                <span class="text-[11px] text-amber-300 font-semibold">에너지고 최대 10점 · 현대공고 최대 5점</span>
                             </div>
-                            <div class="flex items-center gap-3 pt-1">
-                                <label class="text-slate-300 font-medium whitespace-nowrap">인정 리더십(학기):</label>
-                                <div class="relative w-32">
-                                    <input type="number" id="inputLeadershipTerms" min="0" max="4" step="1"
-                                           class="input-field w-full text-center py-1.5 text-sm font-bold text-amber-300"
-                                           value="${ctx.data.leadershipTerms || 0}" ${isViewer ? 'disabled' : ''}/>
-                                    <span class="absolute right-2.5 top-2 text-[11px] text-slate-400 pointer-events-none">학기</span>
-                                </div>
-                                <span class="text-xs text-slate-400">= 가산점 <strong class="text-amber-300 num">${Math.min(10, ((ctx.data.leadershipTerms || 0) * 2.5)).toFixed(1)}</strong>점</span>
-                            </div>
-                            <p class="text-[10px] text-slate-400 mt-1">※ 반장·부반장·전교 학생회장·부회장 활동만 인정 (한 학기당 2.5점, 최대 4학기 10점)</p>
+                            ${leadershipHTML(ctx.data, isViewer)}
+                            <p class="text-[10px] text-slate-400 mt-1">※ 반장·부반장·전교 학생회장·부회장 활동만 인정 (한 학기당 2.5점, 에너지고 최대 10점·현대공고 최대 5점). 생활기록부(창체 특기사항·행동특성)에 기록된 학기만 체크합니다.</p>
                         </section>
 
                         <!-- ② 후기 일반고 비교과 가산점 -->

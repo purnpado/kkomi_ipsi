@@ -246,6 +246,7 @@ func ApplyWhatIf(s parser.StudentExcelData, in WhatIfInput) (parser.StudentExcel
 	}
 	if in.LeadershipTerms >= 0 {
 		extra["leadership_terms"] = float64(in.LeadershipTerms)
+		delete(extra, "leadership_semesters") // 학기별 체크보다 가정한 학기 수를 쓴다
 	}
 	for kind, mode := range map[string]string{"changche_3": in.Changche3, "haengbal_3": in.Haengbal3} {
 		switch mode {

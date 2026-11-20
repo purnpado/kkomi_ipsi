@@ -12,7 +12,11 @@ import (
 //   - 값은 산출식이 실제로 쓴 값(ScoreBasis)만 쓴다. 화면에서 다시 계산하지 않으므로 대조표와 점수가 어긋나지 않는다.
 //   - 전형마다 나이스 화면이 다르므로 배치(칸 이름·순서·안내 문구)는 전형 종류별 함수 하나에 모은다.
 //     나이스 화면이 바뀌면 그 함수만 고치고 nice_form_test.go 의 고정 정답을 맞춘다.
-//   - 지금은 특성화고(NiceFormVocational)만 있다. 마이스터고·일반고는 나이스 화면을 확인한 뒤 더한다.
+//   - 특성화고(NiceFormVocational)만 있다. 마이스터고 화면은 나이스 성적 파일 원자료를 그대로 보여 주고
+//     후기 일반고는 대조가 필요 없어 만들지 않는다(담임 확인 2026-11-19).
+
+// NiceFileHint 대조표 아래 늘 붙는 안내.
+const NiceFileHint = "성적·출결·봉사는 마지막으로 올린 나이스 파일 값입니다. 원서 마감일 기준으로 다시 내려받아 올린 뒤 맞춰 보세요."
 
 // NiceFormVocational 특성화고 원서등록 화면 배치.
 const NiceFormVocational = "vocational"
@@ -175,9 +179,9 @@ func vocationalNiceForm(b *ScoreBasis) *NiceForm {
 			},
 		},
 	}
-	if !b.CutoffEntered {
-		form.Warnings = append(form.Warnings, fmt.Sprintf("%s 기준 출결이 따로 없어 나이스 성적 파일의 출결로 계산했습니다. 성적 파일을 받은 날짜에 따라 나이스 원서 화면의 출결과 다를 수 있습니다.", cutoffLabel(b.AttendanceCutoff)))
-	}
+	// 나이스 파일에는 마감일이 없어 프로그램이 마감일 기준인지 판단할 수 없다. 경고 대신 늘 같은 안내를 붙인다
+	// (담임은 원서 마감일 기준으로 나이스 파일을 다시 내려받아 올린다).
+	form.Hints = append(form.Hints, NiceFileHint)
 	if !b.SplitKnown {
 		form.Warnings = append(form.Warnings, fmt.Sprintf("예전에 입력한 %s 기준 출결은 지각·조퇴·결과 합계(%d회)만 있어 따로 보여 줄 수 없습니다. 나이스 화면의 세 값을 더해 맞춰 보세요.", cutoffLabel(b.AttendanceCutoff), b.LateEtcCount))
 	}

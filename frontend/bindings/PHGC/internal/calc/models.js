@@ -179,6 +179,7 @@ import * as model$0 from "../model/models.js";
  * @property {number} addVolunteerHours - 수기 추가 봉사 시간
  * @property {number} totalVolunteerHours - 최종 봉사 시간 (기본 + 추가)
  * @property {number} leadershipTerms - 인정 리더십 활동 학기 수
+ * @property {string[] | null} leadershipSemesters - 리더십 인정 학기("1_2"…"3_1"). 학기별로 체크하지 않은 예전 자료는 nil
  * @property {{ [_ in string]?: boolean } | null} extraData - 수기 입력 데이터 "창체_1": true 등
  * @property {number} extraPoints - 창체/행발 가산점 총점
  * @property {string} extraJSON - 원본 JSON 문자열
