@@ -27,15 +27,17 @@ type CompetitionRecord struct {
 
 // AdmissionEvidence 학년도·고교·학과·전형별 합격·불합격 사례 수(점수 기준).
 type AdmissionEvidence struct {
-	AdmissionYear   int     `json:"admissionYear"`
-	HighSchool      string  `json:"highSchool"`
-	Department      string  `json:"department"` // 빈 문자열이면 학교·전형 전체 합계
-	Track           string  `json:"track"`
-	AcceptedCount   int     `json:"acceptedCount"`
-	RejectedCount   int     `json:"rejectedCount"`   // 점수로 떨어진 사례(1차 통과 후 면접 탈락 제외)
-	Stage2FailCount int     `json:"stage2FailCount"` // 1차 통과 후 2차(면접 등) 탈락
-	AcceptedMin     float64 `json:"acceptedMin"`
-	RejectedMax     float64 `json:"rejectedMax"`
+	AdmissionYear   int    `json:"admissionYear"`
+	HighSchool      string `json:"highSchool"`
+	Department      string `json:"department"` // 빈 문자열이면 학교·전형 전체 합계
+	Track           string `json:"track"`
+	AcceptedCount   int    `json:"acceptedCount"`
+	RejectedCount   int    `json:"rejectedCount"`   // 점수로 떨어진 사례(1차 통과 후 면접 탈락 제외)
+	Stage2FailCount int    `json:"stage2FailCount"` // 1차 통과 후 2차(면접 등) 탈락
+	// ExtraRoundAccepted 합격 가운데 추가모집 합격(정규모집 미달 신호). 합격 수·합격선에는 그대로 들어간다.
+	ExtraRoundAccepted int     `json:"extraRoundAccepted"`
+	AcceptedMin        float64 `json:"acceptedMin"`
+	RejectedMax        float64 `json:"rejectedMax"`
 }
 
 func initCompetitionTable(db *sql.DB) error {
@@ -153,7 +155,7 @@ type evidenceAcc struct {
 	e AdmissionEvidence
 }
 
-func (acc *evidenceAcc) add(status, firstStage string, score float64) {
+func (acc *evidenceAcc) add(status, firstStage string, score float64, extraRound bool) {
 	status = strings.TrimSpace(status)
 	switch {
 	case strings.Contains(status, "불합격") && firstStage == "합격":
@@ -165,6 +167,9 @@ func (acc *evidenceAcc) add(status, firstStage string, score float64) {
 		}
 	case strings.Contains(status, "합격") || strings.Contains(status, "진학"):
 		acc.e.AcceptedCount++
+		if extraRound {
+			acc.e.ExtraRoundAccepted++
+		}
 		if score > 0 && (acc.e.AcceptedMin == 0 || score < acc.e.AcceptedMin) {
 			acc.e.AcceptedMin = score
 		}
@@ -175,7 +180,7 @@ func (acc *evidenceAcc) add(status, firstStage string, score float64) {
 // 학년도·고교·학과·전형별 합격·불합격 사례 수를 센다. 학과가 빈 항목은 학교·전형 전체 합계다.
 func (dm *DBManager) GetAdmissionEvidence() ([]AdmissionEvidence, error) {
 	groups := map[string]*evidenceAcc{}
-	add := func(year int, school, dept, track, status, firstStage string, score float64) {
+	add := func(year int, school, dept, track, status, firstStage string, score float64, extraRound bool) {
 		for _, d := range []string{dept, ""} {
 			key := fmt.Sprintf("%d\x1f%s\x1f%s\x1f%s", year, school, d, track)
 			acc := groups[key]
@@ -183,7 +188,7 @@ func (dm *DBManager) GetAdmissionEvidence() ([]AdmissionEvidence, error) {
 				acc = &evidenceAcc{e: AdmissionEvidence{AdmissionYear: year, HighSchool: school, Department: d, Track: track}}
 				groups[key] = acc
 			}
-			acc.add(status, firstStage, score)
+			acc.add(status, firstStage, score, extraRound)
 			if dept == "" {
 				break // 학과가 없는 기록은 전체 합계에 한 번만 더한다.
 			}
@@ -203,7 +208,7 @@ func (dm *DBManager) GetAdmissionEvidence() ([]AdmissionEvidence, error) {
 		if dept == "" && len(r.Preferences) > 0 {
 			dept = strings.TrimSpace(r.Preferences[0])
 		}
-		add(r.AdmissionYear, normalizeCutoffSchool(r.SchoolName), normalizeCutoffDept(dept), normalizeCutoffTrack(r.Track), r.Status, r.FirstStageResult, r.Score)
+		add(r.AdmissionYear, normalizeCutoffSchool(r.SchoolName), normalizeCutoffDept(dept), normalizeCutoffTrack(r.Track), r.Status, r.FirstStageResult, r.Score, r.ExtraRound)
 	}
 
 	// 2) 관내 공유 자료(우리 학교가 낸 자료는 위에서 이미 셌으므로 뺀다)
@@ -219,7 +224,7 @@ func (dm *DBManager) GetAdmissionEvidence() ([]AdmissionEvidence, error) {
 		return nil, err
 	}
 	defer db.Close()
-	rows, err := db.Query(`SELECT s.admission_year, s.high_school, s.department, s.track, s.status, s.score, COALESCE(s.first_stage_result, '')
+	rows, err := db.Query(`SELECT s.admission_year, s.high_school, s.department, s.track, s.status, s.score, COALESCE(s.first_stage_result, ''), COALESCE(s.extra_round, 0)
 		FROM shared_anonymous_scores s JOIN shared_participating_schools p ON p.id = s.school_pkg_id
 		WHERE p.school_name <> ? AND s.excluded = 0`, ownSchool)
 	if err != nil {
@@ -230,13 +235,14 @@ func (dm *DBManager) GetAdmissionEvidence() ([]AdmissionEvidence, error) {
 		var year int
 		var school, dept, track, status, firstStage string
 		var score float64
-		if err := rows.Scan(&year, &school, &dept, &track, &status, &score, &firstStage); err != nil {
+		var extraRound bool
+		if err := rows.Scan(&year, &school, &dept, &track, &status, &score, &firstStage, &extraRound); err != nil {
 			return nil, err
 		}
 		if strings.Contains(school, "일반계고") {
 			continue // 후기 일반고는 관내 합격선 추정(정원·지원자 수)으로 따로 판정한다.
 		}
-		add(year, normalizeCutoffSchool(school), normalizeCutoffDept(dept), normalizeCutoffTrack(track), status, firstStage, score)
+		add(year, normalizeCutoffSchool(school), normalizeCutoffDept(dept), normalizeCutoffTrack(track), status, firstStage, score, extraRound)
 	}
 	if err := rows.Err(); err != nil {
 		return nil, err

@@ -107,6 +107,7 @@ type verifyRecord struct {
 	version, firstStage       string
 	excluded                  bool
 	own                       bool
+	extraRound                bool // 추가모집(미달 학교라 낮은 점수 합격이 정상)
 }
 
 var validSharedStatus = map[string]bool{

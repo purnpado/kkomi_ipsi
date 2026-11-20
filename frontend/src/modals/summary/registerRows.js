@@ -19,9 +19,11 @@ export function isOutOfProvince(app) {
     return !ULSAN_OTHER_SCHOOLS.includes(name) && !name.startsWith('울산');
 }
 
-// 전형 진행 순서: 전기(마이스터고 → 특성화고 취업희망자 → 특성화고 일반 → 자사고·외고·기타) → 후기 일반고 → 미진학
+// 전형 진행 순서: 전기(마이스터고 → 특성화고 취업희망자 → 특성화고 일반 → 자사고·외고·기타) → 후기 일반고 → 추가모집 → 미진학
+// 추가모집은 후기 일반고 발표 뒤에 있으므로 일반고 다음에 적는다.
 function stageOrder(app) {
     const track = String(app.track || '');
+    if (app.extraRound) return 6.5;
     switch (app.category) {
         case 'meister': return 1;
         case 'special': return track.includes('취업') ? 2 : 3;
@@ -131,7 +133,8 @@ function noteText(app) {
     }
     if (app.category === 'none' && app.track) parts.push(app.track);
     if (isOutOfProvince(app)) parts.push('타시도 진학');
-    if ([app.schoolName, app.track, app.status].some(value => String(value || '').includes('추가'))) parts.push('[추가모집]');
+    // 원서의 추가모집 표시(예전에는 학교명·전형에 '추가'를 적어 구분했다)
+    if (app.extraRound || [app.schoolName, app.track, app.status].some(value => String(value || '').includes('추가'))) parts.push('[추가모집]');
     if (app.status === '최종 진학' || app.status === '최종진학') parts.push('최종 진학');
     return parts.join(' ');
 }

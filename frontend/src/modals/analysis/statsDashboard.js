@@ -39,6 +39,7 @@ export function renderStatsDashboard(container, stats, sourceMode) {
                     <span class="text-2xl font-black text-white">${stats.acceptedCount}</span>
                     <span class="text-xs text-slate-400">/ 총 ${stats.totalApplicants}명 지원</span>
                 </div>
+                ${stats.extraRoundAccepted ? `<div class="text-[11px] text-amber-300" title="정규모집에서 미달해 추가모집으로 합격한 인원입니다. 합격 수와 합격선에 포함됩니다.">추가모집 합격 ${stats.extraRoundAccepted}명 포함(정규모집 미달)</div>` : ''}
                 <div class="text-[11px] text-slate-400 flex items-center gap-1.5 pt-1 border-t border-slate-700/40">
                     <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
                     <span>불합격 ${stats.rejectedCount}명${stats.stage2FailCount ? ` (1차 합격 후 ${stats.stage2FailCount}명)` : ''}</span>

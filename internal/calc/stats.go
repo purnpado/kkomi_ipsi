@@ -36,6 +36,8 @@ type DepartmentAdmissionStats struct {
 	RejectedCount   int `json:"rejectedCount"`
 	Stage2FailCount int `json:"stage2FailCount"` // 1차 합격 후 최종 불합격(면접 등)
 	FinalCount      int `json:"finalCount"`
+	// ExtraRoundAccepted 합격 가운데 추가모집 합격(정규모집 미달 신호). 합격 수·점수 분포에는 그대로 들어간다.
+	ExtraRoundAccepted int `json:"extraRoundAccepted"`
 
 	// Accepted Scores
 	AcceptedMin    float64 `json:"acceptedMin"`
@@ -250,6 +252,9 @@ func ComputeDepartmentAdmissionStats(records []model.ApplicationRecord, bucketSt
 			g.stats.SubmittedCount++
 		case "합격":
 			g.stats.AcceptedCount++
+			if r.ExtraRound {
+				g.stats.ExtraRoundAccepted++
+			}
 		case "불합격":
 			g.stats.RejectedCount++
 			if r.FirstStageResult == "합격" {
@@ -258,6 +263,9 @@ func ComputeDepartmentAdmissionStats(records []model.ApplicationRecord, bucketSt
 		case "최종 진학", "최종진학":
 			g.stats.FinalCount++
 			g.stats.AcceptedCount++
+			if r.ExtraRound {
+				g.stats.ExtraRoundAccepted++
+			}
 		}
 
 		// Score gathering (별도 전형 학교는 인원만 집계)

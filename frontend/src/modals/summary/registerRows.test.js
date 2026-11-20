@@ -39,4 +39,12 @@ test('통계 제외 학생은 점수 대신 별도전형, 타시도 원서는 �
     const out = buildRegisterEntries(ctx, [{ id: 9, admissionYear: 2027, classNum: 1, studentNum: '9', studentName: '가상아홉', category: 'out_province', schoolName: '민족사관고등학교', track: '해당 없음', status: '합격' }], 1)[0];
     assert.equal(out.scoreText, '별도전형');
     assert.equal(out.noteText, '타시도 진학');
+    const extra = buildRegisterEntries(ctx, [{ id: 10, admissionYear: 2027, classNum: 1, studentNum: '10', studentName: '가상열', category: 'special', schoolName: '울산상업고등학교', track: '일반', status: '합격', score: 40, extraRound: true }], 1)[0];
+    assert.match(extra.noteText, /\[추가모집\]/);
+    // 추가모집 원서는 후기 일반고(불합격) 다음 줄에 적는다.
+    const order = buildRegisterEntries(ctx, [
+        { id: 11, admissionYear: 2027, classNum: 1, studentNum: '11', studentName: '가상열하나', category: 'special', schoolName: '울산상업고등학교', track: '일반', status: '합격', extraRound: true },
+        { id: 12, admissionYear: 2027, classNum: 1, studentNum: '11', studentName: '가상열하나', category: 'general', schoolName: '', track: '후기 일반계고', status: '불합격' },
+    ], 1).map((r) => r.app.category);
+    assert.deepEqual(order, ['general', 'special']);
 });

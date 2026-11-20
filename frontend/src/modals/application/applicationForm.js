@@ -1,6 +1,7 @@
 import { escapeHtml, escapeAttr, displayTrack } from '../../core/utils.js';
 import { showModalAlert, showModalConfirm } from '../../core/dialogs.js';
 import { notifyApplicationsChanged } from '../../core/navigation.js';
+import { suggestExtraRound } from '../../core/extraRound.js';
 
 // 지원현황 입력: 원서별 입력 화면 렌더러 정의
 export function defineApplicationRenderer(ctx) {
@@ -60,6 +61,9 @@ export function defineApplicationRenderer(ctx) {
         }
 
         const record = workingRecords[activeIdx] || { admissionYear: ctx.defaultAdmissionYear, category: 'meister', status: '지원희망', preferences: [] };
+        // 새 원서: 후기 일반고 불합격이면 추가모집으로 미리 체크한다(해제 가능).
+        const extraSuggested = !record.id && record.extraRound === undefined && suggestExtraRound(records, record.admissionYear || ctx.defaultAdmissionYear);
+        if (extraSuggested) record.extraRound = true;
         const isGeneral = record.category === 'general';
         const isNone = record.category === 'none';
         const isOther = ctx.isCustomSchoolCategory(record.category); // 기타·타시도: 학교명 직접 입력
@@ -128,6 +132,7 @@ export function defineApplicationRenderer(ctx) {
             <div id="appCustomSchoolArea" class="md:col-span-2 ${record.category === 'out_province' || isOther && record.schoolName && !['울산예술고등학교', '울산스포츠과학고등학교', '울산고운고등학교', '울산애니원고등학교', '울산과학고등학교'].includes(record.schoolName) ? '' : 'hidden'}"><label class="text-sm font-bold">지원 고등학교명 직접 입력<input id="appCustomSchool" type="text" value="${escapeAttr(isOther && !['타시도 고등학교', '기타'].includes(record.schoolName) ? (record.schoolName || '') : '')}" placeholder="예: 제주서귀포고등학교" class="input-field mt-1 w-full" ${ctx.canEdit && !isLocked ? '' : 'disabled'}></label><p class="text-xs text-text-muted mt-1">실제 지원 학교명을 입력하면 원서대장에 표시됩니다. 기존 메모는 그대로 유지됩니다.</p></div>
             <label class="text-sm font-bold">전형 / 지원 유형<select id="appTrack" class="input-field mt-1 w-full" ${ctx.canEdit && !isOther && !isLocked ? '' : 'disabled'}>${ctx.trackOptions(record.category, record.schoolName, record.track)}</select></label>
             <label class="text-sm font-bold">지원 상태<select id="appStatus" class="input-field mt-1 w-full" ${ctx.canEdit && !isNone && !isLocked ? '' : 'disabled'}>${statusSelectHTML}</select></label>
+            <label id="appExtraRoundArea" class="text-sm font-bold flex items-center gap-2 md:col-span-2 ${needsDepartment ? '' : 'hidden'}"><input type="checkbox" id="appExtraRound" class="w-4 h-4 accent-amber-400" ${record.extraRound ? 'checked' : ''} ${ctx.canEdit && !isLocked ? '' : 'disabled'}> 추가모집 원서 <span class="text-[11px] font-normal text-slate-400">(정규모집에서 미달한 학교에 추가로 지원 — 원서대장 비고에 "추가모집", 합격선 통계에는 그대로 포함)</span>${extraSuggested ? '<span id="appExtraHint" class="text-[11px] font-normal text-amber-300">후기 일반고 불합격이라 미리 체크했습니다. 정규 원서면 해제하세요.</span>' : ''}</label>
             <label id="appStageArea" class="text-sm font-bold ${needsDepartment && ctx.stageInfo(record.schoolName, record.track) ? '' : 'hidden'}">1차 전형 결과 <span class="text-[11px] font-normal text-slate-400">(1차 합격 후 면접 등에서 떨어지면 '1차 합격' + 지원 상태 '불합격')</span><select id="appStage" class="input-field mt-1 w-full" ${ctx.canEdit && !isLocked ? '' : 'disabled'}>${ctx.stageOptions(record.firstStageResult || '')}</select><span id="appStageNote" class="block mt-1 text-[11px] font-normal text-indigo-300"></span></label>
             <label class="text-sm font-bold">점수 스냅샷 <span class="text-[11px] text-cyan-300">자동</span><input id="appScore" type="text" inputmode="decimal" value="${displayedScore || ''}" placeholder="${isUnscored && !isNone ? '별도 전형 학교 — 점수 미기록' : '학교·전형 선택 시 자동 산출'}" class="input-field mt-1 w-full" ${isUnscored ? 'disabled' : (autoScore || isLocked ? 'readonly' : (ctx.canEdit ? '' : 'disabled'))}></label>
             <label class="text-sm font-bold md:col-span-2">점수 기준 / 메모<input id="appBasis" value="${escapeAttr(displayedBasis)}" data-auto="${isAutoBasis}" placeholder="${isNone ? '예: 진학포기 사유, 기타 진로 등' : (isUnscored ? '예: 실기·면접 전형, 지원 학과, 메모 등' : '예: 3-1 누적 예상, 1차 서류점수 등')}" class="input-field mt-1 w-full" ${ctx.canEdit && !isLocked ? '' : 'disabled'}></label>
@@ -155,6 +160,10 @@ export function defineApplicationRenderer(ctx) {
         });
 
         // 잠금 해제 이벤트 리스너
+        // 추가모집 미리 체크 안내는 체크를 해제하면 감춘다.
+        document.getElementById('appExtraRound')?.addEventListener('change', (e) => {
+            document.getElementById('appExtraHint')?.classList.toggle('hidden', !e.target.checked);
+        });
         document.getElementById('unlockApplicationBtn')?.addEventListener('click', () => {
             isLocked = false;
             const banner = document.getElementById('applicationLockBanner');
@@ -164,6 +173,7 @@ export function defineApplicationRenderer(ctx) {
             }
             document.getElementById('appYear').disabled = false;
             document.getElementById('appCategory').disabled = false;
+            document.getElementById('appExtraRound').disabled = false;
             const curCat = document.getElementById('appCategory').value;
             const reqSchool = ['meister', 'special', 'self_foreign'].includes(curCat);
             document.getElementById('appSchool').disabled = (!reqSchool && !ctx.isCustomSchoolCategory(curCat)) || curCat === 'none';
@@ -301,6 +311,7 @@ export function defineApplicationRenderer(ctx) {
             trackSelect.disabled = other || !ctx.canEdit || isLocked;
 
             document.getElementById('appPreferenceArea').classList.toggle('hidden', !departmentRequired);
+            document.getElementById('appExtraRoundArea').classList.toggle('hidden', !departmentRequired);
             refreshStageArea();
             document.getElementById('generalApplicationGuide').classList.toggle('hidden', !general);
             document.getElementById('noneApplicationGuide')?.classList.toggle('hidden', !none);
@@ -376,7 +387,8 @@ export function defineApplicationRenderer(ctx) {
                 preferences: hasDepartment ? preferences : [],
                 assignedDepartment: hasDepartment ? document.getElementById('appAssigned').value.trim() : '',
                 assignedSchool: assignedSchoolVal,
-                firstStageResult: hasDepartment && !document.getElementById('appStageArea').classList.contains('hidden') ? document.getElementById('appStage').value : ''
+                firstStageResult: hasDepartment && !document.getElementById('appStageArea').classList.contains('hidden') ? document.getElementById('appStage').value : '',
+                extraRound: hasDepartment && document.getElementById('appExtraRound').checked
             };
             const sameYear = records.filter(r => r.id !== record.id && r.admissionYear === payload.admissionYear && r.schoolName !== payload.schoolName);
             const active = r => ['지원예정', '지원완료', '지원 예정', '지원 완료', '합격', '최종 진학'].includes(r.status);

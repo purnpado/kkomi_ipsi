@@ -27,17 +27,18 @@ type bulkRow struct {
 	AssignedSchool     string  `json:"assignedSchool"`
 	ScoreDetailsJSON   string  `json:"scoreDetailsJson"`
 	FirstStageResult   string  `json:"firstStageResult"`
+	ExtraRound         bool    `json:"extraRound,omitempty"`
 	UpdatedAt          string  `json:"updatedAt"`
 }
 
-const bulkRowColumns = `student_num, student_name, admission_year, category, school_name, track, status, score, IFNULL(score_basis,''), IFNULL(preferences_json,'[]'), IFNULL(assigned_department,''), IFNULL(assigned_school,''), IFNULL(score_details_json,''), IFNULL(first_stage_result,''), IFNULL(updated_at,'')`
+const bulkRowColumns = `student_num, student_name, admission_year, category, school_name, track, status, score, IFNULL(score_basis,''), IFNULL(preferences_json,'[]'), IFNULL(assigned_department,''), IFNULL(assigned_school,''), IFNULL(score_details_json,''), IFNULL(first_stage_result,''), IFNULL(extra_round,0), IFNULL(updated_at,'')`
 
 func scanBulkRows(rows *sql.Rows) ([]bulkRow, error) {
 	defer rows.Close()
 	var out []bulkRow
 	for rows.Next() {
 		var r bulkRow
-		if err := rows.Scan(&r.StudentNum, &r.StudentName, &r.AdmissionYear, &r.Category, &r.SchoolName, &r.Track, &r.Status, &r.Score, &r.ScoreBasis, &r.PreferencesJSON, &r.AssignedDepartment, &r.AssignedSchool, &r.ScoreDetailsJSON, &r.FirstStageResult, &r.UpdatedAt); err != nil {
+		if err := rows.Scan(&r.StudentNum, &r.StudentName, &r.AdmissionYear, &r.Category, &r.SchoolName, &r.Track, &r.Status, &r.Score, &r.ScoreBasis, &r.PreferencesJSON, &r.AssignedDepartment, &r.AssignedSchool, &r.ScoreDetailsJSON, &r.FirstStageResult, &r.ExtraRound, &r.UpdatedAt); err != nil {
 			return nil, err
 		}
 		out = append(out, r)
@@ -127,13 +128,13 @@ func undoBatchInDB(db *sql.DB, batchID string) (int, error) {
 			_, err = tx.Exec(`DELETE FROM student_applications WHERE `+rowKeyWhere, e.row.keyArgs()...)
 		case "updated", "deleted":
 			r := e.row
-			_, err = tx.Exec(`INSERT INTO student_applications (student_num, student_name, admission_year, category, school_name, track, status, score, score_basis, preferences_json, assigned_department, assigned_school, score_details_json, first_stage_result, updated_at)
-				VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+			_, err = tx.Exec(`INSERT INTO student_applications (student_num, student_name, admission_year, category, school_name, track, status, score, score_basis, preferences_json, assigned_department, assigned_school, score_details_json, first_stage_result, extra_round, updated_at)
+				VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
 				ON CONFLICT(student_num, student_name, admission_year, category, school_name, track) DO UPDATE SET
 					status = excluded.status, score = excluded.score, score_basis = excluded.score_basis, preferences_json = excluded.preferences_json,
 					assigned_department = excluded.assigned_department, assigned_school = excluded.assigned_school,
-					score_details_json = excluded.score_details_json, first_stage_result = excluded.first_stage_result, updated_at = CURRENT_TIMESTAMP`,
-				r.StudentNum, r.StudentName, r.AdmissionYear, r.Category, r.SchoolName, r.Track, r.Status, r.Score, r.ScoreBasis, r.PreferencesJSON, r.AssignedDepartment, r.AssignedSchool, r.ScoreDetailsJSON, r.FirstStageResult)
+					score_details_json = excluded.score_details_json, first_stage_result = excluded.first_stage_result, extra_round = excluded.extra_round, updated_at = CURRENT_TIMESTAMP`,
+				r.StudentNum, r.StudentName, r.AdmissionYear, r.Category, r.SchoolName, r.Track, r.Status, r.Score, r.ScoreBasis, r.PreferencesJSON, r.AssignedDepartment, r.AssignedSchool, r.ScoreDetailsJSON, r.FirstStageResult, r.ExtraRound)
 		}
 		if err != nil {
 			return 0, err

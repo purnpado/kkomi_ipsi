@@ -34,7 +34,7 @@ func (dm *DBManager) GetConsolidatedAdmissionStats(admissionYear int, highSchool
 
 	// 통합 점수 레코드 로드
 	// 학과를 비우면 학교·전형 전체(모든 학과 합계)를 집계한다(분석 화면 "전체(학교 총괄)", 여러 해 추세).
-	query := `SELECT status, score, COALESCE(first_stage_result, '') FROM shared_anonymous_scores 
+	query := `SELECT status, score, COALESCE(first_stage_result, ''), COALESCE(extra_round, 0) FROM shared_anonymous_scores 
 		WHERE admission_year = ? AND high_school = ? AND track = ? AND excluded = 0`
 	args := []interface{}{admissionYear, highSchool, track}
 	if department != "" {
@@ -49,12 +49,13 @@ func (dm *DBManager) GetConsolidatedAdmissionStats(admissionYear int, highSchool
 
 	var acceptedScores []float64
 	var rejectedScores []float64
-	var stage1PassCount, stage2FailCount int
+	var stage1PassCount, stage2FailCount, extraRoundAccepted int
 	var stage1PassMin, stage2FailSum float64
 	for rows.Next() {
 		var status, firstStage string
 		var score float64
-		if err := rows.Scan(&status, &score, &firstStage); err == nil {
+		var extraRound bool
+		if err := rows.Scan(&status, &score, &firstStage, &extraRound); err == nil {
 			cleanStatus := strings.TrimSpace(status)
 			if firstStage == "합격" {
 				stage1PassCount++
@@ -72,6 +73,9 @@ func (dm *DBManager) GetConsolidatedAdmissionStats(admissionYear int, highSchool
 				rejectedScores = append(rejectedScores, score)
 			} else if strings.Contains(cleanStatus, "합격") || strings.Contains(cleanStatus, "진학") {
 				acceptedScores = append(acceptedScores, score)
+				if extraRound {
+					extraRoundAccepted++
+				}
 			}
 		}
 	}
@@ -157,6 +161,7 @@ func (dm *DBManager) GetConsolidatedAdmissionStats(admissionYear int, highSchool
 		Stage1PassCount:          stage1PassCount,
 		Stage1PassMin:            calc.Round2(stage1PassMin),
 		Stage2FailCount:          stage2FailCount,
+		ExtraRoundAccepted:       extraRoundAccepted,
 		Stage2FailAvg:            stage2FailAvg(stage2FailSum, stage2FailCount),
 		HasOverlap:               hasOverlap,
 		OverlapMin:               overlapMin,

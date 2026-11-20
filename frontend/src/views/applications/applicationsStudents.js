@@ -22,6 +22,7 @@ function appChips(apps) {
     return apps.map((a) => `
         <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-slate-900/50 border border-slate-700/60 text-xs whitespace-nowrap">
             <span class="text-slate-200 font-semibold">${escapeHtml(appLabel(a))}</span>
+            ${a.extraRound ? '<span class="text-[11px] font-bold text-amber-300">추가모집</span>' : ''}
             ${a.firstStageResult && !RESULT_STATUSES.has(a.status) ? `<span class="text-[11px] text-indigo-300">1차 ${escapeHtml(a.firstStageResult)}</span>` : ''}
             ${statusChip(a.status)}
         </span>`).join(' ');

@@ -125,3 +125,32 @@ func TestBulkRejectsClosedYear(t *testing.T) {
 		t.Fatal("확정한 학년도에는 일괄 결과를 넣을 수 없어야 합니다")
 	}
 }
+
+// 일반고 불합격 뒤 특성화고 추가모집에 합격한 학생: 특성화고 합격을 넣어도 일반고 불합격 기록은 남는다.
+func TestEarlyPassKeepsDecidedGeneral(t *testing.T) {
+	dm := bulkTestDB(t)
+	for _, rec := range []model.ApplicationRecord{
+		{ClassNum: 1, StudentNum: "1", StudentName: "가학생", AdmissionYear: 2027, Category: "general", Track: generalTrack, Status: "불합격"},
+		{ClassNum: 1, StudentNum: "1", StudentName: "가학생", AdmissionYear: 2027, Category: "special", SchoolName: "울산상업고", Track: "일반", Status: "지원완료"},
+		{ClassNum: 1, StudentNum: "2", StudentName: "나학생", AdmissionYear: 2027, Category: "general", Track: generalTrack, Status: "지원예정"},
+		{ClassNum: 1, StudentNum: "2", StudentName: "나학생", AdmissionYear: 2027, Category: "special", SchoolName: "울산상업고", Track: "일반", Status: "지원완료"},
+	} {
+		if err := dm.SaveApplication(rec); err != nil {
+			t.Fatal(err)
+		}
+	}
+	accepted := map[string]string{StudentKey(1, "1", "가학생"): "", StudentKey(1, "2", "나학생"): ""}
+	sum, err := dm.BulkSetSchoolResults(2027, []int{1}, "special", "울산상업고", "일반", "final", accepted, true)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if sum.Removed != 1 {
+		t.Fatalf("결과가 없는 일반고 원서(나학생)만 지워야 합니다: %+v", sum)
+	}
+	if got := statusOf(t, dm, 1, "1", "가학생", "general"); got != "불합격" {
+		t.Fatalf("가학생 일반고 불합격 기록이 남아야 합니다: %q", got)
+	}
+	if got := statusOf(t, dm, 1, "2", "나학생", "general"); got != "" {
+		t.Fatalf("나학생 일반고 원서(결과 없음)는 지워져야 합니다: %q", got)
+	}
+}

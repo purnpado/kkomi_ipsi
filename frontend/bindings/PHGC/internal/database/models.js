@@ -41,6 +41,7 @@ import * as calc$0 from "../calc/models.js";
  * @property {number} acceptedCount
  * @property {number} rejectedCount - 점수로 떨어진 사례(1차 통과 후 면접 탈락 제외)
  * @property {number} stage2FailCount - 1차 통과 후 2차(면접 등) 탈락
+ * @property {number} extraRoundAccepted - ExtraRoundAccepted 합격 가운데 추가모집 합격(정규모집 미달 신호). 합격 수·합격선에는 그대로 들어간다.
  * @property {number} acceptedMin
  * @property {number} rejectedMax
  */
@@ -142,6 +143,7 @@ import * as calc$0 from "../calc/models.js";
  * @property {number} stage1PassCount - 1차 합격(최종 합격·2차 탈락 포함)
  * @property {number} stage1PassMin - 관내 1차 합격선
  * @property {number} stage2FailCount - 1차 합격 후 최종 불합격
+ * @property {number} extraRoundAccepted - 합격 가운데 추가모집 합격
  * @property {number} stage2FailAvg
  * @property {boolean} hasOverlap
  * @property {number} overlapMin

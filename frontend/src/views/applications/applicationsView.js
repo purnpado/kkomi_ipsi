@@ -1,6 +1,6 @@
 // ===== 원서 관리 화면 (app:navigate 'applications') =====
 // 학년부장은 전교생(반 고르기), 담임은 우리 반, 진로부장은 조회만. 계획서 docs/application-management-plan.md.
-// 탭: 학생별 원서(일반고 일괄 지원·되돌리기) / 학교별 결과 입력 / 일반고 결과.
+// 탭: 학생별 원서(일반고 일괄 지원·되돌리기) / 학교별 결과 입력 / 일반고 결과 / 전기고 빠른 입력(applicationsQuick.js, 진로부장에게는 없음).
 import { app } from '../../core/dom.js';
 import { state } from '../../core/store.js';
 import { eventBus, EVENTS } from '../../core/eventBus.js';
@@ -12,11 +12,13 @@ import { ScreenLockManager } from '../../core/screenLock.js';
 import { STUDENT_FILTERS, loadApplicationsData } from './applicationsData.js';
 import { filterStudents, studentsTableHTML } from './applicationsStudents.js';
 import { collectAccepted, collectRejected, generalResultsHTML, groupOptions, schoolResultsHTML } from './applicationsResults.js';
+import { bindQuickEntry, loadQuickCatalog, quickEntryHTML } from './applicationsQuick.js';
 
 const TABS = [
     { id: 'students', label: '학생별 원서' },
     { id: 'school', label: '학교별 결과 입력' },
-    { id: 'general', label: '일반고 결과' }
+    { id: 'general', label: '일반고 결과' },
+    { id: 'quick', label: '전기고 빠른 입력', editOnly: true }
 ];
 
 const view = { tab: 'students', classNum: 0, filter: 'all', query: '', groupKey: '' };
@@ -55,7 +57,7 @@ function toolbarHTML() {
         </select>` : '';
     return `
         <div class="flex flex-wrap items-center gap-2">
-            ${TABS.map((t) => `<button type="button" class="apps-tab px-4 py-2 rounded-xl text-sm font-bold border ${view.tab === t.id ? 'bg-indigo-600 text-white border-indigo-500' : 'bg-slate-800/60 text-slate-300 border-slate-700 hover:border-indigo-500/60'}" data-tab="${t.id}" style="width:auto">${t.label}</button>`).join('')}
+            ${TABS.filter((t) => !t.editOnly || canEdit()).map((t) => `<button type="button" class="apps-tab px-4 py-2 rounded-xl text-sm font-bold border ${view.tab === t.id ? 'bg-indigo-600 text-white border-indigo-500' : 'bg-slate-800/60 text-slate-300 border-slate-700 hover:border-indigo-500/60'}" data-tab="${t.id}" style="width:auto">${t.label}</button>`).join('')}
             <span class="flex-1"></span>
             ${classSelect}
         </div>`;
@@ -74,6 +76,7 @@ function tabBodyHTML() {
             ${schoolResultsHTML(groups.find((g) => g.key === view.groupKey), opts)}`;
     }
     if (view.tab === 'general') return generalResultsHTML(visibleStudents(), opts);
+    if (view.tab === 'quick' && canEdit()) return quickEntryHTML(data);
     return `
         <div class="flex flex-wrap items-center gap-2 mb-3">
             ${STUDENT_FILTERS.map((f) => `<button type="button" class="apps-filter px-3 py-1.5 rounded-full text-xs font-bold border ${view.filter === f.id ? 'bg-indigo-500/20 text-indigo-200 border-indigo-500/50' : 'bg-slate-800/60 text-slate-300 border-slate-700'}" data-filter="${f.id}" style="width:auto">${f.label}</button>`).join('')}
@@ -138,6 +141,14 @@ function bind() {
         bindRowButtons();
     });
     bindRowButtons();
+    if (view.tab === 'quick' && canEdit()) {
+        bindQuickEntry(app.querySelector('#appsBody'), {
+            getData: () => data,
+            reload: async () => { data = await loadApplicationsData(who()); },
+            rerender: render,
+            notify: () => notifyApplicationsChanged({ source: 'bulk-quick' }) // 'bulk' 로 시작하면 아래 구독이 화면을 다시 읽지 않는다
+        });
+    }
     app.querySelector('#appsBulkGeneral')?.addEventListener('click', () => runBulk('일반고 일괄 지원',
         (apply) => App.BulkCreateGeneralApplications(data.year, scopeClass(), apply),
         (p) => `올해 원서가 없는 <strong>${p.changed}명</strong>에게 "후기 일반고 · 지원예정" 원서를 만듭니다.`));
@@ -179,7 +190,7 @@ export async function renderApplicationsScreen() {
     app.className = 'wide-layout';
     app.innerHTML = '<div class="py-24 text-center text-slate-400"><span class="spinner"></span>원서 자료를 읽는 중…</div>';
     ScreenLockManager.resetTimer();
-    data = await loadApplicationsData(who());
+    [data] = await Promise.all([loadApplicationsData(who()), canEdit() ? loadQuickCatalog() : null]);
     if (state.currentScreen !== 'applications') return;
     render();
     unsubscribe?.();

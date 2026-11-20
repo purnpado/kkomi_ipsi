@@ -44,7 +44,7 @@ func (dm *DBManager) loadVerifyRecords() ([]verifyRecord, []SharedVerifySchool, 
 		names[s.PkgID] = s.SchoolName
 	}
 	rows, err := db.Query(`SELECT id, school_pkg_id, admission_year, high_school, department, track, status, score,
-		COALESCE(score_details_json, ''), COALESCE(formula_version, ''), COALESCE(first_stage_result, ''), excluded, self_excluded
+		COALESCE(score_details_json, ''), COALESCE(formula_version, ''), COALESCE(first_stage_result, ''), excluded, self_excluded, COALESCE(extra_round, 0)
 		FROM shared_anonymous_scores`)
 	if err != nil {
 		return nil, nil, err
@@ -55,7 +55,7 @@ func (dm *DBManager) loadVerifyRecords() ([]verifyRecord, []SharedVerifySchool, 
 	for rows.Next() {
 		var r verifyRecord
 		var self bool
-		if err := rows.Scan(&r.id, &r.pkg, &r.year, &r.high, &r.dept, &r.track, &r.status, &r.score, &r.details, &r.version, &r.firstStage, &r.excluded, &self); err != nil {
+		if err := rows.Scan(&r.id, &r.pkg, &r.year, &r.high, &r.dept, &r.track, &r.status, &r.score, &r.details, &r.version, &r.firstStage, &r.excluded, &self, &r.extraRound); err != nil {
 			continue
 		}
 		r.school, r.own = names[r.pkg], ownPkg[r.pkg]
@@ -95,7 +95,7 @@ func (dm *DBManager) ownStatsAccepted() []ownRef {
 	}
 	var out []ownRef
 	for _, r := range records {
-		if !isAcceptedStatus(r.Status) || r.Score <= 0 || (r.Category != "meister" && r.Category != "special") {
+		if !isAcceptedStatus(r.Status) || r.Score <= 0 || r.ExtraRound || (r.Category != "meister" && r.Category != "special") {
 			continue
 		}
 		dept := r.AssignedDepartment
@@ -133,7 +133,8 @@ func outlierIssues(records []verifyRecord, own []ownRef) []outlierHit {
 	}
 	for _, r := range records {
 		// 우리 학교 파일은 학급 자료(own)로 대신 넣어 두 번 세지 않는다.
-		if r.excluded || r.own || r.score <= 0 || !isAcceptedStatus(r.status) || !plausibleScore(r) {
+		// 추가모집 합격은 미달이라 점수가 낮은 것이 정상이므로 기준선을 만들 때 넣지 않는다.
+		if r.excluded || r.own || r.extraRound || r.score <= 0 || !isAcceptedStatus(r.status) || !plausibleScore(r) {
 			continue
 		}
 		addRef(r.year, r.high, r.track, r.dept, refScore{pkg: r.pkg, score: r.score})
@@ -210,7 +211,7 @@ func outlierIssues(records []verifyRecord, own []ownRef) []outlierHit {
 	}
 	var hits []outlierHit
 	for _, r := range records {
-		if r.score <= 0 {
+		if r.score <= 0 || r.extraRound { // 추가모집 합격은 낮아도 이상한 값으로 보지 않는다
 			continue
 		}
 		f, ok := fences(r)

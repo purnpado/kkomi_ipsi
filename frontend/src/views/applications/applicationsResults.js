@@ -32,7 +32,7 @@ export function schoolResultsHTML(group, { showClass, canEdit }) {
                         ${prefs.map((p, i) => `<option value="${escapeAttr(p)}" ${p === app.assignedDepartment ? 'selected' : ''}>${i + 1}지망 · ${escapeHtml(p)}</option>`).join('')}
                     </select>` : '<span class="text-xs text-slate-500">지망 학과 없음</span>'}
                 </td>
-                <td class="py-2 px-2 whitespace-nowrap">${app.firstStageResult ? `<span class="text-[11px] text-indigo-300 mr-1">1차 ${escapeHtml(app.firstStageResult)}</span>` : ''}${statusChip(app.status)}</td>
+                <td class="py-2 px-2 whitespace-nowrap">${app.extraRound ? '<span class="text-[11px] font-bold text-amber-300 mr-1">추가모집</span>' : ''}${app.firstStageResult ? `<span class="text-[11px] text-indigo-300 mr-1">1차 ${escapeHtml(app.firstStageResult)}</span>` : ''}${statusChip(app.status)}</td>
             </tr>`;
     }).join('');
     return `

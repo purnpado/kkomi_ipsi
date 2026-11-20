@@ -23,6 +23,7 @@ import * as model$0 from "../model/models.js";
  * @property {number} rejectedCount
  * @property {number} stage2FailCount - 1차 합격 후 최종 불합격(면접 등)
  * @property {number} finalCount
+ * @property {number} extraRoundAccepted - ExtraRoundAccepted 합격 가운데 추가모집 합격(정규모집 미달 신호). 합격 수·점수 분포에는 그대로 들어간다.
  * @property {number} acceptedMin - Accepted Scores
  * @property {number} acceptedMax
  * @property {number} acceptedAvg

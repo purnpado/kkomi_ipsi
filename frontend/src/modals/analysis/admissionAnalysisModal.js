@@ -284,6 +284,7 @@ export async function openAdmissionAnalysisModal() {
                         acceptedStdDev: found.acceptedStdDev,
                         rejectedCount: found.rejectedCount,
                         stage2FailCount: found.stage2FailCount,
+                        extraRoundAccepted: found.extraRoundAccepted,
                         rejectedMax: found.rejectedMax,
                         rejectedAvg: found.rejectedAvg,
                         hasOverlap: found.hasOverlap,

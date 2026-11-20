@@ -41,9 +41,12 @@ type ApplicationRecord struct {
 	// FirstStageResult 1차 전형 결과("" 미구분·해당 없음, "합격", "불합격").
 	// 1차에서 정원의 1.3~1.5배를 뽑고 2차(면접 등)를 거쳐 최종 합격자를 정하는 학교에서
 	// "1차 합격 후 최종 불합격"을 따로 분석하기 위해 쓴다.
-	FirstStageResult string                   `json:"firstStageResult"`
-	ScoreDetails     *ApplicationScoreDetails `json:"scoreDetails,omitempty"`
-	UpdatedAt        string                   `json:"updatedAt"`
+	FirstStageResult string `json:"firstStageResult"`
+	// ExtraRound 추가모집 원서(마이스터고·특성화고). 정규모집에서 미달한 학교에 후기 일반고 불합격 학생 등이
+	// 추가로 지원한 원서. 합격선 통계에는 그대로 넣고(미달 신호), 원서대장·분석·공유 자료에 표시만 한다.
+	ExtraRound   bool                     `json:"extraRound"`
+	ScoreDetails *ApplicationScoreDetails `json:"scoreDetails,omitempty"`
+	UpdatedAt    string                   `json:"updatedAt"`
 }
 
 // IsScoredCategory reports whether a category's recorded score is comparable

@@ -124,6 +124,7 @@ func (dm *DBManager) BulkCreateGeneral(year int, classes []int, apply bool) (*Bu
 // mode "final": accepted 에 있는 학생은 합격(배정 학과가 있으면 함께), 나머지는 불합격.
 //
 //	합격자의 같은 학년도 일반고 원서는 지운다(울산: 전기고 합격자는 후기고에 지원할 수 없음).
+//	단, 결과(합격·불합격)가 이미 있는 일반고 원서는 지우지 않는다(일반고 불합격 뒤 전기고 추가모집 합격).
 //
 // mode "first": accepted 는 1차 합격, 나머지는 1차 불합격(최종 불합격).
 func (dm *DBManager) BulkSetSchoolResults(year int, classes []int, category, schoolName, track, mode string, accepted map[string]string, apply bool) (*BulkSummary, error) {
@@ -191,7 +192,8 @@ func (dm *DBManager) BulkSetSchoolResults(year int, classes []int, category, sch
 				}
 			}
 			for _, r := range rows {
-				if r.Category == "general" && passed[r.StudentNum+"|"+r.StudentName] {
+				// 결과가 이미 있는 일반고 원서(일반고 불합격 뒤 전기고 추가모집 합격 등)는 기록으로 남긴다.
+				if r.Category == "general" && passed[r.StudentNum+"|"+r.StudentName] && pendingStatuses[r.Status] {
 					summary.Removed++
 					if apply {
 						if err := deleteRow(tx, summary.BatchID, r); err != nil {

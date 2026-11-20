@@ -22,6 +22,7 @@ type HistoryRecord struct {
 	Track              string   `json:"track"`
 	Status             string   `json:"status"`
 	FirstStageResult   string   `json:"firstStageResult,omitempty"`
+	ExtraRound         bool     `json:"extraRound,omitempty"` // 추가모집 원서
 	Score              float64  `json:"score"`
 	ScoreBasis         string   `json:"scoreBasis,omitempty"`
 	Preferences        []string `json:"preferences,omitempty"`
@@ -41,6 +42,7 @@ func (dm *DBManager) initHistoryTable(db *sql.DB) error {
 		track TEXT NOT NULL DEFAULT '',
 		status TEXT NOT NULL,
 		first_stage_result TEXT NOT NULL DEFAULT '',
+		extra_round INTEGER NOT NULL DEFAULT 0,
 		score REAL NOT NULL DEFAULT 0,
 		score_basis TEXT NOT NULL DEFAULT '',
 		preferences_json TEXT NOT NULL DEFAULT '[]',
@@ -53,6 +55,7 @@ func (dm *DBManager) initHistoryTable(db *sql.DB) error {
 	)`)
 	if err == nil {
 		_, _ = db.Exec(`CREATE INDEX IF NOT EXISTS idx_admission_history_year ON admission_history(admission_year)`)
+		_, _ = db.Exec(`ALTER TABLE admission_history ADD COLUMN extra_round INTEGER NOT NULL DEFAULT 0`)
 	}
 	return err
 }
@@ -123,7 +126,7 @@ func (dm *DBManager) generalDetailsFor(records []model.ApplicationRecord, admiss
 
 func historyFromRecord(r model.ApplicationRecord) HistoryRecord {
 	h := HistoryRecord{AdmissionYear: r.AdmissionYear, Category: r.Category, SchoolName: r.SchoolName, Track: r.Track,
-		Status: r.Status, FirstStageResult: r.FirstStageResult, Score: r.Score, ScoreBasis: r.ScoreBasis,
+		Status: r.Status, FirstStageResult: r.FirstStageResult, ExtraRound: r.ExtraRound, Score: r.Score, ScoreBasis: r.ScoreBasis,
 		Preferences: r.Preferences, AssignedDepartment: r.AssignedDepartment, AssignedSchool: r.AssignedSchool}
 	if r.ScoreDetails != nil {
 		if b, err := json.Marshal(r.ScoreDetails); err == nil {
@@ -141,8 +144,8 @@ func insertHistory(db *sql.DB, rows []HistoryRecord, source string) error {
 	if err != nil {
 		return err
 	}
-	stmt, err := tx.Prepare(`INSERT INTO admission_history (admission_year, category, school_name, track, status, first_stage_result, score, score_basis,
-		preferences_json, assigned_department, assigned_school, score_details_json, general_detail_json, source) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)`)
+	stmt, err := tx.Prepare(`INSERT INTO admission_history (admission_year, category, school_name, track, status, first_stage_result, extra_round, score, score_basis,
+		preferences_json, assigned_department, assigned_school, score_details_json, general_detail_json, source) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`)
 	if err != nil {
 		_ = tx.Rollback()
 		return err
@@ -153,7 +156,7 @@ func insertHistory(db *sql.DB, rows []HistoryRecord, source string) error {
 		if h.Preferences == nil {
 			prefs = []byte("[]")
 		}
-		if _, err := stmt.Exec(h.AdmissionYear, h.Category, h.SchoolName, h.Track, h.Status, h.FirstStageResult, h.Score, h.ScoreBasis,
+		if _, err := stmt.Exec(h.AdmissionYear, h.Category, h.SchoolName, h.Track, h.Status, h.FirstStageResult, h.ExtraRound, h.Score, h.ScoreBasis,
 			string(prefs), h.AssignedDepartment, h.AssignedSchool, h.ScoreDetailsJSON, h.GeneralDetailJSON, source); err != nil {
 			_ = tx.Rollback()
 			return err
@@ -172,7 +175,7 @@ func (dm *DBManager) GetAdmissionHistory() ([]HistoryRecord, error) {
 	if err := dm.initHistoryTable(db); err != nil {
 		return nil, err
 	}
-	rows, err := db.Query(`SELECT admission_year, category, school_name, track, status, first_stage_result, score, score_basis, preferences_json,
+	rows, err := db.Query(`SELECT admission_year, category, school_name, track, status, first_stage_result, extra_round, score, score_basis, preferences_json,
 		assigned_department, assigned_school, score_details_json, general_detail_json, source FROM admission_history ORDER BY admission_year, id`)
 	if err != nil {
 		return nil, err
@@ -182,7 +185,7 @@ func (dm *DBManager) GetAdmissionHistory() ([]HistoryRecord, error) {
 	for rows.Next() {
 		var h HistoryRecord
 		var prefs string
-		if err := rows.Scan(&h.AdmissionYear, &h.Category, &h.SchoolName, &h.Track, &h.Status, &h.FirstStageResult, &h.Score, &h.ScoreBasis,
+		if err := rows.Scan(&h.AdmissionYear, &h.Category, &h.SchoolName, &h.Track, &h.Status, &h.FirstStageResult, &h.ExtraRound, &h.Score, &h.ScoreBasis,
 			&prefs, &h.AssignedDepartment, &h.AssignedSchool, &h.ScoreDetailsJSON, &h.GeneralDetailJSON, &h.Source); err != nil {
 			return nil, err
 		}
@@ -243,7 +246,7 @@ func (dm *DBManager) historyAsRecords(skipYears map[int]bool) []model.Applicatio
 
 func historyToRecord(h HistoryRecord) model.ApplicationRecord {
 	r := model.ApplicationRecord{AdmissionYear: h.AdmissionYear, Category: h.Category, SchoolName: h.SchoolName, Track: h.Track,
-		Status: h.Status, FirstStageResult: h.FirstStageResult, Score: h.Score, ScoreBasis: h.ScoreBasis, Preferences: h.Preferences,
+		Status: h.Status, FirstStageResult: h.FirstStageResult, ExtraRound: h.ExtraRound, Score: h.Score, ScoreBasis: h.ScoreBasis, Preferences: h.Preferences,
 		AssignedDepartment: h.AssignedDepartment, AssignedSchool: h.AssignedSchool}
 	if strings.TrimSpace(h.ScoreDetailsJSON) != "" {
 		var d model.ApplicationScoreDetails

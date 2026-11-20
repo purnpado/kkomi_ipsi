@@ -56,6 +56,7 @@ func (dm *DBManager) InitSharedDatabaseTables() error {
 	}
 
 	_, _ = db.Exec(`ALTER TABLE shared_anonymous_scores ADD COLUMN first_stage_result TEXT DEFAULT ''`)
+	_, _ = db.Exec(`ALTER TABLE shared_anonymous_scores ADD COLUMN extra_round INTEGER NOT NULL DEFAULT 0`)
 	_, _ = db.Exec(`ALTER TABLE shared_anonymous_scores ADD COLUMN general_detail_json TEXT DEFAULT ''`)
 
 	// 3. 요약 통계 테이블 (다중 학교 모멘트 합산용)
@@ -192,6 +193,7 @@ func (dm *DBManager) BuildSharedPackageV2(admissionYear int) (*SharedPackageV2, 
 			ScoreDetails:     details,
 			FormulaVersion:   details.FormulaVersion,
 			FirstStageResult: r.FirstStageResult,
+			ExtraRound:       r.ExtraRound,
 		}
 		anonymousRecords = append(anonymousRecords, anon)
 	}

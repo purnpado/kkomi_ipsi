@@ -112,7 +112,7 @@ func (dm *DBManager) ExportStoredSharedPackages() ([]SharedPackageV2, error) {
 	for _, p := range pkgs {
 		pkg := SharedPackageV2{Cover: SharedPackageCover{SchoolName: p.school, AdmissionYear: p.year, CreatedAt: time.Now().UTC(), FormatVersion: 2, RecordCount: p.cnt, LocalReviewed: true, LocalExcluded: p.excluded}}
 		recRows, err := db.Query(`SELECT high_school, department, track, preference_rank, status, score, score_basis, COALESCE(score_details_json,''),
-			COALESCE(formula_version,''), COALESCE(first_stage_result,''), COALESCE(general_detail_json,''), self_excluded FROM shared_anonymous_scores WHERE school_pkg_id = ?`, p.id)
+			COALESCE(formula_version,''), COALESCE(first_stage_result,''), COALESCE(general_detail_json,''), self_excluded, COALESCE(extra_round,0) FROM shared_anonymous_scores WHERE school_pkg_id = ?`, p.id)
 		if err != nil {
 			return nil, err
 		}
@@ -120,7 +120,7 @@ func (dm *DBManager) ExportStoredSharedPackages() ([]SharedPackageV2, error) {
 			var a AnonymousApplicationRecord
 			var details, general string
 			if err := recRows.Scan(&a.HighSchool, &a.Department, &a.Track, &a.PreferenceRank, &a.Status, &a.Score, &a.ScoreBasis, &details,
-				&a.FormulaVersion, &a.FirstStageResult, &general, &a.LocalExcluded); err != nil {
+				&a.FormulaVersion, &a.FirstStageResult, &general, &a.LocalExcluded, &a.ExtraRound); err != nil {
 				continue
 			}
 			var d model.ApplicationScoreDetails

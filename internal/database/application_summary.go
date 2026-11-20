@@ -206,7 +206,7 @@ func (dm *DBManager) getApplicationSummaries(classNums []int, includeHistory ...
 			}
 			return nil, err
 		}
-		rows, err := db.Query(`SELECT student_num,student_name,admission_year,category,school_name,track,status,score,score_basis,preferences_json,assigned_department,COALESCE(assigned_school, ''),COALESCE(first_stage_result, ''),updated_at FROM student_applications`)
+		rows, err := db.Query(`SELECT student_num,student_name,admission_year,category,school_name,track,status,score,score_basis,preferences_json,assigned_department,COALESCE(assigned_school, ''),COALESCE(first_stage_result, ''),COALESCE(extra_round, 0),updated_at FROM student_applications`)
 		if err != nil {
 			db.Close()
 			continue
@@ -214,7 +214,7 @@ func (dm *DBManager) getApplicationSummaries(classNums []int, includeHistory ...
 		for rows.Next() {
 			var r model.ApplicationRecord
 			var prefs string
-			if err := rows.Scan(&r.StudentNum, &r.StudentName, &r.AdmissionYear, &r.Category, &r.SchoolName, &r.Track, &r.Status, &r.Score, &r.ScoreBasis, &prefs, &r.AssignedDepartment, &r.AssignedSchool, &r.FirstStageResult, &r.UpdatedAt); err == nil {
+			if err := rows.Scan(&r.StudentNum, &r.StudentName, &r.AdmissionYear, &r.Category, &r.SchoolName, &r.Track, &r.Status, &r.Score, &r.ScoreBasis, &prefs, &r.AssignedDepartment, &r.AssignedSchool, &r.FirstStageResult, &r.ExtraRound, &r.UpdatedAt); err == nil {
 				_ = json.Unmarshal([]byte(prefs), &r.Preferences)
 				presentYears[r.AdmissionYear] = true
 				dispatch(r)

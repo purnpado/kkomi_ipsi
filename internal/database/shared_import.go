@@ -54,8 +54,8 @@ func (dm *DBManager) ImportV2Package(db *sql.DB, v2 *SharedPackageV2) (*SharedPa
 
 	// 익명 학생 점수 자료 배치 삽입
 	stmtScore, err := tx.Prepare(`INSERT INTO shared_anonymous_scores 
-		(school_pkg_id, admission_year, high_school, department, track, preference_rank, status, score, score_basis, stage1_common_score, stage1_school_score, score_details_json, formula_version, first_stage_result, general_detail_json, self_excluded) 
-		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
+		(school_pkg_id, admission_year, high_school, department, track, preference_rank, status, score, score_basis, stage1_common_score, stage1_school_score, score_details_json, formula_version, first_stage_result, general_detail_json, self_excluded, extra_round) 
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
 	if err != nil {
 		return nil, err
 	}
@@ -67,7 +67,7 @@ func (dm *DBManager) ImportV2Package(db *sql.DB, v2 *SharedPackageV2) (*SharedPa
 			pkgID, admissionYear, rec.HighSchool, rec.Department, rec.Track,
 			rec.PreferenceRank, rec.Status, rec.Score, rec.ScoreBasis,
 			rec.ScoreDetails.Percentile, rec.ScoreDetails.AcademicScore,
-			string(detailsJSON), rec.FormulaVersion, rec.FirstStageResult, generalDetailJSON(rec.GeneralDetail), boolInt(rec.LocalExcluded),
+			string(detailsJSON), rec.FormulaVersion, rec.FirstStageResult, generalDetailJSON(rec.GeneralDetail), boolInt(rec.LocalExcluded), boolInt(rec.ExtraRound),
 		)
 		if err != nil {
 			return nil, err
