@@ -50,6 +50,31 @@
 - **`window` 전역 등록 없애기**: `main.js`의 `Object.assign(window, …)`와 화면 파일의 `window.이름 =`을 import·이벤트로 바꾼다. 사용자 관리 화면이 `window.updateUserPassword` 등으로 부르는 5곳도 포함. 마지막에 `window.go`(바인딩) 말고는 남지 않게 검사한다.
 - `innerHTML` 이어 붙이기를 없앤다(글자는 React가 자동으로 안전 처리). `escapeHtml` 사용처(262곳)는 전환하며 자연히 사라진다.
 
+### 5-1. 화면 크기와 배율 (2026-11-21 추가)
+
+지금 상태(v1.8.0): 창은 최대화로 열리고 최소 960×640(`main.go`). 좁아지면 칸이 아래로 내려가는 설정(Tailwind `sm:`·`md:`) 약 100곳, CSS 폭 조건 4곳(상담 학교별 판정·왼쪽 메뉴·취합 비교·상담 입력), 넓은 표는 옆으로 밀기 16곳. 넓은 화면용(`lg:`·`xl:`·`2xl:`)은 10곳뿐이라 큰 모니터에서도 배치가 노트북과 거의 같고, 화면별 최대 폭이 1500·1700·1850·1920px로 제각각이다. 캡처 도구는 1366×768과 A4만 찍는다.
+
+- **확인 크기 5가지**(전환하며 화면마다 찍어 본다, 사용자 결정 — 배율 확인은 전환 때 함께):
+
+  | 폭(CSS px) | 실제 경우 |
+  |---|---|
+  | 1280 | 1920 모니터 + Windows 배율 150% |
+  | 1366 | 노트북 |
+  | 1536 | 1920 모니터 + Windows 배율 125% |
+  | 1920 | 1920 모니터 100% |
+  | 2560 | 큰 모니터(QHD) |
+
+  캡처 도구(`tools/capture/capture.js`)에 이 크기들을 넣고, 각 크기에서 가로 스크롤(표 제외)·잘린 글자·겹친 버튼이 없는지 본다.
+- **화면 폭 기준 통일**: 최대 폭을 화면 종류별로 하나씩 정한다(예: 일반 화면 한 값, 넓은 표 화면 한 값). 변수로 `tokens.css`에 둔다.
+- **넓은 화면 배치**(상담 화면 내신·학교별 판정 나란히 등)는 6절 3번 "배치 손보기"에 속하므로 화면마다 따로 승인받는다.
+
+### 5-2. 글꼴
+
+- 지금 글꼴: **Pretendard**(기본)와 **SUIT** 중 사용자가 고름(`core/preferences.js`, 이 PC에 저장). 둘 다 프로그램 안에 들어 있어 인터넷 없이 쓰고(SIL OFL 1.1), 없을 때는 Noto Sans KR → 맑은 고딕 → Apple SD Gothic Neo 순(`styles/fonts.css`).
+- 전환 때 그대로 둔다. shadcn 부품도 `--app-font`를 쓰게 한다.
+- **글꼴 하나 추가(선택, 사용자 결정)**: 후보 **나눔스퀘어 네오**(선생님들께 익숙하고 지금 두 글꼴과 느낌이 다름). 다른 후보는 IBM Plex Sans KR·원티드 산스(숫자 폭 일정). 실행 파일이 0.6~2MB 커지므로 하나만 더한다. 넣을 때 각 글꼴의 사용 허락 문서를 직접 확인해 함께 넣고, 5-1절 크기로 표·숫자 칸을 확인한다. 제목용 장식 글꼴은 표·작은 글자에서 읽기 어려워 쓰지 않는다.
+- **정리할 것**: `style.css`의 Nunito(Wails 기본 틀에서 남은 영문 글꼴, 실제로는 `fonts.css`가 덮어써 쓰이지 않음)와 `assets/fonts/nunito-…woff2`를 10단계에서 지운다.
+
 ## 6. 사용자 결정 필요 (시작 전)
 
 1. **언어**: JavaScript(JSX) 유지(권장) / TypeScript.
@@ -63,7 +88,7 @@
 - **전환 중에는 main에서 릴리즈하지 않는다.** 그 사이 학교에서 급한 오류가 나오면 마지막 릴리즈 태그(예: `v1.8.x`)에서 임시 갈래를 따서 고쳐 내고(v1.8.y), 같은 수정을 main에도 넣는다. 이 일은 10절에 적는다.
 - 단계마다 프로그램 전체가 동작하는 상태로 커밋한다(8절 "한 화면씩"). Gitea `origin` → GitHub 순서로 푸시해 백업한다.
 - 전환 작업에서는 **가상 자료(`test-data/시뮬레이션`)만** 쓴다. 맥 시험 앱을 다시 빌드할 때는 전처럼 `bin/data`를 먼저 백업한다.
-- 한 단계마다: `go test ./...`, `node --test`, `npm run build`, 캡처 도구(`zsh tools/capture/run.sh`, 라이트·다크)로 화면 확인, 500줄 검사 → 커밋.
+- 한 단계마다: `go test ./...`, `node --test`, `npm run build`, 캡처 도구(`zsh tools/capture/run.sh`, 라이트·다크, 5-1절 크기 5가지)로 화면 확인, 500줄 검사 → 커밋.
 
 ## 8. 단계 (위에서부터 차례로)
 
@@ -71,7 +96,7 @@
 
 | 단계 | 내용 | 대상(지금 파일 수·줄 수) |
 |---|---|---|
-| 0 | 준비: React·shadcn 설치, `components.json`, 7절 변수 연결, `useEventBus`·`useStore` 훅, React 화면을 라우팅 표에 끼우는 연결 함수, 전환 전 화면·인쇄 사진 찍어 두기 | 설정 |
+| 0 | 준비: React·shadcn 설치, `components.json`, 7절 변수 연결, `useEventBus`·`useStore` 훅, React 화면을 라우팅 표에 끼우는 연결 함수, 캡처 도구에 5-1절 확인 크기 5가지 추가, 전환 전 화면(5가지 크기)·인쇄 사진 찍어 두기 | 설정 |
 | 1 | 공통 부품: Button·Dialog·AlertDialog·Tabs·Select·Table·Tooltip·Toast, `<SchoolName>`, 판정 배지, 숫자 칸(`.num`) | `components/` |
 | 2 | 알림·확인 창: `core/dialogs.js`(`showModalAlert`·`showModalConfirm`·`showModalPrompt`, 사용처 약 120곳)를 Radix AlertDialog로. 부르는 쪽 모양은 그대로 둬 한 번에 바뀜 | core |
 | 3 | 공통 틀: 위쪽 막대·왼쪽 메뉴·학생 검색·화면 잠금 | `core/appShell.js` 등 |
@@ -81,7 +106,7 @@
 | 7 | 창: 원서 입력·원서대장·지원현황·입시 분석·매트릭스·관내 공유·사용 설명서 | modals 27개 4,957줄 |
 | 8 | 담임: 명렬표·1:1 상담·합격 예측 | views/teacher 23개 3,837줄 |
 | 9 | 인쇄 확인(0단계 사진과 비교), 큰 표 가상 스크롤 | print·styles |
-| 10 | 정리: `window` 전역 0개, 쓰지 않는 CSS·옛 함수 삭제, `agents.md`·`design-standards.md`·사용 설명서 갱신 | 전체 |
+| 10 | 정리: `window` 전역 0개, 쓰지 않는 CSS·옛 함수·Nunito 글꼴 삭제, `agents.md`·`design-standards.md`·사용 설명서 갱신 | 전체 |
 | 11 | 주고받는 파일 확인(11절) → Windows 시험 빌드 → 학교 PC 확인 → v2.0.0 | 릴리즈 |
 
 - CSS 20개 파일(2,030줄)은 화면을 바꾸며 그 화면 것만 줄인다. `tokens.css`·`theme-light-colors.css`·`print*.css`는 끝까지 기준으로 남긴다.
