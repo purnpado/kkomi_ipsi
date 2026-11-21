@@ -1,5 +1,6 @@
 import { SyncWithServer } from '../../core/backend.js';
 import middleSchools from '../../assets/middleschools.json';
+import { bindSchoolPicker } from './schoolPicker.js';
 import logoUniversal from '../../assets/images/logo-universal.png';
 import { showModalAlert, showModalPrompt } from '../../core/dialogs.js';
 import { GITHUB_RELEASE_URL, openExternalUrlSafe, openFeedbackPage, quitAppSafe, delay } from '../../core/updater.js';
@@ -101,13 +102,12 @@ export function renderSetupScreen(existingConfig = null) {
 
             <!-- 설정 폼 -->
             <form id="setupForm" class="space-y-5">
-                <div>
-                    <label class="block text-sm font-semibold text-text-muted mb-2">중학교명</label>
-                    <input type="text" id="schoolName" class="input-field" list="schoolList"
-                        placeholder="예: 푸른파도소리중학교 (검색 가능)" value="${schoolName}" autocomplete="off" required />
-                    <datalist id="schoolList">
-                        ${middleSchools.map(school => `<option value="${school}"></option>`).join('')}
-                    </datalist>
+                <div class="relative">
+                    <label class="block text-sm font-semibold text-text-muted mb-2" for="schoolName">중학교명</label>
+                    <input type="text" id="schoolName" class="input-field"
+                        placeholder="예: 푸른파도소리중학교 (한 글자나 자음만 쳐도 찾음)" value="${schoolName}" autocomplete="off" required />
+                    <div id="schoolSuggest" role="listbox" aria-label="중학교 목록"
+                        class="hidden absolute left-0 right-0 z-50 mt-1 max-h-64 overflow-y-auto rounded-xl border border-slate-700 bg-slate-900 p-1 shadow-xl"></div>
                     <div id="schoolNameError" role="alert" class="error-msg">학교명을 입력해 주세요.</div>
                 </div>
 
@@ -166,6 +166,7 @@ export function renderSetupScreen(existingConfig = null) {
         </div>
     `;
 
+    bindSchoolPicker(document.getElementById('schoolName'), document.getElementById('schoolSuggest'), middleSchools);
     document.getElementById('schoolName').focus();
     document.getElementById('setupForm').addEventListener('submit', async (e) => {
         e.preventDefault();

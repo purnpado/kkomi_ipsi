@@ -4,6 +4,7 @@ import { escapeAttr, escapeHtml } from '../../core/utils.js';
 import { transferBadge } from '../../core/transferBadges.js';
 import { RESULT_STATUSES, STUDENT_FILTERS, appLabel } from './applicationsData.js';
 import { findApplicationLock } from '../../core/doubleApply.js';
+import { matchesSearch } from '../../core/searchMatch.js';
 
 const STATUS_TONE = {
     합격: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40',
@@ -32,7 +33,7 @@ function appChips(apps) {
 export function filterStudents(students, filterId, query) {
     const filter = STUDENT_FILTERS.find((f) => f.id === filterId) || STUDENT_FILTERS[0];
     const q = String(query || '').replace(/\s+/g, '');
-    return students.filter((s) => filter.test(s) && (!q || s.name.replace(/\s+/g, '').includes(q) || `${s.classNum}-${s.studentNum}` === q || s.studentNum === q));
+    return students.filter((s) => filter.test(s) && (!q || matchesSearch(s.name, q) || `${s.classNum}-${s.studentNum}` === q || s.studentNum === q));
 }
 
 /** @returns {string} 학생별 원서 표 HTML */

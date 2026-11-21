@@ -2,9 +2,16 @@
 
 /* ===== 인쇄 전용 스타일 ===== */
 @media print {
+    /* 용지 여백 0: 브라우저 머리글·꼬리글(날짜·제목·주소·쪽 번호)이 들어갈 자리를 없앤다.
+       여백은 본문 안쪽(body padding)으로 주고, 장마다 반복되게 clone 한다(print/printEngine.js 와 같은 방식). */
     @page {
         size: A4 portrait;
-        margin: 10mm;
+        margin: 0;
+    }
+    body {
+        padding: 10mm;
+        -webkit-box-decoration-break: clone;
+        box-decoration-break: clone;
     }
 
     body, html {
@@ -345,6 +352,13 @@
     body.printing[data-print-kind="register"] .print-document td {
         border: 1px solid black !important;
         color: black !important;
+    }
+    /* 화면에서 원서대장을 감싸는 둥근 테두리 상자는 인쇄하지 않는다(보관용 문서에 쪽 가장자리 선이 생김) */
+    body.printing[data-print-kind="register"] .register-frame {
+        border: 0 !important;
+        border-radius: 0 !important;
+        background: transparent !important;
+        padding: 0 !important;
     }
     body.printing[data-print-kind="register"] .register-assigned-school-input {
         border: none !important;

@@ -1,4 +1,5 @@
 import { normalizeSchoolName } from '../../core/utils.js';
+import { matchesSearch } from '../../core/searchMatch.js';
 import { transferBadge } from '../../core/transferBadges.js';
 import { getGeneralGuideBadge } from '../../core/generalGuide.js';
 import { judgeScore, judgmentBadge } from '../../core/admissionJudgment.js';
@@ -33,7 +34,7 @@ export function defineMatrixRows(ctx, mx) {
                 const cNum = s.classNum || 0;
 
                 // ① 이름 검색: 입력한 이름이 학생 이름에 포함되면 매칭
-                if (sName.includes(qLower)) return true;
+                if (matchesSearch(sName, qLower)) return true;
 
                 // ② 순수 숫자 검색 (1~2자리 번호, 3~4자리 학번, 5자리 나이스 학번)
                 if (isDigitOnly) {

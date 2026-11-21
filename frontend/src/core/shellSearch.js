@@ -5,6 +5,7 @@ import { navigate } from './navigation.js';
 import { transferBadge } from './transferBadges.js';
 import { state } from './store.js';
 import { escapeAttr, escapeHtml } from './utils.js';
+import { matchesSearch, sortByStart } from './searchMatch.js';
 
 const MAX_RESULTS = 12;
 let roster = null;
@@ -45,7 +46,7 @@ async function loadRoster() {
 function matches(student, query) {
     const q = query.replace(/\s+/g, '');
     if (!q) return false;
-    if (student.name.replace(/\s+/g, '').includes(q)) return true;
+    if (matchesSearch(student.name, q)) return true;
     const num = parseInt(student.studentNum, 10);
     const pair = q.match(/^(\d+)[-.반](\d+)번?$/);
     if (pair) return student.classNum === parseInt(pair[1], 10) && num === parseInt(pair[2], 10);
@@ -59,7 +60,7 @@ function renderResults(box, list, query) {
         box.innerHTML = '';
         return;
     }
-    const found = list.filter((student) => matches(student, query)).slice(0, MAX_RESULTS);
+    const found = sortByStart(list.filter((student) => matches(student, query)), query, (s) => s.name).slice(0, MAX_RESULTS);
     box.innerHTML = found.length
         ? found.map((s, i) => `
             <button type="button" class="shell-search-item ${i === 0 ? 'is-focus' : ''}" role="option"

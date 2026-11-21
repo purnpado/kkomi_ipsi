@@ -127,3 +127,13 @@ input[type="number"]::-webkit-inner-spin-button {
 }
 
 }
+
+/* 스크롤하는 둥근 창(성적표·상담·원서 입력·매트릭스·판정 기준 등): 스크롤 막대가 둥근 모서리 밖으로
+   삐져나오지 않게 상자를 모서리 모양대로 자른다. 화면 안에 붙인 창(.docked-panel)과 인쇄에서는 자르지 않는다. */
+.glass-card.overflow-y-auto { clip-path: inset(0 round 1.5rem); }
+html[data-theme="light"] .glass-card.overflow-y-auto { clip-path: inset(0 round 1.75rem); }
+.rounded-2xl.overflow-y-auto { clip-path: inset(0 round 1rem); }
+.docked-panel .glass-card.overflow-y-auto { clip-path: none; }
+@media print {
+    .glass-card.overflow-y-auto, .rounded-2xl.overflow-y-auto { clip-path: none !important; }
+}

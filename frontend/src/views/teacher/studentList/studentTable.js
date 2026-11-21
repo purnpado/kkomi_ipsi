@@ -1,4 +1,5 @@
 import { escapeHtml, escapeAttr } from '../../../core/utils.js';
+import { matchesSearch } from '../../../core/searchMatch.js';
 import { transferBadge } from '../../../core/transferBadges.js';
 import { showModalAlert, showModalConfirm } from '../../../core/dialogs.js';
 import { renderApplicationSummary } from '../simulation/prediction.js';
@@ -22,7 +23,7 @@ export function defineStudentTableRenderer(ctx) {
                 const sNum = s.numInt;
 
                 // 이름 검색 (부분 일치)
-                if (sName.includes(qLower)) return true;
+                if (matchesSearch(sName, qLower)) return true;
 
                 // 순수 숫자 검색 (1~2자리 번호 매칭)
                 if (isDigitOnly) {

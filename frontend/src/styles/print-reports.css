@@ -139,8 +139,9 @@
         font-weight: 800 !important;
         text-align: center !important;
     }
-    /* 자유학기제 안내 배너는 인쇄 시 불필요하므로 숨김 (공간 절약) */
-    body.printing[data-print-kind="transcript"] .bg-indigo-950\/20 {
+    /* 자유학기제 안내 배너는 인쇄 시 불필요하므로 숨김 (공간 절약).
+       표의 자유학기제 칸(td)은 같은 색 이름을 써도 숨기지 않는다(숨기면 학기 칸이 한 칸씩 밀림). */
+    body.printing[data-print-kind="transcript"] div.bg-indigo-950\/20 {
         display: none !important;
     }
     /* 4. 출결 및 봉사활동 요약 (A4 하단 가로 2열 강제 분할) */

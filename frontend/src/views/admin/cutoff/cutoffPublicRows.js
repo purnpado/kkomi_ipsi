@@ -1,6 +1,7 @@
 import { normalizeSchoolName } from '../../../core/utils.js';
 import { admissionLabel } from '../../../core/admissionYear.js';
 import { displaySchool } from '../../../core/schoolName.js';
+import { matchesSearch } from '../../../core/searchMatch.js';
 
 // 커트라인 관리: "고교 발표 자료(참고)" 탭 표 HTML (cutoffRows.js에서 옮김)
 export function buildPublicRowsHTML(ctx) {
@@ -11,10 +12,7 @@ export function buildPublicRowsHTML(ctx) {
             const matchYear = ctx.publicYearFilterMode === 'all' || Number(p.year) === ctx.currentAdmissionYear;
             if (!matchYear) return false;
             if (!q) return true;
-            return (p.school || '').toLowerCase().includes(q) ||
-                   (p.dept || '').toLowerCase().includes(q) ||
-                   (p.track || '').toLowerCase().includes(q) ||
-                   (p.note || '').toLowerCase().includes(q);
+            return [p.school, p.dept, p.track, p.note].some((v) => matchesSearch(v, q));
         });
 
     // 2. 입학년도 + 고교명으로 그룹핑 (Rowspan 및 시각적 일체화)

@@ -148,7 +148,7 @@ export async function openStudentTranscriptModal(classNum, studentNum, name) {
                 if (is1_1FreeSemester) {
                     if (rowIdx === 0) {
                         tds += `
-                            <td rowspan="${sortedSubjects.length}" class="p-2 border-l border-slate-700/60 bg-indigo-950/20 text-indigo-300 font-bold text-center text-xs align-middle leading-relaxed free-semester-cell">
+                            <td rowspan="${sortedSubjects.length}" class="free-semester-cell p-2 border-l border-slate-700/60 bg-indigo-950/20 text-indigo-300 font-bold text-center text-xs align-middle leading-relaxed free-semester-cell">
                                 <span class="px-2 py-0.5 rounded-full bg-indigo-600/40 text-indigo-200 border border-indigo-500/40 text-[11px] font-black inline-block mb-1">자유학기제</span>
                                 <div class="text-[10px] text-slate-400 font-normal">성적 미산출<br>(지필평가 미실시)</div>
                             </td>

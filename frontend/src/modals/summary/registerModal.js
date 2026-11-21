@@ -209,7 +209,7 @@ function renderRegisterLayout(ctx, reg) {
             </div>
 
             <!-- 대장 본문 영역 (A4 가로 화이트 페이퍼 뷰어) -->
-            <div class="flex-1 overflow-auto custom-scrollbar flex flex-col items-center p-2 sm:p-4 bg-slate-950/60 rounded-2xl border border-slate-800">
+            <div class="register-frame flex-1 overflow-auto custom-scrollbar flex flex-col items-center p-2 sm:p-4 bg-slate-950/60 rounded-2xl border border-slate-800">
                 ${reg.documentPagesHTML}
             </div>
         `;

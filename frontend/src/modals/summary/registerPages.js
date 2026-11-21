@@ -154,13 +154,6 @@ export function buildRegisterPages(ctx, reg) {
                             </table>
                         </div>
                     </div>
-
-                    <!-- 하단 출력 정보 및 안내 -->
-                    <div class="mt-8 pt-3 border-t border-slate-200 flex justify-between items-center text-xs text-slate-500 font-sans">
-                        <span>출력일시: ${new Date().toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
-                        <span>[내부 결재 및 원서 접수 확인용]</span>
-                        <span>${displaySchool(ctx.schoolName)} 3학년 진학상담시스템</span>
-                    </div>
                 </div>
             `;
     }).join('');

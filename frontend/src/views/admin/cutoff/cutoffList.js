@@ -1,6 +1,7 @@
 // 커트라인 화면 학교 목록: 탭·검색 거르기(다시 그리지 않고 숨기기만 → 입력한 값이 지워지지 않음),
 // 학교 줄 펼침 상태 기억, [✏️] 학과·전형 이름 고치기, 저장하지 않은 변경 표시와 떠날 때 확인.
 import { showModalConfirm } from '../../../core/dialogs.js';
+import { matchesSearch } from '../../../core/searchMatch.js';
 
 const ROW_INPUTS = '.cutoff-item-row input:not([type="hidden"])';
 
@@ -46,7 +47,7 @@ export async function confirmDiscard() {
 export function matchesCutoffFilter(card, tab, keyword) {
     const tabOk = tab === 'all' || card.category === tab;
     const q = String(keyword || '').trim().toLowerCase();
-    return tabOk && (!q || card.search.includes(q));
+    return tabOk && (!q || matchesSearch(card.search, q));
 }
 
 export function applyCutoffFilter(ctx) {

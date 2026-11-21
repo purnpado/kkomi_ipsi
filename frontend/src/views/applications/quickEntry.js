@@ -1,4 +1,5 @@
 import { blocksNewApplication, lockMessage } from '../../core/doubleApply.js';
+import { matchesSearch, sortByStart } from '../../core/searchMatch.js';
 // 전기고 원서 빠른 입력(applicationsQuick.js)의 계산 부분: 학생 찾기·학교·전형·학과 지망 수·저장할 원서 만들기.
 // 화면과 떼어 두어 node --test 로 확인한다(quickEntry.test.js).
 
@@ -52,9 +53,9 @@ export function findStudents(students, query) {
     const hits = (students || []).filter((s) => {
         if (m) return s.classNum === Number(m[1]) && String(Number(s.studentNum)) === String(Number(m[2]));
         if (/^\d+$/.test(q)) return String(Number(s.studentNum)) === String(Number(q));
-        return s.name.replace(/\s+/g, '').includes(q);
+        return matchesSearch(s.name, q);
     });
-    return hits.slice(0, 8);
+    return sortByStart(hits, q, (s) => s.name).slice(0, 8);
 }
 
 /** 같은 학교·전형 원서가 이미 있으면 그 원서(저장하면 그 원서를 고친다) */
