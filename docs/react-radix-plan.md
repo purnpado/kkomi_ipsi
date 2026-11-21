@@ -131,15 +131,17 @@
 
 지금 화면은 숫자·상태가 문장 속에 섞인 평문이 많아 한눈에 읽기 어렵다. 화면 전체 뱃지화는 **전환 때 공통 부품으로 한 번에** 한다(지금 방식으로 화면마다 고치면 전환 때 다시 짜야 하고 모양이 화면마다 달라진다). 입시 기간(v1.8.x)에는 잘못 읽힐 수 있는 곳과 매일 보는 곳만 고친다.
 
-- **규칙**: 전역 스킬 plain-text-visual(`tools/agent-skills/plain-text-visual/SKILL.md`)의 "무엇을 어떤 모양으로" 표와 부품 이름(InfoBadge·LabeledRow·AlertBox·ScoreTile·PositionBar·HeatCell·FormulaChips·StepList·Fold)을 따른다. 뱃지 외에 표·히트맵·막대·추세선·이름표 줄·경고 상자·접기·단계 표시를 함께 쓴다.
+- **규칙**: 전역 스킬 plain-text-visual(`tools/agent-skills/plain-text-visual/SKILL.md`)의 "무엇을 어떤 모양으로" 표와 부품 이름(InfoBadge·LabeledRow·AlertBox·ScoreTile·PositionBar·HeatCell·FormulaChips·StepList·HelpTip·Fold)을 따른다. 뱃지 외에 표·히트맵·막대·추세선·이름표 줄·경고 상자·도움말·접기·단계 표시를 함께 쓴다.
+- **설명 문장은 도움말로(2026-11-22 사용자 요청)**: "왜·어떻게 계산했나"·용어 정의·입력 칸 사용법은 `HelpTip`(? 아이콘 → Radix Popover, 마우스를 올려도 눌러도 열림, Esc로 닫힘)으로 옮긴다. 감점·미입력·예상값·표본 부족 같은 판단 정보는 그대로 보이게 둔다. 인쇄 문서(원서대장·종합성적표·상담표)에 꼭 필요한 설명은 본문에 남긴다. 기준은 스킬 2-1절.
 - **본보기**: v1.8.4 상담 화면 후기 일반고 칸(`views/teacher/counsel/generalSummary.js`·`generalBar.js`, 스타일 `styles/counsel-summary.css`의 `.cg-chip`·`.cg-fact`·`.cg-alert`). 색은 판정 색 이름표(`--kk-judge-*`)만 쓴다.
 - **1단계에서 만들 부품**
   - `<InfoBadge tone>`: 숫자·상태 한 조각. 색 5가지 — 기본(회색)·좋음(`safe`)·주의(`hope`)·나쁨(`challenge`)·안내(`proper`). 숫자는 굵게(`.num`).
   - `<LabeledRow label>`: 앞에 이름표가 붙은 한 줄("작년 우리 학교 | 뱃지 … 보조 글").
   - `<AlertBox tone title>`: 감점·미입력처럼 놓치면 안 되는 것을 상자 하나에 모으고 항목은 뱃지로.
   - `<ScoreTile value max>`: "값 / 만점", 만점보다 낮으면 테두리 강조.
+  - `<HelpTip text>`: (?) 아이콘 + 작은 설명 창. Radix Popover(눌러서)·Tooltip(올려서)을 감싼다. 화면 읽기용 이름 "○○ 도움말", 내용 2~3문장.
   - `<PositionBar>`: 0~100% 막대. 글자 겹침 규칙(`barLabelLayout`: 내 위치는 막대 위, 끝에서는 안쪽 맞춤, 겹치는 끝 글자 숨김)을 그대로 옮긴다.
-- **화면별 점검표**(그 화면을 바꾸는 단계에서 확인): 문장 속 숫자·상태 → 뱃지, "A · B · C"로 이어진 설명 → 이름표 줄이나 뱃지 묶음, 경고 문장 → 경고 상자, 긴 안내 문단 → 접는 칸이나 작은 보조 글.
+- **화면별 점검표**(그 화면을 바꾸는 단계에서 확인): 문장 속 숫자·상태 → 뱃지, "A · B · C"로 이어진 설명 → 이름표 줄이나 뱃지 묶음, 경고 문장 → 경고 상자, 계산식·용어 설명·입력 칸 사용법 → 도움말(?), 긴 근거 표 → 접는 칸.
 
 | 단계 | 화면 | 볼 곳 |
 |---|---|---|
