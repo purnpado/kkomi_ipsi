@@ -136,7 +136,7 @@ export function buildCutoffRowsHTML(ctx, view) {
                                     <table class="cutoff-table">
                                         <thead>
                                             <tr>
-                                                <th class="w-44">학과명 <span class="cutoff-muted">(비우면 학교 전체)</span></th>
+                                                <th class="w-44">학과명</th>
                                                 <th class="w-44">전형</th>
                                                 <th class="text-center w-40">최저점 (합격선)</th>
                                                 <th class="text-center w-40">최고 불합격점 (선택)</th>

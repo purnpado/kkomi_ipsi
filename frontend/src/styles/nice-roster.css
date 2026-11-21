@@ -1,13 +1,13 @@
 /* 나이스 원서 입력 일람표(views/applications/niceRosterView.js). 색은 디자인 기준 변수만 쓴다. */
 .nice-roster { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; max-width: 1600px; margin: 0 auto; min-width: 0; }
 .nice-roster-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; flex-wrap: wrap; }
-.nice-roster-head h2 { font-size: var(--kk-fs-6); font-weight: var(--kk-fw-bold); color: var(--kk-text-strong); line-height: var(--kk-lh-tight); }
+.nice-roster-head h2 { font-size: var(--kk-fs-6); font-weight: var(--kk-fw-strong); color: var(--kk-text-strong); line-height: var(--kk-lh-tight); }
 .nice-roster-head p { margin-top: 4px; font-size: var(--kk-fs-2); color: var(--kk-text-2); }
 .nice-roster-actions { display: flex; align-items: center; gap: 8px; }
 .nice-roster-class { display: flex; align-items: center; gap: 6px; font-size: var(--kk-fs-2); color: var(--kk-text-2); }
 .nice-roster-class select { width: auto; padding: 6px 10px; font-size: var(--kk-fs-2); }
 .nice-roster-group { min-width: 0; border: 1px solid var(--kk-line-strong); border-radius: 12px; background: var(--kk-surface); padding: 12px 14px; }
-.nice-roster-group h3 { font-size: var(--kk-fs-4); font-weight: var(--kk-fw-bold); color: var(--kk-text-strong); }
+.nice-roster-group h3 { font-size: var(--kk-fs-4); font-weight: var(--kk-fw-strong); color: var(--kk-text-strong); }
 .nice-roster-group h3 span { margin-left: 6px; font-size: var(--kk-fs-1); font-weight: var(--kk-fw-regular); color: var(--kk-text-3); }
 .nice-roster-scroll { margin-top: 8px; overflow: auto; max-height: calc(100vh - 300px); }
 .nice-roster-table { width: 100%; border-collapse: collapse; font-size: var(--kk-fs-2); }
@@ -41,3 +41,11 @@
     body.printing[data-print-kind="nice-roster"] .nice-roster-table thead th { position: static; }
     body.printing[data-print-kind="nice-roster"] .nice-roster-group { border: none !important; padding: 0 !important; break-inside: auto; }
 }
+
+/* 나이스 석차 연명부 맞춰 보기(학년부장 나이스 자료 화면) */
+.nice-compare-scroll { overflow: auto; max-height: calc(100vh - 260px); }
+.nice-compare-table { width: 100%; border-collapse: collapse; font-size: var(--kk-fs-2); font-variant-numeric: tabular-nums; }
+.nice-compare-table th, .nice-compare-table td { padding: 4px 6px; border: 1px solid var(--kk-line-strong); text-align: center; white-space: nowrap; }
+.nice-compare-table thead th { position: sticky; top: 0; z-index: 1; background: var(--kk-sunken); color: var(--kk-text-2); font-weight: var(--kk-fw-strong); }
+.nice-compare-table thead tr:nth-child(2) th { top: 26px; font-weight: var(--kk-fw-regular); }
+.nice-compare-table td.nice-compare-diff { background: var(--kk-judge-hope-bg, rgba(245, 158, 11, 0.18)); color: var(--kk-text-strong); font-weight: var(--kk-fw-strong); }

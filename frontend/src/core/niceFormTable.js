@@ -15,12 +15,14 @@ const CELL_CLASS = {
 function rowHTML(row) {
     let head = '';
     let label = '';
-    return row.map((cell) => {
+    return row.map((cell, i) => {
         const cls = CELL_CLASS[cell.kind] || 'nice-label';
         const note = cell.note ? ` <span class="nice-note">${escapeHtml(cell.note)}</span>` : '';
-        if (cell.kind === 'head') head = cell.text;
+        // 줄 이름(뒤에 "1학년"·"1-1" 칸이 이어지는 강조 칸)도 학기 이름처럼 읽는다: "행동특성 가산 2학년 인정"
+        const isHead = cell.kind === 'head' || (cell.kind === 'accent' && row[i + 1]?.kind === 'label');
+        if (isHead) head = cell.text;
         if (cell.kind !== 'value') {
-            label = cell.kind === 'head' ? '' : cell.text;
+            label = isHead ? '' : cell.text;
             return `<th class="${cls}">${escapeHtml(cell.text)}</th>`;
         }
         const name = [head, label, cell.text, cell.note].filter(Boolean).join(' ');

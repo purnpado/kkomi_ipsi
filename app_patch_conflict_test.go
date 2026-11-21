@@ -18,9 +18,10 @@ func TestPatchConflictFlowKeepsGradeHeadFinal(t *testing.T) {
 		return model.ApplicationRecord{ClassNum: 1, StudentNum: "1", StudentName: "가상학생", AdmissionYear: 2027, Category: category, SchoolName: school, Track: track, Status: status}
 	}
 	for _, r := range []model.ApplicationRecord{
-		app("special", "울산공고", "일반전형", "지원예정"),
-		app("special", "울산상고", "일반전형", "지원예정"),
-		app("meister", "울산마이스터고", "일반전형", "지원예정"),
+		// 이중지원 금지 규칙에 맞는 원서: 마이스터고 불합격 → 특성화고, 특성화고 일반전형 불합격 → 특별전형
+		app("meister", "울산마이스터고", "일반전형", "불합격"),
+		app("special", "울산상고", "일반전형", "불합격"),
+		app("special", "울산공고", "취업희망자 특별전형", "지원예정"),
 	} {
 		if err := master.SaveStudentApplication(r); err != nil {
 			t.Fatal(err)
@@ -66,8 +67,8 @@ func TestPatchConflictFlowKeepsGradeHeadFinal(t *testing.T) {
 			if err := teacher.DeleteStudentApplication(1, "1", "가상학생", r.Category, r.SchoolName, r.Track); err != nil {
 				t.Fatal(err)
 			}
-		case "울산마이스터고":
-			r.Status = "지원완료"
+		case "울산마이스터고": // 담임도 고친다(메모)
+			r.ScoreBasis = "담임 메모"
 			if err := teacher.SaveStudentApplication(r); err != nil {
 				t.Fatal(err)
 			}
@@ -84,10 +85,10 @@ func TestPatchConflictFlowKeepsGradeHeadFinal(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	// 학년부장도 배포 뒤 마이스터고 원서를 고친다(불합격 — 합격이면 이중지원 금지로 새 원서가 막혀 이 흐름과 다르다).
+	// 학년부장도 배포 뒤 마이스터고 원서를 고친다(메모 — 합격이면 이중지원 금지로 새 원서가 막혀 이 흐름과 다르다).
 	for _, r := range mustApps(t, master) {
 		if r.SchoolName == "울산마이스터고" {
-			r.Status = "불합격"
+			r.ScoreBasis = "학년부장 메모"
 			if err := master.SaveStudentApplication(r); err != nil {
 				t.Fatal(err)
 			}
@@ -117,7 +118,7 @@ func TestPatchConflictFlowKeepsGradeHeadFinal(t *testing.T) {
 	if err != nil || count != 1 || held != 3 {
 		t.Fatalf("일괄 병합: count=%d held=%d err=%v", count, held, err)
 	}
-	assertSchools(t, master, map[string]string{"울산공고": "지원예정", "울산상고": "지원예정", "울산마이스터고": "불합격"})
+	assertSchools(t, master, map[string]string{"울산공고": "지원예정", "울산상고": "불합격", "울산마이스터고": "불합격"})
 
 	// 상세 검토 기본값: 학교 바꿈·지움은 반영, 학년부장이 고친 원서는 유지.
 	if _, err := master.ImportTeacherPatchSelected("shared-pw", patchPath, []model.PatchMergeSelection{{StudentNum: "1", Applications: true}}); err != nil {

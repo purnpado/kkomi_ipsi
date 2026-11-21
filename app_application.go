@@ -19,6 +19,14 @@ func (a *App) SaveStudentApplication(record model.ApplicationRecord) error {
 	return a.db.SaveApplication(record)
 }
 
+// GetConflictingWishApplications 원서를 지원완료로 저장할 때 함께 낼 수 없는 지원희망 원서(화면이 확인 뒤 지운다).
+func (a *App) GetConflictingWishApplications(record model.ApplicationRecord) ([]model.ApplicationRecord, error) {
+	if a.user != nil && a.user.Role == "homeroom" && a.user.ClassNum != record.ClassNum {
+		return nil, fmt.Errorf("담임 계정은 본인 학급의 지원현황만 볼 수 있습니다")
+	}
+	return a.db.ConflictingWishApplications(record)
+}
+
 func (a *App) DeleteStudentApplication(classNum int, studentNum, name, category, schoolName, track string) error {
 	if a.user != nil {
 		if a.user.Role == "viewer" {

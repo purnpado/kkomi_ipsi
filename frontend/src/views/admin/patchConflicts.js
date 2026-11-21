@@ -28,7 +28,7 @@ export const ACTION_TEXT = {
     both: '둘 다 남기기',
 };
 
-const CATEGORY_TEXT = { meister: '마이스터고', special: '특성화고', self_foreign: '자사고·외고', general: '후기 일반고', other: '기타', out_province: '타시도 고교', none: '미진학' };
+const CATEGORY_TEXT = { meister: '마이스터고', special: '특성화고', self_foreign: '기타 울산 고교', general: '후기 일반고', other: '기타 울산 고교', out_province: '타시도 고교', none: '미진학' };
 
 /** 원서 한 건을 한 줄 글로 바꾼다(학교 · 전형 · 상태 · 배정 학과). */
 export function describeSummary(summary) {

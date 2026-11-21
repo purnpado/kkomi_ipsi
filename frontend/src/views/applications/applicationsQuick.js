@@ -13,6 +13,7 @@ import {
     preferenceLimit, quickEntryProblem, schoolDepartments
 } from './quickEntry.js';
 import { findApplicationLock, lockLabel } from '../../core/doubleApply.js';
+import { dropConflictingWishes } from '../../core/wishCleanup.js';
 
 const STATUSES = ['지원완료', '지원희망', '합격', '불합격'];
 const quick = { student: null, category: 'meister', school: '', track: '', status: '지원완료', extraRound: false, extraSuggested: false, prefs: [], entries: [], catalog: null, rules: null, message: '', tone: '' };
@@ -180,6 +181,11 @@ export function bindQuickEntry(root, ctx) {
         const snapshot = await App.GetStudentApplicationScoreSnapshot(s.classNum, String(s.studentNum), s.name, quick.category, quick.school, quick.track).catch(() => null);
         const record = buildQuickRecord({ year, student: s, category: quick.category, schoolName: quick.school, track: quick.track, preferences: quick.prefs.slice(0, limit), status: quick.status, extraRound: quick.extraRound, snapshot, existing });
         try {
+            if (!(await dropConflictingWishes(record))) {
+                quick.message = '저장하지 않았습니다(함께 낼 수 없는 지원희망 원서를 그대로 둠).';
+                quick.tone = 'error';
+                return rerender('#quickSave');
+            }
             await App.SaveStudentApplication(record);
         } catch (err) {
             quick.message = `저장하지 못했습니다: ${err}`;

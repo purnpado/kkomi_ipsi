@@ -14,21 +14,25 @@ import { displaySchool } from '../../core/schoolName.js';
 
 const view = { classNum: 0, classCount: 0, admissionYear: 0, rows: [], uploadLine: '' };
 const CATEGORY_LABEL = { meister: '마이스터고', special: '특성화고', general: '후기 일반고' };
+// 전형 표 순서: 원서 순서대로 마이스터고 → 특성화고 → 후기 일반고(대조표 종류 이름 기준)
+const GROUP_ORDER = { meister: 0, vocational: 1, general: 2 };
 
 const isHomeroom = () => state.currentUser?.Role === 'homeroom';
 
-/** 대조표의 값 칸에서 열 목록을 만든다: [{ group, label }] (group 은 학기 이름, 출결 칸은 비어 있음) */
+/** 대조표의 값 칸에서 열 목록을 만든다: [{ group, label }]
+ * group 은 학기 이름이나 줄 이름(결석 환산·봉사·행동특성 가산·창체 가산·리더십처럼 뒤에 "1학년"·"1-1" 칸이 이어지는 강조 칸),
+ * 최종결석·봉사시수처럼 바로 값이 오는 칸은 group 없이 label 만 둔다. */
 function columnsOf(form) {
     const cols = [];
     for (const row of form.rows || []) {
         let head = '';
         let label = '';
-        for (const cell of row) {
-            if (cell.kind === 'head') { head = cell.text; label = ''; continue; }
-            if (cell.kind !== 'value') { label = cell.text; continue; }
+        row.forEach((cell, i) => {
+            const next = row[i + 1];
+            if (cell.kind === 'head' || (cell.kind === 'accent' && next?.kind === 'label')) { head = cell.text; label = ''; return; }
+            if (cell.kind !== 'value') { label = cell.text; return; }
             cols.push({ group: head, label });
-        }
-        head = '';
+        });
     }
     return cols;
 }
@@ -65,14 +69,35 @@ function rowHTML(row, cols) {
         <td class="num">${row.classNum}</td><td class="num">${escapeHtml(row.studentNum)}</td><th scope="row">${escapeHtml(row.studentName)}</th>
         <td class="nice-roster-school">${row.category === 'general' ? '후기 일반고' : `${escapeHtml(displaySchool(row.schoolName))} · ${escapeHtml(displayTrack(row.track))}`}</td>
         <td>${escapeHtml(row.status || '')}</td>${cells}
-        <td class="nice-roster-check">${warn ? `<span class="nice-warn" title="${escapeAttr(warn)}">⚠ 확인</span>` : ''}</td>
+        <td class="nice-roster-check">${warn ? `<span class="nice-warn" title="${escapeAttr(warn)}">⚠ ${escapeHtml(warnShort(row.niceForm.warnings))}</span>` : ''}</td>
     </tr>`;
+}
+
+// 확인 칸의 짧은 이유(전체 문장은 마우스를 올리면 보임)
+const WARN_SHORT = [['가산점', '가산점 미입력'], ['누적값', '학년별 값 예상'], ['리더십', '리더십 학기'], ['출결', '출결 확인']];
+function warnShort(warnings) {
+    const labels = (warnings || []).map((w) => (WARN_SHORT.find(([key]) => w.includes(key)) || [null, '확인'])[1]);
+    return [...new Set(labels)].join(' · ');
+}
+
+// 표 위 안내: 원서마다 다를 수 있다(예: 마이스터고는 학교 요강에 따라 예체능 포함·제외).
+// 모든 학교에 같은 안내는 그대로, 일부 학교에만 붙는 안내는 뒤에 그 학교 이름을 붙인다.
+function groupNotes(rows) {
+    const schoolsOf = new Map();
+    const allSchools = new Set(rows.map((r) => displaySchool(r.schoolName) || '후기 일반고'));
+    for (const r of rows) {
+        for (const n of r.niceForm.notes || []) {
+            if (!schoolsOf.has(n)) schoolsOf.set(n, new Set());
+            schoolsOf.get(n).add(displaySchool(r.schoolName) || '후기 일반고');
+        }
+    }
+    return [...schoolsOf.entries()].map(([n, set]) => (set.size < allSchools.size ? `${n} (${[...set].join(', ')})` : n));
 }
 
 function groupHTML(type, rows) {
     const cols = columnsOf(rows[0].niceForm);
     const title = rows[0].niceForm.title || '';
-    const notes = (rows[0].niceForm.notes || []).map((n) => `<li>※ ${escapeHtml(n)}</li>`).join('');
+    const notes = groupNotes(rows).map((n) => `<li>※ ${escapeHtml(n)}</li>`).join('');
     const hints = (rows[0].niceForm.hints || []).map((h) => `<li>${escapeHtml(h)}</li>`).join('');
     const label = CATEGORY_LABEL[rows[0].category] || type;
     return `
@@ -126,7 +151,8 @@ function render() {
         </label>`;
     const body = view.rows.length === 0
         ? '<p class="nice-roster-empty">올해 원서가 있는 학생이 없습니다. 마이스터고·특성화고·후기 일반고 원서를 입력하면 여기에 학생별 나이스 원서 입력값이 나옵니다.</p>'
-        : [...groups.entries()].map(([type, rows]) => groupHTML(type, rows)).join('') + pendingHTML(pending);
+        : [...groups.entries()].sort(([a], [b]) => (GROUP_ORDER[a] ?? 9) - (GROUP_ORDER[b] ?? 9))
+            .map(([type, rows]) => groupHTML(type, rows)).join('') + pendingHTML(pending);
     app.innerHTML = `
         <div class="nice-roster print-document">
             <div class="nice-roster-head">

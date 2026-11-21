@@ -12,6 +12,8 @@ import { bindYearControls } from './yearControls.js';
 import { bindHandoverControls } from './handoverControls.js';
 import { manageHTML } from './manage/manageLayout.js';
 import { bindNeisUploads } from './manage/neisUpload.js';
+import { bindNiceFinalCard } from './manage/niceFinalCard.js';
+import { bindNiceBonusCard } from './manage/niceBonusCard.js';
 
 export async function renderAdminScreen(schoolName) {
     // 나이스 자료·학년도 관리는 학년부장만 쓴다. 다른 역할은 대시보드로 보낸다.
@@ -32,17 +34,19 @@ export async function renderAdminScreen(schoolName) {
     let status = {};
     let updateStatus = {};
     let uploads = [];
+    let niceFinal = null;
     try {
         status = await GetClassStatus(classCount);
         updateStatus = (await window.go?.main?.App?.GetDataUpdateStatus?.()) || {};
         uploads = (await window.go?.main?.App?.GetNiceUploads?.(0)) || [];
+        niceFinal = (await window.go?.main?.App?.GetNiceGeneralFinalScores?.().catch(() => null))?.summary || null;
     } catch (e) {
         console.error('상태 불러오기 실패:', e);
     }
 
     app.className = 'wide-layout';
     updateAppWindowTitle('master');
-    app.innerHTML = manageHTML({ schoolName, classCount, configuredYear, status, updateStatus, uploads });
+    app.innerHTML = manageHTML({ schoolName, classCount, configuredYear, status, updateStatus, uploads, niceFinal });
 
     ScreenLockManager.resetTimer();
     const rerender = () => renderAdminScreen(schoolName);
@@ -51,6 +55,8 @@ export async function renderAdminScreen(schoolName) {
     bindYearControls({ schoolName, classCount, rerender });
     bindHandoverControls({ rerender });
     bindNeisUploads({ totalStudents: updateStatus.totalStudents || 0, rerender });
+    bindNiceFinalCard({ rerender });
+    bindNiceBonusCard();
     document.getElementById('refreshBtn')?.addEventListener('click', rerender);
     return undefined;
 }

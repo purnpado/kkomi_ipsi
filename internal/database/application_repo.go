@@ -101,6 +101,12 @@ func (dm *DBManager) saveApplicationMode(record model.ApplicationRecord, mode sa
 		return err
 	}
 	defer db.Close()
+	if !merge {
+		// 이중지원 금지(지원 시기): 전기 2개교, 울산·타 시도 같은 시기 동시 지원(application_rounds.go)
+		if err := checkRoundRules(db, record); err != nil {
+			return err
+		}
+	}
 	if !merge && record.ID > 0 {
 		// 이미 있는 원서를 열어 학년도·구분·학교·전형을 바꾸면 새 원서를 더하지 않고 그 원서를 고친다.
 		// (옛 이름표는 트리거가 지운 원서 기록으로 남겨 취합 병합 때 "바꾼 원서"로 알아본다.)

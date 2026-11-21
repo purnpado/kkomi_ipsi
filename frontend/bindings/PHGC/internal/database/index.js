@@ -85,6 +85,36 @@ import * as $models from "./models.js";
  */
 
 /**
+ * NiceBonusChange 한 학생·한 학년의 바뀌는 체크.
+ * @typedef {$models.NiceBonusChange} NiceBonusChange
+ */
+
+/**
+ * NiceBonusPlan 맞춰 보기 결과(가져오기 전에 보여 준다).
+ * @typedef {$models.NiceBonusPlan} NiceBonusPlan
+ */
+
+/**
+ * NiceCompareRow 학생 한 명의 꼬미입시 값과 나이스 값.
+ * @typedef {$models.NiceCompareRow} NiceCompareRow
+ */
+
+/**
+ * NiceCompareValues 비교하는 값.
+ * @typedef {$models.NiceCompareValues} NiceCompareValues
+ */
+
+/**
+ * NiceComparison 맞춰 보기 화면 자료.
+ * @typedef {$models.NiceComparison} NiceComparison
+ */
+
+/**
+ * NiceFinalSummary 올린 나이스 산출 결과 요약.
+ * @typedef {$models.NiceFinalSummary} NiceFinalSummary
+ */
+
+/**
  * NiceRosterRow 원서 한 건의 나이스 대조 줄.
  * @typedef {$models.NiceRosterRow} NiceRosterRow
  */

@@ -1,3 +1,4 @@
+import { escapeHtml } from '../../core/utils.js';
 import { printOnly } from '../../print/printEngine.js';
 import { buildRegisterPages } from './registerPages.js';
 import { bindRegisterExcelExport } from './registerExcel.js';
@@ -34,6 +35,8 @@ async function prepareRegisterModal(ctx) {
     } catch (e) {
         console.error('원서대장 데이터 로드 실패:', e);
     }
+    // 학년부장이 나이스 석차 연명부를 올렸으면 후기 일반고 점수는 나이스 내신성적을 쓴다("반|번호" → 점수).
+    ctx.niceFinal = (await window.go?.main?.App?.GetNiceGeneralFinalScores?.().catch(() => null)) || null;
 
     // 원서에 점수가 저장되지 않은 경우(입력 전 기록 등) 학생의 학교별 1차 전형 산출 점수·만점으로 채운다.
     ctx.studentResults = new Map();
@@ -209,6 +212,7 @@ function renderRegisterLayout(ctx, reg) {
             </div>
 
             <!-- 대장 본문 영역 (A4 가로 화이트 페이퍼 뷰어) -->
+            ${ctx.niceFinal?.summary?.count ? `<p class="no-print mb-2 text-xs text-emerald-300">후기 일반고 점수는 나이스 석차 연명부 값입니다(올린 날 ${escapeHtml(ctx.niceFinal.summary.uploadedAt)}). 연명부에 없는 학생은 꼬미입시 계산값입니다.</p>` : ''}
             <div class="register-frame flex-1 overflow-auto custom-scrollbar flex flex-col items-center p-2 sm:p-4 bg-slate-950/60 rounded-2xl border border-slate-800">
                 ${reg.documentPagesHTML}
             </div>

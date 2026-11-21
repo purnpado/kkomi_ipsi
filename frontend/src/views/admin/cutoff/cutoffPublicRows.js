@@ -75,10 +75,13 @@ export function buildPublicRowsHTML(ctx) {
                                         <input type="hidden" class="public-year" data-index="${p.originalIndex}" value="${group.year}" />
                                     </div>
                                 </td>
-                                <td class="p-3 align-middle text-left pl-3 bg-slate-900/40 border-r border-slate-700/50 min-w-40" rowspan="${rowSpan}">
-                                    <div class="flex items-center gap-1.5 w-full">
-                                        <span class="text-base shrink-0">🏫</span>
-                                        <select class="input-field py-1 px-2.5 text-xs font-bold text-white bg-slate-800 border-slate-600 rounded-lg public-school-select w-full min-w-32.5" data-group-year="${group.year}" data-group-school="${group.school}">
+                                <td class="p-3 align-middle text-left pl-3 bg-slate-900/40 border-r border-slate-700/50 min-w-56" rowspan="${rowSpan}">
+                                    <!-- 학교 이름은 글자로만 보인다. 펼침 목록이 "이 묶음의 학교 바꾸기"라서 다른 학교를 고르면 이 자료가 그 학교 자료로 바뀌었다(사용자 지적).
+                                         잘못 넣은 학교를 고칠 때만 [학교 고치기]로 목록을 열고, 바꾸기 전에 확인한다. -->
+                                    <div class="flex items-center gap-1.5 w-full public-school-cell">
+                                        <span class="text-xs font-bold text-white whitespace-nowrap public-school-name">${displaySchool(group.school)}</span>
+                                        <button type="button" class="public-school-edit text-[11px] text-slate-400 hover:text-indigo-300 underline whitespace-nowrap" title="잘못 넣은 학교를 고칩니다">학교 고치기</button>
+                                        <select class="hidden input-field py-1 px-2.5 text-xs font-bold text-white bg-slate-800 border-slate-600 rounded-lg public-school-select w-full" data-group-year="${group.year}" data-group-school="${group.school}" data-count="${group.items.length}" aria-label="학교 고치기">
                                             ${[
                                                 "울산마이스터고", "울산에너지고", "현대공업고",
                                                 "울산공업고", "울산기술공업고", "울산미용예술고", "울산산업고", "울산생활과학고", "울산여자상업고", "울산상업고", "울산애니원고",
@@ -122,7 +125,7 @@ export function buildPublicRowsHTML(ctx) {
                                 <input type="text" class="input-field py-1.5 px-2.5 text-xs text-slate-300 w-28 public-note" 
                                        value="${p.note || ''}" placeholder="출처/비고" data-index="${p.originalIndex}" />
                             </td>
-                            <td class="p-2.5 text-center">
+                            <td class="p-2.5 text-center whitespace-nowrap">
                                 ${isApplied ? `
                                     <span class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 inline-flex items-center gap-1 shadow-xs">
                                         <span>✅</span> 반영완료
@@ -133,7 +136,7 @@ export function buildPublicRowsHTML(ctx) {
                                     </span>
                                 `}
                             </td>
-                            <td class="p-2.5 text-center">
+                            <td class="p-2.5 text-center whitespace-nowrap">
                                 <div class="flex items-center justify-center gap-1.5">
                                     <button class="px-2.5 py-1.5 rounded-lg ${isApplied ? 'bg-slate-700/60 hover:bg-slate-700 border border-slate-600 text-slate-200' : 'bg-emerald-600/30 hover:bg-emerald-600/50 border border-emerald-500/40 text-emerald-300'} text-xs font-bold transition-all flex items-center gap-1 btn-apply-public-item" 
                                             data-index="${p.originalIndex}" title="${admissionLabel(group.year)} 커트라인으로 ${isApplied ? '다시 적용' : '즉시 적용'}">
@@ -196,7 +199,7 @@ export function buildPublicRowsHTML(ctx) {
                 </div>
 
                 <div class="overflow-x-auto rounded-xl border border-slate-700/50 bg-slate-900/40">
-                    <table class="w-full text-left border-collapse text-xs">
+                    <table class="w-full min-w-[1180px] text-left border-collapse text-xs">
                         <thead class="bg-slate-800/90 text-text-muted font-bold text-center border-b border-slate-700/60 whitespace-nowrap">
                             <tr>
                                 <th class="p-3 w-10 border-r border-slate-700/50 text-center">

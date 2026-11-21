@@ -32,7 +32,7 @@ func createTestDBManagerWithSampleData(t *testing.T) (*database.DBManager, strin
 	}
 
 	// 학교 설정 저장
-	err = dm.SaveSchoolConfig("울산동중학교", 3, "adminPass123", false, 2026)
+	err = dm.SaveSchoolConfig("울산동중학교", 3, "adminPass123", false, 2027)
 	if err != nil {
 		t.Fatalf("SaveSchoolConfig failed: %v", err)
 	}
@@ -43,7 +43,7 @@ func createTestDBManagerWithSampleData(t *testing.T) (*database.DBManager, strin
 			ClassNum:           1,
 			StudentNum:         "30101",
 			StudentName:        "홍길동",
-			AdmissionYear:      2026,
+			AdmissionYear:      2027,
 			Category:           "meister",
 			SchoolName:         "울산마이스터고",
 			Track:              "일반전형",
@@ -57,14 +57,14 @@ func createTestDBManagerWithSampleData(t *testing.T) (*database.DBManager, strin
 				AcademicScore:   160.0,
 				AttendanceScore: 15.5,
 				VolunteerScore:  10.0,
-				FormulaVersion:  "2026.1",
+				FormulaVersion:  "2027.1",
 			},
 		},
 		{
 			ClassNum:           1,
 			StudentNum:         "30102",
 			StudentName:        "김철수",
-			AdmissionYear:      2026,
+			AdmissionYear:      2027,
 			Category:           "meister",
 			SchoolName:         "울산마이스터고",
 			Track:              "일반전형",
@@ -78,14 +78,14 @@ func createTestDBManagerWithSampleData(t *testing.T) (*database.DBManager, strin
 				AcademicScore:   165.0,
 				AttendanceScore: 17.0,
 				VolunteerScore:  10.0,
-				FormulaVersion:  "2026.1",
+				FormulaVersion:  "2027.1",
 			},
 		},
 		{
 			ClassNum:           1,
 			StudentNum:         "30103",
 			StudentName:        "이영희",
-			AdmissionYear:      2026,
+			AdmissionYear:      2027,
 			Category:           "meister",
 			SchoolName:         "울산마이스터고",
 			Track:              "일반전형",
@@ -99,7 +99,7 @@ func createTestDBManagerWithSampleData(t *testing.T) (*database.DBManager, strin
 				AcademicScore:   150.0,
 				AttendanceScore: 18.0,
 				VolunteerScore:  10.0,
-				FormulaVersion:  "2026.1",
+				FormulaVersion:  "2027.1",
 			},
 		},
 	}
@@ -118,7 +118,7 @@ func TestSharedPackageAnonymization(t *testing.T) {
 	dm, tempDir := createTestDBManagerWithSampleData(t)
 	defer os.RemoveAll(tempDir)
 
-	pkg, err := dm.BuildSharedPackageV2(2026)
+	pkg, err := dm.BuildSharedPackageV2(2027)
 	if err != nil {
 		t.Fatalf("BuildSharedPackageV2 failed: %v", err)
 	}
@@ -126,8 +126,8 @@ func TestSharedPackageAnonymization(t *testing.T) {
 	if pkg.Cover.SchoolName != "울산동중학교" {
 		t.Errorf("Expected cover schoolName '울산동중학교', got %s", pkg.Cover.SchoolName)
 	}
-	if pkg.Cover.AdmissionYear != 2026 {
-		t.Errorf("Expected admissionYear 2026, got %d", pkg.Cover.AdmissionYear)
+	if pkg.Cover.AdmissionYear != 2027 {
+		t.Errorf("Expected admissionYear 2027, got %d", pkg.Cover.AdmissionYear)
 	}
 	if pkg.Cover.FormatVersion != 2 {
 		t.Errorf("Expected formatVersion 2, got %d", pkg.Cover.FormatVersion)
@@ -141,7 +141,7 @@ func TestSharedPackageAnonymization(t *testing.T) {
 		if rec.HighSchool != "울산마이스터고" || rec.Department != "정밀기계과" {
 			t.Errorf("Record normalization mismatch: %v", rec)
 		}
-		if rec.ScoreDetails.FormulaVersion != "2026.1" {
+		if rec.ScoreDetails.FormulaVersion != "2027.1" {
 			t.Errorf("FormulaVersion missing: %v", rec)
 		}
 	}
@@ -152,12 +152,12 @@ func TestSharedPackageEncryptionAndDecryption(t *testing.T) {
 	dm, tempDir := createTestDBManagerWithSampleData(t)
 	defer os.RemoveAll(tempDir)
 
-	exportPath := filepath.Join(tempDir, "shared_2026.phgc")
-	correctPass := "UlsanShare2026!"
+	exportPath := filepath.Join(tempDir, "shared_2027.phgc")
+	correctPass := "UlsanShare2027!"
 	wrongPass := "WrongPassword123!"
 
 	// 내보내기
-	err := ExportSharedPackageV2(dm, 2026, correctPass, exportPath)
+	err := ExportSharedPackageV2(dm, 2027, correctPass, exportPath)
 	if err != nil {
 		t.Fatalf("ExportSharedPackageV2 failed: %v", err)
 	}
@@ -183,10 +183,10 @@ func TestSharedPackageImportAndDuplicateReplacement(t *testing.T) {
 	dm, tempDir := createTestDBManagerWithSampleData(t)
 	defer os.RemoveAll(tempDir)
 
-	exportPath := filepath.Join(tempDir, "dongjung_2026.phgc")
-	sharePassword := "SafePass2026!"
+	exportPath := filepath.Join(tempDir, "dongjung_2027.phgc")
+	sharePassword := "SafePass2027!"
 
-	if err := ExportSharedPackageV2(dm, 2026, sharePassword, exportPath); err != nil {
+	if err := ExportSharedPackageV2(dm, 2027, sharePassword, exportPath); err != nil {
 		t.Fatalf("Export failed: %v", err)
 	}
 
@@ -228,7 +228,7 @@ func TestSharedPackageImportAndDuplicateReplacement(t *testing.T) {
 	}
 
 	// 참여 학교 목록 조회 확인
-	schools, err := dmConsolidate.GetParticipatingSchools(2026)
+	schools, err := dmConsolidate.GetParticipatingSchools(2027)
 	if err != nil {
 		t.Fatalf("GetParticipatingSchools failed: %v", err)
 	}
@@ -366,7 +366,7 @@ func TestSharedPackageV1BackwardCompatibility(t *testing.T) {
 
 	v1Cutoffs := []database.CutoffInfo{
 		{
-			Year:       2026,
+			Year:       2027,
 			SchoolName: "현대공업고",
 			Department: "전기전자과",
 			Track:      "일반전형",
@@ -411,10 +411,10 @@ func TestSharedPackageV1BackwardCompatibility(t *testing.T) {
 	}
 
 	// 옛 형식 자료는 점검할 수 없어 처음에는 관내 통계에서 빠진다(기준 학년도 이전이기도 함).
-	if stats, err := dm.GetConsolidatedAdmissionStats(2026, "현대공고", "전기전자과", "일반전형", 1.0); err != nil || stats != nil {
+	if stats, err := dm.GetConsolidatedAdmissionStats(2027, "현대공고", "전기전자과", "일반전형", 1.0); err != nil || stats != nil {
 		t.Fatalf("옛 형식 자료는 기본 통계 제외여야 합니다: %+v %v", stats, err)
 	}
-	schools, _ := dm.GetParticipatingSchools(2026)
+	schools, _ := dm.GetParticipatingSchools(2027)
 	if len(schools) != 1 {
 		t.Fatalf("참여 학교: %+v", schools)
 	}
@@ -422,7 +422,7 @@ func TestSharedPackageV1BackwardCompatibility(t *testing.T) {
 		t.Fatal(err)
 	}
 	// 학년부장이 다시 넣으면 요약 통계로부터 관내 통계를 낸다.
-	stats, err := dm.GetConsolidatedAdmissionStats(2026, "현대공고", "전기전자과", "일반전형", 1.0)
+	stats, err := dm.GetConsolidatedAdmissionStats(2027, "현대공고", "전기전자과", "일반전형", 1.0)
 	if err != nil {
 		t.Fatalf("GetConsolidatedAdmissionStats for V1 failed: %v", err)
 	}
@@ -436,30 +436,42 @@ func TestConsolidatedStatsWholeSchoolWhenDepartmentEmpty(t *testing.T) {
 	dm, tempDir := createTestDBManagerWithSampleData(t)
 	defer os.RemoveAll(tempDir)
 	path := filepath.Join(tempDir, "share.kkomi")
-	if err := ExportSharedPackageV2(dm, 2026, "pw", path); err != nil {
+	if err := ExportSharedPackageV2(dm, 2027, "pw", path); err != nil {
 		t.Fatal(err)
 	}
 	other, otherDir := createTestDBManagerWithSampleData(t)
 	defer os.RemoveAll(otherDir)
-	if err := other.SaveSchoolConfig("다른중학교", 3, "x", false, 2026); err != nil {
+	if err := other.SaveSchoolConfig("다른중학교", 3, "x", false, 2027); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := ImportSharedPackageV2(other, "pw", path); err != nil {
 		t.Fatal(err)
 	}
 	// 기준 학년도(2027) 이전 다른 학교 자료는 기본 제외이므로 학년부장이 다시 넣은 상태로 집계를 본다.
-	schools, _ := other.GetParticipatingSchools(2026)
+	schools, _ := other.GetParticipatingSchools(2027)
 	for _, sc := range schools {
 		if err := other.SetSharedPackageExcluded(sc.ID, false); err != nil {
 			t.Fatal(err)
 		}
 	}
-	whole, err := other.GetConsolidatedAdmissionStats(2026, "울산마이스터고", "", "일반", 1)
+	whole, err := other.GetConsolidatedAdmissionStats(2027, "울산마이스터고", "", "일반", 1)
 	if err != nil || whole == nil || whole.TotalApplicants == 0 {
 		t.Fatalf("학교 전체 집계가 비어 있음: %+v %v", whole, err)
 	}
-	dept, _ := other.GetConsolidatedAdmissionStats(2026, "울산마이스터고", "정밀기계과", "일반", 1)
+	dept, _ := other.GetConsolidatedAdmissionStats(2027, "울산마이스터고", "정밀기계과", "일반", 1)
 	if dept != nil && dept.TotalApplicants > whole.TotalApplicants {
 		t.Fatalf("학과 집계(%d)가 전체(%d)보다 큼", dept.TotalApplicants, whole.TotalApplicants)
+	}
+}
+
+// 관내 공유는 2027 고입부터: 그 전 학년도는 파일로 만들지 않는다(사용자 결정 2026-11-21).
+func TestSharedExportSkipsYearsBeforeBaseline(t *testing.T) {
+	dm, tempDir := createTestDBManagerWithSampleData(t)
+	defer os.RemoveAll(tempDir)
+	if err := ExportSharedPackageV2(dm, 2026, "pw", filepath.Join(tempDir, "old.kkomi")); err == nil {
+		t.Fatal("2026 고입 자료는 관내 공유 파일로 만들지 않아야 합니다")
+	}
+	if err := ExportSharedPackageV2(dm, 2027, "pw", filepath.Join(tempDir, "new.kkomi")); err != nil {
+		t.Fatalf("2027 고입 자료는 만들어야 합니다: %v", err)
 	}
 }

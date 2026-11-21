@@ -3,17 +3,17 @@
 // 한 줄씩(불합격 학교·합격 학교를 각각) 전형 진행 순서대로 기입한다.
 import { isSameTrack, normalizeSchoolName, displayTrack } from '../../core/utils.js';
 import { displaySchool } from '../../core/schoolName.js';
+import { ULSAN_OTHER_SCHOOLS } from '../../core/ulsanOtherSchools.js';
 
 const ACCEPTED = ['합격', '최종 진학', '최종진학'];
 
 // "기타" 구분에서 고르는 울산 학교. 이 밖의 학교명을 직접 넣은 원서는 타시도 진학으로 본다
 // (원서 입력 창 studentApplicationModal.js 의 목록과 같다).
-const ULSAN_OTHER_SCHOOLS = ['울산예술고등학교', '울산스포츠과학고등학교', '울산고운고등학교', '울산애니원고등학교', '울산과학고등학교'];
 
 /** 타시도 고교 원서인지: 타시도 구분, 또는 예전처럼 기타 구분에 직접 입력한 학교명(울산으로 시작하지 않음)·"타시도 고등학교". */
 export function isOutOfProvince(app) {
     if (app.category === 'out_province') return true;
-    if (app.category !== 'other') return false;
+    if (app.category !== 'other') return false; // 예전 자사고·외고(self_foreign) 원서는 타시도로 보지 않는다(예전 판단 유지)
     const name = String(app.schoolName || '').trim();
     if (!name || name === '기타') return false;
     if (name === '타시도 고등학교') return true;
@@ -108,14 +108,22 @@ function firstStageResult(ctx, app) {
     return results.find(r => normalizeSchoolName(r.schoolName) === school && isSameTrack(r.trackName, app.track)) || null;
 }
 
+/** 나이스 석차 연명부의 내신성적(올리지 않았거나 그 학생이 없으면 0) */
+export function niceFinalScore(ctx, app) {
+    const num = Number.parseInt(String(app.studentNum ?? '').trim(), 10);
+    return Number(ctx.niceFinal?.scores?.[`${app.classNum}|${Number.isNaN(num) ? String(app.studentNum).trim() : num}`]) || 0;
+}
+
 function scoreText(ctx, app) {
     // 자사고·외고·과학고·예술고 등 별도 전형 학교는 점수를 기록하지 않는다.
     if (['self_foreign', 'other', 'out_province', 'none'].includes(app.category)) return app.category === 'none' ? '-' : '별도전형';
     // 입시 통계 제외 학생(특수교육대상자·학생선수 등)도 성적과 다른 기준으로 선발되므로 점수 대신 "별도전형"(사유는 적지 않음).
     if (ctx.separateStudents?.has(`${app.classNum}|${String(app.studentNum ?? '').trim()}|${String(app.studentName ?? '').trim()}`)) return '별도전형';
+    // 후기 일반고: 나이스 석차 연명부를 올렸으면 나이스 내신성적(공식 산출)을 쓴다.
+    const niceScore = app.category === 'general' ? niceFinalScore(ctx, app) : 0;
     // 원서에 저장된 점수(지원할 때의 확정값)를 먼저 쓰고, 없으면 지금 산출한 1차 전형 점수로 채운다.
     const result = firstStageResult(ctx, app);
-    const score = app.score > 0 ? app.score : Number(result?.totalScore) || 0;
+    const score = niceScore > 0 ? niceScore : app.score > 0 ? app.score : Number(result?.totalScore) || 0;
     if (!(score > 0)) return '-';
     const formatted = score.toFixed(2);
     // 만점은 산출 규칙(요강)의 1차 전형 만점을 쓰고, 산출 결과가 없을 때만 학교별 기본값을 쓴다.

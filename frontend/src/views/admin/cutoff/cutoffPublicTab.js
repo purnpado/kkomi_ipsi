@@ -4,6 +4,7 @@ import { app } from '../../../core/dom.js';
 import { renderAddPublicDataModal } from './publicDataModal.js';
 import { navigate, notifyStatsRecalculated } from '../../../core/navigation.js';
 import { admissionLabel } from '../../../core/admissionYear.js';
+import { displaySchool } from '../../../core/schoolName.js';
 
 // 커트라인 관리: 공식자료 탭 전용 이벤트
 export function bindPublicDataTab(ctx, ui) {
@@ -100,11 +101,31 @@ export function bindPublicDataTab(ctx, ui) {
         });
 
         // 테이블 학교명 셀 변경 동기화
+        app.querySelectorAll('.public-school-edit').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const sel = btn.parentElement.querySelector('.public-school-select');
+                sel?.classList.remove('hidden');
+                btn.classList.add('hidden');
+                btn.parentElement.querySelector('.public-school-name')?.classList.add('hidden');
+                sel?.focus();
+            });
+        });
         app.querySelectorAll('.public-school-select').forEach(sel => {
             sel.addEventListener('change', async (e) => {
                 const newSchool = e.target.value;
                 const oldSchool = sel.dataset.groupSchool;
                 const gYear = Number(sel.dataset.groupYear);
+                // 학교를 바꾸면 이 묶음의 발표 자료가 모두 그 학교 자료가 된다. 다른 학교 자료 보기와 헷갈리지 않게 확인한다.
+                const ok = await showModalConfirm({
+                    title: '발표 자료의 학교 고치기',
+                    message: `${admissionLabel(gYear)} ${displaySchool(oldSchool)} 발표 자료 ${sel.dataset.count || ''}건을 ${displaySchool(newSchool)} 자료로 바꿀까요?\n\n다른 학교의 발표 자료를 보려는 것이라면 [취소]를 누르고 위쪽 검색칸에 학교 이름을 넣으세요.`,
+                    confirmText: '학교 바꾸기',
+                    type: 'warning'
+                });
+                if (!ok) {
+                    ctx.renderMainScreen();
+                    return;
+                }
                 ctx.publicOfficialData.forEach(item => {
                     if (item.year === gYear && normalizeSchoolName(item.school) === normalizeSchoolName(oldSchool)) {
                         item.school = newSchool;

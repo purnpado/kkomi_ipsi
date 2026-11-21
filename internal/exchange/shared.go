@@ -21,13 +21,17 @@ func ExportSharedPackageV2(dm *database.DBManager, admissionYear int, password, 
 	if err != nil {
 		return err
 	}
+	// 관내 공유는 2027 고입부터 쌓는다(SharedBaselineYear). 그 전 학년도는 보내지 않는다(사용자 결정 2026-11-21).
+	if pkg.Cover.AdmissionYear < database.SharedBaselineYear {
+		return fmt.Errorf("%d 고입 이전 자료는 관내 공유하지 않습니다(%d 고입부터 공유)", database.SharedBaselineYear, database.SharedBaselineYear)
+	}
 	// 우리 학교의 다른 학년도 결과도 함께 담는다(나중에 참여한 학교도 한 번에 지난 자료를 받도록).
 	years, err := ownResultYears(dm)
 	if err != nil {
 		return err
 	}
 	for _, y := range years {
-		if y == pkg.Cover.AdmissionYear {
+		if y == pkg.Cover.AdmissionYear || y < database.SharedBaselineYear {
 			continue
 		}
 		extra, err := dm.BuildSharedPackageV2(y)

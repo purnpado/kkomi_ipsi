@@ -21,7 +21,8 @@ body.shell-on #backToAdminBtn { display: none; }
 
 .cutoff-empty-hint { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--kk-line-strong); background: var(--kk-sunken); color: var(--kk-text-1); }
 
-.cutoff-school-list { display: grid; gap: 8px; }
+/* 격자 칸은 내용보다 좁아지지 않으므로(min-width:auto) 칸 폭을 상자에 묶는다. 넓은 표(고교 발표 자료)는 표 상자 안에서 옆으로 민다. */
+.cutoff-school-list { display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; min-width: 0; }
 .cutoff-school { border: 1px solid var(--kk-line-strong); border-radius: 12px; background: var(--kk-surface); }
 .cutoff-school[open] { border-color: var(--kk-accent); }
 .cutoff-summary { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 10px 14px; cursor: pointer; list-style: none; color: var(--kk-text-1); font-size: var(--kk-fs-2); }

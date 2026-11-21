@@ -22,7 +22,7 @@ func TestNiceRosterRowsFollowApplications(t *testing.T) {
 	for _, rec := range []model.ApplicationRecord{
 		{ClassNum: 1, StudentNum: "1", StudentName: "가상학생", AdmissionYear: 2027, Category: "general", Status: "지원예정"},
 		{ClassNum: 1, StudentNum: "1", StudentName: "가상학생", AdmissionYear: 2027, Category: "special", SchoolName: "울산상업고등학교", Track: "취업희망자", Status: "지원희망"},
-		{ClassNum: 1, StudentNum: "1", StudentName: "가상학생", AdmissionYear: 2027, Category: "meister", SchoolName: "울산마이스터고등학교", Track: "일반", Status: "지원희망"},
+		{ClassNum: 1, StudentNum: "1", StudentName: "가상학생", AdmissionYear: 2027, Category: "meister", SchoolName: "울산마이스터고등학교", Track: "일반", Status: "불합격"}, // 마이스터고 불합격 뒤 특성화고(이중지원 예외)
 		{ClassNum: 1, StudentNum: "1", StudentName: "가상학생", AdmissionYear: 2026, Category: "special", SchoolName: "울산공업고등학교", Track: "일반", Status: "합격"},
 	} {
 		if err := dm.SaveApplication(rec); err != nil {

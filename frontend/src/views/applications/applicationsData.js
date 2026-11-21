@@ -8,7 +8,7 @@ export const PENDING_STATUSES = new Set(['미입력', '지원희망', '지원 �
 export const EARLY_CATEGORIES = new Set(['meister', 'special', 'self_foreign', 'other', 'out_province']);
 
 export const CATEGORY_LABELS = {
-    meister: '마이스터고', special: '특성화고', self_foreign: '자사고·외고', other: '기타', out_province: '타시도', general: '후기 일반고', none: '미진학'
+    meister: '마이스터고', special: '특성화고', self_foreign: '기타 울산 고교', other: '기타 울산 고교', out_province: '타시도', general: '후기 일반고', none: '미진학'
 };
 
 export const studentKey = (classNum, studentNum, name) => `${Number(classNum)}|${String(studentNum).trim()}|${String(name || '').trim()}`;

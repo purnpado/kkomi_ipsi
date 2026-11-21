@@ -2,6 +2,7 @@ import { escapeHtml, escapeAttr, displayTrack } from '../../core/utils.js';
 import { defineApplicationRenderer } from './applicationForm.js';
 import { state } from '../../core/store.js';
 import { resolveAdmissionYear } from '../../core/admissionYear.js';
+import { ULSAN_OTHER_SCHOOLS, ROUND_TRACKS, needsRoundTrack } from '../../core/ulsanOtherSchools.js';
 
 // ===== 학생별 지원·합격 결과 (학교 내부 암호화 DB 전용) =====
 export async function openStudentApplicationModal(classNum, studentNum, name, preset = null) {
@@ -37,7 +38,8 @@ async function prepareApplicationModal(ctx) {
     ctx.defaultAdmissionYear = resolveAdmissionYear(await window.go.main.App.GetSchoolConfig().catch(() => null));
     ctx.canEdit = !state.currentUser || state.currentUser.Role !== 'viewer';
     ctx.statusOptions = ['지원희망', '지원완료', '합격', '불합격'];
-    ctx.categoryOptions = [['meister', '마이스터고'], ['special', '특성화고'], ['self_foreign', '자사고·외고'], ['general', '후기 일반고'], ['other', '기타 (울산 예술·스포츠과학·과학·애니원고 등)'], ['out_province', '타시도 고교 (자사고·외고·특목고·마이스터고·특성화고·일반고 등)'], ['none', '미진학 (진학포기)']];
+    // 자사고·외고와 기타를 "기타 울산 고교" 하나로 합쳤다(2026-11-21). 예전 자사고·외고(self_foreign) 원서는 이 구분으로 보여 준다.
+    ctx.categoryOptions = [['meister', '마이스터고'], ['special', '특성화고'], ['general', '후기 일반고'], ['other', '기타 울산 고교 (과학고·예술고·스포츠과학고·애니원고·외고·자사고·고운고 등)'], ['out_province', '타시도 고교 (자사고·외고·특목고·마이스터고·특성화고·일반고 등)'], ['none', '미진학 (진학포기)']];
     // 학교명을 직접 넣을 수 있는 구분: 기타(울산 예술고 등 + 직접 입력), 타시도 고교(늘 직접 입력)
     ctx.isCustomSchoolCategory = category => category === 'other' || category === 'out_province';
     // 지원현황 창은 목록 조회 실패 때문에 열리지 않으면 안 된다. Wails 바인딩
@@ -94,7 +96,11 @@ async function prepareApplicationModal(ctx) {
         return ['해당 없음'];
     };
     ctx.trackOptions = (category, schoolName, selected = '') => {
-        if (ctx.isCustomSchoolCategory(category)) return '<option value="해당 없음" selected>해당 없음</option>';
+        if (ctx.isCustomSchoolCategory(category)) {
+            // 목록 밖 학교·타시도 고교는 이중지원 금지 규칙을 위해 지원 시기를 고른다(전형 칸에 저장).
+            if (!needsRoundTrack(category, schoolName)) return '<option value="해당 없음" selected>해당 없음</option>';
+            return `<option value="">지원 시기 선택</option>${ROUND_TRACKS.map(([v, t]) => `<option value="${v}" ${v === selected ? 'selected' : ''}>${t}</option>`).join('')}`;
+        }
         const tracks = (['meister', 'special'].includes(category) && schoolName)
             ? (calculatedTracks(schoolName, category).length ? calculatedTracks(schoolName, category) : fallbackTracks(category))
             : fallbackTracks(category);
@@ -121,14 +127,10 @@ async function prepareApplicationModal(ctx) {
         return false;
     };
     ctx.schoolOptions = (category, selected = '') => {
-        if (category === 'self_foreign') {
-            const schools = ['현대청운고등학교', '울산외국어고등학교'];
-            return `<option value="">학교 선택</option>${schools.map(name => `<option value="${escapeAttr(name)}" ${name === selected ? 'selected' : ''}>${escapeHtml(name)}</option>`).join('')}`;
-        }
         // 타시도 고교는 유형과 상관없이 학교명을 직접 입력한다.
         if (category === 'out_province') return '<option value="__custom_school__" selected>학교명 직접 입력</option>';
-        if (category === 'other') {
-            const schools = ['울산예술고등학교', '울산스포츠과학고등학교', '울산고운고등학교', '울산애니원고등학교', '울산과학고등학교'];
+        if (category === 'other' || category === 'self_foreign') {
+            const schools = ULSAN_OTHER_SCHOOLS;
             const custom = selected && !schools.includes(selected);
             return `<option value="">학교 선택</option>${schools.map(name => `<option value="${escapeAttr(name)}" ${name === selected ? 'selected' : ''}>${escapeHtml(name)}</option>`).join('')}<option value="__custom_school__" ${custom ? 'selected' : ''}>기타 학교 직접 입력</option>`;
         }

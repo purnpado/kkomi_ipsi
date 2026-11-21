@@ -229,6 +229,76 @@ import * as calc$0 from "../calc/models.js";
  */
 
 /**
+ * NiceBonusChange 한 학생·한 학년의 바뀌는 체크.
+ * @typedef {Object} NiceBonusChange
+ * @property {number} classNum
+ * @property {string} studentNum
+ * @property {string} name
+ * @property {number} grade
+ * @property {boolean} from - 지금 꼬미입시 체크
+ * @property {boolean} to - 나이스 가산점으로 정할 체크
+ */
+
+/**
+ * NiceBonusPlan 맞춰 보기 결과(가져오기 전에 보여 준다).
+ * @typedef {Object} NiceBonusPlan
+ * @property {string} kind - changche·haengbal
+ * @property {string} kindLabel - 창의적체험활동·행동특성
+ * @property {number} students - 파일의 학생 수
+ * @property {number} matched - 꼬미입시 학생과 맞춘 수
+ * @property {number} same - 세 학년 모두 같은 학생 수
+ * @property {number} withBonus - 나이스에 가산점이 하나라도 있는 학생 수
+ * @property {NiceBonusChange[] | null} changes - 바뀌는 체크
+ * @property {string[] | null} disqualified - 가산 제외라 건드리지 않는 학생·학년
+ * @property {string[] | null} unmatched - 꼬미입시에 없는 학생
+ */
+
+/**
+ * NiceCompareRow 학생 한 명의 꼬미입시 값과 나이스 값.
+ * @typedef {Object} NiceCompareRow
+ * @property {number} classNum
+ * @property {string} studentNum
+ * @property {string} name
+ * @property {NiceCompareValues | null} program - 꼬미입시(없으면 nil: 꼬미입시에 없는 학생)
+ * @property {NiceCompareValues | null} nice - 나이스(없으면 nil: 연명부에 없는 학생)
+ * @property {string[] | null} diffs - 다른 칸 이름(rank·percentile·academic·attendance·volunteer·creative·behavior·total)
+ * @property {string[] | null} hints - 다를 때 짐작되는 이유
+ */
+
+/**
+ * NiceCompareValues 비교하는 값.
+ * @typedef {Object} NiceCompareValues
+ * @property {number} rank
+ * @property {number} percentile
+ * @property {number} academic
+ * @property {number} attendance
+ * @property {number} volunteer
+ * @property {number} creative
+ * @property {number} behavior
+ * @property {number} total
+ */
+
+/**
+ * NiceComparison 맞춰 보기 화면 자료.
+ * @typedef {Object} NiceComparison
+ * @property {NiceFinalSummary | null} summary
+ * @property {number} programEnrolled - 꼬미입시가 석차백분율에 쓴 재적수(소인수 학교 보정 포함)
+ * @property {NiceCompareRow[] | null} rows
+ * @property {number} same - 모든 칸이 같은 학생 수
+ */
+
+/**
+ * NiceFinalSummary 올린 나이스 산출 결과 요약.
+ * @typedef {Object} NiceFinalSummary
+ * @property {number} admissionYear
+ * @property {number} count - 학생 수
+ * @property {number} scored - 점수가 있는 학생 수
+ * @property {number} enrolled - 연명부의 재적수(없으면 0)
+ * @property {string} kind - 올린 양식
+ * @property {string} uploadedAt - "2026-12-10 14:03"
+ */
+
+/**
  * NiceRosterRow 원서 한 건의 나이스 대조 줄.
  * @typedef {Object} NiceRosterRow
  * @property {number} classNum

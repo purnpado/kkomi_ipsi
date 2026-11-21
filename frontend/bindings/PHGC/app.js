@@ -59,6 +59,15 @@ export function ApplyApplicationCutoffs() {
 }
 
 /**
+ * ApplyNiceBonusFile 맞춰 본 파일의 가산점으로 상담 화면 체크를 맞춘다(가산 제외 학년은 그대로).
+ * @param {string} path
+ * @returns {$CancellablePromise<database$0.NiceBonusPlan | null>}
+ */
+export function ApplyNiceBonusFile(path) {
+    return $Call.ByID(3850814555, path);
+}
+
+/**
  * ApplyUpdate 새 버전을 내려받아 확인한 뒤 실행 파일을 바꾸고 프로그램을 다시 시작한다(윈도우 전용).
  * 학생 자료는 봉인(암호화 저장)한 뒤 암호화 파일만 "업데이트전_백업" 폴더에 복사해 둔다. 아무것도 밖으로 보내지 않는다.
  * @returns {$CancellablePromise<$models.UpdateResult | null>}
@@ -122,6 +131,14 @@ export function ChangeUserPassword(username, newPassword) {
  */
 export function CheckSetupComplete() {
     return $Call.ByID(4035327959);
+}
+
+/**
+ * ClearNiceGeneralRank 올린 나이스 석차 연명부를 지운다(원서대장은 꼬미입시 계산값으로 돌아감).
+ * @returns {$CancellablePromise<void>}
+ */
+export function ClearNiceGeneralRank() {
+    return $Call.ByID(189450563);
 }
 
 /**
@@ -399,6 +416,15 @@ export function GetCompetitionRecords() {
 }
 
 /**
+ * GetConflictingWishApplications 원서를 지원완료로 저장할 때 함께 낼 수 없는 지원희망 원서(화면이 확인 뒤 지운다).
+ * @param {model$0.ApplicationRecord} record
+ * @returns {$CancellablePromise<model$0.ApplicationRecord[] | null>}
+ */
+export function GetConflictingWishApplications(record) {
+    return $Call.ByID(2092835131, record);
+}
+
+/**
  * GetConsolidatedAdmissionStats 취합된 관내 통합 점수 자료로부터 학과별 정밀 통계 산출
  * @param {number} admissionYear
  * @param {string} highSchool
@@ -476,6 +502,22 @@ export function GetJudgmentSettings() {
  */
 export function GetLoginIndex() {
     return $Call.ByID(4290566720);
+}
+
+/**
+ * GetNiceGeneralComparison 꼬미입시 계산값과 나이스 값을 학생마다 나란히(학년부장).
+ * @returns {$CancellablePromise<database$0.NiceComparison | null>}
+ */
+export function GetNiceGeneralComparison() {
+    return $Call.ByID(1535360511);
+}
+
+/**
+ * GetNiceGeneralFinalScores 원서대장의 후기 일반고 점수에 쓸 나이스 내신성적(그 학년도).
+ * @returns {$CancellablePromise<$models.NiceGeneralFinalResult | null>}
+ */
+export function GetNiceGeneralFinalScores() {
+    return $Call.ByID(122299273);
 }
 
 /**
@@ -963,6 +1005,14 @@ export function OpenTeacherPatchPreview(password) {
 }
 
 /**
+ * PreviewNiceBonusFile 나이스 항목별점수관리(창의체험·행동발달) 엑셀을 골라 상담 화면 가산점 체크와 맞춰 본다(바꾸지 않음).
+ * @returns {$CancellablePromise<$models.NiceBonusPreview | null>}
+ */
+export function PreviewNiceBonusFile() {
+    return $Call.ByID(1694787695);
+}
+
+/**
  * ProcessAttendanceExcel 출결 엑셀 파싱 후 DB 병합 (단일 파일 호환)
  * @param {string} filePath
  * @returns {$CancellablePromise<{ [_ in `${number}`]?: number } | null>}
@@ -1381,6 +1431,14 @@ export function UpdateClassCount(classCount) {
  */
 export function UpdateSchoolRankSnapshots() {
     return $Call.ByID(1162231123);
+}
+
+/**
+ * UploadNiceGeneralRank 파일 고르는 창으로 나이스 석차 연명부(또는 석차백분율산출) 엑셀을 골라 그 학년도 값으로 저장한다.
+ * @returns {$CancellablePromise<database$0.NiceFinalSummary | null>}
+ */
+export function UploadNiceGeneralRank() {
+    return $Call.ByID(1816110001);
 }
 
 /**

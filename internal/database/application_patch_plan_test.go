@@ -334,12 +334,13 @@ func TestEditApplicationInPlaceRecordsOldKey(t *testing.T) {
 	dm := newEvidenceTestDB(t)
 	ghSave(t, dm, planApp("울산공고", "일반전형", "지원완료", tPre))
 	rows, _ := dm.GetStudentApplications(1, "1", "가상학생")
-	edited := planApp("울산상고", "일반전형", "지원완료", "")
+	// 바꾼 원서는 특별전형 불합격으로 둔다: 뒤에서 일반전형 원서를 다시 만들 때 이중지원 예외(특별 불합격 뒤 일반)에 해당
+	edited := planApp("울산상고", "취업희망자 특별전형", "불합격", "")
 	edited.ID = rows[0].ID
 	if err := dm.SaveApplication(edited); err != nil {
 		t.Fatal(err)
 	}
-	if got := ghStatuses(t, dm); len(got) != 1 || got["울산상고/일반전형"] != "지원완료" {
+	if got := ghStatuses(t, dm); len(got) != 1 || got["울산상고/취업희망자 특별전형"] != "불합격" {
 		t.Fatalf("제자리에서 고쳐야 합니다: %v", got)
 	}
 	tombs, err := dm.GetApplicationDeletions(1, "1", "가상학생", "")
@@ -355,7 +356,7 @@ func TestEditApplicationInPlaceRecordsOldKey(t *testing.T) {
 	rows, _ = dm.GetStudentApplications(1, "1", "가상학생")
 	for _, r := range rows {
 		if r.SchoolName == "울산상고" {
-			r.SchoolName = "울산공고"
+			r.SchoolName, r.Track = "울산공고", "일반전형"
 			if err := dm.SaveApplication(r); err == nil {
 				t.Fatal("같은 학교·전형 원서가 있으면 거부해야 합니다")
 			}
