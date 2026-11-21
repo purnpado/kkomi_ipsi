@@ -3,6 +3,8 @@
 import { currentAdmissionYear, admissionLabel } from '../../../core/admissionYear.js';
 import { judgeRange, judgmentBadge, describeDiff } from '../../../core/admissionJudgment.js';
 
+const LABEL = '<span class="cg-fact-label">관내 합격선</span>';
+
 export async function fillGeneralCityCutoff(ctx) {
     const holder = ctx.modalEl.querySelector('#generalCityCutoff');
     if (!holder) return;
@@ -10,6 +12,7 @@ export async function fillGeneralCityCutoff(ctx) {
     const base = Number(d.generalHSBaseScore || 0);
     if (!(base > 0)) {
         holder.textContent = '';
+        holder.hidden = true;
         return;
     }
     const year = currentAdmissionYear() - 1;
@@ -21,12 +24,12 @@ export async function fillGeneralCityCutoff(ctx) {
         failed = true;
     }
     if (failed || !result) {
-        holder.textContent = '관내 추정 합격선 자료를 불러오지 못했습니다. 다시 확인해 주세요.';
+        holder.innerHTML = `${LABEL}<span>자료를 불러오지 못했습니다. 다시 확인해 주세요.</span>`;
         return;
     }
     const e = result?.base;
     if (!e || !(e.acceptedMin > 0)) {
-        holder.innerHTML = `<span>관내 합격선 비교: ${admissionLabel(year)} 공유 자료 없음 · 위 구간은 학교 내 석차 기준입니다.</span>`;
+        holder.innerHTML = `${LABEL}<span class="cg-chip">${admissionLabel(year)} 공유 자료 없음</span><span class="cg-fact-sub">위 구간은 학교 안 석차 기준입니다.</span>`;
         return;
     }
     const judged = judgeRange({
@@ -34,7 +37,7 @@ export async function fillGeneralCityCutoff(ctx) {
         totalMax: 200, schoolName: '후기 일반고', track: '후기 일반계고',
         source: `${admissionLabel(year)} 관내 ${result.participatingSchool}개교 배정 최저(기본 지표)`
     });
-    holder.innerHTML = `관내 합격선 비교: ${judgmentBadge(judged, { compact: true })} <span>관내 추정선 ${e.acceptedMin.toFixed(2)}점 대비 ${describeDiff(judged)}${e.smallSample ? ' · 표본 부족(참고)' : ''}</span>`;
+    holder.innerHTML = `${LABEL}${judgmentBadge(judged, { compact: true })}<span>관내 추정선 <b>${e.acceptedMin.toFixed(2)}점</b> 대비 ${describeDiff(judged)}</span>${e.smallSample ? '<span class="cg-chip cg-chip--warn">표본 부족(참고)</span>' : ''}`;
 }
 
 // 작년 우리 학교 결과 한 줄: 지난 학년도 후기 일반고 합격 학생의 교과 석차백분율이 어디까지였는지(지난 입시 기록).
@@ -47,7 +50,7 @@ export async function fillGeneralLastYear(ctx) {
         return;
     }
     const parts = [];
-    if (r.passed > 0) parts.push(`석차백분율 상위 ${Number(r.maxPassedPct).toFixed(1)}%까지 후기 일반고 합격(${r.passed}명)`);
-    if (r.failed > 0) parts.push(`불합격 학생 중 가장 앞 ${Number(r.minFailedPct).toFixed(1)}%(${r.failed}명)`);
-    holder.textContent = `작년(${admissionLabel(r.admissionYear)}) 우리 학교: ${parts.join(' · ')}`;
+    if (r.passed > 0) parts.push(`<span class="cg-chip cg-chip--ok">합격 ${r.passed}명 · 상위 <b>${Number(r.maxPassedPct).toFixed(1)}%</b>까지</span>`);
+    if (r.failed > 0) parts.push(`<span class="cg-chip cg-chip--bad">불합격 ${r.failed}명 · 가장 앞 <b>${Number(r.minFailedPct).toFixed(1)}%</b></span>`);
+    holder.innerHTML = `<span class="cg-fact-label">작년 우리 학교</span>${parts.join('')}<span class="cg-fact-sub">${admissionLabel(r.admissionYear)} 후기 일반고 · 교과 석차백분율</span>`;
 }

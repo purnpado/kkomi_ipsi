@@ -22,7 +22,9 @@
 .cg-figure > span { display: block; color: var(--color-slate-400); font-size: var(--kk-fs-1); font-weight: 700; }
 .cg-figure > strong { display: block; font-size: 26px; line-height: 1.2; font-weight: 800; font-variant-numeric: tabular-nums; }
 .cg-figure small { color: var(--color-slate-400); font-size: var(--kk-fs-2); font-weight: 500; }
+.cg-judge { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
 .cg-judge .counsel-judgment { margin-top: 0; }
+.cg-judge .cg-chips { margin-top: 0; }
 .cg-note { margin: 3px 0 0; color: var(--color-slate-400); font-size: var(--kk-fs-1); line-height: 1.5; }
 .cg-main .counsel-city { margin-top: 0; flex: 1 1 280px; }
 .cg-folds { margin-top: 10px; display: grid; gap: 0; }
@@ -68,19 +70,49 @@
 }
 
 /* 후기 일반고: 학교 안 위치 막대(상위 %)·200점 점수·비교과 감점 */
-.cg-bar { margin-top: 10px; max-width: 640px; }
+.cg-bar { margin-top: 12px; max-width: 640px; padding: 0 8px; }
+.cg-bar-top, .cg-bar-labels { position: relative; height: 18px; font-size: var(--kk-fs-1); color: var(--kk-text-3); }
+.cg-bar-top { margin-bottom: 4px; }
+.cg-bar-labels { margin-top: 5px; }
+.cg-bar-top > span, .cg-bar-labels > span { position: absolute; top: 0; white-space: nowrap; }
+.cg-al-center { transform: translateX(-50%); }
+.cg-al-start { transform: translateX(-8px); }
+.cg-al-end { transform: translateX(calc(-100% + 8px)); }
 .cg-bar-track { position: relative; height: 10px; border-radius: 999px; background: var(--kk-sunken); border: 1px solid var(--kk-line); }
 .cg-bar-band { position: absolute; top: -1px; bottom: -1px; background: var(--kk-judge-hope-bg); border: 1px solid var(--kk-judge-hope); border-radius: 4px; }
 .cg-bar-dot { position: absolute; top: 50%; width: 14px; height: 14px; margin: -7px 0 0 -7px; border-radius: 50%; background: var(--kk-accent-fill); border: 2px solid var(--kk-surface); box-shadow: 0 0 0 1px var(--kk-accent-fill); }
-.cg-bar-labels { position: relative; height: 18px; margin-top: 4px; font-size: var(--kk-fs-1); color: var(--color-slate-400); }
-.cg-bar-labels > span { position: absolute; top: 0; white-space: nowrap; }
-.cg-bar-labels > span:first-child { left: 0; }
-.cg-bar-labels > span:last-child { right: 0; }
-.cg-bar-me, .cg-bar-cut { transform: translateX(-50%); font-weight: 700; }
-.cg-bar-me { color: var(--kk-accent); }
-.cg-bar-cut { top: 18px !important; color: var(--kk-judge-hope); }
-.cg-bar-labels { height: 34px; }
-.cg-score { margin: 6px 0 0; font-size: var(--kk-fs-3); }
-.cg-score strong { font-size: var(--kk-fs-4); font-variant-numeric: tabular-nums; }
-.cg-score span { color: var(--color-slate-400); font-size: var(--kk-fs-2); }
-.cg-cut { margin: 4px 0 0; color: var(--kk-warning); font-size: var(--kk-fs-2); font-weight: 600; }
+.cg-bar-me { color: var(--kk-accent); font-weight: 700; }
+.cg-bar-cut { color: var(--kk-judge-hope); font-weight: 700; }
+/* 뱃지(칩): 숫자·상태를 한눈에. 색은 판정 색 이름표를 쓴다. */
+.cg-chips { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; margin-top: 6px; }
+.cg-chip { display: inline-flex; align-items: center; gap: 3px; padding: 2px 9px; border-radius: 999px; border: 1px solid var(--kk-line); background: var(--kk-sunken); color: var(--kk-text-2); font-size: var(--kk-fs-1); font-weight: 600; line-height: 1.6; white-space: nowrap; }
+.cg-chip b { color: inherit; font-weight: 800; font-variant-numeric: tabular-nums; }
+.cg-chip--ok { background: var(--kk-judge-safe-bg); border-color: transparent; color: var(--kk-judge-safe); }
+.cg-chip--warn { background: var(--kk-judge-hope-bg); border-color: transparent; color: var(--kk-judge-hope); }
+.cg-chip--bad { background: var(--kk-judge-challenge-bg); border-color: transparent; color: var(--kk-judge-challenge); }
+.cg-chip--info { background: var(--kk-judge-proper-bg); border-color: transparent; color: var(--kk-judge-proper); }
+.cg-label { color: var(--kk-text-3); font-size: var(--kk-fs-1); font-weight: 700; }
+.cg-score { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 8px; margin-top: 12px; }
+.cg-score > strong { font-size: var(--kk-fs-5); font-weight: 800; font-variant-numeric: tabular-nums; }
+.cg-of { color: var(--kk-text-3); font-size: var(--kk-fs-2); }
+.cg-score .cg-chips { margin-top: 0; margin-left: 4px; }
+.cg-alert { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 8px; padding: 7px 10px; border-radius: 10px; border: 1px solid var(--kk-judge-challenge); background: var(--kk-judge-challenge-bg); }
+.cg-alert-title { color: var(--kk-judge-challenge); font-size: var(--kk-fs-2); font-weight: 800; margin-right: 2px; }
+.cg-alert .cg-chip--bad { background: var(--kk-surface); }
+.cg-alert-hint { margin-left: auto; color: var(--kk-text-2); font-size: var(--kk-fs-1); }
+.counsel-score-part small, .counsel-term small { color: var(--kk-text-3); font-weight: 500; }
+.counsel-term em { color: var(--kk-text-3); font-style: normal; font-weight: 500; }
+.counsel-score-part.is-short { box-shadow: inset 0 0 0 1px var(--kk-judge-challenge); }
+.counsel-score-part.is-short strong { color: var(--kk-judge-challenge); }
+.cg-facts { display: grid; gap: 6px; margin-top: 10px; }
+.cg-fact { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; margin: 0; color: var(--kk-text-2); font-size: var(--kk-fs-1); line-height: 1.6; }
+.cg-fact:empty, .cg-fact[hidden] { display: none; }
+.cg-fact-label { min-width: 84px; padding: 2px 8px; border-radius: 6px; background: var(--kk-sunken); color: var(--kk-text-1); font-weight: 700; text-align: center; }
+.cg-fact-sub { color: var(--kk-text-3); }
+.counsel-summary-note { margin: 8px 0 0; color: var(--kk-text-3); font-size: var(--kk-fs-1); line-height: 1.6; }
+.counsel-details-body > .cg-chips:first-child { margin-top: 0; }
+@media print {
+    .cg-chip, .cg-fact-label { background: #fff; color: #111827; border-color: #cbd5e1; }
+    .cg-alert { background: #fff; }
+}
+.cg-facts .counsel-city { margin-top: 0; }

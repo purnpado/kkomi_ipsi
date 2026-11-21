@@ -23,12 +23,19 @@ export async function loadMasterData() {
     const classes = Array.from({ length: classCount }, (_, i) => i + 1);
     const home = await loadHomeData(classes);
     const year = home.admissionYear;
-    const [status, competition, closure, review] = await Promise.all([
+    const [status, competition, closure, review, niceFinal] = await Promise.all([
         App.GetDataUpdateStatus().catch(() => ({})),
         App.GetCompetitionRecords().catch(() => []),
         App.GetAdmissionClosure(year).catch(() => null),
-        App.GetAdmissionClosureReview(year).catch(() => null)
+        App.GetAdmissionClosureReview(year).catch(() => null),
+        App.GetNiceGeneralFinalScores?.().catch(() => null)
     ]);
+    // 나이스 석차 연명부(석차백분율산출): 3학년 2학기 산출 뒤에만 나오므로 2단계 완료 조건에는 넣지 않고 상태만 보인다.
+    const rankSummary = niceFinal?.summary;
+    const rankCount = rankSummary?.count || 0;
+    const rankText = rankCount > 0
+        ? `석차백분율 ${rankCount}명(${String(rankSummary.uploadedAt || '').slice(5, 10).replace('-', '.')})`
+        : '석차백분율 미올림';
 
     const students = home.students;
     const total = status.totalStudents || students.length;
@@ -47,7 +54,7 @@ export async function loadMasterData() {
 
     const steps = markCurrent([
         step('setup', '초기 설정', `학급 ${classCount}개 · ${admissionLabel(year)}`, 'done', 'settings'),
-        step('neis', '나이스 자료 올리기', `교과 ${total} · 출결 ${att} · 봉사 ${vol}명`,
+        step('neis', '나이스 자료 올리기', `교과 ${total} · 출결 ${att} · 봉사 ${vol}명 · ${rankText}`,
             total > 0 && att > 0 && vol > 0 ? 'done' : 'todo', 'admin'),
         step('basis', '합격선·경쟁률 준비', `합격선 ${home.cutoffCount}건 · ${year - 1} 경쟁률 ${lastYearCompetition}건`,
             home.cutoffCount > 0 ? 'done' : 'todo', 'cutoff'),
@@ -66,6 +73,9 @@ export async function loadMasterData() {
     if (stale) alerts.push({ tone: 'amber', title: '고입 연도 확인', detail: stale, action: 'admin' });
     if (total === 0) alerts.push({ tone: 'rose', title: '학생 자료가 없습니다', detail: '나이스 교과 성적 엑셀부터 올리세요.', action: 'admin' });
     else if (att === 0 || vol === 0) alerts.push({ tone: 'amber', title: '출결·봉사 자료가 비어 있습니다', detail: `출결 ${att}명 · 봉사 ${vol}명 — 판정 점수가 낮게 나올 수 있습니다.`, action: 'admin' });
+    if (total > 0 && rankCount === 0 && late > 0) {
+        alerts.push({ tone: 'slate', title: '나이스 석차백분율 미올림', detail: '3학년 2학기 성적 산출 뒤 [나이스 자료·학년도 관리]의 「4. 후기 일반고 석차 연명부」에 올리세요. 올리기 전까지 원서대장의 후기 일반고 점수는 꼬미입시 계산값입니다.', action: 'admin' });
+    }
     if (home.cutoffCount === 0) alerts.push({ tone: 'amber', title: '합격선이 없습니다', detail: '판정이 모두 "기준 없음"으로 나옵니다. 커트라인을 등록하거나 지난 학년도 자료를 가져오세요.', action: 'cutoff' });
     if (lastYearCompetition === 0) alerts.push({ tone: 'slate', title: `${year - 1} 고입 지원자 수 미입력`, detail: '[커트라인·경쟁률] → [지원자 수·경쟁률]: 요강 모집정원은 채워져 있어 지원자 수만 넣으면 미달 여부를 판정에 함께 표시합니다.', action: 'cutoff' });
     if (classCount > 0 && missingClasses.length > 0 && missingClasses.length < classCount) {
