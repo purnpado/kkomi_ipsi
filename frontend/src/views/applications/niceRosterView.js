@@ -20,7 +20,7 @@ const GROUP_ORDER = { meister: 0, vocational: 1, general: 2 };
 const isHomeroom = () => state.currentUser?.Role === 'homeroom';
 
 /** 대조표의 값 칸에서 열 목록을 만든다: [{ group, label }]
- * group 은 학기 이름이나 줄 이름(결석 환산·봉사·행동특성 가산·창체 가산·리더십처럼 뒤에 "1학년"·"1-1" 칸이 이어지는 강조 칸),
+ * group 은 학기 이름이나 줄 이름(결석 환산·봉사·행동발달·창의체험·리더십처럼 뒤에 "1학년"·"1-1" 칸이 이어지는 강조 칸),
  * 최종결석·봉사시수처럼 바로 값이 오는 칸은 group 없이 label 만 둔다. */
 function columnsOf(form) {
     const cols = [];

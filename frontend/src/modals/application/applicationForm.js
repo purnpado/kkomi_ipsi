@@ -136,7 +136,7 @@ export function defineApplicationRenderer(ctx) {
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4 rounded-xl border border-slate-700 p-5 bg-slate-900/40">
             ${lockedBannerHTML}
             <label class="text-sm font-bold">고입 학년도<input id="appYear" type="text" inputmode="numeric" value="${record.admissionYear || ''}" class="input-field mt-1 w-full" ${ctx.canEdit && !isLocked ? '' : 'disabled'}></label>
-            <label class="text-sm font-bold">전형 구분<select id="appCategory" class="input-field mt-1 w-full" ${ctx.canEdit && !isLocked ? '' : 'disabled'}>${ctx.categoryOptions.map(([v, t]) => `<option value="${v}" ${record.category === v ? 'selected' : ''}>${t}</option>`).join('')}</select></label>
+            <label class="text-sm font-bold">전형 구분<select id="appCategory" class="input-field mt-1 w-full" ${ctx.canEdit && !isLocked ? '' : 'disabled'}>${ctx.categoryOptions.map(([v, t]) => `<option value="${v}" ${record.category === v ? 'selected' : ''}>${t}</option>`).join('')}</select><span id="appCategoryHint" class="block mt-1 text-[11px] font-normal text-slate-400">${ctx.categoryHint(record.category)}</span></label>
             <label class="text-sm font-bold">지원 학교<select id="appSchool" class="input-field mt-1 w-full" ${(!needsSchool && !isOther) || isNone || !ctx.canEdit || isLocked ? 'disabled' : ''}>${ctx.schoolOptions(record.category, record.schoolName)}</select></label>
             <div id="appCustomSchoolArea" class="md:col-span-2 ${record.category === 'out_province' || isOther && record.schoolName && !ULSAN_OTHER_SCHOOLS.includes(record.schoolName) ? '' : 'hidden'}"><label class="text-sm font-bold">지원 고등학교명 직접 입력<input id="appCustomSchool" type="text" value="${escapeAttr(isOther && !['타시도 고등학교', '기타'].includes(record.schoolName) ? (record.schoolName || '') : '')}" placeholder="예: 제주서귀포고등학교" class="input-field mt-1 w-full" ${ctx.canEdit && !isLocked ? '' : 'disabled'}></label><p class="text-xs text-text-muted mt-1">실제 지원 학교명을 입력하면 원서대장에 표시됩니다. 기존 메모는 그대로 유지됩니다.</p></div>
             <label class="text-sm font-bold">전형 / 지원 유형<select id="appTrack" class="input-field mt-1 w-full" ${ctx.canEdit && !(isOther && !needsRoundTrack(record.category, record.schoolName)) && !isLocked ? '' : 'disabled'}>${ctx.trackOptions(record.category, record.schoolName, record.track)}</select></label>
@@ -298,6 +298,7 @@ export function defineApplicationRenderer(ctx) {
         };
         document.getElementById('appCategory').onchange = () => {
             const category = document.getElementById('appCategory').value;
+            document.getElementById('appCategoryHint').textContent = ctx.categoryHint(category);
             const general = category === 'general';
             const none = category === 'none';
             const other = ctx.isCustomSchoolCategory(category);

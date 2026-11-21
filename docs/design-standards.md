@@ -149,6 +149,15 @@
 
 2026-11-18에 화면·백엔드 안내 문구의 "배포 자료"(35곳), "지원 현황"(3곳), "석차 백분율"(4곳), 화면의 "관리자"(12곳), "업로드"(3곳)를 이 표대로 고쳤다. "입학년도"(7곳)는 대부분 저장 필드 설명이라 C 때 화면을 다시 만들며 정리한다.
 
+## 5-1. 평문을 한눈에 읽히는 모양으로 (2026-11-22)
+
+모든 화면은 전역 스킬 **plain-text-visual** 규칙을 따른다(원본 `tools/agent-skills/plain-text-visual/SKILL.md`, 다른 컴퓨터 설치는 `agents.md` 참고). 문장 속 숫자·상태는 뱃지·표·히트맵·막대·이름표 줄·경고 상자·접기로 바꾼다.
+
+- 색은 판정 색 이름표(`--kk-judge-safe/proper/hope/challenge/none`)만 쓴다. 좋음=safe, 안내=proper, 주의=hope, 나쁨=challenge, 기본=none·회색.
+- 지금 있는 부품: 뱃지 `.cg-chip`(`--ok`·`--warn`·`--bad`·`--info`), 이름표 줄 `.cg-fact`, 경고 상자 `.cg-alert`, 점수 칸 `.counsel-score-part.is-short`(`styles/counsel-summary.css`), 위치 막대 `views/teacher/counsel/generalBar.js`, 성취도 히트맵 `.tr-g--A~P`·만점 미달 `.tr-short`(`styles/transcript.css`).
+- 나이스 자료와 맞춰 보는 화면은 나이스의 칸 이름·순서를 따른다(예: 행동발달·창의체험, 종합성적표 = 기초자료 확인서 순서).
+- 화면 전체 뱃지화는 React 전환 때 공통 부품으로(`docs/react-radix-plan.md` 8-1절).
+
 ## 6. 검토 기록 (2026-11-18)
 
 ### ui-ux-pro-max 검토

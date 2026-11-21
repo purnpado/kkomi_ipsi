@@ -18,7 +18,7 @@ function rowHTML(row) {
     return row.map((cell, i) => {
         const cls = CELL_CLASS[cell.kind] || 'nice-label';
         const note = cell.note ? ` <span class="nice-note">${escapeHtml(cell.note)}</span>` : '';
-        // 줄 이름(뒤에 "1학년"·"1-1" 칸이 이어지는 강조 칸)도 학기 이름처럼 읽는다: "행동특성 가산 2학년 인정"
+        // 줄 이름(뒤에 "1학년"·"1-1" 칸이 이어지는 강조 칸)도 학기 이름처럼 읽는다: "행동발달 2학년 인정"
         const isHead = cell.kind === 'head' || (cell.kind === 'accent' && row[i + 1]?.kind === 'label');
         if (isHead) head = cell.text;
         if (cell.kind !== 'value') {

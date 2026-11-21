@@ -29,6 +29,8 @@ type GeneralYearBasis struct {
 	AbsenceDays    [3]int     `json:"absenceDays"`    // 학년별 결석 환산 일수(미인정 결석 + 지각·조퇴·결과 3회당 1일)
 	VolunteerHours [3]int     `json:"volunteerHours"` // 학년별 봉사 시간
 	ConvertedHours [3]float64 `json:"convertedHours"` // 학년별 인정 시간(전·편입 등으로 실적이 없는 학년은 환산)
+	AttendancePts  [3]float64 `json:"attendancePts"`  // 학년별 출석 점수(4점 만점, 기본 4점은 따로)
+	VolunteerPts   [3]float64 `json:"volunteerPts"`   // 학년별 봉사 점수(2점 만점, 기본 2점은 따로)
 	Behavior       [3]string  `json:"behavior"`       // 행동특성 가산점: "인정"·"제외"(징계 등)·""(체크 안 함)
 	Creative       [3]string  `json:"creative"`       // 창의적체험활동 가산점
 	BonusEntered   bool       `json:"bonusEntered"`   // 담임이 가산점 입력을 마쳤는지
@@ -151,8 +153,10 @@ func calculateGeneralNonAcademic(all map[int][]parser.StudentExcelData, target S
 
 	r := generalNonAcademic{AttendanceScore: 4, VolunteerScore: 2, BehaviorScore: 5, CreativeScore: 5}
 	for g := 0; g < 3; g++ {
-		r.AttendanceScore += generalAttendanceYearScore(absenceDays[g])
-		r.VolunteerScore += generalVolunteerYearScore(int(converted[g]))
+		r.Years.AttendancePts[g] = generalAttendanceYearScore(absenceDays[g])
+		r.Years.VolunteerPts[g] = generalVolunteerYearScore(int(converted[g]))
+		r.AttendanceScore += r.Years.AttendancePts[g]
+		r.VolunteerScore += r.Years.VolunteerPts[g]
 	}
 
 	r.Years.AbsenceDays, r.Years.VolunteerHours, r.Years.ConvertedHours = absenceDays, hours, converted

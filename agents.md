@@ -9,7 +9,7 @@
 - 꼬미입시 원본 저장소는 Gitea `purnpadosori/PHGC-OFFLINE`입니다.
 - GitHub `purnpado/kkomi_ipsi`(옛 이름 `purnpado/PHGC`, 옛 주소는 자동 연결됨)는 원본을 보관하는 백업 미러이자 공개 릴리즈 저장소입니다. GitHub에 `PHGC`라는 새 저장소를 만들면 옛 주소 연결이 끊기므로 만들지 않습니다.
 - `proxmox`(`purnpadosori/proxmox`)는 NAS·Proxmox 관제용 별도 저장소이며 꼬미입시 소스가 아닙니다.
-- 현재 릴리즈 버전은 `v1.8.4`입니다. 현재 상태·남은 작업은 `docs/current-work.md`와 `docs/handover.md`를 먼저 봅니다.
+- 현재 릴리즈 버전은 `v1.8.5`입니다. 현재 상태·남은 작업은 `docs/current-work.md`와 `docs/handover.md`를 먼저 봅니다.
 
 ## 작업 전 필수 확인
 
@@ -29,6 +29,16 @@ Gitea 원본을 복제한 뒤 다음 개발 도구를 설치해야 합니다.
 - Node.js 및 npm (현재 프론트엔드는 Vite + 일반 JavaScript)
 - Wails v3 CLI(`go install github.com/wailsapp/wails/v3/cmd/wails3@v3.1.0`)
 - Microsoft Edge WebView2 Runtime
+
+화면 규칙 전역 스킬(plain-text-visual): 이 컴퓨터의 공용 스킬 폴더에 복사하고 Claude·Codex에 연결한다(맥 기준, 한 번만).
+
+```sh
+mkdir -p ~/.agents/skills && cp -R tools/agent-skills/plain-text-visual ~/.agents/skills/
+ln -sfn ~/.agents/skills/plain-text-visual ~/.claude/skills/plain-text-visual
+ln -sfn ~/.agents/skills/plain-text-visual ~/.codex/skills/plain-text-visual
+```
+
+스킬을 고치면 `tools/agent-skills/` 사본도 같이 고쳐 커밋한다.
 
 설치 후 프로젝트 루트에서 `go test ./...`를 실행하고, 프론트엔드 작업 시 `frontend` 폴더에서 `npm install`과 `npm run build`를 실행합니다. 실제 학생 자료와 `data/` 폴더는 원본 저장소에서 내려받지 않습니다.
 

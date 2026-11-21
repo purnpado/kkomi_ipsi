@@ -131,6 +131,7 @@
 
 지금 화면은 숫자·상태가 문장 속에 섞인 평문이 많아 한눈에 읽기 어렵다. 화면 전체 뱃지화는 **전환 때 공통 부품으로 한 번에** 한다(지금 방식으로 화면마다 고치면 전환 때 다시 짜야 하고 모양이 화면마다 달라진다). 입시 기간(v1.8.x)에는 잘못 읽힐 수 있는 곳과 매일 보는 곳만 고친다.
 
+- **규칙**: 전역 스킬 plain-text-visual(`tools/agent-skills/plain-text-visual/SKILL.md`)의 "무엇을 어떤 모양으로" 표와 부품 이름(InfoBadge·LabeledRow·AlertBox·ScoreTile·PositionBar·HeatCell·FormulaChips·StepList·Fold)을 따른다. 뱃지 외에 표·히트맵·막대·추세선·이름표 줄·경고 상자·접기·단계 표시를 함께 쓴다.
 - **본보기**: v1.8.4 상담 화면 후기 일반고 칸(`views/teacher/counsel/generalSummary.js`·`generalBar.js`, 스타일 `styles/counsel-summary.css`의 `.cg-chip`·`.cg-fact`·`.cg-alert`). 색은 판정 색 이름표(`--kk-judge-*`)만 쓴다.
 - **1단계에서 만들 부품**
   - `<InfoBadge tone>`: 숫자·상태 한 조각. 색 5가지 — 기본(회색)·좋음(`safe`)·주의(`hope`)·나쁨(`challenge`)·안내(`proper`). 숫자는 굵게(`.num`).
@@ -150,6 +151,7 @@
 | 7 | 원서 입력 창 | 이중지원 안내, 나이스 대조표 차이 표시(5-3절 재구성과 함께) |
 | 8 | 상담 화면 | 이름 아래 요약 줄, 학교별 판정 한 줄 요약, 전기고 가산점·리더십, 가정해 보기 결과 |
 | 8 | 학급 명렬표·합격 예측 | 학생 줄의 상태 표시, 상세 창 설명 문장 |
+| 8 | 종합성적표 | v1.8.5에서 나이스 기초자료 확인서 모양·히트맵으로 바꿈 → 부품만 옮긴다 |
 
 ## 9. 위험과 대책
 

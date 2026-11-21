@@ -80,3 +80,18 @@ func TestGeneralVolunteerConvertedForMissingGrade(t *testing.T) {
 		t.Fatalf("두 학년 환산 봉사 = %.2f, want 7.10", r.VolunteerScore)
 	}
 }
+
+// 종합성적표(기초자료확인서 모양)용 학년별 점수: 기본점수 + 학년별 점수 합이 총점과 같아야 한다.
+func TestGeneralYearPoints(t *testing.T) {
+	r, _ := nonAcademicFor(t, `{"1_absence":10,"2_absence":1,"3_absence":0}`, `{}`, `{"general_volunteer_1":4,"general_volunteer_2":3,"general_volunteer_3":1}`)
+	if r.Years.AttendancePts != [3]float64{0, 3.5, 4} {
+		t.Fatalf("학년별 출석 점수 = %v", r.Years.AttendancePts)
+	}
+	if r.Years.VolunteerPts != [3]float64{2, 1.7, 1} {
+		t.Fatalf("학년별 봉사 점수 = %v", r.Years.VolunteerPts)
+	}
+	sum := func(v [3]float64) float64 { return v[0] + v[1] + v[2] }
+	if 4+sum(r.Years.AttendancePts) != r.AttendanceScore || roundToTwoDecimals(2+sum(r.Years.VolunteerPts)) != r.VolunteerScore {
+		t.Fatalf("기본+학년별 합이 총점과 다름: 출석 %.2f 봉사 %.2f", r.AttendanceScore, r.VolunteerScore)
+	}
+}

@@ -67,7 +67,7 @@ func TestNiceRosterRowsFollowApplications(t *testing.T) {
 		t.Fatalf("일반고 1-2 교과성취점수/과목수: %s", got)
 	}
 	// 교과 3줄(한 줄에 두 학기) + 결석 환산·봉사·행동특성·창체 가산(학년별) 4줄
-	if len(general.NiceForm.Rows) != 7 || general.NiceForm.Rows[6][0].Text != "창체 가산" || general.NiceForm.Rows[3][0].Text != "결석 환산(일)" {
+	if len(general.NiceForm.Rows) != 7 || general.NiceForm.Rows[6][0].Text != "창의체험" || general.NiceForm.Rows[3][0].Text != "결석 환산(일)" {
 		t.Fatalf("일반고 대조표 줄: %+v", general.NiceForm.Rows)
 	}
 	roster, err := dm.GetNiceRoster(0, true)

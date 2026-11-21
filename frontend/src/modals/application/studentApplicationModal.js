@@ -39,7 +39,11 @@ async function prepareApplicationModal(ctx) {
     ctx.canEdit = !state.currentUser || state.currentUser.Role !== 'viewer';
     ctx.statusOptions = ['지원희망', '지원완료', '합격', '불합격'];
     // 자사고·외고와 기타를 "기타 울산 고교" 하나로 합쳤다(2026-11-21). 예전 자사고·외고(self_foreign) 원서는 이 구분으로 보여 준다.
-    ctx.categoryOptions = [['meister', '마이스터고'], ['special', '특성화고'], ['general', '후기 일반고'], ['other', '기타 울산 고교 (과학고·예술고·스포츠과학고·애니원고·외고·자사고·고운고 등)'], ['out_province', '타시도 고교 (자사고·외고·특목고·마이스터고·특성화고·일반고 등)'], ['none', '미진학 (진학포기)']];
+    // 세 번째 값은 고른 구분 아래 작은 글씨 안내(긴 설명을 선택 칸에 넣으면 잘린다).
+    ctx.categoryOptions = [['meister', '마이스터고'], ['special', '특성화고'], ['general', '후기 일반고'],
+        ['other', '기타 울산 고교', '과학고·예술고·스포츠과학고·애니원고·외고·자사고·고운고 등'],
+        ['out_province', '타시도 고교', '다른 시·도의 자사고·외고·특목고·마이스터고·특성화고·일반고 등'], ['none', '미진학 (진학포기)']];
+    ctx.categoryHint = category => (ctx.categoryOptions.find(([v]) => v === category) || [])[2] || '';
     // 학교명을 직접 넣을 수 있는 구분: 기타(울산 예술고 등 + 직접 입력), 타시도 고교(늘 직접 입력)
     ctx.isCustomSchoolCategory = category => category === 'other' || category === 'out_province';
     // 지원현황 창은 목록 조회 실패 때문에 열리지 않으면 안 된다. Wails 바인딩

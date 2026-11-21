@@ -1,0 +1,84 @@
+/* 종합성적표(modals/studentTranscriptModal.js · modals/transcript/): 나이스 기초자료 확인서 모양 + 뱃지·히트맵 */
+.transcript-doc { display: grid; gap: 14px; color: var(--kk-text-1); }
+.tr-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding-bottom: 10px; border-bottom: 1px solid var(--kk-line); }
+.tr-lead { margin: 4px 0 0; color: var(--kk-text-3); font-size: var(--kk-fs-1); }
+.tr-badges { margin-top: 0; }
+.tr-badges .counsel-judgment { margin-top: 0; }
+.tr-block { display: grid; gap: 6px; }
+.tr-block h4 { display: flex; align-items: center; gap: 10px; margin: 0; color: var(--kk-text-strong); font-size: var(--kk-fs-3); font-weight: 800; }
+.tr-pair { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); gap: 14px; align-items: start; }
+.tr-scroll { overflow-x: auto; border-radius: 10px; border: 1px solid var(--kk-line); }
+.tr-table { width: 100%; border-collapse: collapse; font-size: var(--kk-fs-1); text-align: center; }
+.tr-table th, .tr-table td { padding: 5px 4px; border: 1px solid var(--kk-line); white-space: nowrap; }
+.tr-table thead th { background: var(--kk-sunken); color: var(--kk-text-2); font-weight: 700; }
+.tr-table th[scope="row"] { background: var(--kk-sunken); color: var(--kk-text-1); font-weight: 700; text-align: left; padding-left: 10px; }
+.tr-table small { color: var(--kk-text-3); font-weight: 500; }
+.tr-table b { color: var(--kk-text-strong); font-weight: 800; }
+.tr-scroll .tr-table { border-style: hidden; }
+.tr-sub { font-size: 11px; font-weight: 600 !important; }
+.tr-gstart { border-left: 2px solid var(--kk-line-strong) !important; }
+.tr-subj { min-width: 84px; }
+.tr-subj small { display: block; font-size: 10px; }
+.tr-tag { padding: 0 6px; border-radius: 999px; background: var(--kk-judge-hope-bg); color: var(--kk-judge-hope); font-size: 10px; }
+.tr-ach { font-weight: 800; }
+.tr-raw { color: var(--kk-text-3); }
+.tr-empty { color: var(--kk-text-3); }
+.tr-none { padding: 24px !important; color: var(--kk-text-3); }
+.tr-free { background: var(--kk-judge-proper-bg); vertical-align: middle; }
+.tr-free small { display: block; margin-top: 4px; color: var(--kk-text-3); font-size: 10px; white-space: normal; }
+.tr-sum, .tr-total { background: var(--kk-sunken); }
+.tr-total { text-align: left; padding-left: 12px !important; }
+/* 성취도 히트맵: 판정 색 이름표만 쓴다 */
+.tr-g--A { background: var(--kk-judge-safe-bg); color: var(--kk-judge-safe); }
+.tr-g--B { background: var(--kk-judge-proper-bg); color: var(--kk-judge-proper); }
+.tr-g--C { background: var(--kk-judge-hope-bg); color: var(--kk-judge-hope); }
+.tr-g--D, .tr-g--E { background: var(--kk-judge-challenge-bg); color: var(--kk-judge-challenge); }
+.tr-g--P { background: var(--kk-judge-none-bg); color: var(--kk-judge-none); }
+.tr-legend { display: inline-flex; gap: 3px; }
+.tr-legend i { width: 20px; padding: 1px 0; border-radius: 4px; font-size: 10px; font-style: normal; font-weight: 800; text-align: center; }
+/* 내신점수 한 줄 */
+.tr-summary { border-radius: 10px; overflow: hidden; }
+.tr-summary td { font-size: var(--kk-fs-3); padding: 7px 4px; }
+.tr-maxrow td { font-size: 11px !important; color: var(--kk-text-3); padding: 2px 4px !important; background: var(--kk-sunken); }
+.tr-sep { border-left: 2px solid var(--kk-line-strong) !important; }
+.tr-src { display: block; font-size: 10px; }
+.tr-short { box-shadow: inset 0 0 0 2px var(--kk-judge-challenge); color: var(--kk-judge-challenge); }
+.tr-short b { color: var(--kk-judge-challenge); }
+.tr-warn { color: var(--kk-judge-challenge); font-weight: 800; }
+.tr-mini td, .tr-mini th { padding: 4px 6px; }
+.tr-formula { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; margin: 0; color: var(--kk-text-3); font-size: var(--kk-fs-1); }
+.tr-formula .cg-chip { margin: 0; }
+.tr-foot { margin: 0; color: var(--kk-text-3); font-size: var(--kk-fs-1); }
+@media (max-width: 900px) { .tr-pair { grid-template-columns: 1fr; } }
+
+@media print {
+    body.printing[data-print-kind="transcript"] #studentTranscriptModal { padding: 0 !important; margin: 0 !important; background: #fff !important; }
+    body.printing[data-print-kind="transcript"] .transcript-doc { gap: 2.2mm !important; max-width: 100% !important; max-height: none !important; overflow: visible !important; padding: 0 !important; color: #0f172a !important; }
+    body.printing[data-print-kind="transcript"] .tr-head { padding-bottom: 1.5mm; border-bottom: 1.5px solid #0f172a; }
+    body.printing[data-print-kind="transcript"] .tr-head h2 { font-size: 13pt !important; color: #0f172a !important; }
+    body.printing[data-print-kind="transcript"] .tr-lead, body.printing[data-print-kind="transcript"] .tr-foot, body.printing[data-print-kind="transcript"] .tr-formula { font-size: 7pt !important; color: #475569 !important; }
+    body.printing[data-print-kind="transcript"] .tr-block h4 { font-size: 8.5pt !important; color: #0f172a !important; }
+    body.printing[data-print-kind="transcript"] .tr-block, body.printing[data-print-kind="transcript"] .tr-pair { break-inside: avoid; }
+    body.printing[data-print-kind="transcript"] .tr-pair { grid-template-columns: 1fr 1.4fr !important; gap: 3mm !important; }
+    body.printing[data-print-kind="transcript"] .tr-scroll { overflow: visible !important; border: none !important; }
+    body.printing[data-print-kind="transcript"] .transcript-doc .tr-table { width: 100% !important; table-layout: fixed !important; }
+    body.printing[data-print-kind="transcript"] .transcript-doc .tr-grades .tr-subj { width: 17mm !important; min-width: 0 !important; white-space: normal !important; }
+    body.printing[data-print-kind="transcript"] .transcript-doc .tr-table th, body.printing[data-print-kind="transcript"] .transcript-doc .tr-table td { white-space: normal !important; }
+    body.printing[data-print-kind="transcript"] .transcript-doc .tr-table th,
+    body.printing[data-print-kind="transcript"] .transcript-doc .tr-table td { padding: 0.7mm 0.4mm !important; font-size: 7pt !important; line-height: 1.15 !important; border: 1px solid #94a3b8 !important; color: #0f172a !important; }
+    body.printing[data-print-kind="transcript"] .transcript-doc .tr-table th { background: #f1f5f9 !important; }
+    body.printing[data-print-kind="transcript"] .transcript-doc .tr-summary td { font-size: 8.5pt !important; }
+    body.printing[data-print-kind="transcript"] .transcript-doc .tr-table small { font-size: 6pt !important; color: #475569 !important; }
+    body.printing[data-print-kind="transcript"] .transcript-doc .cg-chip,
+    body.printing[data-print-kind="transcript"] .transcript-doc .counsel-judgment { padding: 0 1.5mm !important; font-size: 6.5pt !important; background: #fff !important; color: #0f172a !important; border: 1px solid #cbd5e1 !important; }
+    /* 히트맵은 프린터 배경 옵션과 상관없이 옅은 색으로 나오게 한다 */
+    body.printing[data-print-kind="transcript"] .transcript-doc .tr-g--A { background: #ecfdf5 !important; color: #065f46 !important; }
+    body.printing[data-print-kind="transcript"] .transcript-doc .tr-g--B { background: #eef2ff !important; color: #3730a3 !important; }
+    body.printing[data-print-kind="transcript"] .transcript-doc .tr-g--C { background: #fffbeb !important; color: #92400e !important; }
+    body.printing[data-print-kind="transcript"] .transcript-doc .tr-g--D,
+    body.printing[data-print-kind="transcript"] .transcript-doc .tr-g--E { background: #fff1f2 !important; color: #9f1239 !important; }
+    body.printing[data-print-kind="transcript"] .transcript-doc .tr-g--P,
+    body.printing[data-print-kind="transcript"] .transcript-doc .tr-free { background: #f8fafc !important; }
+    body.printing[data-print-kind="transcript"] .transcript-doc .tr-short { box-shadow: inset 0 0 0 1.5px #9f1239 !important; color: #9f1239 !important; }
+    body.printing[data-print-kind="transcript"] .transcript-doc * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}

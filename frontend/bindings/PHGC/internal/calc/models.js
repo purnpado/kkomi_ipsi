@@ -47,6 +47,8 @@ import * as model$0 from "../model/models.js";
  * @property {number[]} absenceDays - 학년별 결석 환산 일수(미인정 결석 + 지각·조퇴·결과 3회당 1일)
  * @property {number[]} volunteerHours - 학년별 봉사 시간
  * @property {number[]} convertedHours - 학년별 인정 시간(전·편입 등으로 실적이 없는 학년은 환산)
+ * @property {number[]} attendancePts - 학년별 출석 점수(4점 만점, 기본 4점은 따로)
+ * @property {number[]} volunteerPts - 학년별 봉사 점수(2점 만점, 기본 2점은 따로)
  * @property {string[]} behavior - 행동특성 가산점: "인정"·"제외"(징계 등)·""(체크 안 함)
  * @property {string[]} creative - 창의적체험활동 가산점
  * @property {boolean} bonusEntered - 담임이 가산점 입력을 마쳤는지

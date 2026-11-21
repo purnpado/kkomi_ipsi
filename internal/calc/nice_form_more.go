@@ -75,7 +75,7 @@ func GeneralNiceForm(student *StudentFullData) *NiceForm {
 		Notes: []string{
 			"교과성취점수는 예체능을 포함한 학기별 성취도 점수 합(A=5 … E=1)입니다. 자유학기(P)는 빠집니다.",
 			"결석 환산 = 미인정 결석 + (지각 + 조퇴 + 결과) ÷ 3 (학년별, 소수점 버림)",
-			"행동특성·창의적체험활동 가산점은 담임이 학업성적관리위원회 명단을 보고 나이스에서 체크합니다. 아래는 상담 화면에서 체크한 값입니다.",
+			"행동발달·창의체험 가산점은 담임이 학업성적관리위원회 명단을 보고 나이스에서 체크합니다. 아래는 상담 화면에서 체크한 값입니다.",
 		},
 		Rows: [][]NiceFormCell{
 			append(semCells("1_1"), semCells("1_2")...),
@@ -114,8 +114,8 @@ func GeneralNiceForm(student *StudentFullData) *NiceForm {
 			}
 			return strconv.Itoa(years.VolunteerHours[i]), note
 		}),
-		yearRow("행동특성 가산", bonus(years.Behavior)),
-		yearRow("창체 가산", bonus(years.Creative)),
+		yearRow("행동발달", bonus(years.Behavior)),
+		yearRow("창의체험", bonus(years.Creative)),
 	)
 	if !years.Exact {
 		form.Warnings = append(form.Warnings, "학년별 출결·봉사 자료가 없어 누적값을 학년마다 나눈 예상값입니다. 학년별 나이스 자료를 올리거나 상담 화면에서 학년별 값을 넣어 주세요.")
