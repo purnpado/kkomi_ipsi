@@ -13,7 +13,6 @@ export async function openPredictionDetailModal(classNum, studentNum, studentNam
 
     const isMeister = category === 'meister';
     const titleCategory = isMeister ? '마이스터고' : '특성화고';
-    const categoryIcon = isMeister ? '🏛️' : '🏭';
 
     // 1. 학생 전체 성적 및 커트라인 로드
     let fullStudent = null;
@@ -256,7 +255,6 @@ export async function openPredictionDetailModal(classNum, studentNum, studentNam
                 <!-- 헤더 -->
                 <div class="flex items-center justify-between border-b border-slate-700/60 pb-4 shrink-0 flex-wrap gap-3">
                     <div class="flex items-center gap-3">
-                        <span class="text-3xl">${categoryIcon}</span>
                         <div>
                             <h2 class="text-xl md:text-2xl font-black text-white flex items-center gap-2">
                                 <span>[${escapeHtml(studentName)}]</span> 학생 ${titleCategory} 합격 예측 정밀 분석

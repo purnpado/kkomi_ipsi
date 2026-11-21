@@ -12,14 +12,18 @@ import (
 //   - 값은 산출식이 실제로 쓴 값(ScoreBasis)만 쓴다. 화면에서 다시 계산하지 않으므로 대조표와 점수가 어긋나지 않는다.
 //   - 전형마다 나이스 화면이 다르므로 배치(칸 이름·순서·안내 문구)는 전형 종류별 함수 하나에 모은다.
 //     나이스 화면이 바뀌면 그 함수만 고치고 nice_form_test.go 의 고정 정답을 맞춘다.
-//   - 특성화고(NiceFormVocational)만 있다. 마이스터고 화면은 나이스 성적 파일 원자료를 그대로 보여 주고
-//     후기 일반고는 대조가 필요 없어 만들지 않는다(담임 확인 2026-11-19).
+//   - 특성화고(NiceFormVocational)·마이스터고(NiceFormMeister, 현대공고 화면 기준)·후기 일반고(GeneralNiceForm)가 있다.
+//     나이스는 성적·출결·봉사를 자기 자료로 불러와 요강 산출식으로 계산하고, 리더십·창체·행동특성 가산점은
+//     담임이 학업성적관리위원회 명단을 보고 나이스에서 직접 체크한다(담임 확인 2026-11-21). 마이스터고·일반고는 nice_form_more.go.
 
 // NiceFileHint 대조표 아래 늘 붙는 안내.
 const NiceFileHint = "성적·출결·봉사는 마지막으로 올린 나이스 파일 값입니다. 원서 마감일 기준으로 다시 내려받아 올린 뒤 맞춰 보세요."
 
 // NiceFormVocational 특성화고 원서등록 화면 배치.
 const NiceFormVocational = "vocational"
+
+// NiceFormMeister 마이스터고 원서등록 화면 배치(특성화고와 같은 요약 + 리더십 학기 줄).
+const NiceFormMeister = "meister"
 
 // SemesterBasis 한 학기 교과 성적에서 산출식이 쓴 값.
 type SemesterBasis struct {
@@ -43,6 +47,8 @@ type ScoreBasis struct {
 	SplitKnown       bool            `json:"splitKnown"`       // 지각·조퇴·결과를 따로 알 수 있는지(예전 마감일 기준 수기 입력은 합계만 있음)
 	FinalAbsenceDays int             `json:"finalAbsenceDays"` // 최종결석 = 결석 + (지각+조퇴+결과)÷3, 소수점 절사
 	VolunteerHours   int             `json:"volunteerHours"`
+	Leadership       []string        `json:"leadership"`      // 상담 화면에서 체크한 리더십 학기("1_2"…)
+	LeadershipTerms  int             `json:"leadershipTerms"` // 인정 학기 수(예전 숫자 입력만 있으면 학기를 모름)
 }
 
 // NiceFormCell 대조표 한 칸. Kind: head(학기 이름)·label(항목 이름)·accent(강조 항목 이름)·value(값)
@@ -56,10 +62,11 @@ type NiceFormCell struct {
 type NiceForm struct {
 	Type     string           `json:"type"`
 	Title    string           `json:"title"`
-	Notes    []string         `json:"notes"`    // 나이스 화면 위 안내 문구
-	Rows     [][]NiceFormCell `json:"rows"`     // 나이스 화면과 같은 줄·순서
-	Warnings []string         `json:"warnings"` // 이 학생 값이 나이스 화면과 다를 수 있는 이유(있을 때만)
-	Hints    []string         `json:"hints"`    // 늘 붙는 맞춰 보기 안내
+	Subtitle string           `json:"subtitle,omitempty"` // 제목 옆 작은 글(비면 "나이스 원서등록 화면과 같은 순서")
+	Notes    []string         `json:"notes"`              // 나이스 화면 위 안내 문구
+	Rows     [][]NiceFormCell `json:"rows"`               // 나이스 화면과 같은 줄·순서
+	Warnings []string         `json:"warnings"`           // 이 학생 값이 나이스 화면과 다를 수 있는 이유(있을 때만)
+	Hints    []string         `json:"hints"`              // 늘 붙는 맞춰 보기 안내
 }
 
 // SchoolBasisView 학교별 산출 상세 창이 받는 값: 산출에 쓴 원자료와 나이스 대조표(배치가 없는 전형은 nil).
@@ -94,7 +101,8 @@ func NiceFormFor(student *StudentFullData, schoolName, trackName string) *NiceFo
 
 // buildScoreBasis 산출식(calculateForSchool)과 같은 규칙으로 쓴 값을 모은다.
 func buildScoreBasis(student *StudentFullData, rule SchoolRule) *ScoreBasis {
-	basis := &ScoreBasis{ExcludeArts: rule.ExcludeArts, AttendanceCutoff: rule.AttendanceCutoff, VolunteerHours: student.TotalVolunteerHours}
+	basis := &ScoreBasis{ExcludeArts: rule.ExcludeArts, AttendanceCutoff: rule.AttendanceCutoff, VolunteerHours: student.TotalVolunteerHours,
+		Leadership: append([]string{}, student.LeadershipSemesters...), LeadershipTerms: student.LeadershipTerms}
 	for _, sem := range rule.Semesters {
 		scores := ruleSemesterScores(student, rule, sem)
 		sum := 0
@@ -132,6 +140,8 @@ func buildNiceForm(rule SchoolRule, basis *ScoreBasis) *NiceForm {
 	switch rule.NiceForm {
 	case NiceFormVocational:
 		return vocationalNiceForm(basis)
+	case NiceFormMeister:
+		return meisterNiceForm(basis)
 	}
 	return nil
 }

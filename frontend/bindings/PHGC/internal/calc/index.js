@@ -11,6 +11,11 @@ import * as $models from "./models.js";
  */
 
 /**
+ * GeneralYearBasis 후기 일반고 비교과를 학년별로 계산에 쓴 값(원서 입력 창 나이스 대조표용).
+ * @typedef {$models.GeneralYearBasis} GeneralYearBasis
+ */
+
+/**
  * NiceForm 나이스 원서등록 화면과 같은 배치의 대조표.
  * @typedef {$models.NiceForm} NiceForm
  */

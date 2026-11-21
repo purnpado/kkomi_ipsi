@@ -106,7 +106,18 @@ func TestVocationalNiceFormMatchesCalculation(t *testing.T) {
 			}
 		}
 	}
-	if NiceFormFor(s, "울산마이스터고", "일반") != nil {
-		t.Fatal("마이스터고는 나이스 대조표가 없어야 합니다(나이스 성적 파일 원자료와 같음)")
+	// 마이스터고: 특성화고와 같은 요약 + 리더십 학기 줄(1-1 ~ 3-2, 나이스 현대공고 화면 순서)
+	s.LeadershipSemesters = []string{"2_1", "3_1"}
+	form := NiceFormFor(s, "현대공업고", "일반")
+	if form == nil || form.Type != NiceFormMeister || len(form.Rows) != 4 {
+		t.Fatalf("마이스터고 대조표: %+v", form)
+	}
+	got := []string{}
+	for _, c := range form.Rows[3] {
+		got = append(got, c.Text)
+	}
+	want := "리더십 1-1 - 1-2 - 2-1 인정 2-2 - 3-1 인정 3-2 -"
+	if strings.Join(got, " ") != want {
+		t.Fatalf("리더십 줄: %q, want %q", strings.Join(got, " "), want)
 	}
 }

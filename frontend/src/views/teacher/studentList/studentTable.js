@@ -160,7 +160,6 @@ export function defineStudentTableRenderer(ctx) {
                                         data-class="${ctx.classNum}" data-num="${s.studentNum}" data-name="${escapeAttr(s.name)}" data-category="meister"
                                         data-percentile="${s.percentile !== 999 ? s.percentile.toFixed(2) : ''}" data-rank="${s.rank || ''}" data-total="${s.totalStudents}"
                                         title="${escapeAttr(s.name)} 학생의 마이스터고 3개교 전형별 상세 점수 및 합격 분석표 보기 (클릭)">
-                                    <span class="text-sm">🏛️</span>
                                     <span>마이스터고</span>
                                     <span class="px-2 py-0.5 rounded-full text-[11px] font-black ${s.meisterPassCount > 0 ? 'bg-amber-500 text-slate-950' : 'bg-slate-700 text-slate-400'}">${s.meisterTotalCount > 0 ? `${s.meisterPassCount}/${s.meisterTotalCount}` : '미등록'}</span>
                                 </button>
@@ -168,7 +167,6 @@ export function defineStudentTableRenderer(ctx) {
                                         data-class="${ctx.classNum}" data-num="${s.studentNum}" data-name="${escapeAttr(s.name)}" data-category="special"
                                         data-percentile="${s.percentile !== 999 ? s.percentile.toFixed(2) : ''}" data-rank="${s.rank || ''}" data-total="${s.totalStudents}"
                                         title="${escapeAttr(s.name)} 학생의 특성화고 전형·학과별 상세 점수 및 합격 분석표 보기 (클릭)">
-                                    <span class="text-sm">🏭</span>
                                     <span>특성화고</span>
                                     <span class="px-2 py-0.5 rounded-full text-[11px] font-black ${s.specialPassCount > 0 ? 'bg-cyan-500 text-slate-950' : 'bg-slate-700 text-slate-400'}">${s.specialTotalCount > 0 ? `${s.specialPassCount}/${s.specialTotalCount}` : '미등록'}</span>
                                 </button>

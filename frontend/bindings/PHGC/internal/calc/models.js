@@ -42,10 +42,23 @@ import * as model$0 from "../model/models.js";
  */
 
 /**
+ * GeneralYearBasis 후기 일반고 비교과를 학년별로 계산에 쓴 값(원서 입력 창 나이스 대조표용).
+ * @typedef {Object} GeneralYearBasis
+ * @property {number[]} absenceDays - 학년별 결석 환산 일수(미인정 결석 + 지각·조퇴·결과 3회당 1일)
+ * @property {number[]} volunteerHours - 학년별 봉사 시간
+ * @property {number[]} convertedHours - 학년별 인정 시간(전·편입 등으로 실적이 없는 학년은 환산)
+ * @property {string[]} behavior - 행동특성 가산점: "인정"·"제외"(징계 등)·""(체크 안 함)
+ * @property {string[]} creative - 창의적체험활동 가산점
+ * @property {boolean} bonusEntered - 담임이 가산점 입력을 마쳤는지
+ * @property {boolean} exact - 출결·봉사를 학년별 실제 값으로 계산했는지(아니면 누적값을 나눈 예상)
+ */
+
+/**
  * NiceForm 나이스 원서등록 화면과 같은 배치의 대조표.
  * @typedef {Object} NiceForm
  * @property {string} type
  * @property {string} title
+ * @property {string} [subtitle] - 제목 옆 작은 글(비면 "나이스 원서등록 화면과 같은 순서")
  * @property {string[] | null} notes - 나이스 화면 위 안내 문구
  * @property {(NiceFormCell[] | null)[] | null} rows - 나이스 화면과 같은 줄·순서
  * @property {string[] | null} warnings - 이 학생 값이 나이스 화면과 다를 수 있는 이유(있을 때만)
@@ -103,6 +116,8 @@ import * as model$0 from "../model/models.js";
  * @property {boolean} splitKnown - 지각·조퇴·결과를 따로 알 수 있는지(예전 마감일 기준 수기 입력은 합계만 있음)
  * @property {number} finalAbsenceDays - 최종결석 = 결석 + (지각+조퇴+결과)÷3, 소수점 절사
  * @property {number} volunteerHours
+ * @property {string[] | null} leadership - 상담 화면에서 체크한 리더십 학기("1_2"…)
+ * @property {number} leadershipTerms - 인정 학기 수(예전 숫자 입력만 있으면 학기를 모름)
  */
 
 /**
@@ -201,6 +216,7 @@ import * as model$0 from "../model/models.js";
  * @property {boolean} generalHSThirdYearFinal - 3-2 성적 반영(아니면 3-1 복사 예상)
  * @property {boolean} generalHSThirdYearProjected - 학기 초: 3학년을 2학년 성적으로 대신한 예상치
  * @property {boolean} generalHSPerGradeExact - 출결·봉사 학년별 실제 값 사용
+ * @property {GeneralYearBasis | null} [generalHSYears] - 비교과 학년별 값(나이스 대조표용)
  * @property {SchoolCalcResult[] | null} schoolResults - 학교별 산출 결과
  * @property {model$0.ApplicationRecord[] | null} applications - 학생 지원 희망 학교 목록 (1~5지망)
  */

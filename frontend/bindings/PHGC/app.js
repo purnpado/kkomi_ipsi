@@ -1222,6 +1222,15 @@ export function SelfDestruct() {
 }
 
 /**
+ * SetPrinting 화면이 인쇄 미리보기를 열 때(true)와 닫힌 뒤(false) 알린다.
+ * @param {boolean} on
+ * @returns {$CancellablePromise<void>}
+ */
+export function SetPrinting(on) {
+    return $Call.ByID(521493494, on);
+}
+
+/**
  * SetSharedPackageExcluded 학교·학년도 파일 전체를 관내 통계·판정 근거에서 빼거나 다시 넣는다.
  * @param {number} pkgID
  * @param {boolean} excluded

@@ -27,9 +27,24 @@ export function printOnly(kind, orientation = 'portrait') {
     };
     window.addEventListener('afterprint', cleanup, { once: true });
     // 인쇄 CSS가 적용된 뒤 브라우저 미리보기를 열도록 두 프레임을 기다린다.
-    requestAnimationFrame(() => requestAnimationFrame(() => window.print()));
+    // 미리보기가 열리면 화면 코드가 멈추므로, "인쇄 중" 알림이 Go 에 닿은 뒤(최대 0.5초) 연다.
+    requestAnimationFrame(() => requestAnimationFrame(async () => {
+        await Promise.race([setPrinting(true), new Promise((resolve) => setTimeout(resolve, 500))]);
+        window.print();
+    }));
+}
+
+// 인쇄 미리보기가 열려 있는 동안을 프로그램(Go)에 알린다. 윈도우는 미리보기가 프로그램 창 안을 덮어 열리므로,
+// 그동안 창의 X 를 누르면 프로그램 대신 인쇄 화면만 닫는다(app_print.go). Ctrl+P 로 연 인쇄도 같다.
+function setPrinting(on) {
+    try {
+        return Promise.resolve(window.go?.main?.App?.SetPrinting?.(on)).catch(() => {});
+    } catch (_) { /* 바인딩이 없으면(서버 모드 등) 할 일 없음 */ }
+    return Promise.resolve();
 }
 
 if (typeof window !== 'undefined') {
     window.printOnly = printOnly;
+    window.addEventListener('beforeprint', () => setPrinting(true));
+    window.addEventListener('afterprint', () => setPrinting(false));
 }

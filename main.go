@@ -106,6 +106,12 @@ func main() {
 
 	appService.setMainWindow(win)
 	win.RegisterHook(events.Common.WindowClosing, func(event *application.WindowEvent) {
+		// 인쇄 미리보기 중 X: 프로그램을 끄지 않고 인쇄 화면만 닫는다(app_print.go).
+		if printGuard.blockClose() {
+			event.Cancel()
+			go closePrintPreview()
+			return
+		}
 		appService.shutdown(context.Background())
 	})
 	appService.startup(context.Background())

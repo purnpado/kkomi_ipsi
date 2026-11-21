@@ -112,17 +112,17 @@ export function renderMatrixLayout(ctx, mx) {
                                 <th class="p-2 w-10 font-bold">번호</th>
                                 <th class="p-2 w-16 font-bold">성명</th>
                                 <th class="p-2 w-16 font-bold text-indigo-300">내신평균</th>
-                                <th class="p-1.5 text-amber-300 font-bold matrix-school-head">🎓 울산마이스터<br>고등학교</th>
-                                <th class="p-1.5 text-amber-300 font-bold matrix-school-head">🎓 울산에너지<br>고등학교</th>
-                                <th class="p-1.5 text-amber-300 font-bold matrix-school-head">🎓 현대공업<br>고등학교</th>
-                                <th class="p-1.5 text-cyan-300 font-bold matrix-school-head">🏭 울산상업<br>고등학교</th>
-                                <th class="p-1.5 text-cyan-300 font-bold matrix-school-head">🏭 울산여자상업<br>고등학교</th>
-                                <th class="p-1.5 text-cyan-300 font-bold matrix-school-head">🏭 울산생활과학<br>고등학교</th>
-                                <th class="p-1.5 text-cyan-300 font-bold matrix-school-head">🏭 울산공업<br>고등학교</th>
-                                <th class="p-1.5 text-cyan-300 font-bold matrix-school-head">🏭 울산산업<br>고등학교</th>
-                                <th class="p-1.5 text-cyan-300 font-bold matrix-school-head">🏭 울산미용예술<br>고등학교</th>
-                                <th class="p-1.5 text-cyan-300 font-bold matrix-school-head">🏭 울산기술공업<br>고등학교</th>
-                                <th class="p-2 w-32 text-emerald-300 font-bold whitespace-nowrap">🏫 후기 일반계고</th>
+                                <th class="p-1.5 text-amber-300 font-bold matrix-school-head">울산마이스터<br>고등학교</th>
+                                <th class="p-1.5 text-amber-300 font-bold matrix-school-head">울산에너지<br>고등학교</th>
+                                <th class="p-1.5 text-amber-300 font-bold matrix-school-head">현대공업<br>고등학교</th>
+                                <th class="p-1.5 text-cyan-300 font-bold matrix-school-head">울산상업<br>고등학교</th>
+                                <th class="p-1.5 text-cyan-300 font-bold matrix-school-head">울산여자상업<br>고등학교</th>
+                                <th class="p-1.5 text-cyan-300 font-bold matrix-school-head">울산생활과학<br>고등학교</th>
+                                <th class="p-1.5 text-cyan-300 font-bold matrix-school-head">울산공업<br>고등학교</th>
+                                <th class="p-1.5 text-cyan-300 font-bold matrix-school-head">울산산업<br>고등학교</th>
+                                <th class="p-1.5 text-cyan-300 font-bold matrix-school-head">울산미용예술<br>고등학교</th>
+                                <th class="p-1.5 text-cyan-300 font-bold matrix-school-head">울산기술공업<br>고등학교</th>
+                                <th class="p-2 w-32 text-emerald-300 font-bold whitespace-nowrap">후기 일반계고</th>
                             </tr>
                         </thead>
                         <tbody id="matrixTableBody">

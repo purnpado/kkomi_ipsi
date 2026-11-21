@@ -39,7 +39,7 @@ export function renderNiceFormTable(form) {
     return `
         <section class="nice-form" aria-labelledby="${titleId}">
             <div class="nice-form-head">
-                <h4 id="${titleId}">${escapeHtml(form.title || '나이스 원서 화면 대조')} <span>나이스 원서등록 화면과 같은 순서</span></h4>
+                <h4 id="${titleId}">${escapeHtml(form.title || '나이스 원서 화면 대조')} <span>${escapeHtml(form.subtitle || '나이스 원서등록 화면과 같은 순서')}</span></h4>
                 ${notes ? `<ul class="nice-form-notes">${notes}</ul>` : ''}
             </div>
             <div class="nice-form-scroll">

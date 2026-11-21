@@ -7,7 +7,7 @@ import (
 	"PHGC/internal/parser"
 )
 
-// 나이스 대조표는 특성화고 원서에만 붙는다: 마이스터고·후기 일반고와 다른 해 원서는 빼기.
+// 나이스 대조표는 그 해의 마이스터고·특성화고·후기 일반고 원서에 붙는다(다른 해 원서는 빼기).
 func TestNiceRosterRowsFollowApplications(t *testing.T) {
 	dm := newEvidenceTestDB(t) // 고입 연도 2027
 	student := parser.StudentExcelData{
@@ -34,10 +34,15 @@ func TestNiceRosterRowsFollowApplications(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(rows) != 1 || rows[0].Category != "special" {
-		t.Fatalf("2027 특성화고 원서 1건만 나와야 합니다(마이스터고·일반고 제외): %+v", rows)
+	if len(rows) != 3 || rows[0].Category != "meister" || rows[1].Category != "special" || rows[2].Category != "general" {
+		t.Fatalf("2027 원서 3건(마이스터고·특성화고·일반고 순)이 나와야 합니다: %+v", rows)
 	}
-	special := rows[0]
+	for _, r := range rows {
+		if r.NiceForm == nil {
+			t.Fatalf("%s 원서에 대조표가 없습니다: %+v", r.Category, r)
+		}
+	}
+	special := rows[1]
 	if special.NiceForm == nil {
 		t.Fatalf("특성화고 원서에는 대조표가 있어야 합니다: %+v", special)
 	}
@@ -50,14 +55,26 @@ func TestNiceRosterRowsFollowApplications(t *testing.T) {
 	if err != nil || row.NiceForm == nil || row.NiceForm.Rows[0][2].Text != "7" {
 		t.Fatalf("원서 입력 창 특성화고 대조표: %+v %v", row, err)
 	}
-	if row, err := dm.GetApplicationNiceRow(1, "1", "가상학생", true, "meister", "울산마이스터고등학교", "일반"); err != nil || row.NiceForm != nil || row.Note == "" {
-		t.Fatalf("마이스터고는 대조표 없이 안내만: %+v %v", row, err)
+	if row, err := dm.GetApplicationNiceRow(1, "1", "가상학생", true, "meister", "울산마이스터고등학교", "일반"); err != nil || row.NiceForm == nil || row.NiceForm.Type != "meister" {
+		t.Fatalf("원서 입력 창 마이스터고 대조표: %+v %v", row, err)
+	}
+	general, err := dm.GetApplicationNiceRow(1, "1", "가상학생", true, "general", "", "")
+	if err != nil || general.NiceForm == nil || general.NiceForm.Type != "general" {
+		t.Fatalf("원서 입력 창 일반고 대조표: %+v %v", general, err)
+	}
+	// 일반고 1-2학기(예체능 포함): B(4)+C(3)=7, 2과목 → 첫 줄 두 번째 학기 칸
+	if got := general.NiceForm.Rows[0][7].Text + "/" + general.NiceForm.Rows[0][9].Text; got != "7/2" {
+		t.Fatalf("일반고 1-2 교과성취점수/과목수: %s", got)
+	}
+	// 교과 3줄(한 줄에 두 학기) + 결석 환산·봉사·행동특성·창체 가산(학년별) 4줄
+	if len(general.NiceForm.Rows) != 7 || general.NiceForm.Rows[6][0].Text != "창체 가산" || general.NiceForm.Rows[3][0].Text != "결석 환산(일)" {
+		t.Fatalf("일반고 대조표 줄: %+v", general.NiceForm.Rows)
 	}
 	roster, err := dm.GetNiceRoster(0, true)
-	if err != nil || len(roster) != 1 {
+	if err != nil || len(roster) != 3 {
 		t.Fatalf("전교 일람표: %d건 %v", len(roster), err)
 	}
-	if roster[0].NiceForm == nil || roster[0].StudentName != "가상학생" {
-		t.Fatalf("일람표 특성화고 줄: %+v", roster[0])
+	if roster[1].NiceForm == nil || roster[1].StudentName != "가상학생" {
+		t.Fatalf("일람표 특성화고 줄: %+v", roster[1])
 	}
 }

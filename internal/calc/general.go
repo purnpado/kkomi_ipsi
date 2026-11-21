@@ -52,8 +52,9 @@ type StudentCalcResult struct {
 	ThirdYearProjected   bool    // 학기 초라 3학년(3-1·3-2)을 2학년 성적으로 대신한 예상치인지
 	hasThirdYearFinal    bool
 	s22Projected         float64
-	gradePresent         [3]bool    // 학년별 성적 기록 유무(중도 입국·유학 등 학년 결손 판단)
-	tieKeys              [4]float64 // 동점자 비교용 학기 평균 성취도(가중치 없음): 3-2, 3-1, 2-2, 2-1
+	gradePresent         [3]bool          // 학년별 성적 기록 유무(중도 입국·유학 등 학년 결손 판단)
+	GeneralYears         GeneralYearBasis `json:"-"` // 비교과 학년별 값(학생 한 명 상세에서만 씀, 명렬표 자료에는 싣지 않음)
+	tieKeys              [4]float64       // 동점자 비교용 학기 평균 성취도(가중치 없음): 3-2, 3-1, 2-2, 2-1
 }
 
 // CalculateGrades 전체 학생들의 내신 성적을 계산하여 석차 및 최종 점수를 반환
@@ -184,6 +185,7 @@ func CalculateGrades(allStudents map[int][]parser.StudentExcelData, isSmallSchoo
 		results[i].GeneralTotalHigh = roundToTwoDecimals(results[i].GeneralTotalScore + nonAcademic.PendingBonus)
 		results[i].GeneralBonusEntered = nonAcademic.BonusEntered
 		results[i].GeneralPerGradeExact = nonAcademic.PerGradeExact
+		results[i].GeneralYears = nonAcademic.Years
 	}
 
 	return results, nil

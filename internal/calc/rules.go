@@ -44,7 +44,11 @@ func init() {
 	for i := range vocational {
 		vocational[i].NiceForm = NiceFormVocational
 	}
-	AllSchoolRules = append(meisterRules(), vocational...)
+	meister := meisterRules()
+	for i := range meister {
+		meister[i].NiceForm = NiceFormMeister
+	}
+	AllSchoolRules = append(meister, vocational...)
 }
 
 // GetAllSchoolRules 프론트엔드에서 학교 목록 조회용

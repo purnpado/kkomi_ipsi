@@ -238,7 +238,7 @@ export function defineApplicationRenderer(ctx) {
             const previousTrack = track.value;
             track.innerHTML = ctx.trackOptions(category, schoolName, previousTrack);
             refreshStageArea();
-            refreshNicePreview(ctx, category, schoolName, track.value); // 특성화고만 나이스 대조표
+            refreshNicePreview(ctx, category, schoolName, track.value); // 마이스터고·특성화고·후기 일반고 나이스 대조표
             const prefArea = document.getElementById('appPreferenceArea');
             if (prefArea && prefArea.dataset.limit !== String(ctx.preferenceLimit(category, track.value))) refreshDepartmentControls();
             if (ctx.isCustomSchoolCategory(category)) {

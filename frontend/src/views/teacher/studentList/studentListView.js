@@ -128,8 +128,8 @@ function renderStudentListLayout(ctx) {
                     <option value="name_asc">🔤 성명순 (가나다)</option>
                     <option value="general_asc">🟢 일반계고 안정순 (석차백분율↑)</option>
                     <option value="general_desc">🔴 일반계고 위험순 (석차백분율↓)</option>
-                    <option value="meister_desc">🏛️ 마이스터고 유망순</option>
-                    <option value="special_desc">🏭 특성화고 유망순</option>
+                    <option value="meister_desc">마이스터고 유망순</option>
+                    <option value="special_desc">특성화고 유망순</option>
                 </select>
             </div>
 

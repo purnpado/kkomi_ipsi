@@ -21,6 +21,18 @@ type generalNonAcademic struct {
 	PendingBonus                                                         float64 // 아직 정해지지 않아 더 받을 수 있는 가산점
 	BonusEntered                                                         bool
 	PerGradeExact                                                        bool // 출결·봉사를 세 학년 모두 학년별 실제 값(수기·나이스)으로 계산했는지
+	Years                                                                GeneralYearBasis
+}
+
+// GeneralYearBasis 후기 일반고 비교과를 학년별로 계산에 쓴 값(원서 입력 창 나이스 대조표용).
+type GeneralYearBasis struct {
+	AbsenceDays    [3]int     `json:"absenceDays"`    // 학년별 결석 환산 일수(미인정 결석 + 지각·조퇴·결과 3회당 1일)
+	VolunteerHours [3]int     `json:"volunteerHours"` // 학년별 봉사 시간
+	ConvertedHours [3]float64 `json:"convertedHours"` // 학년별 인정 시간(전·편입 등으로 실적이 없는 학년은 환산)
+	Behavior       [3]string  `json:"behavior"`       // 행동특성 가산점: "인정"·"제외"(징계 등)·""(체크 안 함)
+	Creative       [3]string  `json:"creative"`       // 창의적체험활동 가산점
+	BonusEntered   bool       `json:"bonusEntered"`   // 담임이 가산점 입력을 마쳤는지
+	Exact          bool       `json:"exact"`          // 출결·봉사를 학년별 실제 값으로 계산했는지(아니면 누적값을 나눈 예상)
 }
 
 func findExcelStudent(all map[int][]parser.StudentExcelData, target StudentCalcResult) *parser.StudentExcelData {
@@ -143,8 +155,22 @@ func calculateGeneralNonAcademic(all map[int][]parser.StudentExcelData, target S
 		r.VolunteerScore += generalVolunteerYearScore(int(converted[g]))
 	}
 
+	r.Years.AbsenceDays, r.Years.VolunteerHours, r.Years.ConvertedHours = absenceDays, hours, converted
+
 	// 행발·창체 가산점: 징계 등으로 가산 제외된 학년은 인정하지 않는다.
 	r.BonusEntered = extraBool("general_bonus_entered")
+	for g := 1; g <= 3; g++ {
+		state := func(kind string) string {
+			if extraBool(fmt.Sprintf("%s_disqualified_%d", kind, g)) {
+				return "제외"
+			}
+			if extraBool(fmt.Sprintf("%s_%d", kind, g)) {
+				return "인정"
+			}
+			return ""
+		}
+		r.Years.Behavior[g-1], r.Years.Creative[g-1] = state("haengbal"), state("changche")
+	}
 	openSlots := 0.0
 	for g := 1; g <= 3; g++ {
 		for _, kind := range []string{"haengbal", "changche"} {
@@ -164,6 +190,7 @@ func calculateGeneralNonAcademic(all map[int][]parser.StudentExcelData, target S
 		}
 	}
 	r.PerGradeExact = attExact && volExact
+	r.Years.BonusEntered, r.Years.Exact = r.BonusEntered, r.PerGradeExact
 	complete := r.PerGradeExact && r.BonusEntered
 	if complete {
 		openSlots = 0

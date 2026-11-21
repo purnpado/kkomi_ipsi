@@ -25,12 +25,19 @@ type NiceRosterRow struct {
 	Note        string         `json:"note"` // 대조표가 없을 때 이유
 }
 
-var niceCategoryOrder = map[string]int{"special": 0}
+var niceCategoryOrder = map[string]int{"meister": 0, "special": 1, "general": 2}
 
 // niceRowFor 원서 한 건에 대조표를 붙인다. full 은 그 학생의 산출 자료.
 func niceRowFor(full *calc.StudentFullData, r model.ApplicationRecord) NiceRosterRow {
 	row := NiceRosterRow{ClassNum: r.ClassNum, StudentNum: r.StudentNum, StudentName: r.StudentName, Category: r.Category, SchoolName: r.SchoolName, Track: r.Track, Status: r.Status}
-	if r.Category != "special" {
+	switch r.Category {
+	case "general":
+		if row.NiceForm = calc.GeneralNiceForm(full); row.NiceForm == nil {
+			row.Note = "성적 자료가 없는 학생입니다(나이스 엑셀을 올렸는지 확인)."
+		}
+		return row
+	case "special", "meister":
+	default:
 		row.Note = "나이스 대조표가 없는 전형입니다."
 		return row
 	}
@@ -50,14 +57,19 @@ func niceRowFor(full *calc.StudentFullData, r model.ApplicationRecord) NiceRoste
 	return row
 }
 
-// isNiceTarget 나이스 대조 대상 원서: 그 고입 연도의 특성화고 원서 중 지원 학교가 정해진 것.
-// 특성화고 나이스 화면은 예체능을 뺀 학기 합계를 나이스가 계산해 보여 주므로 산출 값과 맞춰 볼 수 있다.
-// 마이스터고 화면은 나이스 성적 파일 원자료를 그대로 보여 주고, 후기 일반고는 대조가 필요 없어 뺀다(담임 확인 2026-11-19).
+// isNiceTarget 나이스 대조 대상 원서: 그 고입 연도의 마이스터고·특성화고 원서(지원 학교가 정해진 것)와 후기 일반고 원서.
+// 나이스는 세 전형 모두 성적·출결·봉사를 자기 자료로 계산해 보여 주므로 산출 값과 맞춰 볼 수 있다(담임 확인 2026-11-21).
 func isNiceTarget(r model.ApplicationRecord, admissionYear int) bool {
 	if admissionYear > 0 && r.AdmissionYear != admissionYear {
 		return false
 	}
-	return r.Category == "special" && strings.TrimSpace(r.SchoolName) != ""
+	switch r.Category {
+	case "general":
+		return true
+	case "special", "meister":
+		return strings.TrimSpace(r.SchoolName) != ""
+	}
+	return false
 }
 
 func sortNiceRows(rows []NiceRosterRow) {
@@ -114,10 +126,10 @@ func (dm *DBManager) GetStudentNiceRows(classNum int, studentNum, name string, i
 }
 
 // GetApplicationNiceRow 원서 입력 창에서 고른 학교·전형 하나의 나이스 대조 줄(저장 전 값으로).
-// 특성화고만 대조표가 있다. 학교·전형 이름은 산출 규칙 이름으로 맞춘다.
+// 마이스터고·특성화고·후기 일반고. 학교·전형 이름은 산출 규칙 이름으로 맞춘다.
 func (dm *DBManager) GetApplicationNiceRow(classNum int, studentNum, name string, isMaster bool, category, schoolName, track string) (NiceRosterRow, error) {
 	r := model.ApplicationRecord{ClassNum: classNum, StudentNum: studentNum, StudentName: name, Category: category, SchoolName: schoolName, Track: track}
-	if category != "special" || strings.TrimSpace(schoolName) == "" {
+	if category != "general" && (category != "special" && category != "meister" || strings.TrimSpace(schoolName) == "") {
 		return niceRowFor(nil, r), nil
 	}
 	full, err := dm.GetStudentFullDetail(classNum, studentNum, name, isMaster)

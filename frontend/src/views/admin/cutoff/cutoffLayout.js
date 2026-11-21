@@ -57,16 +57,16 @@ export function renderCutoffLayout(ctx, view) {
                 <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-700/60 pb-3">
                     <div class="flex items-center gap-2 overflow-x-auto custom-scrollbar">
                         <button class="nav-tab-btn px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${ctx.currentTab === 'all' ? 'bg-primary text-white shadow-md' : 'bg-slate-800/60 text-slate-400 hover:text-white'}" data-tab="all">
-                            <span>🏷️</span> 전체 학교
+                            전체 학교
                         </button>
                         <button class="nav-tab-btn px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${ctx.currentTab === 'meister' ? 'bg-primary text-white shadow-md' : 'bg-slate-800/60 text-slate-400 hover:text-white'}" data-tab="meister">
-                            <span>🏛️</span> 마이스터고
+                            마이스터고
                         </button>
                         <button class="nav-tab-btn px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${ctx.currentTab === 'special' ? 'bg-primary text-white shadow-md' : 'bg-slate-800/60 text-slate-400 hover:text-white'}" data-tab="special">
-                            <span>🏭</span> 특성화고
+                            특성화고
                         </button>
                         <button class="nav-tab-btn px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${ctx.currentTab === 'general' ? 'bg-primary text-white shadow-md' : 'bg-slate-800/60 text-slate-400 hover:text-white'}" data-tab="general">
-                            <span>🏫</span> 후기 일반고
+                            후기 일반고
                         </button>
                         <button class="nav-tab-btn px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${ctx.currentTab === 'public' ? 'bg-amber-500 text-white shadow-md' : 'bg-amber-950/30 text-amber-300 border border-amber-500/30 hover:bg-amber-900/40'}" data-tab="public">
                             <span>📊</span> 고교 발표 자료(참고)
