@@ -7,7 +7,6 @@ import { admissionLongLabel } from '../../../core/admissionYear.js';
 import { NEIS_STEPS } from './neisUpload.js';
 import { niceUploadParts } from '../../../core/niceUploads.js';
 import { niceFinalCardHTML } from './niceFinalCard.js';
-import { niceBonusCardHTML } from './niceBonusCard.js';
 
 function stepCard(step, count, uploaded) {
     const done = count > 0;
@@ -84,8 +83,7 @@ export function manageHTML({ schoolName, classCount, configuredYear, status, upd
                     ${NEIS_STEPS.map((step) => stepCard(step, counts[step.key], uploaded[step.key])).join('')}
                 </div>
                 <div id="uploadStatus" role="status" aria-live="polite" class="mt-3 text-sm text-center hidden"></div>
-                ${niceFinalCardHTML(niceFinal)}
-                ${niceBonusCardHTML()}`,
+                ${niceFinalCardHTML(niceFinal)}`,
                 '순서대로 1 → 2 → 3단계 파일을 고르세요. 파일 고르는 창에서 <strong>모든 반 파일을 한 번에(Ctrl 또는 Shift)</strong> 고르면 전 학급이 함께 올라갑니다.')}
 
             <div class="rounded-2xl border border-amber-500/40 bg-amber-950/30 px-4 py-3 text-xs text-amber-200 leading-relaxed">

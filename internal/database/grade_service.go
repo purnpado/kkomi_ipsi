@@ -371,4 +371,5 @@ func applyGeneralBreakdown(full *calc.StudentFullData, cg calc.StudentCalcResult
 	full.GeneralHSPerGradeExact = cg.GeneralPerGradeExact
 	years := cg.GeneralYears
 	full.GeneralHSYears = &years
+	full.GeneralHSRank, full.GeneralHSTotalStudents = cg.Rank, cg.TotalStudents
 }

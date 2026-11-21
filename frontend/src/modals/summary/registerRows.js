@@ -78,7 +78,8 @@ function schoolText(app) {
 
 function departmentText(app) {
     if (app.category === 'general') return app.assignedSchool ? `배정: ${displaySchool(app.assignedSchool)}` : '';
-    if (ACCEPTED.includes(app.status) && app.assignedDepartment) return `${app.assignedDepartment} (배정)`;
+    // 마이스터고·특성화고는 배정 학과, 기타 울산 고교(예술고 음악과 등)는 합격 학과
+    if (ACCEPTED.includes(app.status) && app.assignedDepartment) return `${app.assignedDepartment} (${['meister', 'special'].includes(app.category) ? '배정' : '합격'})`;
     if (app.preferences && app.preferences.length > 0) {
         return app.preferences.length > 1 ? `${app.preferences[0]} (1지망)` : app.preferences[0];
     }

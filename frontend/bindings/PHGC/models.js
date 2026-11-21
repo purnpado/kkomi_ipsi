@@ -7,13 +7,6 @@
 import * as database$0 from "./internal/database/models.js";
 
 /**
- * NiceBonusPreview 항목별점수관리 파일 맞춰 보기 결과와 그 파일 경로(가져오기 때 다시 읽는다).
- * @typedef {Object} NiceBonusPreview
- * @property {string} path
- * @property {database$0.NiceBonusPlan | null} plan
- */
-
-/**
  * NiceGeneralFinalResult 원서대장용 나이스 내신성적과 올린 정보.
  * @typedef {Object} NiceGeneralFinalResult
  * @property {{ [_ in string]?: number } | null} scores - "반|번호" → 내신성적(200)

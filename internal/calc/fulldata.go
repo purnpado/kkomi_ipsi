@@ -82,6 +82,8 @@ type StudentFullData struct {
 	GeneralHSThirdYearProjected bool              `json:"generalHSThirdYearProjected"` // 학기 초: 3학년을 2학년 성적으로 대신한 예상치
 	GeneralHSPerGradeExact      bool              `json:"generalHSPerGradeExact"`      // 출결·봉사 학년별 실제 값 사용
 	GeneralHSYears              *GeneralYearBasis `json:"generalHSYears,omitempty"`    // 비교과 학년별 값(나이스 대조표용)
+	GeneralHSRank               int               `json:"generalHSRank"`               // 교과 석차(전교)
+	GeneralHSTotalStudents      int               `json:"generalHSTotalStudents"`      // 석차를 낸 학생 수(전교)
 
 	// 학교별 산출 결과
 	SchoolResults []SchoolCalcResult `json:"schoolResults"`

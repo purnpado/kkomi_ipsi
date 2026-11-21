@@ -66,3 +66,21 @@
     .counsel-score-part strong { color: #111827; }
     .counsel-details:not([open]) { display: none; }
 }
+
+/* 후기 일반고: 학교 안 위치 막대(상위 %)·200점 점수·비교과 감점 */
+.cg-bar { margin-top: 10px; max-width: 640px; }
+.cg-bar-track { position: relative; height: 10px; border-radius: 999px; background: var(--kk-sunken); border: 1px solid var(--kk-line); }
+.cg-bar-band { position: absolute; top: -1px; bottom: -1px; background: var(--kk-judge-hope-bg); border: 1px solid var(--kk-judge-hope); border-radius: 4px; }
+.cg-bar-dot { position: absolute; top: 50%; width: 14px; height: 14px; margin: -7px 0 0 -7px; border-radius: 50%; background: var(--kk-accent-fill); border: 2px solid var(--kk-surface); box-shadow: 0 0 0 1px var(--kk-accent-fill); }
+.cg-bar-labels { position: relative; height: 18px; margin-top: 4px; font-size: var(--kk-fs-1); color: var(--color-slate-400); }
+.cg-bar-labels > span { position: absolute; top: 0; white-space: nowrap; }
+.cg-bar-labels > span:first-child { left: 0; }
+.cg-bar-labels > span:last-child { right: 0; }
+.cg-bar-me, .cg-bar-cut { transform: translateX(-50%); font-weight: 700; }
+.cg-bar-me { color: var(--kk-accent); }
+.cg-bar-cut { top: 18px !important; color: var(--kk-judge-hope); }
+.cg-bar-labels { height: 34px; }
+.cg-score { margin: 6px 0 0; font-size: var(--kk-fs-3); }
+.cg-score strong { font-size: var(--kk-fs-4); font-variant-numeric: tabular-nums; }
+.cg-score span { color: var(--color-slate-400); font-size: var(--kk-fs-2); }
+.cg-cut { margin: 4px 0 0; color: var(--kk-warning); font-size: var(--kk-fs-2); font-weight: 600; }

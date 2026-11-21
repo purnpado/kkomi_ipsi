@@ -2,7 +2,7 @@ import { escapeHtml, escapeAttr, displayTrack } from '../../core/utils.js';
 import { defineApplicationRenderer } from './applicationForm.js';
 import { state } from '../../core/store.js';
 import { resolveAdmissionYear } from '../../core/admissionYear.js';
-import { ULSAN_OTHER_SCHOOLS, ROUND_TRACKS, needsRoundTrack } from '../../core/ulsanOtherSchools.js';
+import { ULSAN_OTHER_SCHOOLS, ULSAN_OTHER_DEPARTMENTS, ROUND_TRACKS, needsRoundTrack, hasOtherDepartments } from '../../core/ulsanOtherSchools.js';
 
 // ===== 학생별 지원·합격 결과 (학교 내부 암호화 DB 전용) =====
 export async function openStudentApplicationModal(classNum, studentNum, name, preset = null) {
@@ -56,7 +56,10 @@ async function prepareApplicationModal(ctx) {
     );
     let studentDetail = null;
     ctx.refreshAutoScore = null;
-    ctx.catalog = highSchoolData?.schools || [];
+    // 기타 울산 고교의 학과(과정)도 고를 수 있게 학교 목록에 더한다(고교 목록 파일에는 마이스터고·특성화고만 있음).
+    ctx.catalog = [...(highSchoolData?.schools || []), ...Object.entries(ULSAN_OTHER_DEPARTMENTS)
+        .filter(([name]) => !(highSchoolData?.schools || []).some((s) => s.name === name))
+        .map(([name, departments]) => ({ name, type: 'other', departments }))];
     // 학교·전형별 1차 선발 배수와 2차 전형 구성(백엔드 calc/stages.go, 2027 요강 확인값)
     const ruleList = await ctx.withFallback(() => window.go?.main?.App?.GetSchoolRuleList?.(), []);
     const stageTrack = track => {
@@ -169,7 +172,9 @@ async function prepareApplicationModal(ctx) {
         .map(([v, t]) => `<option value="${v}" ${v === selected ? 'selected' : ''}>${t}</option>`).join('');
     ctx.isUnscoredCategory = category => ['self_foreign', 'other', 'out_province', 'none'].includes(category);
     // 특성화고 취업희망자 특별전형은 1개 학과(1지망)만 지원할 수 있다.
-    ctx.preferenceLimit = (category, track) => (category === 'special' && String(track || '').includes('취업') ? 1 : 5);
+    // 기타 울산 고교는 지원 학과(과정) 1개를 고른다.
+    ctx.preferenceLimit = (category, track) => ((category === 'special' && String(track || '').includes('취업')) || category === 'other' || category === 'self_foreign' ? 1 : 5);
+    ctx.showsDepartments = (category, schoolName) => ['meister', 'special'].includes(category) || hasOtherDepartments(category, schoolName);
     ctx.departmentControls = (schoolName, preferences = [], assignedDepartment = '', limit = 5) => {
         const school = ctx.catalog.find(s => s.name === schoolName || ctx.normalizedSchoolName(s.name) === ctx.normalizedSchoolName(schoolName));
         const departments = school?.departments || [];
@@ -181,7 +186,7 @@ async function prepareApplicationModal(ctx) {
             <div class="mb-2 flex items-center justify-between">
                 <p class="text-sm font-bold text-white flex items-center gap-1.5">
                     <span>🎯</span> 학과 지망
-                    <span class="text-xs font-normal text-slate-400">${limit === 1 ? '(취업희망자 특별전형은 1지망 1개 학과만 지원할 수 있습니다)' : '(다른 지망에 선택된 학과는 비활성화되어 중복 선택이 방지됩니다)'}</span>
+                    <span class="text-xs font-normal text-slate-400">${limit === 1 ? '(1개 학과만 고릅니다)' : '(다른 지망에 선택된 학과는 비활성화되어 중복 선택이 방지됩니다)'}</span>
                 </p>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-3">

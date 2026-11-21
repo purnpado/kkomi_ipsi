@@ -59,15 +59,6 @@ export function ApplyApplicationCutoffs() {
 }
 
 /**
- * ApplyNiceBonusFile 맞춰 본 파일의 가산점으로 상담 화면 체크를 맞춘다(가산 제외 학년은 그대로).
- * @param {string} path
- * @returns {$CancellablePromise<database$0.NiceBonusPlan | null>}
- */
-export function ApplyNiceBonusFile(path) {
-    return $Call.ByID(3850814555, path);
-}
-
-/**
  * ApplyUpdate 새 버전을 내려받아 확인한 뒤 실행 파일을 바꾸고 프로그램을 다시 시작한다(윈도우 전용).
  * 학생 자료는 봉인(암호화 저장)한 뒤 암호화 파일만 "업데이트전_백업" 폴더에 복사해 둔다. 아무것도 밖으로 보내지 않는다.
  * @returns {$CancellablePromise<$models.UpdateResult | null>}
@@ -150,6 +141,14 @@ export function ClearNiceGeneralRank() {
  */
 export function CloseAdmissionYear(admissionYear, note) {
     return $Call.ByID(732460729, admissionYear, note);
+}
+
+/**
+ * CompareNiceClassRankFile 담임: 나이스 반별 석차 연명부(우리 반)를 골라 꼬미입시 값과 맞춰 본다(저장하지 않음).
+ * @returns {$CancellablePromise<database$0.NiceComparison | null>}
+ */
+export function CompareNiceClassRankFile() {
+    return $Call.ByID(2714299747);
 }
 
 /**
@@ -469,6 +468,14 @@ export function GetDataUpdateStatus() {
  */
 export function GetDepartmentAdmissionStats(bucketStep) {
     return $Call.ByID(4037939689, bucketStep);
+}
+
+/**
+ * GetGeneralLastYearResult 상담 화면 "작년 우리 학교 결과": 지난 학년도 후기 일반고 합격·불합격 교과 석차백분율 범위(없으면 nil).
+ * @returns {$CancellablePromise<database$0.GeneralYearResult | null>}
+ */
+export function GetGeneralLastYearResult() {
+    return $Call.ByID(631711233);
 }
 
 /**
@@ -1002,14 +1009,6 @@ export function OpenTeacherPatch(password) {
  */
 export function OpenTeacherPatchPreview(password) {
     return $Call.ByID(3758657367, password);
-}
-
-/**
- * PreviewNiceBonusFile 나이스 항목별점수관리(창의체험·행동발달) 엑셀을 골라 상담 화면 가산점 체크와 맞춰 본다(바꾸지 않음).
- * @returns {$CancellablePromise<$models.NiceBonusPreview | null>}
- */
-export function PreviewNiceBonusFile() {
-    return $Call.ByID(1694787695);
 }
 
 /**

@@ -3,6 +3,7 @@ package database
 import (
 	"testing"
 
+	"PHGC/internal/calc"
 	"PHGC/internal/parser"
 )
 
@@ -69,5 +70,46 @@ func TestNiceGeneralFinalCompare(t *testing.T) {
 	}
 	if scores, _, _ := dm.NiceGeneralFinalScores(2027); len(scores) != 0 {
 		t.Fatal("지우면 원서대장 점수도 없어야 합니다")
+	}
+}
+
+// 200점(비교과포함) 기준 석차: 같은 점수는 같은 석차, 백분율 = 석차 ÷ 재적수 × 100.
+func TestTotalRanks(t *testing.T) {
+	results := []calc.StudentCalcResult{
+		{ClassNum: 1, StudentNum: "1", GeneralTotalScore: 150},
+		{ClassNum: 1, StudentNum: "2", GeneralTotalScore: 190.4},
+		{ClassNum: 1, StudentNum: "3", GeneralTotalScore: 150},
+		{ClassNum: 1, StudentNum: "4", GeneralTotalScore: 120},
+	}
+	got := totalRanks(results, 10)
+	if got["1|2"] != [2]float64{1, 10} || got["1|1"] != [2]float64{2, 20} || got["1|3"] != [2]float64{2, 20} || got["1|4"] != [2]float64{4, 40} {
+		t.Fatalf("200점 석차: %v", got)
+	}
+}
+
+// 석차백분율산출 파일은 꼬미입시도 200점 기준 석차로 비교하고, 담임 PC에서는 석차·백분율을 비교하지 않는다.
+func TestNiceComparisonWithNonAcademicPercentile(t *testing.T) {
+	results := []calc.StudentCalcResult{
+		{ClassNum: 1, StudentNum: "1", Name: "가", Rank: 2, Percentile: 20, FinalScore: 140.8, GeneralTotalScore: 190},
+		{ClassNum: 1, StudentNum: "2", Name: "나", Rank: 1, Percentile: 10, FinalScore: 150.4, GeneralTotalScore: 180},
+	}
+	nice := []parser.NiceRankRow{{ClassNum: 1, StudentNum: "1", HasScores: true, Rank: 1, Percentile: 10, Academic: 140.8, Final: 190, Total: 190}}
+	sum := &NiceFinalSummary{Kind: "석차백분율산출"}
+	whole := buildNiceComparison(nice, sum, results, 10, true, 0)
+	if len(whole.Rows[0].Diffs) != 0 || !whole.PercentileWithNonAcademic {
+		t.Fatalf("200점 기준이면 1등 10%%로 같아야 합니다: %+v", whole.Rows[0])
+	}
+	roster := buildNiceComparison(nice, &NiceFinalSummary{Kind: "석차 연명부"}, results, 10, true, 0)
+	if len(roster.Rows[0].Diffs) != 2 {
+		t.Fatalf("연명부는 교과 기준(2등 20%%)이라 석차·백분율이 달라야 합니다: %+v", roster.Rows[0].Diffs)
+	}
+	class := buildNiceComparison(nice, sum, results, 10, false, 1)
+	for _, d := range class.Rows[0].Diffs {
+		if d == "rank" || d == "percentile" {
+			t.Fatalf("담임 PC에서는 200점 석차를 비교하지 않습니다: %+v", class.Rows[0].Diffs)
+		}
+	}
+	if len(class.Rows) != 2 || class.Rows[1].Nice != nil {
+		t.Fatalf("연명부에 없는 우리 반 학생도 보여야 합니다: %+v", class.Rows)
 	}
 }

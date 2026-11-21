@@ -75,6 +75,11 @@ import * as $models from "./models.js";
  */
 
 /**
+ * GeneralYearResult 한 학년도의 우리 학교 후기 일반고 결과.
+ * @typedef {$models.GeneralYearResult} GeneralYearResult
+ */
+
+/**
  * @typedef {$models.LoginAccount} LoginAccount
  */
 
@@ -82,16 +87,6 @@ import * as $models from "./models.js";
  * LoginIndex contains no student data and no password material. It exists so
  * the login screen can show account choices without opening encrypted SQLite.
  * @typedef {$models.LoginIndex} LoginIndex
- */
-
-/**
- * NiceBonusChange 한 학생·한 학년의 바뀌는 체크.
- * @typedef {$models.NiceBonusChange} NiceBonusChange
- */
-
-/**
- * NiceBonusPlan 맞춰 보기 결과(가져오기 전에 보여 준다).
- * @typedef {$models.NiceBonusPlan} NiceBonusPlan
  */
 
 /**

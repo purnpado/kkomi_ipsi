@@ -15,7 +15,7 @@ export const DEFAULT_JUDGMENT_SETTINGS = Object.freeze({
     points: 3,            // 점
     overrides: {},        // { '울산마이스터고|일반': { mode: 'points', value: 5 } }
     generalSafePct: 80,   // 후기 일반고 석차백분율 안정선(%)
-    generalBorderPct: 90  // 후기 일반고 석차백분율 경계선(%)
+    generalBorderPct: 85  // 후기 일반고 석차백분율 경계선(%) — "커트라인 대략 80~85%" 설명에 맞춤(2026-11-21)
 });
 
 export const JUDGMENT_LEVELS = Object.freeze({

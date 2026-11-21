@@ -3,13 +3,7 @@
 // 원서대장의 후기 일반고 점수는 나이스 값을 쓰고, 꼬미입시 계산값과 학생마다 맞춰 본다(백엔드 nice_final.go).
 import { escapeHtml } from '../../../core/utils.js';
 import { showModalAlert, showModalConfirm } from '../../../core/dialogs.js';
-
-const COLS = [
-    ['rank', '석차'], ['percentile', '백분율'], ['academic', '교과(160)'], ['attendance', '출석(16)'],
-    ['volunteer', '봉사(8)'], ['creative', '창체(8)'], ['behavior', '행발(8)'], ['total', '합계(200)']
-];
-
-const fmt = (key, v) => (v === undefined || v === null ? '-' : key === 'rank' ? String(Math.round(v)) : Number(v).toFixed(2));
+import { niceCompareHTML } from '../../../core/niceCompareTable.js';
 
 /** ① 나이스 자료 올리기 아래에 붙는 카드 */
 export function niceFinalCardHTML(summary) {
@@ -35,32 +29,6 @@ export function niceFinalCardHTML(summary) {
         </div>`;
 }
 
-function compareHTML(cmp) {
-    const rows = cmp.rows || [];
-    const enrolledNote = cmp.summary?.enrolled && cmp.programEnrolled && cmp.summary.enrolled !== cmp.programEnrolled
-        ? `<p class="text-xs text-amber-300 mb-2">⚠ 재적수가 다릅니다: 나이스 ${cmp.summary.enrolled}명, 꼬미입시 ${cmp.programEnrolled}명(소인수 학교는 10명으로 보정).</p>` : '';
-    const head = COLS.map(([, label]) => `<th colspan="2" scope="colgroup">${label}</th>`).join('');
-    const sub = COLS.map(() => '<th scope="col">꼬미입시</th><th scope="col">나이스</th>').join('');
-    const body = rows.map((r) => {
-        const diffs = new Set(r.diffs || []);
-        const cells = COLS.map(([key]) => {
-            const cls = diffs.has(key) ? ' class="nice-compare-diff"' : '';
-            return `<td${cls}>${fmt(key, r.program?.[key])}</td><td${cls}>${fmt(key, r.nice?.[key])}</td>`;
-        }).join('');
-        const ok = r.program && r.nice && diffs.size === 0 && !(r.hints || []).length;
-        return `<tr><td class="num">${r.classNum}</td><td class="num">${escapeHtml(r.studentNum)}</td><th scope="row">${escapeHtml(r.name || '')}</th>${cells}
-            <td class="text-left">${ok ? '<span class="text-emerald-300 font-bold">같음</span>' : (r.hints || []).map((h) => `<span class="block text-amber-300">${escapeHtml(h)}</span>`).join('')}</td></tr>`;
-    }).join('');
-    return `
-        <p class="text-sm font-bold text-white mb-1">꼬미입시 ↔ 나이스 맞춰 보기 <span class="text-xs font-normal text-slate-400">${cmp.same}명 같음 / ${rows.length}명</span></p>
-        <p class="text-xs text-slate-400 mb-2">다른 칸은 색으로 표시합니다. 같은 자료(3-2 성적·학년별 출결·봉사·가산점 체크)를 올렸다면 값이 같아야 합니다.</p>
-        ${enrolledNote}
-        <div class="nice-compare-scroll"><table class="nice-compare-table">
-            <thead><tr><th rowspan="2" scope="col">반</th><th rowspan="2" scope="col">번호</th><th rowspan="2" scope="col">이름</th>${head}<th rowspan="2" scope="col">확인</th></tr><tr>${sub}</tr></thead>
-            <tbody>${body}</tbody>
-        </table></div>`;
-}
-
 export function bindNiceFinalCard({ rerender }) {
     const App = window.go?.main?.App;
     document.getElementById('niceFinalUploadBtn')?.addEventListener('click', async () => {
@@ -80,7 +48,7 @@ export function bindNiceFinalCard({ rerender }) {
         box.classList.remove('hidden');
         box.innerHTML = '<p class="text-sm text-slate-400"><span class="spinner"></span> 맞춰 보는 중…</p>';
         try {
-            box.innerHTML = compareHTML(await App.GetNiceGeneralComparison());
+            box.innerHTML = niceCompareHTML(await App.GetNiceGeneralComparison());
         } catch (err) {
             box.innerHTML = `<p class="text-sm text-rose-300">맞춰 보지 못했습니다: ${escapeHtml(String(err))}</p>`;
         }

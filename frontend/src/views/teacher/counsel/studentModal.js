@@ -3,7 +3,7 @@ import { buildSchoolResultCards } from './schoolCards.js';
 import { renderStudentModalLayout } from './modalLayout.js';
 import { bindBaselineControls } from './baselineControls.js';
 import { bindExtraSaveAndPrint } from './extraEditor.js';
-import { fillGeneralCityCutoff } from './generalCityCutoff.js';
+import { fillGeneralCityCutoff, fillGeneralLastYear } from './generalCityCutoff.js';
 import { bindCounselRecords } from './counselLog.js';
 import { bindWishlistControls } from './wishlist.js';
 import { notifyClassUpdated, notifyStudentSelected } from '../../../core/navigation.js';
@@ -72,6 +72,7 @@ export function renderStudentModalContent(modalEl, classNum, studentNum, name, d
     bindBaselineControls(ctx);
     bindExtraSaveAndPrint(ctx);
     fillGeneralCityCutoff(ctx);
+    fillGeneralLastYear(ctx);
     bindCounselRecords(ctx);
     bindWishlistControls(ctx);
     mountStatExclusion(ctx);

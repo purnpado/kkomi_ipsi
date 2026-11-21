@@ -6,6 +6,21 @@ export const ULSAN_OTHER_SCHOOLS = [
     '울산외국어고등학교', '현대청운고등학교', '울산고운고등학교'
 ];
 
+// 학교별 학과(과정): 원서 입력 창의 지원 학과·합격 학과, 원서대장 학과 칸(점수는 "별도전형", 사용자 결정 2026-11-21).
+// 학교·학과가 바뀌면 이 목록만 고친다.
+// 과학고·현대청운고는 학과 이름이 따로 없고, 고운고는 학과가 없다(사용자 확인 2026-11-21).
+export const ULSAN_OTHER_DEPARTMENTS = {
+    '울산스포츠과학고등학교': ['스포츠전문과정', '스포츠인재과정'],
+    '울산예술고등학교': ['음악과', '미술과', '무용과'],
+    '울산애니원고등학교': ['만화창작과', '애니메이션과', '컴퓨터게임개발과'],
+    '울산외국어고등학교': ['영어과', '러시아어과', '일본어과', '중국어과', '아랍어과']
+};
+
+/** 기타 울산 고교 중 학과(과정)를 고를 수 있는 학교인지 */
+export function hasOtherDepartments(category, schoolName) {
+    return (category === 'other' || category === 'self_foreign') && Boolean(ULSAN_OTHER_DEPARTMENTS[String(schoolName || '').trim()]);
+}
+
 // 목록에 없는 학교·타시도 고교는 원서의 전형 칸에 시기를 적는다(백엔드 RoundTrack* 와 같은 글자).
 export const ROUND_TRACKS = [
     ['전기', '전기 (마이스터고·특성화고·과학고·예술고·체육고 등)'],

@@ -68,40 +68,30 @@ func (a *App) GetNiceGeneralFinalScores() (*NiceGeneralFinalResult, error) {
 	return &NiceGeneralFinalResult{Scores: scores, Summary: summary}, nil
 }
 
-// NiceBonusPreview 항목별점수관리 파일 맞춰 보기 결과와 그 파일 경로(가져오기 때 다시 읽는다).
-type NiceBonusPreview struct {
-	Path string                  `json:"path"`
-	Plan *database.NiceBonusPlan `json:"plan"`
-}
-
-// PreviewNiceBonusFile 나이스 항목별점수관리(창의체험·행동발달) 엑셀을 골라 상담 화면 가산점 체크와 맞춰 본다(바꾸지 않음).
-func (a *App) PreviewNiceBonusFile() (*NiceBonusPreview, error) {
-	if err := a.requireMaster("나이스 가산점 맞춰 보기"); err != nil {
+// CompareNiceClassRankFile 담임: 나이스 반별 석차 연명부(우리 반)를 골라 꼬미입시 값과 맞춰 본다(저장하지 않음).
+func (a *App) CompareNiceClassRankFile() (*database.NiceComparison, error) {
+	if err := a.requireLogin(); err != nil {
 		return nil, err
 	}
-	path, err := a.openFileDialog("나이스 항목별점수관리(창의체험 또는 행동발달) 엑셀 선택", "엑셀 파일 (*.xlsx)", "*.xlsx")
+	if a.user.Role != "homeroom" {
+		return nil, fmt.Errorf("반별 석차 연명부 맞춰 보기는 담임 계정에서 합니다(학년부장은 나이스 자료 화면의 석차 연명부를 씁니다)")
+	}
+	path, err := a.openFileDialog("나이스 반별 석차 연명부(우리 반) 엑셀 선택", "엑셀 파일 (*.xlsx)", "*.xlsx")
 	if err != nil || path == "" {
 		return nil, err
 	}
-	rows, err := parser.ParseNiceBonusFile(path)
+	file, err := parser.ParseNiceRankFile(path)
 	if err != nil {
 		return nil, err
 	}
-	plan, err := a.db.PlanNiceBonus(parser.NiceBonusKind(path), rows)
-	if err != nil {
-		return nil, err
-	}
-	return &NiceBonusPreview{Path: path, Plan: plan}, nil
+	return a.db.NiceClassComparison(file, a.user.ClassNum)
 }
 
-// ApplyNiceBonusFile 맞춰 본 파일의 가산점으로 상담 화면 체크를 맞춘다(가산 제외 학년은 그대로).
-func (a *App) ApplyNiceBonusFile(path string) (*database.NiceBonusPlan, error) {
-	if err := a.requireMaster("나이스 가산점 가져오기"); err != nil {
-		return nil, err
+// GetGeneralLastYearResult 상담 화면 "작년 우리 학교 결과": 지난 학년도 후기 일반고 합격·불합격 교과 석차백분율 범위(없으면 nil).
+func (a *App) GetGeneralLastYearResult() (*database.GeneralYearResult, error) {
+	config, err := a.db.GetSchoolConfig()
+	if err != nil || config == nil {
+		return nil, fmt.Errorf("학교 설정을 불러올 수 없습니다")
 	}
-	rows, err := parser.ParseNiceBonusFile(path)
-	if err != nil {
-		return nil, err
-	}
-	return a.db.ApplyNiceBonus(parser.NiceBonusKind(path), rows)
+	return a.db.GeneralLastYearResult(config.AdmissionYear)
 }

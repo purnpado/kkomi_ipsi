@@ -36,3 +36,18 @@ export async function fillGeneralCityCutoff(ctx) {
     });
     holder.innerHTML = `관내 합격선 비교: ${judgmentBadge(judged, { compact: true })} <span>관내 추정선 ${e.acceptedMin.toFixed(2)}점 대비 ${describeDiff(judged)}${e.smallSample ? ' · 표본 부족(참고)' : ''}</span>`;
 }
+
+// 작년 우리 학교 결과 한 줄: 지난 학년도 후기 일반고 합격 학생의 교과 석차백분율이 어디까지였는지(지난 입시 기록).
+export async function fillGeneralLastYear(ctx) {
+    const holder = ctx.modalEl.querySelector('#generalLastYear');
+    if (!holder) return;
+    const r = await window.go?.main?.App?.GetGeneralLastYearResult?.().catch(() => null);
+    if (!r || !(r.passed > 0 || r.failed > 0)) {
+        holder.textContent = '';
+        return;
+    }
+    const parts = [];
+    if (r.passed > 0) parts.push(`석차백분율 상위 ${Number(r.maxPassedPct).toFixed(1)}%까지 후기 일반고 합격(${r.passed}명)`);
+    if (r.failed > 0) parts.push(`불합격 학생 중 가장 앞 ${Number(r.minFailedPct).toFixed(1)}%(${r.failed}명)`);
+    holder.textContent = `작년(${admissionLabel(r.admissionYear)}) 우리 학교: ${parts.join(' · ')}`;
+}

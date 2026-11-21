@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"math"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -171,6 +172,8 @@ type NiceComparison struct {
 	ProgramEnrolled int               `json:"programEnrolled"` // 꼬미입시가 석차백분율에 쓴 재적수(소인수 학교 보정 포함)
 	Rows            []NiceCompareRow  `json:"rows"`
 	Same            int               `json:"same"` // 모든 칸이 같은 학생 수
+	// PercentileWithNonAcademic 석차·백분율이 200점(비교과포함) 기준인 파일(석차백분율산출)
+	PercentileWithNonAcademic bool `json:"percentileWithNonAcademic"`
 }
 
 func diffValues(p, n *NiceCompareValues) []string {
@@ -237,17 +240,89 @@ func (dm *DBManager) NiceGeneralComparison() (*NiceComparison, error) {
 	if err != nil && len(all) > 0 {
 		return nil, err
 	}
-	out := &NiceComparison{Summary: summary, Rows: []NiceCompareRow{}}
+	enrolled := 0
 	if len(results) > 0 {
-		out.ProgramEnrolled = results[0].TotalStudents
-		if config.IsSmallSchool && out.ProgramEnrolled < 10 {
-			out.ProgramEnrolled = 10
+		enrolled = results[0].TotalStudents
+		if config.IsSmallSchool && enrolled < 10 {
+			enrolled = 10
 		}
 	}
-	enrolledDiffer := summary.Enrolled > 0 && out.ProgramEnrolled > 0 && summary.Enrolled != out.ProgramEnrolled
+	return buildNiceComparison(niceRows, summary, results, enrolled, true, 0), nil
+}
+
+// NiceClassComparison 담임: 나이스 반별 석차 연명부를 우리 반 꼬미입시 값과 맞춰 본다(저장하지 않음).
+// 담임 PC에는 전교 학생 자료가 없으므로 꼬미입시 값은 배포받은 전교 석차 기준(상담 화면과 같은 값)을 쓴다.
+func (dm *DBManager) NiceClassComparison(file *parser.NiceRankFile, classNum int) (*NiceComparison, error) {
+	if file == nil {
+		return nil, fmt.Errorf("읽은 자료가 없습니다")
+	}
+	results, err := dm.GetClassGrades(classNum, false)
+	if err != nil {
+		return nil, err
+	}
+	var rows []parser.NiceRankRow
+	for _, r := range file.Rows {
+		if r.ClassNum == classNum && r.HasScores {
+			rows = append(rows, r)
+		}
+	}
+	if len(rows) == 0 {
+		return nil, fmt.Errorf("%d반 학생의 점수가 들어 있지 않습니다. 나이스 산출을 마친 뒤 받은 우리 반 석차 연명부인지 확인해 주세요", classNum)
+	}
+	enrolled := 0
+	if len(results) > 0 {
+		enrolled = results[0].TotalStudents
+	}
+	summary := &NiceFinalSummary{Count: len(rows), Scored: len(rows), Enrolled: file.Enrolled, Kind: file.Kind}
+	return buildNiceComparison(rows, summary, results, enrolled, false, classNum), nil
+}
+
+// totalRanks 200점 내신(교과+비교과) 기준 석차·백분율(나이스 "석차백분율(비교과포함)"과 같은 방식, 같은 점수는 같은 석차).
+func totalRanks(results []calc.StudentCalcResult, enrolled int) map[string][2]float64 {
+	idx := make([]int, len(results))
+	for i := range idx {
+		idx[i] = i
+	}
+	sort.SliceStable(idx, func(a, b int) bool { return results[idx[a]].GeneralTotalScore > results[idx[b]].GeneralTotalScore })
+	out := map[string][2]float64{}
+	rank := 0
+	for pos, i := range idx {
+		if pos == 0 || math.Abs(results[idx[pos-1]].GeneralTotalScore-results[i].GeneralTotalScore) > 0.005 {
+			rank = pos + 1
+		}
+		pct := 0.0
+		if enrolled > 0 {
+			pct = math.Round(float64(rank)/float64(enrolled)*10000) / 100
+		}
+		out[fmt.Sprintf("%d|%s", results[i].ClassNum, normalizeNum(results[i].StudentNum))] = [2]float64{float64(rank), pct}
+	}
+	return out
+}
+
+// buildNiceComparison 나이스 줄과 꼬미입시 계산값을 맞춘다.
+// 석차백분율산출 파일의 석차·백분율은 "비교과포함"(200점 기준)이라 꼬미입시도 200점 기준으로 계산해 비교한다.
+// 담임 PC(wholeSchool=false)는 전교 200점 석차를 알 수 없어 그 두 칸은 비교하지 않는다.
+func buildNiceComparison(niceRows []parser.NiceRankRow, summary *NiceFinalSummary, results []calc.StudentCalcResult, enrolled int, wholeSchool bool, classNum int) *NiceComparison {
+	out := &NiceComparison{Summary: summary, ProgramEnrolled: enrolled, Rows: []NiceCompareRow{}}
+	withNonAcademic := summary != nil && summary.Kind == "석차백분율산출"
+	out.PercentileWithNonAcademic = withNonAcademic
+	var totals map[string][2]float64
+	if withNonAcademic && wholeSchool {
+		totals = totalRanks(results, enrolled)
+	}
+	enrolledDiffer := summary != nil && summary.Enrolled > 0 && enrolled > 0 && summary.Enrolled != enrolled
 	byKey := map[string]*calc.StudentCalcResult{}
 	for i := range results {
 		byKey[fmt.Sprintf("%d|%s", results[i].ClassNum, normalizeNum(results[i].StudentNum))] = &results[i]
+	}
+	values := func(r *calc.StudentCalcResult, key string) *NiceCompareValues {
+		v := &NiceCompareValues{float64(r.Rank), r.Percentile, r.FinalScore, r.AttendanceScore, r.VolunteerScore, r.CreativeScore, r.BehaviorScore, r.GeneralTotalScore}
+		if withNonAcademic {
+			if t, ok := totals[key]; ok {
+				v.Rank, v.Percentile = t[0], t[1]
+			}
+		}
+		return v
 	}
 	seen := map[string]bool{}
 	for _, n := range niceRows {
@@ -256,33 +331,50 @@ func (dm *DBManager) NiceGeneralComparison() (*NiceComparison, error) {
 		row := NiceCompareRow{ClassNum: n.ClassNum, StudentNum: n.StudentNum, Name: n.Name,
 			Nice: &NiceCompareValues{n.Rank, n.Percentile, n.Academic, n.Attendance, n.Volunteer, n.Creative, n.Behavior, n.Final}}
 		res := byKey[key]
-		if res != nil {
-			row.Name = res.Name
-			row.Program = &NiceCompareValues{float64(res.Rank), res.Percentile, res.FinalScore, res.AttendanceScore, res.VolunteerScore, res.CreativeScore, res.BehaviorScore, res.GeneralTotalScore}
-			row.Diffs = diffValues(row.Program, row.Nice)
-			if nm := strings.TrimSpace(n.Name); nm != "" && !strings.Contains(nm, "000") && nm != res.Name {
-				row.Hints = append(row.Hints, fmt.Sprintf("이름이 다릅니다(나이스: %s)", nm))
-			}
-			row.Hints = append(row.Hints, compareHints(row.Diffs, res, enrolledDiffer)...)
-			if len(row.Diffs) == 0 && len(row.Hints) == 0 {
-				out.Same++
-			}
-		} else {
+		if res == nil {
 			row.Hints = []string{"꼬미입시에 없는 학생입니다(반·번호 확인)"}
+			out.Rows = append(out.Rows, row)
+			continue
+		}
+		row.Name = res.Name
+		row.Program = values(res, key)
+		row.Diffs = diffValues(row.Program, row.Nice)
+		if withNonAcademic && !wholeSchool {
+			row.Diffs = dropDiffs(row.Diffs, "rank", "percentile")
+		}
+		if nm := strings.TrimSpace(n.Name); nm != "" && !strings.Contains(nm, "000") && nm != res.Name {
+			row.Hints = append(row.Hints, fmt.Sprintf("이름이 다릅니다(나이스: %s)", nm))
+		}
+		row.Hints = append(row.Hints, compareHints(row.Diffs, res, enrolledDiffer)...)
+		if len(row.Diffs) == 0 && len(row.Hints) == 0 {
+			out.Same++
 		}
 		out.Rows = append(out.Rows, row)
 	}
 	for i := range results {
 		r := &results[i]
 		key := fmt.Sprintf("%d|%s", r.ClassNum, normalizeNum(r.StudentNum))
-		if seen[key] || len(niceRows) == 0 {
+		if seen[key] || len(niceRows) == 0 || (classNum > 0 && r.ClassNum != classNum) {
 			continue
 		}
 		out.Rows = append(out.Rows, NiceCompareRow{ClassNum: r.ClassNum, StudentNum: normalizeNum(r.StudentNum), Name: r.Name,
-			Program: &NiceCompareValues{float64(r.Rank), r.Percentile, r.FinalScore, r.AttendanceScore, r.VolunteerScore, r.CreativeScore, r.BehaviorScore, r.GeneralTotalScore},
-			Hints:   []string{"나이스 연명부에 없는 학생입니다"}})
+			Program: values(r, key), Hints: []string{"나이스 연명부에 없는 학생입니다"}})
 	}
-	return out, nil
+	return out
+}
+
+func dropDiffs(diffs []string, names ...string) []string {
+	out := diffs[:0]
+	for _, d := range diffs {
+		drop := false
+		for _, n := range names {
+			drop = drop || d == n
+		}
+		if !drop {
+			out = append(out, d)
+		}
+	}
+	return out
 }
 
 // NiceGeneralFinalScores 원서대장용: "반|번호" → 나이스 내신성적(그 학년도에 올린 것만).

@@ -27,7 +27,24 @@ function semesterDetails(d) {
         <p class="counsel-summary-note">${projection} ${substitutions.join(' ')}</p>`;
 }
 
-// 후기 일반고 내신 칸: 큰 숫자 두 개와 판정을 한 줄에, 항목별 점수를 한 줄에 둔다.
+// 학교 안 위치 막대: 0~100%, 커트라인 구간(학교 판정 기준의 안정선~경계선)과 내 위치.
+function percentBar(pct, s) {
+    if (!(pct > 0)) return '';
+    const at = Math.min(100, Math.max(0, pct));
+    return `<div class="cg-bar" role="img" aria-label="우리 학교 안 위치 상위 ${score(pct, 2)}%, 커트라인 약 ${s.generalSafePct}~${s.generalBorderPct}%">
+        <div class="cg-bar-track"><span class="cg-bar-band" style="left:${s.generalSafePct}%;width:${Math.max(1, s.generalBorderPct - s.generalSafePct)}%"></span><span class="cg-bar-dot" style="left:${at}%"></span></div>
+        <div class="cg-bar-labels"><span>0%</span><span style="left:${at}%" class="cg-bar-me">내 위치 ${score(pct, 1)}%</span><span style="left:${(s.generalSafePct + s.generalBorderPct) / 2}%" class="cg-bar-cut">커트라인 약 ${s.generalSafePct}~${s.generalBorderPct}%</span><span>100%</span></div>
+    </div>`;
+}
+
+function marginText(pct, s) {
+    if (!(pct > 0)) return `학교 설정: 안정 ≤ ${s.generalSafePct}% · 경계 ≤ ${s.generalBorderPct}%`;
+    if (pct <= s.generalSafePct) return `커트라인 구간(${s.generalSafePct}%)보다 ${score(s.generalSafePct - pct, 1)}%p 앞`;
+    if (pct <= s.generalBorderPct) return `커트라인 구간(${s.generalSafePct}~${s.generalBorderPct}%) 안`;
+    return `커트라인 구간(${s.generalBorderPct}%)보다 ${score(pct - s.generalBorderPct, 1)}%p 뒤`;
+}
+
+// 후기 일반고 내신 칸: 석차백분율(학교 안 위치)을 중심으로 판정·막대를 두고, 200점 내신 점수와 비교과 감점을 함께 적는다.
 // 산출 근거와 후기 일반고 입력(창체·행발·학년별 출결·봉사·전입생 환산)은 접힌 칸으로 둔다(inputsHTML).
 export function renderGeneralSummary(d, inputsHTML = '') {
     const result = judgeGeneralPercentile(d.generalHSPercentile);
@@ -39,15 +56,27 @@ export function renderGeneralSummary(d, inputsHTML = '') {
     const parts = [['교과', d.generalHSAcademicScore, 2], ['출석', d.generalHSAttendanceScore, 1],
         ['봉사', d.generalHSVolunteerScore, 1], ['행발', d.generalHSBehaviorScore, 0], ['창체', d.generalHSCreativeScore, 0]];
     const partsHTML = parts.map(([label, value, digits]) => `<div class="counsel-score-part"><span>${label}</span><strong>${score(value, digits)}</strong></div>`).join('');
-    const rangeNote = hasRange ? `<p class="cg-note">미정 가산점 포함 예상 범위 ~ ${score(high, 2)}점</p>` : '';
+    const rangeNote = hasRange ? ` · 미정 가산점 포함 ~ ${score(high, 2)}점` : '';
+    const pct = Number(d.generalHSPercentile || 0);
+    const rankText = d.generalHSRank > 0 && d.generalHSTotalStudents > 0 ? `${d.generalHSTotalStudents}명 중 ${d.generalHSRank}등` : '';
+    // 비교과(출석 16·봉사 8·창체 8·행발 8)는 대부분 만점이라 가산점처럼 작용한다. 최종 판정은 200점이므로 감점이 있으면 알려 준다.
+    const academic = Number(d.generalHSAcademicScore || 0);
+    const nonAcademic = total - academic;
+    const cuts = [['출석', 16, d.generalHSAttendanceScore], ['봉사', 8, d.generalHSVolunteerScore], ['창체', 8, d.generalHSCreativeScore], ['행발', 8, d.generalHSBehaviorScore]]
+        .map(([label, max, v]) => [label, max - Number(v || 0)]).filter(([, cut]) => cut > 0.001);
+    const cutTotal = cuts.reduce((a, [, c]) => a + c, 0);
+    const cutNote = cutTotal > 0.001 ? `<p class="cg-cut">⚠ 비교과 ${score(cutTotal, 1)}점 감점(${cuts.map(([l, c]) => `${l} −${score(c, 1)}`).join(' · ')})${d.generalHSBonusEntered ? '' : ' · 창체·행발 가산점 미입력'} — 커트라인 근처라면 주의</p>` : '';
     return `<section class="counsel-general counsel-section" id="counselSecGeneral" aria-labelledby="counselGeneralTitle">
         <div class="cg-head"><h3 id="counselGeneralTitle">후기 일반고 내신</h3><span class="counsel-status">${projected ? '예상' : '확정'}</span></div>
         <div class="cg-main">
-            <div class="cg-figure"><span>내신 점수</span><strong>${score(total, 2)}<small> / 200점</small></strong>${rangeNote}</div>
-            <div class="cg-figure"><span>교과 석차백분율</span><strong>${score(d.generalHSPercentile, 2)}<small>%</small></strong></div>
-            <div class="cg-judge"><span class="counsel-judgment counsel-judgment--${result.level}">${result.emoji} ${result.label}${result.level === 'unknown' ? '' : ' 구간'}</span><p class="cg-note">학교 설정: 안정 ≤ ${settings.generalSafePct}% · 경계 ≤ ${settings.generalBorderPct}%</p></div>
-            <div class="counsel-city" id="generalCityCutoff" role="status">관내 추정 합격선 자료를 확인하고 있습니다.</div>
+            <div class="cg-figure"><span>석차백분율(교과)</span><strong>상위 ${score(pct, 2)}<small>%</small></strong>${rankText ? `<p class="cg-note">${rankText}</p>` : ''}</div>
+            <div class="cg-judge"><span class="counsel-judgment counsel-judgment--${result.level}">${result.emoji} ${result.label}${result.level === 'unknown' ? '' : ' 구간'}</span><p class="cg-note">${marginText(pct, settings)}</p></div>
         </div>
+        ${percentBar(pct, settings)}
+        <p class="cg-score">내신 점수 <strong>${score(total, 2)}</strong> / 200점 <span>(교과 ${score(academic, 2)} + 비교과 ${score(nonAcademic, 1)})${rangeNote}</span></p>
+        ${cutNote}
+        <p class="cg-note" id="generalLastYear" role="status"></p>
+        <div class="counsel-city" id="generalCityCutoff" role="status">관내 추정 합격선 자료를 확인하고 있습니다.</div>
         <div class="counsel-score-parts" aria-label="내신 점수 구성">${partsHTML}</div>
         <div class="cg-folds">
             <details class="counsel-details"><summary>산출 근거 보기 <span aria-hidden="true">⌄</span></summary>

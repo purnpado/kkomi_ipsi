@@ -119,3 +119,17 @@ func TestSaveApplicationRoundRules(t *testing.T) {
 		t.Fatalf("특성화고 일반 불합격 뒤 특별전형은 넣을 수 있어야 합니다: %v", err)
 	}
 }
+
+// 기타 울산 고교도 지원 학과(과정)·합격 학과를 적을 수 있다(원서대장 학과 칸).
+func TestOtherSchoolDepartmentsSaved(t *testing.T) {
+	dm := newEvidenceTestDB(t)
+	r := model.ApplicationRecord{ClassNum: 1, StudentNum: "1", StudentName: "가상학생", AdmissionYear: 2027, Category: "other",
+		SchoolName: "울산예술고등학교", Track: "해당 없음", Status: "합격", Preferences: []string{"음악과"}, AssignedDepartment: "음악과"}
+	if err := dm.SaveApplication(r); err != nil {
+		t.Fatal(err)
+	}
+	rows, _ := dm.GetStudentApplications(1, "1", "가상학생")
+	if len(rows) != 1 || rows[0].AssignedDepartment != "음악과" || len(rows[0].Preferences) != 1 {
+		t.Fatalf("기타 울산 고교 학과: %+v", rows)
+	}
+}

@@ -217,6 +217,8 @@ import * as model$0 from "../model/models.js";
  * @property {boolean} generalHSThirdYearProjected - 학기 초: 3학년을 2학년 성적으로 대신한 예상치
  * @property {boolean} generalHSPerGradeExact - 출결·봉사 학년별 실제 값 사용
  * @property {GeneralYearBasis | null} [generalHSYears] - 비교과 학년별 값(나이스 대조표용)
+ * @property {number} generalHSRank - 교과 석차(전교)
+ * @property {number} generalHSTotalStudents - 석차를 낸 학생 수(전교)
  * @property {SchoolCalcResult[] | null} schoolResults - 학교별 산출 결과
  * @property {model$0.ApplicationRecord[] | null} applications - 학생 지원 희망 학교 목록 (1~5지망)
  */

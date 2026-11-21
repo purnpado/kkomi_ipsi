@@ -72,8 +72,9 @@ func (dm *DBManager) saveApplicationMode(record model.ApplicationRecord, mode sa
 	if record.Category == "general" && (len(record.Preferences) != 0 || record.AssignedDepartment != "") {
 		return fmt.Errorf("후기 일반고는 학과 지망을 기록하지 않습니다")
 	}
-	if (record.Category == "self_foreign" || record.Category == "none") && (len(record.Preferences) != 0 || record.AssignedDepartment != "") {
-		return fmt.Errorf("자사고·외고 및 미진학은 학과 지망을 기록하지 않습니다")
+	// 기타 울산 고교(옛 자사고·외고 포함)는 지원 학과(과정)·합격 학과를 적을 수 있다(원서대장 학과 칸, 2026-11-21).
+	if record.Category == "none" && (len(record.Preferences) != 0 || record.AssignedDepartment != "") {
+		return fmt.Errorf("미진학은 학과 지망을 기록하지 않습니다")
 	}
 	prefs, err := json.Marshal(record.Preferences)
 	if err != nil {

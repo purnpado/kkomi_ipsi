@@ -13,7 +13,6 @@ import { bindHandoverControls } from './handoverControls.js';
 import { manageHTML } from './manage/manageLayout.js';
 import { bindNeisUploads } from './manage/neisUpload.js';
 import { bindNiceFinalCard } from './manage/niceFinalCard.js';
-import { bindNiceBonusCard } from './manage/niceBonusCard.js';
 
 export async function renderAdminScreen(schoolName) {
     // 나이스 자료·학년도 관리는 학년부장만 쓴다. 다른 역할은 대시보드로 보낸다.
@@ -56,7 +55,6 @@ export async function renderAdminScreen(schoolName) {
     bindHandoverControls({ rerender });
     bindNeisUploads({ totalStudents: updateStatus.totalStudents || 0, rerender });
     bindNiceFinalCard({ rerender });
-    bindNiceBonusCard();
     document.getElementById('refreshBtn')?.addEventListener('click', rerender);
     return undefined;
 }

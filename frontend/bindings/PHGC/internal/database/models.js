@@ -214,6 +214,16 @@ import * as calc$0 from "../calc/models.js";
  */
 
 /**
+ * GeneralYearResult 한 학년도의 우리 학교 후기 일반고 결과.
+ * @typedef {Object} GeneralYearResult
+ * @property {number} admissionYear
+ * @property {number} passed - 합격(배정) 학생 수
+ * @property {number} maxPassedPct - 합격 학생 중 가장 큰 교과 석차백분율
+ * @property {number} failed - 불합격 학생 수
+ * @property {number} minFailedPct - 불합격 학생 중 가장 작은 교과 석차백분율
+ */
+
+/**
  * @typedef {Object} LoginAccount
  * @property {string} username
  * @property {string} role
@@ -226,31 +236,6 @@ import * as calc$0 from "../calc/models.js";
  * @typedef {Object} LoginIndex
  * @property {string} schoolName
  * @property {LoginAccount[] | null} accounts
- */
-
-/**
- * NiceBonusChange 한 학생·한 학년의 바뀌는 체크.
- * @typedef {Object} NiceBonusChange
- * @property {number} classNum
- * @property {string} studentNum
- * @property {string} name
- * @property {number} grade
- * @property {boolean} from - 지금 꼬미입시 체크
- * @property {boolean} to - 나이스 가산점으로 정할 체크
- */
-
-/**
- * NiceBonusPlan 맞춰 보기 결과(가져오기 전에 보여 준다).
- * @typedef {Object} NiceBonusPlan
- * @property {string} kind - changche·haengbal
- * @property {string} kindLabel - 창의적체험활동·행동특성
- * @property {number} students - 파일의 학생 수
- * @property {number} matched - 꼬미입시 학생과 맞춘 수
- * @property {number} same - 세 학년 모두 같은 학생 수
- * @property {number} withBonus - 나이스에 가산점이 하나라도 있는 학생 수
- * @property {NiceBonusChange[] | null} changes - 바뀌는 체크
- * @property {string[] | null} disqualified - 가산 제외라 건드리지 않는 학생·학년
- * @property {string[] | null} unmatched - 꼬미입시에 없는 학생
  */
 
 /**
@@ -285,6 +270,7 @@ import * as calc$0 from "../calc/models.js";
  * @property {number} programEnrolled - 꼬미입시가 석차백분율에 쓴 재적수(소인수 학교 보정 포함)
  * @property {NiceCompareRow[] | null} rows
  * @property {number} same - 모든 칸이 같은 학생 수
+ * @property {boolean} percentileWithNonAcademic - PercentileWithNonAcademic 석차·백분율이 200점(비교과포함) 기준인 파일(석차백분율산출)
  */
 
 /**

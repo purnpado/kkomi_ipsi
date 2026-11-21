@@ -3,6 +3,9 @@ import { defineStudentTableRenderer, defineStudentTableEvents } from './studentT
 import { getGeneralGuideBadge } from '../../../core/generalGuide.js';
 import { getPredictionAnalysisList } from '../simulation/prediction.js';
 import { notifyClassUpdated, openModal } from '../../../core/navigation.js';
+import { state } from '../../../core/store.js';
+import { openNiceCompareOverlay } from '../../../core/niceCompareTable.js';
+import { showModalAlert } from '../../../core/dialogs.js';
 
 export async function renderStudentList(students, classNum) {
     // 화면 구성 요소들이 공유하는 상태 (파트 함수 간 전달)
@@ -135,6 +138,9 @@ function renderStudentListLayout(ctx) {
 
             <!-- 우측 액션 버튼들 -->
             <div class="flex gap-2 flex-wrap items-center">
+                ${state.currentUser?.Role === 'homeroom' ? `<button id="niceClassRankBtn" class="btn-secondary text-xs px-3 py-2 font-bold flex items-center gap-1.5 hover:border-amber-400/80 transition-all" title="나이스 반별 석차 연명부(우리 반) 엑셀을 골라 꼬미입시 후기 일반고 값과 학생마다 맞춰 봅니다">
+                    <span>나이스 석차 연명부로 맞춰 보기</span>
+                </button>` : ''}
                 <button id="refreshDashboardBtn" class="btn-secondary text-xs px-3 py-2 font-bold flex items-center gap-1.5 hover:border-sky-400/80 hover:text-sky-300 transition-all cursor-pointer" title="대시보드 학생 목록 및 상담 상태 새로고침">
                     <span class="text-xs">🔄</span>
                     <span>새로고침</span>
@@ -226,6 +232,15 @@ function bindStudentListToolbar(ctx) {
     });
 
     // 우리 반 통계 버튼
+    // 담임: 나이스 반별 석차 연명부로 우리 반 후기 일반고 값 맞춰 보기(저장하지 않음)
+    document.getElementById('niceClassRankBtn')?.addEventListener('click', async () => {
+        try {
+            const cmp = await window.go.main.App.CompareNiceClassRankFile();
+            if (cmp) openNiceCompareOverlay(cmp, '나이스 반별 석차 연명부 ↔ 꼬미입시 (우리 반)');
+        } catch (err) {
+            await showModalAlert(`맞춰 보지 못했습니다: ${err}`, '나이스 석차 연명부', 'error');
+        }
+    });
     document.getElementById('openClassApplicationSummaryBtn')?.addEventListener('click', () => {
         openModal('class-summary', { classNum: ctx.classNum });
     });

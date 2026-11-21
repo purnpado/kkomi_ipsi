@@ -10,11 +10,6 @@ export {
 import * as $models from "./models.js";
 
 /**
- * NiceBonusPreview 항목별점수관리 파일 맞춰 보기 결과와 그 파일 경로(가져오기 때 다시 읽는다).
- * @typedef {$models.NiceBonusPreview} NiceBonusPreview
- */
-
-/**
  * NiceGeneralFinalResult 원서대장용 나이스 내신성적과 올린 정보.
  * @typedef {$models.NiceGeneralFinalResult} NiceGeneralFinalResult
  */
