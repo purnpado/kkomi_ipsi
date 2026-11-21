@@ -360,6 +360,11 @@
         background: transparent !important;
         padding: 0 !important;
     }
+    /* 학급 대장 사이 화면용 아래 여백(2rem)이 인쇄에 남으면, 한 장에 딱 맞는 반은 뒤에 빈 장이 한 장 더 나온다.
+       인쇄에서는 여백을 없애고 학급마다 새 장에서 시작하게(break-before) 한다. */
+    body.printing[data-print-kind="register"] .register-frame { display: block !important; }
+    body.printing[data-print-kind="register"] .register-frame > .print-document { margin: 0 !important; min-height: 0 !important; }
+    body.printing[data-print-kind="register"] .register-frame > .print-document:last-child { break-after: auto !important; page-break-after: auto !important; }
     body.printing[data-print-kind="register"] .register-assigned-school-input {
         border: none !important;
         background: transparent !important;

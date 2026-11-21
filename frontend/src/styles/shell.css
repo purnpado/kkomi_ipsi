@@ -200,7 +200,8 @@ body.shell-on .watermark { display: none; }
 
 /* 인쇄: 화면 안에 띄운 문서(상담표·매트릭스·원서대장 등)도 인쇄되게 본문 영역을 남긴다 */
 @media print {
-    body.printing #app:has(#panelScreenMount) { display: block !important; padding: 0 !important; margin: 0 !important; }
+    /* #app.wide-layout 의 min-height: 100vh 가 인쇄에서는 "용지 한 장 높이"가 되어, 위아래 여백과 합쳐지면 늘 빈 장이 한 장 더 나온다. */
+    body.printing #app:has(#panelScreenMount) { display: block !important; padding: 0 !important; margin: 0 !important; min-height: 0 !important; height: auto !important; }
 }
 
 /* 전입생 뱃지(core/transferBadges.js) */

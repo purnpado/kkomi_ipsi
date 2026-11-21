@@ -77,7 +77,7 @@ export function bonusHTML(d) {
     return `<section class="tr-block"><h4>4·5. 행동발달 · 창의체험</h4>
         <table class="tr-table tr-mini"><thead><tr><th>항목</th><th>기본점수</th><th>1학년</th><th>2학년</th><th>3학년</th><th>성적</th></tr></thead>
         <tbody>${row(4, '행동발달', y.behavior, d.generalHSBehaviorScore)}${row(5, '창의체험', y.creative, d.generalHSCreativeScore)}</tbody></table>
-        <p class="tr-foot">학업성적관리위원회 명단으로 담임이 체크한 값${entered ? '' : ' · <span class="cg-chip cg-chip--warn">가산점 입력 전</span>'}</p></section>`;
+        <p class="tr-foot">${entered ? '<span class="cg-chip cg-chip--ok">가산점 입력 완료</span>' : '<span class="cg-chip cg-chip--warn">가산점 입력 전</span>'}</p></section>`;
 }
 
 function formulaHTML(base, years, total, max, label) {

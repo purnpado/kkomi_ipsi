@@ -28,3 +28,14 @@ test('표: 6학기 칸, 학기별점수 줄, 교과성적 160', () => {
     assert.match(html, /<b>4<\/b><small> \(1과목\)/);
     assert.match(html, /150\.50/);
 });
+
+test('3학년 2학기가 없고 예상 중이면 1학기 성적을 흐리게(예상) 채운다', () => {
+    const g = collectSubjects([{ 학년: '3', 학기: '1', 과목: '국어', 성취도: 'A', 원점수: '95' }]);
+    const sums = { '3-1': { sum: 5, count: 1 } };
+    const html = subjectTableHTML(g, sums, 150, false, false);
+    assert.match(html, /tr-g--A tr-proj/);
+    assert.match(html, /1과목 · 예상/);
+    // 3학년 전체를 전년도로 예상한 경우와 실제 성적이 확정된 경우에는 채우지 않는다
+    assert.doesNotMatch(subjectTableHTML(g, sums, 150, false, true), /tr-proj/);
+    assert.doesNotMatch(subjectTableHTML(g, sums, 150, true, false), /tr-proj/);
+});

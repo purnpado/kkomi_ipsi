@@ -1,0 +1,47 @@
+/* 판정 기준 창(modals/judgmentSettingsModal.js · modals/judgment/judgmentPreview.js) */
+.jg-doc { display: grid; gap: 16px; }
+.jg-doc .cg-chips { margin-top: 6px; }
+.jg-section { display: grid; gap: 10px; padding-top: 14px; border-top: 1px solid var(--kk-line); }
+.jg-section h3 { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 10px; margin: 0; color: var(--kk-text-strong); font-size: var(--kk-fs-3); font-weight: 800; }
+.jg-section h3 small { color: var(--kk-text-3); font-size: var(--kk-fs-1); font-weight: 500; }
+.jg-section h3 .cg-chip { font-size: var(--kk-fs-1); }
+.jg-legend { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.jg-card { display: grid; gap: 4px; align-content: start; padding: 8px 10px; border-radius: 10px; border: 1px solid transparent; font-size: var(--kk-fs-1); }
+.jg-card-name { font-size: var(--kk-fs-2); font-weight: 800; }
+.jg-formula { display: flex; flex-wrap: wrap; align-items: center; gap: 3px; color: var(--kk-text-2); }
+.jg-formula .cg-chip { background: var(--kk-surface); }
+.jg-card small { color: var(--kk-text-3); font-size: 11px; }
+.jg-card--safe { background: var(--kk-judge-safe-bg); border-color: var(--kk-judge-safe); }
+.jg-card--safe .jg-card-name { color: var(--kk-judge-safe); }
+.jg-card--proper { background: var(--kk-judge-proper-bg); border-color: var(--kk-judge-proper); }
+.jg-card--proper .jg-card-name { color: var(--kk-judge-proper); }
+.jg-card--hope { background: var(--kk-judge-hope-bg); border-color: var(--kk-judge-hope); }
+.jg-card--hope .jg-card-name { color: var(--kk-judge-hope); }
+.jg-card--challenge { background: var(--kk-judge-challenge-bg); border-color: var(--kk-judge-challenge); }
+.jg-card--challenge .jg-card-name { color: var(--kk-judge-challenge); }
+.jg-controls { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; align-items: end; }
+.jg-controls--two { grid-template-columns: repeat(2, minmax(0, 1fr)); max-width: 520px; }
+.jg-off-tag { display: none; margin-left: 4px; padding: 0 7px; border-radius: 999px; background: var(--kk-sunken); color: var(--kk-text-3); font-size: 11px; font-weight: 600; }
+.jg-field.is-off { opacity: .55; }
+.jg-field.is-off .jg-off-tag { display: inline-block; }
+/* 후기 일반고 구간 막대 */
+.jg-zones { max-width: 640px; padding: 0 8px; }
+.jg-zone-track { display: flex; height: 14px; border-radius: 999px; overflow: hidden; border: 1px solid var(--kk-line); }
+.jg-zone--safe { background: var(--kk-judge-safe-bg); border-right: 2px solid var(--kk-judge-safe); }
+.jg-zone--hope { background: var(--kk-judge-hope-bg); border-right: 2px solid var(--kk-judge-hope); }
+.jg-zone--bad { background: var(--kk-judge-challenge-bg); }
+.jg-zone-ticks { position: relative; height: 18px; margin-top: 3px; color: var(--kk-text-3); font-size: var(--kk-fs-1); }
+.jg-zone-ticks > span { position: absolute; top: 0; transform: translateX(-50%); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.jg-zone-ticks > .jg-al-start { transform: translateX(0); }
+.jg-zone-ticks > .jg-al-end { transform: translateX(-100%); }
+.jg-zones .cg-chips { margin-top: 4px; }
+/* 예외 표 */
+.jg-table-wrap { overflow-x: auto; border: 1px solid var(--kk-line); border-radius: 10px; }
+.jg-table { width: 100%; border-collapse: collapse; font-size: var(--kk-fs-1); }
+.jg-table th { padding: 7px 8px; background: var(--kk-sunken); color: var(--kk-text-2); font-weight: 700; text-align: left; }
+.jg-table td { padding: 5px 8px; border-top: 1px solid var(--kk-line); color: var(--kk-text-1); }
+.jg-table .jg-c { text-align: center; }
+.jg-row--same td { border-top-style: dashed; }
+.jg-school { font-weight: 700; }
+.jg-row.is-override td { background: var(--kk-judge-proper-bg); }
+@media (max-width: 760px) { .jg-legend, .jg-controls { grid-template-columns: repeat(2, minmax(0, 1fr)); } }

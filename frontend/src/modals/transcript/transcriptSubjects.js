@@ -53,19 +53,22 @@ export function collectSubjects(records = []) {
     return { subjects, freeFirst: !graded11 };
 }
 
-const cell = (sc) => {
+const cell = (sc, proj = false) => {
     if (!sc) return '<td class="tr-empty" colspan="3">-</td>';
-    const tone = `tr-g tr-g--${sc.letter}`;
+    const tone = `tr-g tr-g--${sc.letter}${proj ? ' tr-proj' : ''}`;
     // 성취도는 나이스 확인서처럼 글자만(원자료의 "D(311)" 같은 수강자수 표기는 마우스를 올리면 보임)
     return `<td class="${tone} tr-ach" title="${escapeHtml(sc.achieve)}">${sc.letter}</td><td class="${tone} num">${sc.points || '-'}</td><td class="${tone} num tr-raw">${escapeHtml(sc.raw || '-')}</td>`;
 };
 
-/** semSums: { '1-2': { sum, count } } — 학기별 성취점수 합(서버 계산, 원서 대조표와 같은 값) */
-export function subjectTableHTML({ subjects, freeFirst }, semSums, academic, thirdFinal) {
+/** semSums: { '1-2': { sum, count } } — 학기별 성취점수 합(서버 계산, 원서 대조표와 같은 값)
+ *  thirdFinal 이 아니면 석차·교과성적은 3학년 2학기를 1학기 성적으로 예상해 계산한다. 표도 같은 값을 흐리게 채워
+ *  "교과성적이 어디서 나왔는지" 맞아 보이게 한다(3학년 전체를 전년도로 예상한 경우는 채우지 않음). */
+export function subjectTableHTML({ subjects, freeFirst }, semSums, academic, thirdFinal, thirdProjected = false) {
+    const fill32 = !thirdFinal && !thirdProjected;
     const head1 = SEMESTERS.map((k) => {
         const [g, s] = k.split('-');
         const projected = k === '3-2' && !thirdFinal;
-        return `<th colspan="3" class="${k.endsWith('-1') ? 'tr-gstart' : ''}">${g}학년 ${s}학기${projected ? ' <span class="tr-tag">예상</span>' : ''}</th>`;
+        return `<th colspan="3" class="${k.endsWith('-1') ? 'tr-gstart' : ''}">${g}학년 ${s}학기${projected ? ` <span class="tr-tag">${fill32 ? '예상 · 1학기 성적' : '예상'}</span>` : ''}</th>`;
     }).join('');
     const head2 = SEMESTERS.map((k) => `<th class="tr-sub ${k.endsWith('-1') ? 'tr-gstart' : ''}">성취도</th><th class="tr-sub">환산</th><th class="tr-sub">원점수</th>`).join('');
     let body = '';
@@ -77,14 +80,16 @@ export function subjectTableHTML({ subjects, freeFirst }, semSums, academic, thi
                 if (k === '1-1' && freeFirst) {
                     return i === 0 ? `<td colspan="3" rowspan="${subjects.length}" class="tr-free"><span class="cg-chip cg-chip--info">자유학기</span><small>성적 미산출 · 내신 제외</small></td>` : '';
                 }
+                if (k === '3-2' && fill32 && !sub.scores['3-2']) return cell(sub.scores['3-1'], true);
                 return cell(sub.scores[k]);
             }).join('');
             body += `<tr><th scope="row" class="tr-subj">${escapeHtml(sub.name)}</th>${tds}</tr>`;
         });
     }
     const sums = SEMESTERS.map((k) => {
-        const v = semSums[k];
-        return `<td colspan="3" class="num tr-sum">${v ? `<b>${v.sum}</b><small> (${v.count}과목)</small>` : '-'}</td>`;
+        const proj = k === '3-2' && fill32 && !semSums['3-2'];
+        const v = proj ? semSums['3-1'] : semSums[k];
+        return `<td colspan="3" class="num tr-sum${proj ? ' tr-proj' : ''}">${v ? `<b>${v.sum}</b><small> (${v.count}과목${proj ? ' · 예상' : ''})</small>` : '-'}</td>`;
     }).join('');
     return `<div class="tr-scroll"><table class="tr-table tr-grades">
         <thead><tr><th rowspan="2" class="tr-subj">과목명</th>${head1}</tr><tr>${head2}</tr></thead>

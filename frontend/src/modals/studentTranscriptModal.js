@@ -67,7 +67,7 @@ export async function openStudentTranscriptModal(classNum, studentNum, name) {
                 ${badgesHTML(data, full, nice)}
                 ${full ? `<section class="tr-block"><h4>내신점수</h4>${scoreSummaryHTML(d, nice)}</section>` : ''}
                 <section class="tr-block"><h4>1. 교과성적 <span class="tr-legend"><i class="tr-g--A">A</i><i class="tr-g--B">B</i><i class="tr-g--C">C</i><i class="tr-g--D">D</i><i class="tr-g--E">E</i><i class="tr-g--P">P</i></span></h4>
-                    ${subjectTableHTML(grades, semesterSums(full), d.generalHSAcademicScore, !!d.generalHSThirdYearFinal)}</section>
+                    ${subjectTableHTML(grades, semesterSums(full), d.generalHSAcademicScore, !!d.generalHSThirdYearFinal, !!d.generalHSThirdYearProjected)}</section>
                 ${full ? `${attendanceHTML(d, att)}<div class="tr-pair">${volunteerHTML(d)}${bonusHTML(d)}</div>` : '<p class="tr-foot">출석·봉사·가산점 근거를 불러오지 못했습니다.</p>'}
             </div>`;
 

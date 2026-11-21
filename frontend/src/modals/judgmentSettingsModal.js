@@ -1,10 +1,11 @@
-// ===== 4단계 판정 기준 설정 (학년부장 전용) =====
+// ===== 판정 기준 설정 (학년부장 전용) =====
 // 학교 기본 여유폭(비율 또는 점수), 학교·전형별 예외, 후기 일반고 석차백분율 안정·경계선을 정한다.
 // 저장값은 학교 설정 DB에 들어가 배포자료로 담임 PC에도 같은 기준이 적용된다.
 import { escapeAttr, escapeHtml } from '../core/utils.js';
 import { getJudgmentSettings, saveJudgmentSettings, judgmentKey } from '../core/admissionJudgment.js';
 import { showModalAlert } from '../core/dialogs.js';
 import { displaySchool } from '../core/schoolName.js';
+import { effectiveMargin, generalZonesHTML, legendHTML, marginChip } from './judgment/judgmentPreview.js';
 
 const MODAL_ID = 'judgmentSettingsModal';
 
@@ -18,20 +19,23 @@ export async function openJudgmentSettingsModal({ onSaved } = {}) {
         rules = [];
     }
 
-    const overrideRow = rule => {
+    // 같은 학교가 이어지면 두 번째 줄부터 학교명을 비워 묶어 보이게 한다.
+    const overrideRow = (rule, i) => {
         const key = judgmentKey(rule.schoolName, rule.trackName);
         const o = settings.overrides?.[key] || {};
         const mode = o.mode === 'ratio' || o.mode === 'points' ? o.mode : '';
-        return `<tr class="border-b border-slate-700/50" data-key="${escapeAttr(key)}">
-            <td class="p-2 text-slate-200">${escapeHtml(displaySchool(rule.schoolName))}</td>
-            <td class="p-2 text-slate-300">${escapeHtml(rule.trackName)}</td>
-            <td class="p-2 text-slate-400 text-center">${escapeHtml(rule.totalMax)}점</td>
-            <td class="p-2"><select class="input-field py-1 text-xs jo-mode">
+        const sameSchool = i > 0 && rules[i - 1].schoolName === rule.schoolName;
+        return `<tr class="jg-row ${sameSchool ? 'jg-row--same' : ''}" data-key="${escapeAttr(key)}" data-max="${escapeAttr(rule.totalMax)}">
+            <td class="jg-school">${sameSchool ? '' : escapeHtml(displaySchool(rule.schoolName))}</td>
+            <td>${escapeHtml(rule.trackName)}</td>
+            <td class="num jg-c">${escapeHtml(rule.totalMax)}점</td>
+            <td><select class="input-field py-1 text-xs jo-mode" aria-label="${escapeAttr(displaySchool(rule.schoolName))} ${escapeAttr(rule.trackName)} 여유폭 방식">
                 <option value="" ${mode === '' ? 'selected' : ''}>학교 기본</option>
                 <option value="ratio" ${mode === 'ratio' ? 'selected' : ''}>비율(%)</option>
                 <option value="points" ${mode === 'points' ? 'selected' : ''}>점수(점)</option>
             </select></td>
-            <td class="p-2"><input type="text" inputmode="decimal" class="input-field py-1 text-xs w-20 text-center jo-value" value="${mode ? escapeAttr(o.value) : ''}" placeholder="-"></td>
+            <td><input type="text" inputmode="decimal" class="input-field py-1 text-xs w-20 text-center jo-value" value="${mode ? escapeAttr(o.value) : ''}" placeholder="-" aria-label="예외 값"></td>
+            <td class="jg-applied"></td>
         </tr>`;
     };
 
@@ -39,40 +43,53 @@ export async function openJudgmentSettingsModal({ onSaved } = {}) {
     modal.id = MODAL_ID;
     modal.className = 'fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4';
     modal.innerHTML = `
-        <div class="glass-card p-6 w-full max-w-3xl max-h-[90vh] overflow-y-auto space-y-4">
+        <div class="glass-card p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto jg-doc">
             <div class="flex justify-between items-start">
                 <div>
-                    <h2 class="text-xl font-bold text-white">🎯 4단계 판정 기준 설정</h2>
-                    <p class="text-xs text-text-muted mt-1">기준선(합격 최저점 또는 학교 예상선)과 학생 점수의 차이를 여유폭과 비교해 안정·적정·소신·어려움을 정합니다.
-                    저장하면 배포자료를 통해 모든 담임 PC에 같은 기준이 적용됩니다.</p>
+                    <h2 class="text-xl font-bold text-white">판정 기준</h2>
+                    <div class="cg-chips"><span class="cg-chip cg-chip--info">저장하면 배포자료로 모든 담임 PC에 같은 기준</span></div>
                 </div>
                 <button aria-label="닫기" id="closeJudgmentSettings" class="text-3xl text-text-muted cursor-pointer">×</button>
             </div>
-            <div class="rounded-xl border border-slate-700 p-4 bg-slate-900/40 text-xs text-slate-300 space-y-1">
-                <p>🟢 안정: 기준선 + 여유폭 이상 (불합격 최고점이 있으면 그보다 높아도 안정) · 🔵 적정: 기준선 이상(동점 포함)</p>
-                <p>🟠 소신: 기준선 − 여유폭 이상 · 🔴 어려움: 그 미만</p>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-                <label class="text-sm font-bold">학교 기본 방식
-                    <select id="jsMode" class="input-field mt-1 w-full">
-                        <option value="ratio" ${settings.mode === 'ratio' ? 'selected' : ''}>비율 (만점 대비 %)</option>
-                        <option value="points" ${settings.mode === 'points' ? 'selected' : ''}>점수 (점)</option>
-                    </select></label>
-                <label class="text-sm font-bold">비율 여유폭 (%)<input id="jsRatio" type="text" inputmode="decimal" class="input-field mt-1 w-full" value="${settings.ratio}"></label>
-                <label class="text-sm font-bold">점수 여유폭 (점)<input id="jsPoints" type="text" inputmode="decimal" class="input-field mt-1 w-full" value="${settings.points}"></label>
-                <label class="text-sm font-bold">후기 일반고 안정선 (석차백분율 %)<input id="jsGeneralSafe" type="text" inputmode="decimal" class="input-field mt-1 w-full" value="${settings.generalSafePct}"></label>
-                <label class="text-sm font-bold">후기 일반고 경계선 (석차백분율 %)<input id="jsGeneralBorder" type="text" inputmode="decimal" class="input-field mt-1 w-full" value="${settings.generalBorderPct}"></label>
-            </div>
-            <div>
-                <p class="text-sm font-bold text-white mb-2">학교·전형별 예외 <span class="text-xs font-normal text-slate-400">(비워 두면 학교 기본 방식을 따릅니다)</span></p>
-                <table class="w-full text-xs"><thead><tr class="text-slate-400 border-b border-slate-700">
-                    <th class="p-2 text-left">학교</th><th class="p-2 text-left">전형</th><th class="p-2">만점</th><th class="p-2 text-left">방식</th><th class="p-2 text-left">값</th>
-                </tr></thead><tbody>${rules.map(overrideRow).join('') || '<tr><td colspan="5" class="p-3 text-slate-500">학교 규칙 목록을 불러오지 못했습니다.</td></tr>'}</tbody></table>
-            </div>
-            <details id="statExclusionList" class="rounded-xl border border-slate-700/60 bg-slate-900/40">
-                <summary class="cursor-pointer select-none px-4 py-2.5 text-xs font-bold text-slate-300">입시 통계에서 뺀 학생</summary>
-                <div class="px-4 pb-3 pt-1 text-xs text-slate-300" id="statExclusionListBody" role="status" aria-live="polite">펼치면 불러옵니다.</div>
-            </details>
+
+            <section class="jg-section">
+                <h3>1. 학교별 점수 판정 <small>마이스터고·특성화고 등, 기준선(합격 최저점 또는 학교 예상선)과 학생 점수의 차이</small></h3>
+                ${legendHTML()}
+                <div class="jg-controls">
+                    <label class="text-sm font-bold">학교 기본 방식
+                        <select id="jsMode" class="input-field mt-1 w-full">
+                            <option value="ratio" ${settings.mode === 'ratio' ? 'selected' : ''}>비율 (만점 대비 %)</option>
+                            <option value="points" ${settings.mode === 'points' ? 'selected' : ''}>점수 (점)</option>
+                        </select></label>
+                    <label class="text-sm font-bold jg-field" data-mode="ratio">비율 여유폭 (%) <span class="jg-off-tag">상담 화면에서 '비율' 보기로 바꿀 때만</span><input id="jsRatio" type="text" inputmode="decimal" class="input-field mt-1 w-full" value="${settings.ratio}"></label>
+                    <label class="text-sm font-bold jg-field" data-mode="points">점수 여유폭 (점) <span class="jg-off-tag">상담 화면에서 '점수' 보기로 바꿀 때만</span><input id="jsPoints" type="text" inputmode="decimal" class="input-field mt-1 w-full" value="${settings.points}"></label>
+                </div>
+                <div class="cg-chips" id="jsExample"></div>
+            </section>
+
+            <section class="jg-section">
+                <h3>2. 후기 일반고 <small>학교 안 교과 석차백분율 · 숫자가 작을수록 앞</small></h3>
+                <div class="jg-controls jg-controls--two">
+                    <label class="text-sm font-bold">안정선 (상위 %)<input id="jsGeneralSafe" type="text" inputmode="decimal" class="input-field mt-1 w-full" value="${settings.generalSafePct}"></label>
+                    <label class="text-sm font-bold">경계선 (상위 %)<input id="jsGeneralBorder" type="text" inputmode="decimal" class="input-field mt-1 w-full" value="${settings.generalBorderPct}"></label>
+                </div>
+                <div id="jsGeneralZones"></div>
+            </section>
+
+            <section class="jg-section">
+                <h3>3. 학교·전형별 예외 <span id="jsOverrideCount"></span> <small>비워 두면 학교 기본 방식</small></h3>
+                <div class="jg-table-wrap"><table class="jg-table"><thead><tr>
+                    <th>학교</th><th>전형</th><th class="jg-c">만점</th><th>방식</th><th>값</th><th>적용 여유폭</th>
+                </tr></thead><tbody>${rules.map(overrideRow).join('') || '<tr><td colspan="6" class="p-3 text-slate-500">학교 규칙 목록을 불러오지 못했습니다.</td></tr>'}</tbody></table></div>
+            </section>
+
+            <section class="jg-section">
+                <h3>기타</h3>
+                <details id="statExclusionList" class="rounded-xl border border-slate-700/60 bg-slate-900/40">
+                    <summary class="cursor-pointer select-none px-4 py-2.5 text-xs font-bold text-slate-300">입시 통계에서 뺀 학생</summary>
+                    <div class="px-4 pb-3 pt-1 text-xs text-slate-300" id="statExclusionListBody" role="status" aria-live="polite">펼치면 불러옵니다.</div>
+                </details>
+            </section>
             <div class="flex justify-end gap-2">
                 <button id="cancelJudgmentSettings" class="btn-secondary w-auto whitespace-nowrap px-4 py-2 text-sm">취소</button>
                 <button id="saveJudgmentSettings" class="btn-primary w-auto whitespace-nowrap px-5 py-2 text-sm">저장</button>
@@ -83,6 +100,7 @@ export async function openJudgmentSettingsModal({ onSaved } = {}) {
     modal.querySelector('#closeJudgmentSettings').addEventListener('click', close);
     modal.querySelector('#cancelJudgmentSettings').addEventListener('click', close);
     bindStatExclusionList(modal);
+    bindPreview(modal);
     modal.querySelector('#saveJudgmentSettings').addEventListener('click', async () => {
         const num = id => parseFloat(modal.querySelector(id).value);
         const next = {
@@ -135,4 +153,29 @@ function bindStatExclusionList(modal) {
             body.textContent = `목록을 불러오지 못했습니다: ${err}`;
         }
     });
+}
+
+// 입력할 때마다 미리보기를 바꾼다: 쓰지 않는 방식 칸 흐리게, 예시 여유폭, 후기 일반고 구간 막대, 예외 줄별 적용 여유폭.
+function bindPreview(modal) {
+    const q = (sel) => modal.querySelector(sel);
+    const update = () => {
+        const base = { mode: q('#jsMode').value, ratio: parseFloat(q('#jsRatio').value) || 0, points: parseFloat(q('#jsPoints').value) || 0 };
+        modal.querySelectorAll('.jg-field').forEach((f) => f.classList.toggle('is-off', f.dataset.mode !== base.mode));
+        const ex = (max) => effectiveMargin(base, null, max).points.toFixed(1);
+        q('#jsExample').innerHTML = `<span class="cg-label">예</span><span class="cg-chip">만점 100점 → 여유폭 <b>${ex(100)}점</b></span><span class="cg-chip">만점 200점 → <b>${ex(200)}점</b></span><span class="cg-chip">만점 300점 → <b>${ex(300)}점</b></span>`;
+        q('#jsGeneralZones').innerHTML = generalZonesHTML(parseFloat(q('#jsGeneralSafe').value), parseFloat(q('#jsGeneralBorder').value));
+        let count = 0;
+        modal.querySelectorAll('tbody tr[data-key]').forEach((tr) => {
+            const mode = tr.querySelector('.jo-mode').value;
+            const value = parseFloat(tr.querySelector('.jo-value').value);
+            const override = mode && Number.isFinite(value) && value >= 0 ? { mode, value } : null;
+            if (override) count++;
+            tr.classList.toggle('is-override', !!override);
+            tr.querySelector('.jg-applied').innerHTML = marginChip(effectiveMargin(base, override, tr.dataset.max));
+        });
+        q('#jsOverrideCount').innerHTML = `<span class="cg-chip ${count ? 'cg-chip--info' : ''}">예외 <b>${count}</b>곳</span>`;
+    };
+    modal.addEventListener('input', update);
+    modal.addEventListener('change', update);
+    update();
 }
